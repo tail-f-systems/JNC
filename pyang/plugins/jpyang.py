@@ -20,10 +20,11 @@ Invoke with:
 
 """
 
-from __future__ import with_statement
+from __future__ import with_statement # Not required from Python 2.6 and
+# ... onwards, but kept for the sake of backwards compatibility
 
 import optparse # FIXME Deprecated in python 2.7, should use argparse instead
-# .. See http://stackoverflow.com/questions/3217673/why-use-argparse-rather-than-optparse and http://docs.python.org/dev/library/argparse.html#upgrading-optparse-code
+# ... See http://stackoverflow.com/questions/3217673/why-use-argparse-rather-than-optparse and http://docs.python.org/dev/library/argparse.html#upgrading-optparse-code
 import os
 import sys
 import shutil
@@ -102,6 +103,14 @@ class JPyangPlugin(plugin.PyangPlugin):
         """
         directory = ctx.opts.directory
         wd = os.getcwd()
+        if ctx.opts.debug and ctx.opts.outfile is not None:
+            print 'Generating files to '+wd+'/'+ \
+                fd.name[:-4]+'/'+directory.replace('.', '/')
+            os.mkdir(fd.name[:-4], 0777)
+            os.chdir(fd.name[:-4])
+        elif ctx.opts.debug:
+            print 'Generating files to '+wd+'/'+ \
+                directory.replace('.', '/')
         # Replace directory with an empty one
         for d in directory.split('.'):
             shutil.rmtree(d, True)
