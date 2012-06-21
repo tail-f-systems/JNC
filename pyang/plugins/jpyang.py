@@ -826,6 +826,7 @@ def set_value(stmt, prefix='', arg_type='', confm_type=''):
 '''
 
 def unset_value(stmt):
+    """unset<Identifier> method generator"""
     return '''
     /**
      * Unsets the value for child '''+stmt.keyword+' "'+stmt.arg+'''".
@@ -838,7 +839,8 @@ def unset_value(stmt):
 
 def add_value(stmt, prefix):
     """add<Identifier> method generator, designed for leaf statements. Not to
-    be confused with the add_stmt function which is similar.
+    be confused with the add_stmt function which is similar but does not
+    contain a call to the setLeafValue function.
     
     stmt   -- Typically a leaf statement
     prefix -- Namespace prefix of module
@@ -1005,34 +1007,41 @@ def support_add(fields=[]):
 '''#FIXME '$' should be removed unless it is actually needed
 
 def is_not_list(entry):
+    """Returns False iff entry is instance of list"""
     return not isinstance(entry, list)
 
-def html_list(body, indent_level, ul=True):
+def html_list(body, indent_level, tag='ul'):
     """Returns a string representing javadoc with a <ul> html-element if ul,
     else with a <li> html-element.
     
     """
-    if ul:
-        body = '<ul>\n'+body#TODO could add id="classList"
-    else:
-        body = '<li>\n'+body
+    body = '<'+tag+'>\n'+body
     if body[-1:] != '\n':
         body += '\n'
-    if ul:
-        body += '</ul>' 
-    else:
-        body += '</li>'
+    body += '</'+tag+'>'
     return indent(body.split('\n'), indent_level)
 
-def html_link(item, indent):
-    return ' '*indent*4+'<a href="'+item+'.html">'+item+'</a>'
-
 def parse_hierarchy(hierarchy):
+    """Returns html for a list of javadoc pages corresponding to the .java
+    files in the hierarchy list.
+    
+    hierarchy -- a tree of .java files represented as a list, for example:
+        ['Foo.java', ['Bar.java', ['Baz.java'], 'Qux.java']] would represent the
+        hierarchy structure:
+        Foo
+        |   Bar
+        |   |   Baz
+        |   Qux
+        
+        That is, Baz is a child of Bar in the data model tree, and Bar and Qux
+        are children of the top level element Foo.
+    
+    """
     res = ''
     for entry in hierarchy:
         if is_not_list(entry):
-            body = html_link(entry[:-5], 1)
-            res += html_list(body, 1, False)
+            body = '    <a href="'+entry[:-5]+'.html">'+entry[:-5]+'</a>'
+            res += html_list(body, 1, tag='li')
         else:
             body = parse_hierarchy(entry)
             res += html_list(body, 1)
@@ -1041,6 +1050,14 @@ def parse_hierarchy(hierarchy):
     return res
 
 def gen_package(class_hierarchy, package, ctx):
+    """Writes a package-info.java file to the package directory with a high
+    level description of the package functionality and requirements.
+    
+    class_hierarchy -- A tree represented as a list as in parse_hierarchy
+    package         -- The package directory as a string
+    ctx             -- Context used only for debugging purposes
+    
+    """
     src = ''
     decapitalize = lambda s: s[:1].lower() + s[1:] if s else ''
     top_level_entries = filter(is_not_list, class_hierarchy)
