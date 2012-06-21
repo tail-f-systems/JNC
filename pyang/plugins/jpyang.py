@@ -63,6 +63,10 @@ class JPyangPlugin(plugin.PyangPlugin):
                 dest='debug',
                 action='store_true',
                 help='Print debug messages.'),
+            optparse.make_option(
+                '--jpyang-javadoc',
+                dest='javadoc_directory',
+                help='Generate javadoc to JAVADOC_DIRECTORY.'),
             ]
         g = optparser.add_option_group('JPyang output specific options')
         g.add_options(optlist)
@@ -116,7 +120,7 @@ class JPyangPlugin(plugin.PyangPlugin):
             if exc.errno == errno.ENOTDIR:
                 if ctx.opts.debug:
                     print 'WARNING: Unable to change directory to '+d+ \
-                        '. Probably a non-directory file with the same name'+ \
+                        '. Probably a non-directory file with same name'+ \
                         'as one of the subdirectories already exists.'
             else:
                 raise
@@ -133,7 +137,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                             indent(schema_node(module, '/', ns, ctx))+ \
                             '\n</node>'+ \
                             schema_nodes(module.substmts, '/', ns, ctx) \
-                        ).split('\n'))+'\n</schema>'
+                        ).splitlines())+'\n</schema>'
                 )
                 if ctx.opts.debug:
                     print 'Schema generation COMPLETE.'
@@ -156,11 +160,14 @@ class JPyangPlugin(plugin.PyangPlugin):
         is_java_file = lambda s: s.endswith('.java')
         directory_listing = os.listdir(os.getcwd())
         java_files = filter(is_java_file, directory_listing)
-        # generate_javadoc(modules, java_files, ctx)
-        if ctx.opts.debug:
-            print 'No javadoc was generated.'
-            # print 'Javadoc generation COMPLETE.'
+        class_hierarchy = generate_javadoc(modules, java_files, ctx)
+        gen_package(class_hierarchy, directory, ctx)
         os.chdir(wd)
+        javadir = ctx.opts.javadoc_directory
+        if javadir:
+            os.system('javadoc -d '+javadir+' '+d+'/*.java')
+            if ctx.opts.debug:
+                print 'Javadoc generation COMPLETE.'
 
     def fatal(self, exitCode=1):
         """Raise an EmitError"""
@@ -208,8 +215,8 @@ def in_schema(stmt):
         stmt.keyword == 'leaf')
 
 def indent(lines, level=1):
-    """Returns a string consisting of all strings in 'lines' concatenated,
-    each string prepended by a 'level'*4 number of spaces and appended with
+    """Returns a string consisting of all strings in lines concatenated,
+    each string prepended by a level*4 number of spaces and appended with
     a newline, except the last which has no newline.
     
     lines -- list of strings
@@ -219,10 +226,18 @@ def indent(lines, level=1):
     #TODO implement a more efficient version using replace on strings
     res = ''
     for line in lines:
-        res += (' '*level*4) + line + '\n'
+        res += ' '*level*4 + line + '\n'
+    return res[:-1] # Don't include the last newline character
+
+def java_docify(s):
+    """Returns the string s, but with each row prepended by ' * '"""
+    res = ''
+    for row in s.splitlines():
+        res += ' * ' + row + '\n'
     return res[:-1] # Don't include the last newline character
 
 def schema_nodes(stmts, tagpath, ns, ctx):
+    """Generate XML schema as a list of "node" elements"""
     res = ''
     for stmt in stmts:
         if in_schema(stmt):
@@ -233,6 +248,7 @@ def schema_nodes(stmts, tagpath, ns, ctx):
     return res
 
 def schema_node(stmt, tagpath, ns, ctx):
+    """Generate "node" element content for an XML schema"""
     res = []
     res.append('<tagpath>'+tagpath+'</tagpath>') # Could use stmt.full_path()
     # ... but it is marked for removal (and it would be less efficient)
@@ -270,7 +286,7 @@ def schema_node(stmt, tagpath, ns, ctx):
     res.append('<flags></flags>')
     res.append('<desc></desc>')
     if ctx.opts.debug:
-        print 'Schema generated: '+tagpath
+        print 'Schema node generated: '+tagpath
     return res
 
 def generate_classes(module, directory, package, src, ctx):
@@ -428,30 +444,25 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
     if ctx.opts.debug:
         print 'Java class generated: '+filename
 
-def in_list(s, stmts):
-    """Checks if s without its last five characters equals any capitalized
-    statement argument (stmts[i].arg) in stmts.
+def generate_javadoc(stmts, java_files, ctx):
+    """Generates a list of class filenames and lists of their subclasses'
+    filenames, positioned immediately after each filename if any.
     
-    s     -- a string, at least five characters long
-    stmts -- a list of pyang statements
+    stmts      -- list of statements representing a YANG module tree node
+    java_files -- list of java class filenames that has been generated
+    ctx        -- Context, ignored
     
     """
+    hierarchy = []
     for stmt in stmts:
-        if s[:-5] == stmt.arg.capitalize():
-            return True
-    return False
-
-"""def generate_javadoc(stmts, java_files, ctx, class_hierarchy=[]):
-    matches = filter(lambda s: in_list(s, stmts), java_files)
-    for match in matches:
-        class_hierarchy.append(match)
-        class_hierarchy.append(generate_javadoc(
-    for substmt in stmt.substmts():
-        
-def generate_class_hierarchy(stmt, java_files, class_hierarchy=[]):
-    class_hierarchy.append(matches)
-    for substmt in stmt.substmts():
-    return class_hierarchy"""
+        (filename, name) = extract_names(stmt.arg)
+        if filename in java_files:
+            java_files.remove(filename)
+            hierarchy.append(filename)
+            children = generate_javadoc(stmt.substmts, java_files, ctx)
+            if children:
+                hierarchy.append(children)
+    return hierarchy
 
 def java_class(filename, package, imports, description, body, version='1.0',
                modifiers='', source='<unknown>.yang'):
@@ -567,7 +578,7 @@ def clone(class_name, key_name='', shallow='False'):
     
     """ #FIXME add support for multiple keys
     if key_name != '':
-        try_stmt = 'try {\n'+(' '*12)
+        try_stmt = 'try {\n'+' '*12
         catch_stmt = '(get'+key_name+'''Value()));
         } catch (INMException e) { return null; }
     }\n'''
@@ -610,8 +621,8 @@ def key_names(stmt):
         # Add keys to res, one key per line, indented by 12 spaces
         for key_str in keys:
             for key in key_str.arg.split(' '):
-                res += (' '*12)+'"'+key+'",\n'
-        res = res[:-2]+'\n'+(' '*8)+'}'
+                res += ' '*12+'"'+key+'",\n'
+        res = res[:-2]+'\n'+' '*8+'}'
     return '''
     /**
      * Structure information which specifies
@@ -634,7 +645,7 @@ def children_names(stmt):
         stmt.substmts)
     names = [ch.arg for ch in children]
     if len(names) > 0:
-        names = repr(names)[1:-1].replace("'", '"').replace(', ', ',\n'+(' '*12))
+        names = repr(names)[1:-1].replace("'", '"').replace(', ', ',\n'+' '*12)
     else:
         names = ''
     return '''
@@ -906,7 +917,7 @@ def add_stmt(stmt, arg_name, arg_type='com.tailf.confm.xs.String', field=False):
         spec2 = name+' '+stmt.arg
         spec3 = ''
     else:
-        spec3 = '\n'+(' '*8)+name+' '+stmt.arg+ \
+        spec3 = '\n'+' '*8+name+' '+stmt.arg+ \
             ' = new '+name+'('
         if arg_type == '':
             spec1 = '.\n     * This method is used for creating subtree filters'
@@ -920,7 +931,7 @@ def add_stmt(stmt, arg_name, arg_type='com.tailf.confm.xs.String', field=False):
             spec2 = arg_type+' '+arg_name
             spec3 += arg_name+');'
     if field:
-        spec3 += '\n'+(' '*8)+'this.'+arg_name+' = '+arg_name+';'
+        spec3 += '\n'+' '*8+'this.'+arg_name+' = '+arg_name+';'
     return '''
     /**
      * Adds '''+stmt.keyword+' entry "'+stmt.arg+'"'+spec1+'''.
@@ -993,61 +1004,84 @@ def support_add(fields=[]):
     }
 '''#FIXME '$' should be removed unless it is actually needed
 
-def gen_package(class_hierarchy):
-    return '''<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<html>
-<head>
-<!--
+def is_not_list(entry):
+    return not isinstance(entry, list)
 
-  @(#)package.html
+def html_list(body, indent_level, ul=True):
+    """Returns a string representing javadoc with a <ul> html-element if ul,
+    else with a <li> html-element.
+    
+    """
+    if ul:
+        body = '<ul>\n'+body#TODO could add id="classList"
+    else:
+        body = '<li>\n'+body
+    if body[-1:] != '\n':
+        body += '\n'
+    if ul:
+        body += '</ul>' 
+    else:
+        body += '</li>'
+    return indent(body.split('\n'), indent_level)
 
-  Generated from simple.fxs
+def html_link(item, indent):
+    return ' '*indent*4+'<a href="'+item+'.html">'+item+'</a>'
 
--->
-</head>
-<body bgcolor="white">
-This is the class hierarchy generated from simple.fxs:</p>
+def parse_hierarchy(hierarchy):
+    res = ''
+    for entry in hierarchy:
+        if is_not_list(entry):
+            body = html_link(entry[:-5], 1)
+            res += html_list(body, 1, False)
+        else:
+            body = parse_hierarchy(entry)
+            res += html_list(body, 1)
+        if body[-1:] != '\n':
+            res += '\n'
+    return res
 
-<h2>Generated class hierarchy</h2>
+def gen_package(class_hierarchy, package, ctx):
+    src = ''
+    decapitalize = lambda s: s[:1].lower() + s[1:] if s else ''
+    top_level_entries = filter(is_not_list, class_hierarchy)
+    for entry in top_level_entries:
+        module_arg = decapitalize(entry[:-5])
+        rev = ctx.revs[module_arg][-1:][:0]
+        if not rev:
+            rev = 'unknown'
+        src += 'module "'+module_arg+'" (rev "'+rev+'"), '
+    source = ''
+    if len(top_level_entries) > 1:
+        source += 's'
+    source += '\n'+src[:-2]
+    html_hierarchy = html_list(parse_hierarchy(class_hierarchy), 0)
+    specification = '''
+This class hierarchy was generated from the Yang module'''+source+ \
+' by the <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">'+ \
+'JPyang</a> plugin of <a target="_top" '+ \
+'''href="http://code.google.com/p/pyang/">pyang</a>.
+The generated classes may be used to manipulate pieces of configuration data
+with NETCONF operations such as edit-config, delete-config and lock. These
+operations are typically accessed through the ConfM Java library by
+instantiating Device objects and setting up NETCONF sessions with real devices
+using a compatible YANG model.
 
-<style type="text/css">
-<!--
-#classList {
-  padding:0;
-  margin:0;
-}
+'''
+    with open('package-info.java', 'w+') as f:
+        f.write('/**'+java_docify(specification+html_hierarchy)+'''
+ * 
+ * @see <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">JPyang project page</a>
+ * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6020.txt">RFC 6020: YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF)</a>
+ * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6241.txt">RFC 6241: Network Configuration Protocol (NETCONF)</a>
+ * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>
+ * @see <a target="_top" href="http://www.tail-f.com">Tail-f Systems</a>
+ */
+package '''+package+';')
+    if ctx.opts.debug:
+        print 'Package description generated: package-info.java'
 
-#classList li {
-  list-style-type:none;
-}
--->
-</style>
 
-<ul id="classList">
-<li><a href="Hosts.html">
-Hosts</a></li>
-<ul>
-<li><a href="Bar.html">
-Bar</a></li>
-<li><a href="Foo.html">
-Foo</a></li>
-</ul>
-</ul>
 
-<h2>Related Documentation</h2>
-
-<ul>
-<li><a target="_top" href="http://www.ops.ietf.org/netconf/">IETF NETCONF Working Group</a></li>
-
-<li><a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc4741.txt">RFC 4741: NETCONF Configuration Protocol</a></li>
-
-<li><a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc4742.txt">RFC 4742: Using the NETCONF Configuration Protocol over Secure Shell (SSH)</a></li>
-
-<li><a target="_top" href="http://www.tail-f.com">Tail-f Systems</a></li>
-
-</ul>
-</body>
-</html>''' #FIXME Clean up and validate html
 
 
 
