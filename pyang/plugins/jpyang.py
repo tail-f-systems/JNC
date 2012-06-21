@@ -107,7 +107,7 @@ class JPyangPlugin(plugin.PyangPlugin):
             os.makedirs(d, 0777)
         except OSError as exc:
             if exc.errno == errno.EEXIST:
-                pass
+                pass # The directory already exists
             else:
                 raise
         try:
@@ -115,12 +115,13 @@ class JPyangPlugin(plugin.PyangPlugin):
         except OSError as exc:
             if exc.errno == errno.ENOTDIR:
                 if ctx.opts.debug:
-                    print 'WARNING: A non-directory file '+d+' already exists.'
+                    print 'WARNING: Unable to change directory to '+d+ \
+                        '. Probably a non-directory file with the same name'+ \
+                        'as one of the subdirectories already exists.'
             else:
                 raise
         if ctx.opts.debug:
-            print 'GENERATION PATH: '+os.getcwd()
-        # Generate java classes from module to directory
+            print 'GENERATING FILES TO: '+os.getcwd()
         for module in modules:
             if module.keyword == 'module' or module.keyword == 'submodule':
                 # Generate schema
@@ -151,6 +152,14 @@ class JPyangPlugin(plugin.PyangPlugin):
                     'Error: unrecognized keyword: '+module.keyword+ \
                     'top-level element should be module or submodule'
                 self.fatal()
+        # Generate javadoc
+        is_java_file = lambda s: s.endswith('.java')
+        directory_listing = os.listdir(os.getcwd())
+        java_files = filter(is_java_file, directory_listing)
+        # generate_javadoc(modules, java_files, ctx)
+        if ctx.opts.debug:
+            print 'No javadoc was generated.'
+            # print 'Javadoc generation COMPLETE.'
         os.chdir(wd)
 
     def fatal(self, exitCode=1):
@@ -419,6 +428,31 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
     if ctx.opts.debug:
         print 'Java class generated: '+filename
 
+def in_list(s, stmts):
+    """Checks if s without its last five characters equals any capitalized
+    statement argument (stmts[i].arg) in stmts.
+    
+    s     -- a string, at least five characters long
+    stmts -- a list of pyang statements
+    
+    """
+    for stmt in stmts:
+        if s[:-5] == stmt.arg.capitalize():
+            return True
+    return False
+
+"""def generate_javadoc(stmts, java_files, ctx, class_hierarchy=[]):
+    matches = filter(lambda s: in_list(s, stmts), java_files)
+    for match in matches:
+        class_hierarchy.append(match)
+        class_hierarchy.append(generate_javadoc(
+    for substmt in stmt.substmts():
+        
+def generate_class_hierarchy(stmt, java_files, class_hierarchy=[]):
+    class_hierarchy.append(matches)
+    for substmt in stmt.substmts():
+    return class_hierarchy"""
+
 def java_class(filename, package, imports, description, body, version='1.0',
                modifiers='', source='<unknown>.yang'):
     """The java_class function returns a string representing java code for a 
@@ -549,7 +583,7 @@ def clone(class_name, key_name='', shallow='False'):
     else:
         copy = ' shallow'
         children = ' Children are not included.'
-        signature = 'element cloneShallow()'
+        signature = 'Element cloneShallow()'
         cast = ''
         method = 'cloneShallowContent'
     return '''
@@ -919,7 +953,7 @@ def delete_stmt(stmt, arg_name, arg_type='com.tailf.confm.xs.String'):
         arg_type += ' '
         spec1 += '\n     * @param '+arg_name+' Key argument of child.'
         spec2 = ''
-        spec3 = '['+arg_name+'=\'"+'+arg_name+'\'+"]'
+        spec3 = '['+arg_name+'=\'"+'+arg_name+'+"\']'
     return '''
     /**
      * Deletes '''+stmt.keyword+' entry "'+stmt.arg+spec1+'''"
@@ -957,9 +991,63 @@ def support_add(fields=[]):
         super.addChild($child);
         '''+assignments+'''
     }
-'''#FIXME remove '$' unless it is actually needed
+'''#FIXME '$' should be removed unless it is actually needed
 
+def gen_package(class_hierarchy):
+    return '''<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<!--
 
+  @(#)package.html
+
+  Generated from simple.fxs
+
+-->
+</head>
+<body bgcolor="white">
+This is the class hierarchy generated from simple.fxs:</p>
+
+<h2>Generated class hierarchy</h2>
+
+<style type="text/css">
+<!--
+#classList {
+  padding:0;
+  margin:0;
+}
+
+#classList li {
+  list-style-type:none;
+}
+-->
+</style>
+
+<ul id="classList">
+<li><a href="Hosts.html">
+Hosts</a></li>
+<ul>
+<li><a href="Bar.html">
+Bar</a></li>
+<li><a href="Foo.html">
+Foo</a></li>
+</ul>
+</ul>
+
+<h2>Related Documentation</h2>
+
+<ul>
+<li><a target="_top" href="http://www.ops.ietf.org/netconf/">IETF NETCONF Working Group</a></li>
+
+<li><a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc4741.txt">RFC 4741: NETCONF Configuration Protocol</a></li>
+
+<li><a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc4742.txt">RFC 4742: Using the NETCONF Configuration Protocol over Secure Shell (SSH)</a></li>
+
+<li><a target="_top" href="http://www.tail-f.com">Tail-f Systems</a></li>
+
+</ul>
+</body>
+</html>''' #FIXME Clean up and validate html
 
 
 
