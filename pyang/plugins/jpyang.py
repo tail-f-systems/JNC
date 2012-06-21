@@ -165,7 +165,9 @@ class JPyangPlugin(plugin.PyangPlugin):
         os.chdir(wd)
         javadir = ctx.opts.javadoc_directory
         if javadir:
-            os.system('javadoc -d '+javadir+' '+d+'/*.java')
+            if ctx.opts.debug:
+                print 'Generating javadoc...'
+            os.system('javadoc -d '+javadir+' '+d+'/*.java > /tmp/javadoc')
             if ctx.opts.debug:
                 print 'Javadoc generation COMPLETE.'
 
@@ -249,6 +251,8 @@ def schema_nodes(stmts, tagpath, ns, ctx):
 
 def schema_node(stmt, tagpath, ns, ctx):
     """Generate "node" element content for an XML schema"""
+    if ctx.opts.debug:
+        print 'Generating schema node "'+tagpath+'"...'
     res = []
     res.append('<tagpath>'+tagpath+'</tagpath>') # Could use stmt.full_path()
     # ... but it is marked for removal (and it would be less efficient)
@@ -285,8 +289,6 @@ def schema_node(stmt, tagpath, ns, ctx):
     
     res.append('<flags></flags>')
     res.append('<desc></desc>')
-    if ctx.opts.debug:
-        print 'Schema node generated: '+tagpath
     return res
 
 def generate_classes(module, directory, package, src, ctx):
@@ -308,6 +310,8 @@ def generate_classes(module, directory, package, src, ctx):
             stmt.keyword == 'list'): #FIXME add support for submodule, etc.
             generate_class(stmt, directory, package, src, '', ns.arg, name, 
                 top_level=True, ctx=ctx)
+    if ctx.opts.debug:
+        print 'Generating Java class "'+filename+'"...'
     with open(directory+'/'+filename, 'w+') as f:
         f.write(java_class(filename, package, 
             ['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'], 
@@ -318,8 +322,6 @@ def generate_classes(module, directory, package, src, ctx):
             source=src
         )
     )
-    if ctx.opts.debug:
-        print 'Java class generated: '+filename
 
 def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
         top_level=False):
@@ -408,6 +410,8 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
                 mark(sub, 'merge')+ \
                 mark(sub, 'create')+ \
                 mark(sub, 'delete')
+    if ctx.opts.debug:
+        print 'Generating Java class "'+filename+'"...'
     contructors = ''
     cloners = ''
     support_methods = ''
@@ -441,8 +445,6 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
             modifiers=' extends Container'
         )
     )
-    if ctx.opts.debug:
-        print 'Java class generated: '+filename
 
 def generate_javadoc(stmts, java_files, ctx):
     """Generates a list of class filenames and lists of their subclasses'
@@ -1058,6 +1060,8 @@ def gen_package(class_hierarchy, package, ctx):
     ctx             -- Context used only for debugging purposes
     
     """
+    if ctx.opts.debug:
+        print 'Generating package description package-info.java...'
     src = ''
     decapitalize = lambda s: s[:1].lower() + s[1:] if s else ''
     top_level_entries = filter(is_not_list, class_hierarchy)
@@ -1094,8 +1098,6 @@ using a compatible YANG model.
  * @see <a target="_top" href="http://www.tail-f.com">Tail-f Systems</a>
  */
 package '''+package+';')
-    if ctx.opts.debug:
-        print 'Package description generated: package-info.java'
 
 
 
