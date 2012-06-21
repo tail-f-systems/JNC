@@ -25,9 +25,7 @@ from __future__ import with_statement # Not required from Python 2.6 and
 
 import optparse # FIXME Deprecated in python 2.7, should use argparse instead
 # ... See http://stackoverflow.com/questions/3217673/why-use-argparse-rather-than-optparse and http://docs.python.org/dev/library/argparse.html#upgrading-optparse-code
-import os
-import sys
-import shutil
+import os, errno, sys
 import datetime
 
 from pyang import plugin
@@ -103,19 +101,25 @@ class JPyangPlugin(plugin.PyangPlugin):
         """
         directory = ctx.opts.directory
         wd = os.getcwd()
-        if ctx.opts.debug and ctx.opts.outfile is not None:
-            print 'Generating files to '+wd+'/'+ \
-                fd.name[:-4]+'/'+directory.replace('.', '/')
-            os.mkdir(fd.name[:-4], 0777)
-            os.chdir(fd.name[:-4])
-        elif ctx.opts.debug:
-            print 'Generating files to '+wd+'/'+ \
-                directory.replace('.', '/')
-        # Replace directory with an empty one
-        for d in directory.split('.'):
-            shutil.rmtree(d, True)
-            os.mkdir(d, 0777)
+        # Create directory
+        d = directory.replace('.', '/')
+        try:
+            os.makedirs(d, 0777)
+        except OSError as exc:
+            if exc.errno == errno.EEXIST:
+                pass
+            else:
+                raise
+        try:
             os.chdir(d)
+        except OSError as exc:
+            if exc.errno == errno.ENOTDIR:
+                if ctx.opts.debug:
+                    print 'WARNING: A non-directory file '+d+' already exists.'
+            else:
+                raise
+        if ctx.opts.debug:
+            print 'GENERATION PATH: '+os.getcwd()
         # Generate java classes from module to directory
         for module in modules:
             if module.keyword == 'module' or module.keyword == 'submodule':
