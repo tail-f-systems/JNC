@@ -67,6 +67,11 @@ class JPyangPlugin(plugin.PyangPlugin):
                 '--jpyang-javadoc',
                 dest='javadoc_directory',
                 help='Generate javadoc to JAVADOC_DIRECTORY.'),
+            optparse.make_option(
+                '--jpyang-verbose',
+                dest='verbose',
+                action='store_true',
+                help='Print detailed debug messages.'),
             ]
         g = optparser.add_option_group('JPyang output specific options')
         g.add_options(optlist)
@@ -118,13 +123,13 @@ class JPyangPlugin(plugin.PyangPlugin):
             os.chdir(d)
         except OSError as exc:
             if exc.errno == errno.ENOTDIR:
-                if ctx.opts.debug:
+                if ctx.opts.debug or ctx.opts.verbose:
                     print 'WARNING: Unable to change directory to '+d+ \
                         '. Probably a non-directory file with same name'+ \
                         'as one of the subdirectories already exists.'
             else:
                 raise
-        if ctx.opts.debug:
+        if ctx.opts.debug or ctx.opts.verbose:
             print 'GENERATING FILES TO: '+os.getcwd()
         for module in modules:
             if module.keyword == 'module' or module.keyword == 'submodule':
@@ -139,7 +144,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                             schema_nodes(module.substmts, '/', ns, ctx) \
                         ).splitlines())+'\n</schema>'
                 )
-                if ctx.opts.debug:
+                if ctx.opts.debug or ctx.opts.verbose:
                     print 'Schema generation COMPLETE.'
                 # Generate java classes
                 src = 'module "'+module.arg+'", revision: "'+ \
@@ -149,7 +154,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                     #FIXME add support for submodule
                     print >> sys.stderr, \
                         'Warning: no support for submodule'
-                if ctx.opts.debug:
+                if ctx.opts.debug or ctx.opts.verbose:
                     print 'Java classes generation COMPLETE.'
             else:
                 print >> sys.stderr, \
@@ -165,10 +170,13 @@ class JPyangPlugin(plugin.PyangPlugin):
         os.chdir(wd)
         javadir = ctx.opts.javadoc_directory
         if javadir:
-            if ctx.opts.debug:
+            if ctx.opts.debug or ctx.opts.verbose:
                 print 'Generating javadoc...'
-            os.system('javadoc -d '+javadir+' '+d+'/*.java > /tmp/javadoc')
-            if ctx.opts.debug:
+            if ctx.opts.verbose:
+                os.system('javadoc -d '+javadir+' '+d+'/*.java')
+            else:
+                os.system('javadoc -d '+javadir+' '+d+'/*.java > /tmp/javadoc')
+            if ctx.opts.debug or ctx.opts.verbose:
                 print 'Javadoc generation COMPLETE.'
 
     def fatal(self, exitCode=1):
@@ -251,7 +259,7 @@ def schema_nodes(stmts, tagpath, ns, ctx):
 
 def schema_node(stmt, tagpath, ns, ctx):
     """Generate "node" element content for an XML schema"""
-    if ctx.opts.debug:
+    if ctx.opts.verbose:
         print 'Generating schema node "'+tagpath+'"...'
     res = []
     res.append('<tagpath>'+tagpath+'</tagpath>') # Could use stmt.full_path()
@@ -310,7 +318,7 @@ def generate_classes(module, directory, package, src, ctx):
             stmt.keyword == 'list'): #FIXME add support for submodule, etc.
             generate_class(stmt, directory, package, src, '', ns.arg, name, 
                 top_level=True, ctx=ctx)
-    if ctx.opts.debug:
+    if ctx.opts.verbose:
         print 'Generating Java class "'+filename+'"...'
     with open(directory+'/'+filename, 'w+') as f:
         f.write(java_class(filename, package, 
@@ -410,7 +418,7 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
                 mark(sub, 'merge')+ \
                 mark(sub, 'create')+ \
                 mark(sub, 'delete')
-    if ctx.opts.debug:
+    if ctx.opts.verbose:
         print 'Generating Java class "'+filename+'"...'
     contructors = ''
     cloners = ''
@@ -1060,7 +1068,7 @@ def gen_package(class_hierarchy, package, ctx):
     ctx             -- Context used only for debugging purposes
     
     """
-    if ctx.opts.debug:
+    if ctx.opts.verbose:
         print 'Generating package description package-info.java...'
     src = ''
     decapitalize = lambda s: s[:1].lower() + s[1:] if s else ''
