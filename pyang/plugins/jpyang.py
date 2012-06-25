@@ -402,13 +402,13 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
                 prefix_name, ctx)
             key, _, confm_keys, _ = extract_keys(sub, ctx)
             access_methods += access_methods_comment(sub)+ \
-            get_stmt(sub, key.arg)+ \
-            get_stmt(sub, key.arg, arg_type='String')+ \
+            get_stmt(sub, confm_keys)+ \
+            get_stmt(sub, confm_keys, string=True)+ \
             child_iterator(sub)+ \
-            add_stmt(sub, arg_name=sub.arg, arg_type=sub.arg)+ \
-            add_stmt(sub, arg_name=key.arg)+ \
-            add_stmt(sub, arg_name=key.arg, arg_type='String')+ \
-            add_stmt(sub, arg_name=sub.arg, arg_type='')+ \
+            add_stmt(sub, args=[(sub.arg, sub.arg)])+ \
+            add_stmt(sub, args=confm_keys)+ \
+            add_stmt(sub, args=confm_keys, string=True)+ \
+            add_stmt(sub, args=[])+ \
             delete_stmt(sub, arg_name=key.arg)+ \
             delete_stmt(sub, arg_name=key.arg, arg_type='String')
         if sub.keyword == 'container':
@@ -417,8 +417,8 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
             fields.append(sub.arg) # FIXME might have to append more fields
             access_methods += access_methods_comment(sub)+ \
             child_field(sub)+ \
-            add_stmt(sub, arg_name=sub.arg, arg_type=sub.arg, field=True)+ \
-            add_stmt(sub, arg_name=sub.arg, arg_type='', field=True)+ \
+            add_stmt(sub, args=[(sub.arg, sub.arg)], field=True)+ \
+            add_stmt(sub, args=[], field=True)+ \
             delete_stmt(sub, arg_name='', arg_type='')
         if sub.keyword == 'leaf':
             key = stmt.search_one('key')
@@ -840,14 +840,11 @@ def get_stmt(stmt, keys, string=False):
         spec = '\n     * The keys are specified as Strings'
     for (key_type, key_name) in keys:
         spec += '\n     * @param '+key_name+' Key argument of child.'
-    if string:
-        for (key_type, key_name) in keys:
+        if string: #TODO http://en.wikipedia.org/wiki/Loop_unswitching
             arguments += 'String '+key_name+', '
-    else:
-        for (key_type, key_name) in keys:
+        else:
             arguments += key_type+' '+key_name+', '
-    for (key_type, key_name) in keys:
-        xpath += '['+key_name+'=\'"+'+key_name+'+"']
+        xpath += '['+key_name+'=\'"+'+key_name+'+"\']'
     return '''
     /**
      * Get method for '''+stmt.keyword+' entry: "'+stmt.arg+'''".
@@ -984,55 +981,63 @@ def child_iterator(substmt):
     }
 '''
 
-def add_stmt(stmt, arg_name, arg_type='com.tailf.confm.xs.String', field=False):
+def add_stmt(stmt, args=[], field=False, string=False):
     """Generates add-method for stmt, optionally parametrized by an 
     argument of specified type and with customizable comments.
     
-    stmt     -- The YANG statement that needs an adder
-    arg_name -- The name of the method's argument, typically a key identifier
-    arg_type -- The type of the method's argument, also used to deduce the 
-                semantics of the method. Four cases:
-                1. The default value produces a method that adds a new stmt 
-                   with key of the Tail-f String type.
-                2. An empty string produces a method with no argument, which
-                   can be used to create subtree filters.
-                3. If arg_type is the same as stmt.arg, the produced method
-                   will add its argument as a child instead of creating a new
-                   one. No cloning occurs.
-                4. If 'String', The key is specified with the ordinary String
-                   type instead of the Tail-f String type.
-    field    -- If set to True, the statement is added to a field, typically
-                in a container class.
+    stmt   -- The YANG statement that needs an adder
+    args   -- A list of tuples, each tuple containing an arg_type and an
+              arg_name. Each arg_type corresponds to a method argument type
+              which is also used to deduce what the method should do:
+              1. If arg_type is the same as stmt.arg, the produced method
+                 will add its argument as a child instead of creating a new
+                 one. No cloning occurs.
+              2. Tail-f ConfM types produces a method that adds a new stmt 
+                 with that key of the Tail-f String type, unless string is set.
+              Each arg_name corresponds to a method argument name. The names of
+              the method's arguments are typically key identifiers or a single
+              lowercase stmt name. Setting args to an empty list produces a
+              method with no argument, which can be used to create subtree
+              filters.
+    string -- If set to True, the keys are specified with the ordinary String
+              type instead of the Tail-f ConfM String type.
+    field  -- If set to True, the statement is added to a field, typically
+              in a container class.
     
     """
     name = stmt.arg.capitalize()
     spec2 = spec3 = ''
-    if arg_type == stmt.arg:
-        spec1 = '.\n     * @param '+arg_name+ \
+    if len(args) == 1 and args[0][0] == stmt.arg:
+        spec1 = '.\n     * @param '+args[0][1]+ \
             ' Child to be added to children'
-        spec2 = name+' '+stmt.arg
+        spec2 = name+' '+stmt.arg+', '
     else:
         spec3 = '\n'+' '*8+name+' '+stmt.arg+ \
             ' = new '+name+'('
-        if arg_type == '':
+        if not args:
             spec1 = '''.
      * This method is used for creating subtree filters'''
             spec3 += ');'
         else:
             spec1 = ', with given key arguments'
-            if arg_type == 'String':
+            if string:
                 spec1 += '.\n     * The keys are specified as strings'
-            spec1 += '.\n     * @param '+arg_name+' Key argument of child'
-            spec2 = arg_type+' '+arg_name
-            spec3 += arg_name+');'
+            for (arg_type, arg_name) in args:
+                spec1 += '.\n     * @param '+arg_name+' Key argument of child'
+                if string:
+                    spec2 += 'String '+arg_name+', '
+                else:
+                    spec2 += arg_type+' '+arg_name+', '
+                spec3 += arg_name+', '
+            spec3 = spec3[:-2]+');'
     if field:
-        spec3 += '\n'+' '*8+'this.'+arg_name+' = '+arg_name+';'
+        spec3 += '\n'+' '*8+'this.'+stmt.arg+' = '+stmt.arg+';'
     return '''
     /**
      * Adds '''+stmt.keyword+' entry "'+stmt.arg+'"'+spec1+'''.
      * @return The added child.
      */
-    public '''+name+' add'+name+'('+spec2+''')
+    public '''+name+' add'+name+'('+spec2[:-2]+''')
         throws INMException {'''+spec3+'''
         insertChild('''+stmt.arg+''', childrenNames());
         return '''+stmt.arg+''';
