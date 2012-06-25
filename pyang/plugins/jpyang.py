@@ -16,8 +16,13 @@
  * or http://www.gnu.org/licenses/gpl.html
  
 Invoke with:
-> pyang --format java --java-package <package.name> --jpyang-verbose \
-    --jpyang-javadoc <javadoc.directory> <file.yang>
+> pyang \
+    --format java \
+    --java-package <package.name> \
+    --jpyang-verbose \
+    --jpyang-schema \
+    --jpyang-javadoc <javadoc.directory> \
+    <file.yang>
 
 Or, if you like to keep things simple:
 > pyang -f jpyang -d <package.name> <file.yang>
@@ -71,6 +76,11 @@ class JPyangPlugin(plugin.PyangPlugin):
                 '--jpyang-javadoc',
                 dest='javadoc_directory',
                 help='Generate javadoc to JAVADOC_DIRECTORY.'),
+            optparse.make_option(
+                '--jpyang-schema',
+                dest='schema',
+                action='store_true',
+                help='Generate schema.'),
             optparse.make_option(
                 '--jpyang-verbose',
                 dest='verbose',
@@ -137,19 +147,20 @@ class JPyangPlugin(plugin.PyangPlugin):
             print 'GENERATING FILES TO: '+os.getcwd()
         for module in modules:
             if module.keyword == 'module' or module.keyword == 'submodule':
-                # Generate schema
-                ns = module.search_one('namespace').arg
-                name = module.search_one('prefix').arg.capitalize()
-                with open(os.getcwd()+'/'+name+'.schema', 'w+') as f:
-                    f.write('<schema>\n'+indent( \
-                        ('<node>\n'+ \
-                            indent(schema_node(module, '/', ns, ctx))+ \
-                            '\n</node>'+ \
-                            schema_nodes(module.substmts, '/', ns, ctx) \
-                        ).splitlines())+'\n</schema>'
-                )
-                if ctx.opts.debug or ctx.opts.verbose:
-                    print 'Schema generation COMPLETE.'
+                if ctx.opts.schema:
+                    # Generate schema
+                    ns = module.search_one('namespace').arg
+                    name = module.search_one('prefix').arg.capitalize()
+                    with open(os.getcwd()+'/'+name+'.schema', 'w+') as f:
+                        f.write('<schema>\n'+indent( \
+                            ('<node>\n'+ \
+                                indent(schema_node(module, '/', ns, ctx))+ \
+                                '\n</node>'+ \
+                                schema_nodes(module.substmts, '/', ns, ctx) \
+                            ).splitlines())+'\n</schema>'
+                    )
+                    if ctx.opts.debug or ctx.opts.verbose:
+                        print 'Schema generation COMPLETE.'
                 # Generate java classes
                 src = 'module "'+module.arg+'", revision: "'+ \
                     util.get_latest_revision(module)+'".'
