@@ -30,6 +30,7 @@ from __future__ import with_statement # Not required from Python 2.6 and
 import optparse # FIXME Deprecated in python 2.7, should use argparse instead
 # ... See http://stackoverflow.com/questions/3217673/why-use-argparse-rather-than-optparse and http://docs.python.org/dev/library/argparse.html#upgrading-optparse-code
 import os, errno, sys
+from inspect import currentframe
 import datetime
 
 from pyang import plugin
@@ -407,9 +408,10 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
                     set_value(sub, prefix='', arg_type='String', 
                         confm_type=type_str)
             else:
-                print >> sys.stderr, 'WARNING! No support for type "'+ \
-                type_stmt.arg+'", defaulting to string.'
-                type_str = 'com.tailf.confm.xs.String'
+                if ctx.opts.debug or ctx.opts.verbose:
+                    print >> sys.stderr, 'WARNING! No support for type "'+ \
+                    type_stmt.arg+'", defaulting to string.'
+                    type_str = 'com.tailf.confm.xs.String'
                 access_methods += get_value(sub, ret_type=type_str)+ \
                     set_value(sub, prefix=prefix_name, arg_type=type_str)+ \
                     set_value(sub, prefix='')
@@ -433,14 +435,35 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
         key = stmt.search_one('key')
         # TODO make (type, name) lists of keys and pass as args to constructor
         confm_keys = []
+        primitive_keys = []
+        only_strings = True
+        for arg in key.arg.split(' '):
+            key_type = stmt.search_one('leaf', arg).search_one('type')
+            if key_type.arg == 'string':
+                confm_keys.append(('com.tailf.confm.xs.String', arg))
+                primitive_keys.append(('String', arg))
+            elif key_type.arg == 'uint32':
+                confm_keys.append(('com.tailf.confm.xs.UnsignedInt', arg))
+                primitive_keys.append(('long', arg))
+            else:
+                if ctx.opts.debug or ctx.opts.verbose:
+                    print >> sys.stderr, 'WARNING! No support for type "'+ \
+                    key_type.arg+'", defaulting to string.'
+                confm_keys.append(('com.tailf.confm.xs.String', arg))
+                primitive_keys.append(('String', arg))
+            only_strings *= primitive_keys[-1][0] == 'String'
         constructors = constructor(stmt, ctx, root=prefix_name,
             set_prefix=top_level, throws="\n        throws INMException")+ \
         constructor(stmt, ctx, root=prefix_name, set_prefix=top_level, 
-            mode=1, args=[('com.tailf.confm.xs.String', key.arg)], throws='''
+            mode=1, args=confm_keys, throws='''
         throws INMException''')+ \
         constructor(stmt, ctx, root=prefix_name, set_prefix=top_level, 
-            mode=2, args=[('String', key.arg)], throws='''
-        throws INMException''') # FIXME multiple keys not handled
+            mode=2, args=primitive_keys, throws='''
+        throws INMException''')
+        if not only_strings:
+            constructors += constructor(stmt, ctx, root=prefix_name,
+                set_prefix=top_level, mode=3, args=primitive_keys, throws='''
+        throws INMException''')
         cloners = clone(name, key.arg.capitalize(), shallow=False)+ \
             clone(name, key.arg.capitalize(), shallow=True)
     with open(directory+'/'+filename, 'w+') as f:
@@ -575,8 +598,10 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
                 else:
                     # FIXME support more types!
                     if ctx.opts.debug or ctx.opts.verbose:
-                        print >> sys.stderr, 'WARNING, constructor argument'+ \
-                        ' defaulting to string from: '+arg_type
+                        print >> sys.stderr, 'WARNING, at line '+ \
+                            str(currentframe().f_lineno)+ \
+                            ' constructor argument'+ \
+                            ' defaulting to string from: '+arg_type
                     decl = 'new com.tailf.confm.xs.String('
                 values.append(decl+arg_name+'Value)')
         for (arg_type, arg_name), value in zip(args, values):
@@ -587,7 +612,6 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
         insertChild('''+arg_name+', childrenNames());' # FIXME throws
             arg_name = arg_name+'Value'
             docstring += '\n     * @param '+arg_name+' Key argument of child.'
-        for (arg_type, arg_name) in args:
             if mode == 2: # String arguments
                 arguments += 'String '+arg_name+', '
             else: # ConfM or Java primitive arguments
