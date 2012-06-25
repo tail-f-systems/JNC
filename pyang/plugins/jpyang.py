@@ -47,8 +47,7 @@ class JPyangPlugin(plugin.PyangPlugin):
     def add_output_format(self, fmts):
         """Adds 'java' and 'jpyang' as valid output formats"""
         self.multiple_modules = True
-        fmts['java'] = self
-        fmts['jpyang'] = self
+        fmts['java'] = fmts['jpyang'] = self
 
     def add_opts(self, optparser):
         """Adds the --jpyang-help option"""
@@ -155,7 +154,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                     util.get_latest_revision(module)+'".'
                 generate_classes(module, os.getcwd(), directory, src, ctx)
                 if module.keyword == 'submodule':
-                    #FIXME add support for submodule
+                    # FIXME add support for submodule
                     print >> sys.stderr, \
                         'Warning: no support for submodule'
                 if ctx.opts.debug or ctx.opts.verbose:
@@ -237,7 +236,7 @@ def indent(lines, level=1):
     level -- indentation level (number of spaces divided by 4)
     
     """
-    #TODO implement a more efficient version using replace on strings
+    # TODO implement a more efficient version using replace on strings
     res = ''
     for line in lines:
         res += ' '*level*4 + line + '\n'
@@ -291,8 +290,8 @@ def schema_node(stmt, tagpath, ns, ctx):
         min_occurs = '1'
     if isUnique or childOfContainerOrList or is_container(stmt, True):
         max_occurs = '1'
-    res.append('<min_occurs>'+min_occurs+'</min_occurs>') #TODO verify correct
-    res.append('<max_occurs>'+max_occurs+'</max_occurs>') #TODO verify correct
+    res.append('<min_occurs>'+min_occurs+'</min_occurs>') # TODO verify correct
+    res.append('<max_occurs>'+max_occurs+'</max_occurs>') # TODO verify correct
     
     children = ''
     for ch in stmt.substmts:
@@ -319,7 +318,7 @@ def generate_classes(module, directory, package, src, ctx):
     (filename, name) = extract_names(prefix.arg)
     for stmt in module.substmts:
         if (stmt.keyword == 'container' or
-            stmt.keyword == 'list'): #FIXME add support for submodule, etc.
+            stmt.keyword == 'list'): # FIXME add support for submodule, etc.
             generate_class(stmt, directory, package, src, '', ns.arg, name, 
                 top_level=True, ctx=ctx)
     if ctx.opts.verbose:
@@ -352,10 +351,10 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
     
     """
     (filename, name) = extract_names(stmt.arg)
-    access_methods = ''
+    access_methods = contructors = cloners = support_methods = ''
     fields = []
     for sub in stmt.substmts: 
-    #FIXME Perhaps better to have several loops to get correct order and be 
+    # FIXME Perhaps better to have several loops to get correct order and be 
     #      able to call generate_class outside of if-statements
         if sub.keyword == 'list':
             generate_class(sub, directory, package, src, path+stmt.arg+'/', ns,
@@ -374,7 +373,7 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
         if sub.keyword == 'container':
             generate_class(sub, directory, package, src, path+stmt.arg+'/', ns,
                 prefix_name, ctx)
-            fields.append(sub.arg) #FIXME might have to append more fields
+            fields.append(sub.arg) # FIXME might have to append more fields
             access_methods += access_methods_comment(sub)+ \
             child_field(sub)+ \
             add_stmt(sub, arg_name=sub.arg, arg_type=sub.arg, field=True)+ \
@@ -424,35 +423,35 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
                 mark(sub, 'delete')
     if ctx.opts.verbose:
         print 'Generating Java class "'+filename+'"...'
-    contructors = ''
-    cloners = ''
-    support_methods = ''
-    if filter(is_container, stmt.substmts): #TODO Verify correctness of cond.
+    if filter(is_container, stmt.substmts): # TODO Verify correctness of cond.
         support_methods = support_add(fields)
     if stmt.keyword == 'container':
-        constructors = constructor(stmt, top_level, prefix=prefix_name)
+        constructors = constructor(stmt, ctx, set_prefix=top_level,
+            root=prefix_name)
         cloners = clone(name, shallow=False)+clone(name, shallow=True)
     elif stmt.keyword == 'list':
         key = stmt.search_one('key')
-        constructors = constructor(stmt, top_level, prefix=prefix_name, 
-            throws="\n        throws INMException")+ \
-        constructor(stmt, top_level, prefix=prefix_name, 
-            arg_type='com.tailf.confm.xs.String', arg_name=key.arg, throws='''
+        # TODO make (type, name) lists of keys and pass as args to constructor
+        confm_keys = []
+        constructors = constructor(stmt, ctx, root=prefix_name,
+            set_prefix=top_level, throws="\n        throws INMException")+ \
+        constructor(stmt, ctx, root=prefix_name, set_prefix=top_level, 
+            mode=1, args=[('com.tailf.confm.xs.String', key.arg)], throws='''
         throws INMException''')+ \
-        constructor(stmt, top_level, prefix=prefix_name, 
-            arg_type='String', arg_name=key.arg, throws='''
-        throws INMException''') #FIXME multiple keys not handled
+        constructor(stmt, ctx, root=prefix_name, set_prefix=top_level, 
+            mode=2, args=[('String', key.arg)], throws='''
+        throws INMException''') # FIXME multiple keys not handled
         cloners = clone(name, key.arg.capitalize(), shallow=False)+ \
             clone(name, key.arg.capitalize(), shallow=True)
     with open(directory+'/'+filename, 'w+') as f:
         f.write(java_class(filename, package, 
             ['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'], 
-            #FIXME Hashtable not used
+            # FIXME Hashtable not used in generated code
             'This class represents a "'+path+stmt.arg+
             '" element\n * from the namespace '+ns,
             constructors+cloners+key_names(stmt)+
             children_names(stmt)+access_methods+support_methods,
-            #TODO add getters, setters, etc. for children stmts
+            # TODO add getters, setters, etc. for children stmts
             source=src,
             modifiers=' extends Container'
         )
@@ -499,7 +498,7 @@ def java_class(filename, package, imports, description, body, version='1.0',
     # Fetch current date and set date format
     time = datetime.date.today()
     date = str(time.day)+'/'+str(time.month)+'/'+str(time.year%100)
-    #The header_comment is placed in the beginning of the java file
+    # The header_comment is placed in the beginning of the java file
     header_comment = '/* \n * @(#)'+filename+'        '+version+' '+date+'''
  *
  * This file has been auto-generated by JPyang, the java output format plugin 
@@ -524,59 +523,84 @@ def java_class(filename, package, imports, description, body, version='1.0',
     class_decl = 'public class '+filename.split('.')[0]+modifiers+' {\n'
     return header+class_decl+body+'\n}'
 
-def constructor(stmt, set_prefix=False, prefix='', arg_type='', 
-    arg_name='', child='Leaf', throws=''):
+def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
+    throws=''):
     """The constructor function returns a string representing java code for a 
     constructor of a java class corresponding to the stmt parameter.
     
     stmt        -- Typically a module, submodule, container or list Statement
+    ctx         -- Context used to identify debug and verbose flags
+    root        -- Path to class containing the XML namespace prefix of the 
+                   YANG module. If not set stmt name will be used.
     set_prefix  -- Set to true to add setDefaultPrefix and setPrefix calls
-    prefix      -- Path to class containing the XML namespace prefix of the 
-                   YANG module. 
-    arg_type    -- The argument type. If not set, the method will have no
-                   argument.
-    arg_name    -- Argument name but without the 'Value* suffix. Typically
-                   used as a key in the method. Only used if arg_type is set.
-    child       -- Type of the key, if used.
+    mode        -- 0: No arguments
+                   1: ConfM arguments
+                   2: String arguments
+                   3: Java primitive arguments
+    args        -- A list of tuples containing the argument type(s) and 
+                   name(s). If empty, the method will have no argument. The
+                   argument name(s) should be supplied without the 'Value'
+                   suffix. Typically used as a (set of) key(s) in the method.
+                   Note that mode must be > 0 for this to have an effect.
     throws      -- Typically 'throws INMException', prepended with a newline 
                    and spaces for indentation.
     
     """
     name = stmt.arg.capitalize()
-    if prefix == '':
-        prefix = name
-    setters = ''
+    setters = docstring = inserts = arguments = ''
+    if root == '':
+        root = name
     if set_prefix:
         setters = '''
         setDefaultPrefix();
-        setPrefix('''+prefix+'.PREFIX);'
-    docstring = ''
-    if arg_type == '':
-        setName = ''
+        setPrefix('''+root+'.PREFIX);'
+    if not args or mode == 0:
         obj_status = 'empty '
     else:
         obj_status = 'initialized '
-        if arg_type == 'String':
-            value = 'new com.tailf.confm.xs.String('+arg_name+'Value)'
-            docstring = '\n     * with Strings for the keys.'
-        else:
-            value = arg_name+'Value'
-        arg_type += ' '
-        setName = '''
+        values = []
+        if mode == 1: # ConfM arguments
+            for (arg_type, arg_name) in args:
+                values.append(arg_name+'Value')
+        else: # String or Java primitive arguments
+            if mode == 2:
+                docstring = '\n     * with Strings for the keys.'
+            else:
+                docstring = '\n     * with primitive java types.'
+            for (arg_type, arg_name) in args:
+                if arg_type == 'String':
+                    decl = 'new com.tailf.confm.xs.String('
+                elif arg_type == 'long':
+                    decl = 'new com.tailf.confm.xs.UnsignedInt('
+                else:
+                    # FIXME support more types!
+                    if ctx.opts.debug or ctx.opts.verbose:
+                        print >> sys.stderr, 'WARNING, constructor argument'+ \
+                        ' defaulting to string from: '+arg_type
+                    decl = 'new com.tailf.confm.xs.String('
+                values.append(decl+arg_name+'Value)')
+        for (arg_type, arg_name), value in zip(args, values):
+            inserts += '''
         // Set key element: '''+arg_name+'''
-        '''+child+' '+arg_name+' = new '+ \
-        child+'('+prefix+'.NAMESPACE, "'+arg_name+'''");
+        Leaf '''+arg_name+' = new Leaf('+root+'.NAMESPACE, "'+arg_name+'''");
         '''+arg_name+'.setValue('+value+''');
-        insertChild('''+arg_name+', childrenNames());' #FIXME throws
-        arg_name = arg_name+'Value'
-        docstring += '\n     * @param '+arg_name+' Key argument of child.'
+        insertChild('''+arg_name+', childrenNames());' # FIXME throws
+            arg_name = arg_name+'Value'
+            docstring += '\n     * @param '+arg_name+' Key argument of child.'
+        for (arg_type, arg_name) in args:
+            if mode == 2: # String arguments
+                arguments += 'String '+arg_name+', '
+            else: # ConfM or Java primitive arguments
+                arguments += arg_type+' '+arg_name+', '
+            # TODO add newlines if more than 80 cols
+        arguments = arguments[:-2] # Skip the last ', '
     return '''
     /**
      * Constructor for an '''+obj_status+name+' object.'+docstring+'''
      */
-    public '''+name+'('+arg_type+arg_name+')'+throws+''' {
-        super('''+prefix+'.NAMESPACE, "'+stmt.arg+'");'+ \
-        setName+setters+'''
+    public '''+name+'('+arguments+')'+throws+''' {
+        super('''+root+'.NAMESPACE, "'+stmt.arg+'");'+ \
+        inserts+setters+'''
     }
 '''
 
@@ -590,26 +614,24 @@ def clone(class_name, key_name='', shallow='False'):
     key_name   -- Key identifier
     shallow    -- Boolean flag for which clone method to use
     
-    """ #FIXME add support for multiple keys
+    """ # FIXME add support for multiple keys
+    try_stmt = children = cast = ''
     if key_name != '':
         try_stmt = 'try {\n'+' '*12
         catch_stmt = '(get'+key_name+'''Value()));
         } catch (INMException e) { return null; }
     }\n'''
     else:
-        try_stmt = ''
         catch_stmt = '());\n    }\n'
     if not shallow:
         copy = 'n exact'
-        children = ''
         signature = 'Object clone()'
-        cast = '('+class_name+')' #FIXME Maybe this is not always required
+        cast = '('+class_name+')' # FIXME Maybe this is not always required
         method = 'cloneContent'
     else:
         copy = ' shallow'
         children = ' Children are not included.'
         signature = 'Element cloneShallow()'
-        cast = ''
         method = 'cloneShallowContent'
     return '''
     /**
@@ -645,7 +667,7 @@ def key_names(stmt):
     public String[] keyNames() {
         '''+res+''';
     }
-''' #FIXME Add support for multiple keys
+''' # FIXME Add support for multiple keys
 
 def children_names(stmt):
     """Returns a string representing a java method that returns a String[]
@@ -654,7 +676,7 @@ def children_names(stmt):
     stmt -- A pyang Statement, typically a list or a container
     
     """
-    children = filter(lambda x: #x.keyword != 'key' and #FIXME add more
+    children = filter(lambda x: # x.keyword != 'key' and # FIXME add more
         x.keyword != 'key', 
         stmt.substmts)
     names = [ch.arg for ch in children]
@@ -672,7 +694,7 @@ def children_names(stmt):
             '''+names+'''
         };
     }
-''' #FIXME What if there are no children?
+''' # FIXME What if there are no children?
 
 def class_fields(ns_arg, prefix_arg):
     """Returns a string representing java code for two fields"""
@@ -814,8 +836,7 @@ def set_value(stmt, prefix='', arg_type='', confm_type=''):
     
     """
     name = stmt.arg.capitalize()
-    spec1 = ''
-    spec2 = ''
+    spec1 = spec2 = ''
     if arg_type == 'String':
         spec1 = ', using a string value'
         spec2 = 'string representation of the '
@@ -927,17 +948,17 @@ def add_stmt(stmt, arg_name, arg_type='com.tailf.confm.xs.String', field=False):
     
     """
     name = stmt.arg.capitalize()
+    spec2 = spec3 = ''
     if arg_type == stmt.arg:
         spec1 = '.\n     * @param '+arg_name+ \
             ' Child to be added to children'
         spec2 = name+' '+stmt.arg
-        spec3 = ''
     else:
         spec3 = '\n'+' '*8+name+' '+stmt.arg+ \
             ' = new '+name+'('
         if arg_type == '':
-            spec1 = '.\n     * This method is used for creating subtree filters'
-            spec2 = ''
+            spec1 = '''.
+     * This method is used for creating subtree filters'''
             spec3 += ');'
         else:
             spec1 = ', with given key arguments'
@@ -970,16 +991,15 @@ def delete_stmt(stmt, arg_name, arg_type='com.tailf.confm.xs.String'):
     """
     name = stmt.arg.capitalize()
     spec1 = '", with specified keys.'
+    spec2 = spec3 = ''
     if arg_type == 'String':
         spec1 += '\n     * The keys are specified as Strings'
     if arg_type == '':
         spec1 = ''
         spec2 = 'this.'+stmt.arg+' = null;\n        '
-        spec3 = ''
     else:
         arg_type += ' '
         spec1 += '\n     * @param '+arg_name+' Key argument of child.'
-        spec2 = ''
         spec3 = '['+arg_name+'=\'"+'+arg_name+'+"\']'
     return '''
     /**
@@ -1018,7 +1038,7 @@ def support_add(fields=[]):
         super.addChild($child);
         '''+assignments+'''
     }
-'''#FIXME '$' should be removed unless it is actually needed
+'''# FIXME '$' should be removed unless it is actually needed
 
 def is_not_list(entry):
     """Returns False iff entry is instance of list"""
@@ -1074,7 +1094,7 @@ def gen_package(class_hierarchy, package, ctx):
     """
     if ctx.opts.verbose:
         print 'Generating package description package-info.java...'
-    src = ''
+    src = source = ''
     decapitalize = lambda s: s[:1].lower() + s[1:] if s else ''
     top_level_entries = filter(is_not_list, class_hierarchy)
     for entry in top_level_entries:
@@ -1083,7 +1103,6 @@ def gen_package(class_hierarchy, package, ctx):
         if not rev:
             rev = 'unknown'
         src += 'module "'+module_arg+'" (rev "'+rev+'"), '
-    source = ''
     if len(top_level_entries) > 1:
         source += 's'
     source += '\n'+src[:-2]
