@@ -16,7 +16,11 @@
  * or http://www.gnu.org/licenses/gpl.html
  
 Invoke with:
->pyang -f jpyang -d <package.output.dir> <file.yang>
+> pyang --format java --java-package <package.name> --jpyang-verbose \
+    --jpyang-javadoc <javadoc.directory> <file.yang>
+
+Or, if you like to keep things simple:
+> pyang -f jpyang -d <package.name> <file.yang>
 
 """
 
@@ -62,7 +66,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                 '--jpyang-debug',
                 dest='debug',
                 action='store_true',
-                help='Print debug messages.'),
+                help='Print debug messages. Redundant if verbose mode is on.'),
             optparse.make_option(
                 '--jpyang-javadoc',
                 dest='javadoc_directory',
@@ -71,7 +75,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                 '--jpyang-verbose',
                 dest='verbose',
                 action='store_true',
-                help='Print detailed debug messages.'),
+                help='Verbose mode: Print detailed debug messages.'),
             ]
         g = optparser.add_option_group('JPyang output specific options')
         g.add_options(optlist)
