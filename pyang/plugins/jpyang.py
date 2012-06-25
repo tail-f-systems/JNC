@@ -199,15 +199,15 @@ The two formats java and jpyang produce identical results.
 Type '$ pyang --help' for more details on how to use pyang.
 '''
 
-def extract_names(stmt_arg):
-    """Returns a tuple with a capitalized stmt_arg prepended with .java, and
-    stmt_arg capitalized.
+def extract_names(arg):
+    """Returns a tuple with arg capitalized and prepended with .java, and arg
+    capitalized.
     
-    stmt_arg -- Any string, really
+    arg -- Any string, really
     
     """
-    filename = stmt_arg.capitalize()+'.java'
-    return (filename, filename.split('.')[0])
+    capitalized = arg.capitalize()
+    return (capitalized+'.java', capitalized)
 
 def is_module(stmt):
     """Returns True iff stmt is a module or submodule."""
