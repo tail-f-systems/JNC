@@ -400,7 +400,7 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
         if sub.keyword == 'list':
             generate_class(sub, directory, package, src, path+stmt.arg+'/', ns,
                 prefix_name, ctx)
-            key = sub.search_one('key')
+            key, _, confm_keys, _ = extract_keys(sub, ctx)
             access_methods += access_methods_comment(sub)+ \
             get_stmt(sub, key.arg)+ \
             get_stmt(sub, key.arg, arg_type='String')+ \
@@ -825,30 +825,39 @@ def child_field(stmt):
     public '''+stmt.arg.capitalize()+' '+stmt.arg+''' = null;
 '''
 
-def get_stmt(stmt, arg_name, arg_type='com.tailf.confm.xs.String'):
+def get_stmt(stmt, keys, string=False):
     """Get method generator. Similar to add_stmt (see below), but does not
     allow parameter-free methods to be generated.
     
-    stmt     -- Typically a list statement
-    arg_name -- The key identifier
-    arg_type -- Java type of argument
+    stmt   -- Typically a list statement
+    keys   -- A list of key types and the corresponding identifiers 
+    string -- if set to True, keys are specified as Strings in method
     
     """
     name = stmt.arg.capitalize()
-    spec = ''
-    if arg_type == 'String':
+    spec = arguments = xpath = ''
+    if string:
         spec = '\n     * The keys are specified as Strings'
+    for (key_type, key_name) in keys:
+        spec += '\n     * @param '+key_name+' Key argument of child.'
+    if string:
+        for (key_type, key_name) in keys:
+            arguments += 'String '+key_name+', '
+    else:
+        for (key_type, key_name) in keys:
+            arguments += key_type+' '+key_name+', '
+    for (key_type, key_name) in keys:
+        xpath += '['+key_name+'=\'"+'+key_name+'+"']
     return '''
     /**
      * Get method for '''+stmt.keyword+' entry: "'+stmt.arg+'''".
      * Return the child with the specified keys '''+ \
      '(if any).'+spec+'''
-     * @param '''+arg_name+''' Key argument of child.
      * @return The '''+stmt.keyword+''' entry with the specified keys.
      */
-    public '''+name+' get'+name+'('+arg_type+' '+arg_name+''')
+    public '''+name+' get'+name+'('+arguments[:-2]+''')
         throws INMException {
-        String path = "'''+stmt.arg+'['+arg_name+'=\'"+'+arg_name+'''+"']";
+        String path = "'''+stmt.arg+xpath+'''";
         return ('''+name+''')getListContainer(path);
     }
 '''
