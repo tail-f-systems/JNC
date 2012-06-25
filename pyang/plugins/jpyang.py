@@ -214,6 +214,35 @@ The two formats java and jpyang produce identical results.
 Type '$ pyang --help' for more details on how to use pyang.
 '''
 
+def extract_keys(stmt, ctx):
+    """Returns the key statement of stmt and lists containing tuples with the
+    confm (and primitive, respectively) type of the key and its identifier.
+    
+    stmt -- Typically a list statement
+    ctx  -- Context used for passing debug flags
+    
+    """
+    key = stmt.search_one('key')
+    confm_keys = []
+    primitive_keys = []
+    only_strings = True
+    for arg in key.arg.split(' '):
+        key_type = stmt.search_one('leaf', arg).search_one('type')
+        if key_type.arg == 'string':
+            confm_keys.append(('com.tailf.confm.xs.String', arg))
+            primitive_keys.append(('String', arg))
+        elif key_type.arg == 'uint32':
+            confm_keys.append(('com.tailf.confm.xs.UnsignedInt', arg))
+            primitive_keys.append(('long', arg))
+        else:
+            if ctx.opts.debug or ctx.opts.verbose:
+                print >> sys.stderr, 'WARNING! No support for type "'+ \
+                key_type.arg+'", defaulting to string.'
+            confm_keys.append(('com.tailf.confm.xs.String', arg))
+            primitive_keys.append(('String', arg))
+        only_strings *= primitive_keys[-1][0] == 'String'
+    return key, only_strings, confm_keys, primitive_keys
+
 def extract_names(arg):
     """Returns a tuple with arg capitalized and prepended with .java, and arg
     capitalized.
@@ -443,26 +472,7 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
             root=prefix_name)
         cloners = clone(name, shallow=False)+clone(name, shallow=True)
     elif stmt.keyword == 'list':
-        key = stmt.search_one('key')
-        # TODO make (type, name) lists of keys and pass as args to constructor
-        confm_keys = []
-        primitive_keys = []
-        only_strings = True
-        for arg in key.arg.split(' '):
-            key_type = stmt.search_one('leaf', arg).search_one('type')
-            if key_type.arg == 'string':
-                confm_keys.append(('com.tailf.confm.xs.String', arg))
-                primitive_keys.append(('String', arg))
-            elif key_type.arg == 'uint32':
-                confm_keys.append(('com.tailf.confm.xs.UnsignedInt', arg))
-                primitive_keys.append(('long', arg))
-            else:
-                if ctx.opts.debug or ctx.opts.verbose:
-                    print >> sys.stderr, 'WARNING! No support for type "'+ \
-                    key_type.arg+'", defaulting to string.'
-                confm_keys.append(('com.tailf.confm.xs.String', arg))
-                primitive_keys.append(('String', arg))
-            only_strings *= primitive_keys[-1][0] == 'String'
+        key, only_strings, confm_keys, primitive_keys = extract_keys(stmt, ctx)
         constructors = constructor(stmt, ctx, root=prefix_name,
             set_prefix=top_level, throws="\n        throws INMException")+ \
         constructor(stmt, ctx, root=prefix_name, set_prefix=top_level, 
