@@ -475,8 +475,9 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
             constructors += constructor(stmt, ctx, root=prefix_name,
                 set_prefix=top_level, mode=3, args=primitive_keys, throws='''
         throws INMException''')
-        cloners = clone(name, key.arg.capitalize(), shallow=False)+ \
-            clone(name, key.arg.capitalize(), shallow=True)
+        cloners = clone(name, map(str.capitalize, key.arg.split(' ')),
+            shallow=False)+ \
+            clone(name, map(str.capitalize, key.arg.split(' ')), shallow=True)
     with open(directory+'/'+filename, 'w+') as f:
         f.write(java_class(filename, package, 
             ['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'], 
@@ -639,21 +640,24 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
     }
 '''
 
-def clone(class_name, key_name='', shallow='False'):
-    """Returns a string representing a java clone method. If key_name is set
-    to a non-empty string, the get<key_name>Value() method is called and null
-    is returned if an INMException is raised. If shallow is set, the
-    cloneShallowContent method is invoked instead of cloneContent.
+def clone(class_name, key_names=[], shallow='False'):
+    """Returns a string representing a java clone method. Iff key_names is
+    empty, get<key_name>Value() methods are called to fetch contructor
+    arguments and null is returned if an INMException is raised. If shallow is
+    set, the cloneShallowContent method is invoked instead of cloneContent.
     
     class_name -- The name of the class to clone instances of
-    key_name   -- Key identifier
+    key_names  -- Key identifier(s)
     shallow    -- Boolean flag for which clone method to use
     
-    """ # FIXME add support for multiple keys
+    """
     try_stmt = children = cast = ''
-    if key_name != '':
+    if key_names:
         try_stmt = 'try {\n'+' '*12
-        catch_stmt = '(get'+key_name+'''Value()));
+        catch_stmt = '('
+        for key_name in key_names:
+            catch_stmt += 'get'+key_name+'Value(), '
+        catch_stmt = catch_stmt[:-2]+'''));
         } catch (INMException e) { return null; }
     }\n'''
     else:
