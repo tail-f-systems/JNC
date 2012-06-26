@@ -411,7 +411,7 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
             add_stmt(sub, args=[])+ \
             delete_stmt(sub, args=confm_keys)+ \
             delete_stmt(sub, args=confm_keys, string=True)
-        if sub.keyword == 'container':
+        elif sub.keyword == 'container':
             generate_class(sub, directory, package, src, path+stmt.arg+'/', ns,
                 prefix_name, ctx)
             fields.append(sub.arg) # FIXME might have to append more fields
@@ -420,7 +420,7 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
             add_stmt(sub, args=[(sub.arg, sub.arg)], field=True)+ \
             add_stmt(sub, args=[], field=True)+ \
             delete_stmt(sub)
-        if sub.keyword == 'leaf':
+        elif sub.keyword == 'leaf':
             key = stmt.search_one('key')
             if key is not None and sub.arg in key.arg.split(' '):
                 temp = statements.Statement(None, None, None, 'key',
@@ -450,7 +450,7 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
             else:
                 if ctx.opts.debug or ctx.opts.verbose:
                     print >> sys.stderr, 'WARNING! No support for type "'+ \
-                    type_stmt.arg+'", defaulting to string.'
+                        type_stmt.arg+'", defaulting to string.'
                     type_str = 'com.tailf.confm.xs.String'
                 access_methods += get_value(sub, ret_type=type_str)+ \
                     set_value(sub, prefix=prefix_name, arg_type=type_str)+ \
@@ -463,6 +463,37 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
                 mark(sub, 'merge')+ \
                 mark(sub, 'create')+ \
                 mark(sub, 'delete')
+        elif sub.keyword == 'leaf-list':
+            type_stmt = sub.search_one('type')
+            access_methods += access_methods_comment(sub, optional=False)+ \
+                child_iterator(sub)
+            if type_stmt.arg == 'uint32':
+                type_str = 'com.tailf.confm.xs.UnsignedInt'
+                access_methods += set_value(sub, prefix=prefix_name,
+                    arg_type=type_str)+ \
+                    set_value(sub, prefix='', arg_type='String', 
+                        confm_type=type_str)+ \
+                    set_value(sub, prefix='', arg_type='long', 
+                        confm_type=type_str)
+            elif type_stmt.arg == 'string':
+                type_str = 'com.tailf.confm.xs.String'
+                access_methods += set_value(sub, prefix=prefix_name,
+                    arg_type=type_str)+ \
+                    set_value(sub, prefix='', arg_type='String', 
+                        confm_type=type_str)+ \
+                    delete_stmt(sub, args=[(type_str, sub.arg+'Value')],
+                        keys=False)+ \
+                    delete_stmt(sub, args=[(type_str, sub.arg+'Value')],
+                        string=True, keys=False)
+            else:
+                if ctx.opts.debug or ctx.opts.verbose:
+                    print >> sys.stderr, 'WARNING! No support for type "'+ \
+                        type_stmt.arg+'", defaulting to string.'
+                    type_str = 'com.tailf.confm.xs.String'
+                access_methods += set_value(sub, prefix=prefix_name,
+                    arg_type=type_str)+ \
+                    set_value(sub, prefix='')
+            access_methods += add_value(sub, prefix_name)
     if ctx.opts.verbose:
         print 'Generating Java class "'+filename+'"...'
     if filter(is_container, stmt.substmts): # TODO Verify correctness of cond.
@@ -897,8 +928,12 @@ def set_value(stmt, prefix='', arg_type='', confm_type=''):
         spec2 = 'string representation of the '
     elif arg_type == 'long':
         spec1 = ', using the java primitive value'
-    if prefix: # Equivalent to 'if len(prefix) > 0:'
-        body = 'setLeafValue('+prefix+'''.NAMESPACE,
+    if prefix:
+        if stmt.keyword == 'leaf-list':
+            body = 'setLeafListValue('
+        else:
+            body = 'setLeafValue('
+        body += prefix+'''.NAMESPACE,
             "'''+stmt.arg+'''",
             '''+stmt.arg+'''Value,
             childrenNames());'''
@@ -936,7 +971,11 @@ def add_value(stmt, prefix):
     prefix -- Namespace prefix of module
     
     """
-    name = stmt.arg.capitalize()
+    name = value_type = ''
+    if stmt.keyword == 'leaf-list':
+        name = 'Empty'
+        value_type = 'List'
+    name += stmt.arg.capitalize()
     return '''
     /**
      * This method is used for creating a subtree filter.
@@ -944,7 +983,7 @@ def add_value(stmt, prefix):
      */
     public void add'''+name+'''()
         throws INMException {
-        setLeafValue('''+prefix+'''.NAMESPACE,
+        setLeaf'''+value_type+'Value('+prefix+'''.NAMESPACE,
             "'''+stmt.arg+'''",
             null,
             childrenNames());
@@ -971,13 +1010,18 @@ def mark(stmt, op):
 
 def child_iterator(substmt):
     """Returns a string representing a java iterator method for the substmt"""
+    if substmt.keyword == 'leaf-list':
+        iterator_type = 'LeafListValue'
+    else:
+        iterator_type = 'Children'
     return '''
     /**
      * Iterator method for the '''+substmt.keyword+' "'+substmt.arg+'''".
      * @return An iterator for the '''+substmt.keyword+'''.
      */
-    public ElementChildrenIterator '''+substmt.arg+'''Iterator() {
-        return new ElementChildrenIterator(children, "'''+substmt.arg+'''");
+    public Element'''+iterator_type+'Iterator '+substmt.arg+'''Iterator() {
+        return new Element'''+iterator_type+'Iterator(children, "'+ \
+        substmt.arg+'''");
     }
 '''
 
@@ -1044,7 +1088,7 @@ def add_stmt(stmt, args=[], field=False, string=False):
     }
 '''
 
-def delete_stmt(stmt, args=[], string=False):
+def delete_stmt(stmt, args=[], string=False, keys=True):
     """Delete method generator. Similar to add_stmt (see above).
     
     stmt   -- Typically a list or container statement
@@ -1058,21 +1102,28 @@ def delete_stmt(stmt, args=[], string=False):
               type instead of the Tail-f ConfM String type.
     
     """
-    spec1 = '", with specified keys.'
-    spec2 = spec3 = arguments = ''
-    if string:
-        spec1 += '\n     * The keys are specified as Strings'
-    if not args:
-        spec1 = ''
-        spec2 = 'this.'+stmt.arg+' = null;\n        '
-    else:
+    spec1 = spec2 = spec3 = arguments = ''
+    if args:
+        if keys:
+            spec1 = '", with specified keys.'
+            if string:
+                spec1 += '\n     * The keys are specified as Strings'
+        elif string:
+            spec1 += '\n     * The value is specified as a String'
         for (arg_type, arg_name) in args:
-            spec1 += '\n     * @param '+arg_name+' Key argument of child.'
-            spec3 += '['+arg_name+'=\'"+'+arg_name+'+"\']'
             if string:
                 arguments += 'String '+arg_name+', '
             else:
                 arguments += arg_type+' '+arg_name+', '
+            if keys:
+                spec1 += '\n     * @param '+arg_name+' Key argument of child.'
+                spec3 += '['+arg_name+'=\'"+'+arg_name+'+"\']'
+            else:
+                spec1 += '\n     * @param '+arg_name+' Child to be removed.'
+                spec3 += '[name=\'"+'+arg_name+'+"\']'
+    else:
+        spec1 = ''
+        spec2 = 'this.'+stmt.arg+' = null;\n        '
     return '''
     /**
      * Deletes '''+stmt.keyword+' entry "'+stmt.arg+spec1+'''"
