@@ -15,12 +15,11 @@
  * Please see http://www.opensource.org/licenses/gpl-3.0.html
  * or http://www.gnu.org/licenses/gpl.html
  
-Invoke with:
+For complete functionality, invoke with:
 > pyang \
     --format java \
     --java-package <package.name> \
     --jpyang-verbose \
-    --jpyang-schema \
     --jpyang-javadoc <javadoc.directory> \
     <file.yang>
 
@@ -77,10 +76,10 @@ class JPyangPlugin(plugin.PyangPlugin):
                 dest='javadoc_directory',
                 help='Generate javadoc to JAVADOC_DIRECTORY.'),
             optparse.make_option(
-                '--jpyang-schema',
-                dest='schema',
+                '--jpyang-no-schema',
+                dest='no_schema',
                 action='store_true',
-                help='Generate schema.'),
+                help='Do not generate schema.'),
             optparse.make_option(
                 '--jpyang-verbose',
                 dest='verbose',
@@ -147,7 +146,7 @@ class JPyangPlugin(plugin.PyangPlugin):
             print 'GENERATING FILES TO: '+os.getcwd()
         for module in modules:
             if module.keyword == 'module' or module.keyword == 'submodule':
-                if ctx.opts.schema:
+                if not ctx.opts.no_schema:
                     # Generate schema
                     ns = module.search_one('namespace').arg
                     name = module.search_one('prefix').arg.capitalize()
@@ -633,6 +632,7 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
     """
     name = stmt.arg.capitalize()
     setters = docstring = inserts = arguments = ''
+    MAX_COLS = 80 - len('    public '+name+'(')
     if root == '':
         root = name
     if set_prefix:
@@ -675,10 +675,15 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
             arg_name = arg_name+'Value'
             docstring += '\n     * @param '+arg_name+' Key argument of child.'
             if mode == 2: # String arguments
-                arguments += 'String '+arg_name+', '
+                tmp = 'String '+arg_name+', '
             else: # ConfM or Java primitive arguments
-                arguments += arg_type+' '+arg_name+', '
-            # TODO add newlines if more than 80 cols
+                tmp = arg_type+' '+arg_name+', '
+            if len(tmp) > MAX_COLS:
+                tmp = '\n'+' '*8+tmp
+                MAX_COLS = 80 - len(tmp)
+            else:
+                MAX_COLS -= len(tmp)
+            arguments += tmp
         arguments = arguments[:-2] # Skip the last ', '
     return '''
     /**
@@ -705,8 +710,15 @@ def clone(class_name, key_names=[], shallow='False'):
     if key_names:
         try_stmt = 'try {\n'+' '*12
         catch_stmt = '('
+        MAX_COLS = 80 - 44 - len(class_name)
         for key_name in key_names:
-            catch_stmt += 'get'+key_name+'Value(), '
+            tmp = 'get'+key_name+'Value(), '
+            if len(tmp) > MAX_COLS:
+                tmp = '\n'+' '*16+tmp
+                MAX_COLS = 80 - len(tmp)
+            else:
+                MAX_COLS -= len(tmp)
+            catch_stmt += tmp
         catch_stmt = catch_stmt[:-2]+'''));
         } catch (INMException e) { return null; }
     }\n'''
@@ -932,11 +944,16 @@ def set_value(stmt, prefix='', arg_type='', confm_type=''):
     """
     name = stmt.arg.capitalize()
     spec1 = spec2 = ''
+    MAX_COLS = 80 - len('     * Sets the value for child '+stmt.keyword+ \
+        ' "'+stmt.arg+'",.') # Space left to margin
     if arg_type == 'String':
         spec1 = ', using a string value'
         spec2 = 'string representation of the '
     elif arg_type == 'long':
         spec1 = ', using the java primitive value'
+    print('set'+name+'Value('+arg_type+' '+stmt.arg+'Value): \nlen(spec1)='+str(len(spec1))+' MAX_COLS='+str(MAX_COLS))
+    if len(spec1) > MAX_COLS:
+        spec1 = ',\n     * '+spec1[2:]
     if prefix:
         if stmt.keyword == 'leaf-list':
             body = 'setLeafListValue('
