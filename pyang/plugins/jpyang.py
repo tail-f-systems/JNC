@@ -409,8 +409,8 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
             add_stmt(sub, args=confm_keys)+ \
             add_stmt(sub, args=confm_keys, string=True)+ \
             add_stmt(sub, args=[])+ \
-            delete_stmt(sub, arg_name=key.arg)+ \
-            delete_stmt(sub, arg_name=key.arg, arg_type='String')
+            delete_stmt(sub, args=confm_keys)+ \
+            delete_stmt(sub, args=confm_keys, string=True)
         if sub.keyword == 'container':
             generate_class(sub, directory, package, src, path+stmt.arg+'/', ns,
                 prefix_name, ctx)
@@ -419,7 +419,7 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
             child_field(sub)+ \
             add_stmt(sub, args=[(sub.arg, sub.arg)], field=True)+ \
             add_stmt(sub, args=[], field=True)+ \
-            delete_stmt(sub, arg_name='', arg_type='')
+            delete_stmt(sub)
         if sub.keyword == 'leaf':
             key = stmt.search_one('key')
             if key is not None and sub.arg in key.arg.split(' '):
@@ -1066,11 +1066,13 @@ def delete_stmt(stmt, args=[], string=False):
         spec1 = ''
         spec2 = 'this.'+stmt.arg+' = null;\n        '
     else:
-        arg_type += ' '
-        spec1 += '\n     * @param '+arg_name+' Key argument of child.'
         for (arg_type, arg_name) in args:
+            spec1 += '\n     * @param '+arg_name+' Key argument of child.'
             spec3 += '['+arg_name+'=\'"+'+arg_name+'+"\']'
-            arguments += arg_type+' '+arg_name+', '
+            if string:
+                arguments += 'String '+arg_name+', '
+            else:
+                arguments += arg_type+' '+arg_name+', '
     return '''
     /**
      * Deletes '''+stmt.keyword+' entry "'+stmt.arg+spec1+'''"
