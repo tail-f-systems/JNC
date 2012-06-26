@@ -1010,6 +1010,7 @@ def mark(stmt, op, arg_type='String'):
     
     """
     spec = op+'"'
+    path = stmt.arg
     argument = ''
     if stmt.keyword == 'leaf-list':
         spec += '''.
@@ -1017,13 +1018,14 @@ def mark(stmt, op, arg_type='String'):
         if arg_type == 'String':
             spec += ', given as a String'
         argument = arg_type+' '+stmt.arg+'Value'
+        path += '[name=\'"+'+stmt.arg+'Value+"\']'
     return '''
     /**
      * Marks the "'''+stmt.arg+'" '+stmt.keyword+' with operation "'+spec+'''.
      */
     public void mark'''+stmt.arg.capitalize()+op.capitalize()+'('+argument+''')
         throws INMException {
-        markLeaf'''+op.capitalize()+'("'+stmt.arg+'''");
+        markLeaf'''+op.capitalize()+'("'+path+'''");
     }
 '''
 
