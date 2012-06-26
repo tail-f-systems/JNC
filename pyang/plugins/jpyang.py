@@ -1044,31 +1044,38 @@ def add_stmt(stmt, args=[], field=False, string=False):
     }
 '''
 
-def delete_stmt(stmt, arg_name, arg_type='com.tailf.confm.xs.String'):
-    """Delete method generator. Similar to get_stmt (see above).
+def delete_stmt(stmt, args=[], string=False):
+    """Delete method generator. Similar to add_stmt (see above).
     
-    stmt     -- Typically a list or container statement
-    arg_name -- The key identifier, if any (set to empty string otherwise)
-    arg_type -- Java type of argument. If no argument, set it to empty string.
+    stmt   -- Typically a list or container statement
+    args   -- A list of tuples, each tuple containing an arg_type and an
+              arg_name. Each arg_type corresponds to a method argument type.
+              Each arg_name corresponds to a method argument name. The names of
+              the method's arguments are typically key identifiers or a single
+              lowercase stmt name. Setting args to an empty list produces a
+              method with no argument.
+    string -- If set to True, the keys are specified with the ordinary String
+              type instead of the Tail-f ConfM String type.
     
     """
-    name = stmt.arg.capitalize()
     spec1 = '", with specified keys.'
-    spec2 = spec3 = ''
-    if arg_type == 'String':
+    spec2 = spec3 = arguments = ''
+    if string:
         spec1 += '\n     * The keys are specified as Strings'
-    if arg_type == '':
+    if not args:
         spec1 = ''
         spec2 = 'this.'+stmt.arg+' = null;\n        '
     else:
         arg_type += ' '
         spec1 += '\n     * @param '+arg_name+' Key argument of child.'
-        spec3 = '['+arg_name+'=\'"+'+arg_name+'+"\']'
+        for (arg_type, arg_name) in args:
+            spec3 += '['+arg_name+'=\'"+'+arg_name+'+"\']'
+            arguments += arg_type+' '+arg_name+', '
     return '''
     /**
      * Deletes '''+stmt.keyword+' entry "'+stmt.arg+spec1+'''"
      */
-    public void delete'''+name+'('+arg_type+arg_name+''')
+    public void delete'''+stmt.arg.capitalize()+'('+arguments[:-2]+''')
         throws INMException {
         '''+spec2+'String path = "'+stmt.arg+spec3+'''";
         delete(path);
