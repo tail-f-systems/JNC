@@ -480,11 +480,7 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
                 access_methods += set_value(sub, prefix=prefix_name,
                     arg_type=type_str)+ \
                     set_value(sub, prefix='', arg_type='String', 
-                        confm_type=type_str)+ \
-                    delete_stmt(sub, args=[(type_str, sub.arg+'Value')],
-                        keys=False)+ \
-                    delete_stmt(sub, args=[(type_str, sub.arg+'Value')],
-                        string=True, keys=False)
+                        confm_type=type_str)
             else:
                 if ctx.opts.debug or ctx.opts.verbose:
                     print >> sys.stderr, 'WARNING! No support for type "'+ \
@@ -492,8 +488,21 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
                     type_str = 'com.tailf.confm.xs.String'
                 access_methods += set_value(sub, prefix=prefix_name,
                     arg_type=type_str)+ \
-                    set_value(sub, prefix='')
-            access_methods += add_value(sub, prefix_name)
+                    set_value(sub, prefix='', arg_type='String', 
+                        confm_type=type_str)
+            access_methods += delete_stmt(sub, 
+                    args=[(type_str, sub.arg+'Value')], keys=False)+ \
+                delete_stmt(sub, args=[(type_str, sub.arg+'Value')],
+                    string=True, keys=False)+ \
+                add_value(sub, prefix_name)+ \
+                mark(sub, 'replace', arg_type=type_str)+ \
+                mark(sub, 'replace', arg_type='String')+ \
+                mark(sub, 'merge', arg_type=type_str)+ \
+                mark(sub, 'merge', arg_type='String')+ \
+                mark(sub, 'create', arg_type=type_str)+ \
+                mark(sub, 'create', arg_type='String')+ \
+                mark(sub, 'delete', arg_type=type_str)+ \
+                mark(sub, 'delete', arg_type='String')
     if ctx.opts.verbose:
         print 'Generating Java class "'+filename+'"...'
     if filter(is_container, stmt.substmts): # TODO Verify correctness of cond.
@@ -990,19 +999,29 @@ def add_value(stmt, prefix):
     }
 '''
 
-def mark(stmt, op):
+def mark(stmt, op, arg_type='String'):
     """Generates a method that enqueues an operation to be performed on an
     element.
     
-    stmt -- Typically a leaf statement
-    op   -- The operation 'replace', 'merge', 'create' or 'delete'
+    stmt     -- Typically a leaf or leaf-list statement. If stmt is not a leaf-
+                list, the method will have no argument.
+    op       -- The operation 'replace', 'merge', 'create' or 'delete'
+    arg_type -- Type of argument, if any.
     
     """
+    spec = op+'"'
+    argument = ''
+    if stmt.keyword == 'leaf-list':
+        spec += '''.
+     * @param '''+stmt.arg+'Value The value to mark'
+        if arg_type == 'String':
+            spec += ', given as a String'
+        argument = arg_type+' '+stmt.arg+'Value'
     return '''
     /**
-     * Marks the "'''+stmt.arg+'" '+stmt.keyword+' with operation "'+op+'''".
+     * Marks the "'''+stmt.arg+'" '+stmt.keyword+' with operation "'+spec+'''.
      */
-    public void mark'''+stmt.arg.capitalize()+op.capitalize()+'''()
+    public void mark'''+stmt.arg.capitalize()+op.capitalize()+'('+argument+''')
         throws INMException {
         markLeaf'''+op.capitalize()+'("'+stmt.arg+'''");
     }
