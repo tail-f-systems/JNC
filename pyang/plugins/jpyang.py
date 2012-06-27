@@ -48,7 +48,7 @@ from pyang import error
 from pyang import statements
 
 
-java_reserved_words = ['abstract', 'assert', 'boolean', 'break', 'byte', 
+java_reserved_words = ['abstract', 'assert', 'boolean', 'break', 'byte',
     'case', 'catch', 'char', 'class', 'const*', 'continue', 'default',
     'double', 'do', 'else', 'enum', 'extends', 'false',
     'final', 'finally', 'float', 'for', 'goto*', 'if',
@@ -247,15 +247,40 @@ def write_file(d, file_name, file_content, ctx):
         f.write(file_content)
 
 
+def pairwise(iterable):
+    """Returns an iterator that includes the next item also"""
+    iterator = iter(iterable)
+    item = iterator.next()  # throws StopIteration if empty.
+    for next in iterator:
+        yield (item, next)
+        item = next
+    yield (item, None)
+
+
+def camelize(string):
+    """Removes hyphens and dots and replaces following character (if any) with
+    its upper-case counterpart. Does not remove a trailing hyphen or dot.
+
+    """
+    camelized_str = ''
+    iterator = pairwise(string)
+    for character, next in iterator:
+        if next and character in '-.':
+            camelized_str += next.capitalize()
+            iterator.next()
+        else:
+            camelized_str += character
+    return camelized_str
+
+
 def make_valid_identifier(stmt):
     """Prepends a J character to the args field of stmt if it is a Java
     keyword. Replaces hyphens and dots with an underscore character.
-    
+
     """
+    stmt.arg = camelize(stmt.arg)
     if stmt.arg in java_reserved_words:
-        stmt.arg = 'J'+stmt.arg
-    stmt.arg.replace('-', '_')
-    stmt.arg.replace('.', '_')
+        stmt.arg = 'J' + stmt.arg
     return stmt
 
 
@@ -289,14 +314,15 @@ def extract_keys(stmt, ctx):
     primitive_keys = []
     only_strings = True
     for arg in key.arg.split(' '):
-        key_type = make_valid_identifier( \
-            stmt.search_one('leaf', arg).search_one('type'))
+        key_type =  \
+            stmt.search_one('leaf', arg).search_one('type')
         if key_type.arg == 'string':
             confm_keys.append(('com.tailf.confm.xs.String', arg))
             primitive_keys.append(('String', arg))
         elif key_type.arg == 'uint32':
             confm_keys.append(('com.tailf.confm.xs.UnsignedInt', arg))
             primitive_keys.append(('long', arg))
+        # TODO add support for more types
         else:
             if ctx.opts.debug or ctx.opts.verbose:
                 print >> sys.stderr, 'WARNING! No support for type "' + \
@@ -390,7 +416,7 @@ def schema_node(stmt, tagpath, ns, ctx):
     isUnique = unique is not None and unique.arg == 'true'
     key = None
     if stmt.parent is not None:
-        key = make_valid_identifier(stmt.parent.search_one('key'))
+        key = stmt.parent.search_one('key')
     isKey = key is not None and key.arg == stmt.arg
     childOfContainerOrList = (stmt.parent is not None and \
         is_container(stmt.parent))
@@ -427,11 +453,11 @@ def generate_classes(module, package, src, ctx):
 
     """
     if module.keyword == 'module':
-        ns_arg = make_valid_identifier(module.search_one('namespace')).arg
-        prefix = make_valid_identifier(module.search_one('prefix'))
+        ns_arg = module.search_one('namespace').arg
+        prefix = module.search_one('prefix')
     elif module.keyword == 'submodule':
-        parent_module = make_valid_identifier(module.search_one('belongs-to'))
-        prefix = make_valid_identifier(parent_module.search_one('prefix'))
+        parent_module = module.search_one('belongs-to')
+        prefix = parent_module.search_one('prefix')
         ns_arg = '<unknown/prefix: ' + prefix.arg + '>'
     (filename, name) = extract_names(prefix.arg)
     for stmt in module.substmts:
@@ -570,7 +596,7 @@ def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
         add_stmt(sub, args=[], field=True) + \
         delete_stmt(sub)
     elif sub.keyword == 'leaf':
-        key = make_valid_identifier(stmt.search_one('key'))
+        key = stmt.search_one('key')
         if key is not None and sub.arg in key.arg.split(' '):
             temp = statements.Statement(None, None, None, 'key',
                 arg=sub.arg)
@@ -581,7 +607,7 @@ def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
             optional = True
             access_methods += access_methods_comment(sub, optional)
             # TODO ensure that the leaf is really optional
-        type_stmt = make_valid_identifier(sub.search_one('type'))
+        type_stmt = sub.search_one('type')
         if type_stmt.arg == 'uint32':
             type_str = 'com.tailf.confm.xs.UnsignedInt'
             access_methods += get_value(sub, ret_type=type_str) + \
@@ -613,7 +639,7 @@ def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
             mark(sub, 'create') + \
             mark(sub, 'delete')
     elif sub.keyword == 'leaf-list':
-        type_stmt = make_valid_identifier(sub.search_one('type'))
+        type_stmt = sub.search_one('type')
         access_methods += access_methods_comment(sub, optional=False) + \
             child_iterator(sub)
         if type_stmt.arg == 'uint32':
@@ -881,7 +907,6 @@ def key_names(stmt):
         # Add keys to res, one key per line, indented by 12 spaces
         for key_str in keys:
             for key in key_str.arg.split(' '):
-                key = make_valid_identifier(key)
                 res += ' ' * 12 + '"' + key + '",\n'
         res = res[:-2] + '\n' + ' ' * 8 + '}'
     return '''
