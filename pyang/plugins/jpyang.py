@@ -147,7 +147,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                     # Generate external schema
                     ns = module.search_one('namespace').arg
                     name = module.search_one('prefix').arg.capitalize()
-                    write_file(d,
+                    write_file(d,  #XXX This might ruins the directory structure
                         name + '.schema',
                         '<schema>\n' + indent( \
                             ('<node>\n' + \
@@ -155,6 +155,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                                 '\n</node>' + \
                                 schema_nodes(module.substmts, '/', ns, ctx) \
                             ).splitlines()) + '\n</schema>',
+                        [modules],
                         ctx)
                     if ctx.opts.debug or ctx.opts.verbose:
                         print 'Schema generation COMPLETE.'
@@ -175,21 +176,18 @@ class JPyangPlugin(plugin.PyangPlugin):
                     'top-level element should be module or submodule'
                 self.fatal()
         # Generate javadoc
-        is_java_file = lambda s: s.endswith('.java')
-        directory_listing = os.listdir(d)
-        java_files = filter(is_java_file, directory_listing)
-        class_hierarchy = generate_javadoc(modules, java_files, ctx)
-        write_file(d, 'package-info.java',
-            gen_package_info(class_hierarchy, directory, ctx), ctx)
+        for module in modules:
+            module = make_valid_identifiers(module)
+            generate_package_info(d, module, ctx)
         javadir = ctx.opts.javadoc_directory
         if javadir:
             if ctx.opts.debug or ctx.opts.verbose:
                 print 'Generating javadoc...'
             if ctx.opts.verbose:
-                os.system('javadoc -d ' + javadir + ' ' + d + '/*.java')
+                os.system('javadoc -d ' + javadir + ' -subpackages ' + d)
             else:
-                os.system('javadoc -d ' + javadir + ' ' + d + \
-                    '/*.java >/dev/null')
+                os.system('javadoc -d ' + javadir + ' -subpackages ' + d + \
+                    ' >/dev/null')
             if ctx.opts.debug or ctx.opts.verbose:
                 print 'Javadoc generation COMPLETE.'
 
@@ -215,7 +213,7 @@ Type '$ pyang --help' for more details on how to use pyang.
 '''
 
 
-def write_file(d, file_name, file_content, ctx):
+def write_file(d, file_name, file_content, modules, ctx):
     """Creates the directory d if it does not yet exist and writes a file to it
     named file_name with file_content in it.
 
@@ -341,6 +339,7 @@ def extract_names(arg):
     arg -- Any string, really
 
     """
+    #capitalized = arg[:1].capitalize()+arg[1:]
     capitalized = arg.capitalize()
     return (capitalized + '.java', capitalized)
 
@@ -478,6 +477,7 @@ def generate_classes(module, package, src, ctx):
             enable(name) + register_schema(name),
             source=src
         ),
+        [module],
         ctx)
 
 
@@ -553,6 +553,7 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
             source=src,
             modifiers=' extends Container'
         ),
+        [stmt],
         ctx)
 
 
@@ -680,6 +681,26 @@ def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
             mark(sub, 'delete', arg_type=type_str) + \
             mark(sub, 'delete', arg_type='String')
     return access_methods, fields
+
+
+def generate_package_info(d, stmt, ctx):
+    is_java_file = lambda s: s.endswith('.java')
+    is_not_java_file = lambda s: not is_java_file(s)
+    directory_listing = os.listdir(d)
+    java_files = filter(is_java_file, directory_listing)
+    dirs = filter(is_not_java_file, directory_listing)
+    class_hierarchy = generate_javadoc(stmt.substmts, java_files, ctx)
+    write_file(d, 'package-info.java', gen_package_info(class_hierarchy,
+        d.replace('/', '.'), ctx), stmt, ctx)
+    for directory in dirs:
+#        print directory
+#        if(len(directory) > 3):
+#            sys.exit(0)
+        for sub in stmt.substmts:
+            # XXX refactor
+            if camelize(sub.arg.capitalize()) == camelize( \
+                    directory.capitalize().replace('.', '?')).replace('?', '.'):
+                generate_package_info(d + '/' + directory, sub, ctx)
 
 
 def generate_javadoc(stmts, java_files, ctx):
@@ -1447,9 +1468,9 @@ def gen_package_info(class_hierarchy, package, ctx):
     top_level_entries = filter(is_not_list, class_hierarchy)
     for entry in top_level_entries:
         module_arg = decapitalize(entry[:-5])
-        rev = ctx.revs[module_arg][-1:][:0]
-        if not rev:
-            rev = 'unknown'
+#        rev = ctx.revs[module_arg][-1:][:0]
+#        if not rev:
+        rev = 'unknown'
         src += 'module "' + module_arg + '" (rev "' + rev + '"), '
     if len(top_level_entries) > 1:
         source += 's'
