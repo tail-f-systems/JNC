@@ -278,7 +278,8 @@ def make_valid_identifier(stmt):
     keyword. Replaces hyphens and dots with an underscore character.
 
     """
-    stmt.arg = camelize(stmt.arg)
+    if stmt.keyword is not 'range':
+        stmt.arg = camelize(stmt.arg)
     if stmt.arg in java_reserved_words:
         stmt.arg = 'J' + stmt.arg
     return stmt
@@ -309,7 +310,7 @@ def extract_keys(stmt, ctx):
     ctx  -- Context used for passing debug flags
 
     """
-    key = make_valid_identifier(stmt.search_one('key'))
+    key = stmt.search_one('key')
     confm_keys = []
     primitive_keys = []
     only_strings = True
@@ -1101,6 +1102,7 @@ def set_value(stmt, prefix='', arg_type='', confm_type=''):
                   to be used in the method
 
     """
+    # TODO This function is hard to read, should refactor
     name = stmt.arg.capitalize()
     spec1 = spec2 = ''
     MAX_COLS = 80 - len('     * Sets the value for child ' + stmt.keyword + \
@@ -1124,14 +1126,17 @@ def set_value(stmt, prefix='', arg_type='', confm_type=''):
     else:
         body = 'set' + name + 'Value(new ' + confm_type + '(' + stmt.arg + \
             'Value));'
+    argument = arg_type + ' ' + stmt.arg + 'Value'
+    if arg_type == '':
+        argument = ''
+        body = 'set' + name + 'Value(new ' + name + '());'
     return '''
     /**
      * Sets the value for child ''' + stmt.keyword + ' "' + stmt.arg + '"' + \
         spec1 + '''.
      * @param ''' + stmt.arg + 'Value The ' + spec2 + '''value to set.
      */
-    public void set''' + name + 'Value(' + arg_type + ' ' + stmt.arg + \
-        '''Value)
+    public void set''' + name + 'Value(' + argument + ''')
         throws INMException {
         ''' + body + '''
     }
