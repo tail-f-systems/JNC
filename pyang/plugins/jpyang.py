@@ -48,6 +48,17 @@ from pyang import error
 from pyang import statements
 
 
+java_reserved_words = ['abstract', 'assert', 'boolean', 'break', 'byte', 
+    'case', 'catch', 'char', 'class', 'const*', 'continue', 'default',
+    'double', 'do', 'else', 'enum', 'extends', 'false',
+    'final', 'finally', 'float', 'for', 'goto*', 'if',
+    'implements', 'import', 'instanceof', 'int', 'interface', 'long',
+    'native', 'new', 'null', 'package', 'private', 'protected',
+    'public', 'return', 'short', 'static', 'strictfp', 'super',
+    'switch', 'synchronized', 'this', 'throw', 'throws', 'transient',
+    'true', 'try', 'void', 'volatile', 'while']
+
+
 def pyang_plugin_init():
     """Registers an instance of the jpyang plugin"""
     plugin.register_plugin(JPyangPlugin())
@@ -128,13 +139,12 @@ class JPyangPlugin(plugin.PyangPlugin):
         fd      -- File descriptor ignored.
 
         """
-        # Create directory
         directory = ctx.opts.directory
         d = directory.replace('.', '/')
         for module in modules:
             if module.keyword == 'module' or module.keyword == 'submodule':
                 if not ctx.opts.no_schema:
-                    # Generate schema
+                    # Generate external schema
                     ns = module.search_one('namespace').arg
                     name = module.search_one('prefix').arg.capitalize()
                     write_file(d,
@@ -149,6 +159,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                     if ctx.opts.debug or ctx.opts.verbose:
                         print 'Schema generation COMPLETE.'
                 # Generate Java classes
+                module = make_valid_identifiers(module)
                 src = 'module "' + module.arg + '", revision: "' + \
                     util.get_latest_revision(module) + '".'
                 generate_classes(module, directory, src, ctx)
@@ -178,7 +189,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                 os.system('javadoc -d ' + javadir + ' ' + d + '/*.java')
             else:
                 os.system('javadoc -d ' + javadir + ' ' + d + \
-                    '/*.java > /tmp/javadoc')
+                    '/*.java >/dev/null')
             if ctx.opts.debug or ctx.opts.verbose:
                 print 'Javadoc generation COMPLETE.'
 
@@ -236,6 +247,35 @@ def write_file(d, file_name, file_content, ctx):
         f.write(file_content)
 
 
+def make_valid_identifier(stmt):
+    """Prepends a J character to the args field of stmt if it is a Java
+    keyword. Replaces hyphens and dots with an underscore character.
+    
+    """
+    if stmt.arg in java_reserved_words:
+        stmt.arg = 'J'+stmt.arg
+    stmt.arg.replace('-', '_')
+    stmt.arg.replace('.', '_')
+    return stmt
+
+
+def make_valid_identifiers(stmt):
+    """Calls make_valid_identifier on stmt and its substatements"""
+    stmt = make_valid_identifier(stmt)
+    valid_substmts = []
+    valid_i_children = []
+    for sub in stmt.substmts:
+        valid_substmts.append(make_valid_identifiers(sub))
+    stmt.substmts = valid_substmts
+    try:
+        for ch in stmt.i_children:
+            valid_i_children.append(make_valid_identifiers(ch))
+        stmt.i_children = valid_i_children
+    except AttributeError:
+        pass
+    return stmt
+
+
 def extract_keys(stmt, ctx):
     """Returns the key statement of stmt and lists containing tuples with the
     confm (and primitive, respectively) type of the key and its identifier.
@@ -244,12 +284,13 @@ def extract_keys(stmt, ctx):
     ctx  -- Context used for passing debug flags
 
     """
-    key = stmt.search_one('key')
+    key = make_valid_identifier(stmt.search_one('key'))
     confm_keys = []
     primitive_keys = []
     only_strings = True
     for arg in key.arg.split(' '):
-        key_type = stmt.search_one('leaf', arg).search_one('type')
+        key_type = make_valid_identifier( \
+            stmt.search_one('leaf', arg).search_one('type'))
         if key_type.arg == 'string':
             confm_keys.append(('com.tailf.confm.xs.String', arg))
             primitive_keys.append(('String', arg))
@@ -349,7 +390,7 @@ def schema_node(stmt, tagpath, ns, ctx):
     isUnique = unique is not None and unique.arg == 'true'
     key = None
     if stmt.parent is not None:
-        key = stmt.parent.search_one('key')
+        key = make_valid_identifier(stmt.parent.search_one('key'))
     isKey = key is not None and key.arg == stmt.arg
     childOfContainerOrList = (stmt.parent is not None and \
         is_container(stmt.parent))
@@ -386,11 +427,11 @@ def generate_classes(module, package, src, ctx):
 
     """
     if module.keyword == 'module':
-        ns_arg = module.search_one('namespace').arg
-        prefix = module.search_one('prefix')
+        ns_arg = make_valid_identifier(module.search_one('namespace')).arg
+        prefix = make_valid_identifier(module.search_one('prefix'))
     elif module.keyword == 'submodule':
-        parent_module = module.search_one('belongs-to')
-        prefix = parent_module.search_one('prefix')
+        parent_module = make_valid_identifier(module.search_one('belongs-to'))
+        prefix = make_valid_identifier(parent_module.search_one('prefix'))
         ns_arg = '<unknown/prefix: ' + prefix.arg + '>'
     (filename, name) = extract_names(prefix.arg)
     for stmt in module.substmts:
@@ -448,118 +489,6 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
             src, path, ns, prefix_name, ctx)
         access_methods += tmp_access_methods
         fields.extend(tmp_fields)
-#        if sub.keyword in ['list', 'container']:
-#            generate_class(sub, package + '.' + stmt.arg, src,
-#                path + stmt.arg + '/', ns, prefix_name, ctx)
-#        if sub.keyword == 'list':
-#            key, _, confm_keys, _ = extract_keys(sub, ctx)
-#            access_methods += access_methods_comment(sub) + \
-#            get_stmt(sub, confm_keys) + \
-#            get_stmt(sub, confm_keys, string=True) + \
-#            child_iterator(sub) + \
-#            add_stmt(sub, args=[(sub.arg, sub.arg)]) + \
-#            add_stmt(sub, args=confm_keys) + \
-#            add_stmt(sub, args=confm_keys, string=True) + \
-#            add_stmt(sub, args=[]) + \
-#            delete_stmt(sub, args=confm_keys) + \
-#            delete_stmt(sub, args=confm_keys, string=True)
-#        elif sub.keyword == 'container':
-#            fields.append(sub.arg)  # TODO might have to append more fields
-#            access_methods += access_methods_comment(sub) + \
-#            child_field(sub) + \
-#            add_stmt(sub, args=[(stmt.arg + '.' + sub.arg, sub.arg)],
-#                field=True) + \
-#            add_stmt(sub, args=[], field=True) + \
-#            delete_stmt(sub)
-#        elif sub.keyword == 'leaf':
-#            key = stmt.search_one('key')
-#            if key is not None and sub.arg in key.arg.split(' '):
-#                temp = statements.Statement(None, None, None, 'key',
-#                    arg=sub.arg)
-#                optional = False
-#                # Pass temp to avoid multiple keys
-#                access_methods += access_methods_comment(temp, optional)
-#            else:
-#                optional = True
-#                access_methods += access_methods_comment(sub, optional)
-#                # TODO ensure that the leaf is really optional
-#            type_stmt = sub.search_one('type')
-#            if type_stmt.arg == 'uint32':
-#                type_str = 'com.tailf.confm.xs.UnsignedInt'
-#                access_methods += get_value(sub, ret_type=type_str) + \
-#                    set_value(sub, prefix=prefix_name, arg_type=type_str) + \
-#                    set_value(sub, prefix='', arg_type='String',
-#                        confm_type=type_str) + \
-#                    set_value(sub, prefix='', arg_type='long',
-#                        confm_type=type_str)
-#            elif type_stmt.arg == 'string':
-#                type_str = 'com.tailf.confm.xs.String'
-#                access_methods += get_value(sub, ret_type=type_str) + \
-#                    set_value(sub, prefix=prefix_name, arg_type=type_str) + \
-#                    set_value(sub, prefix='', arg_type='String',
-#                        confm_type=type_str)
-#            else:
-#                if ctx.opts.debug or ctx.opts.verbose:
-#                    print >> sys.stderr, 'WARNING! No support for type "' + \
-#                        type_stmt.arg + '", defaulting to string.'
-#                    type_str = 'com.tailf.confm.xs.String'
-#                access_methods += get_value(sub, ret_type=type_str) + \
-#                    set_value(sub, prefix=prefix_name, arg_type=type_str) + \
-#                    set_value(sub, prefix='')
-#            if optional:
-#                access_methods += unset_value(sub)
-#            access_methods += add_value(sub, prefix_name)
-#            if optional:
-#                access_methods += mark(sub, 'replace') + \
-#                mark(sub, 'merge') + \
-#                mark(sub, 'create') + \
-#                mark(sub, 'delete')
-#        elif sub.keyword == 'leaf-list':
-#            type_stmt = sub.search_one('type')
-#            access_methods += access_methods_comment(sub, optional=False) + \
-#                child_iterator(sub)
-#            if type_stmt.arg == 'uint32':
-#                type_str = 'com.tailf.confm.xs.UnsignedInt'
-#                access_methods += set_value(sub, prefix=prefix_name,
-#                    arg_type=type_str) + \
-#                    set_value(sub, prefix='', arg_type='String',
-#                        confm_type=type_str) + \
-#                    set_value(sub, prefix='', arg_type='long',
-#                        confm_type=type_str)
-#            elif type_stmt.arg == 'string':
-#                type_str = 'com.tailf.confm.xs.String'
-#                access_methods += set_value(sub, prefix=prefix_name,
-#                    arg_type=type_str) + \
-#                    set_value(sub, prefix='', arg_type='String',
-#                        confm_type=type_str)
-#            else:
-#                if ctx.opts.debug or ctx.opts.verbose:
-#                    print >> sys.stderr, 'WARNING! No support for type "' + \
-#                        type_stmt.arg + '", defaulting to string.'
-#                    type_str = 'com.tailf.confm.xs.String'
-#                access_methods += set_value(sub, prefix=prefix_name,
-#                    arg_type=type_str) + \
-#                    set_value(sub, prefix='', arg_type='String',
-#                        confm_type=type_str)
-#            access_methods += delete_stmt(sub,
-#                    args=[(type_str, sub.arg + 'Value')], keys=False) + \
-#                delete_stmt(sub, args=[(type_str, sub.arg + 'Value')],
-#                    string=True, keys=False) + \
-#                add_value(sub, prefix_name) + \
-#                mark(sub, 'replace', arg_type=type_str) + \
-#                mark(sub, 'replace', arg_type='String') + \
-#                mark(sub, 'merge', arg_type=type_str) + \
-#                mark(sub, 'merge', arg_type='String') + \
-#                mark(sub, 'create', arg_type=type_str) + \
-#                mark(sub, 'create', arg_type='String') + \
-#                mark(sub, 'delete', arg_type=type_str) + \
-#                mark(sub, 'delete', arg_type='String')
-#        elif sub.keyword == 'uses':
-#            print 'USES..... ' + sub.arg
-#        elif sub.keyword == 'grouping':
-#            print 'Grouping: ' + sub.arg
-#        else:
-#            print sub.keyword + ': ' + sub.arg
     if ctx.opts.verbose:
         print 'Generating Java class "' + filename + '"...'
     if filter(is_container, stmt.substmts):  # TODO Verify correctness of cond.
@@ -641,7 +570,7 @@ def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
         add_stmt(sub, args=[], field=True) + \
         delete_stmt(sub)
     elif sub.keyword == 'leaf':
-        key = stmt.search_one('key')
+        key = make_valid_identifier(stmt.search_one('key'))
         if key is not None and sub.arg in key.arg.split(' '):
             temp = statements.Statement(None, None, None, 'key',
                 arg=sub.arg)
@@ -652,7 +581,7 @@ def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
             optional = True
             access_methods += access_methods_comment(sub, optional)
             # TODO ensure that the leaf is really optional
-        type_stmt = sub.search_one('type')
+        type_stmt = make_valid_identifier(sub.search_one('type'))
         if type_stmt.arg == 'uint32':
             type_str = 'com.tailf.confm.xs.UnsignedInt'
             access_methods += get_value(sub, ret_type=type_str) + \
@@ -684,7 +613,7 @@ def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
             mark(sub, 'create') + \
             mark(sub, 'delete')
     elif sub.keyword == 'leaf-list':
-        type_stmt = sub.search_one('type')
+        type_stmt = make_valid_identifier(sub.search_one('type'))
         access_methods += access_methods_comment(sub, optional=False) + \
             child_iterator(sub)
         if type_stmt.arg == 'uint32':
@@ -952,6 +881,7 @@ def key_names(stmt):
         # Add keys to res, one key per line, indented by 12 spaces
         for key_str in keys:
             for key in key_str.arg.split(' '):
+                key = make_valid_identifier(key)
                 res += ' ' * 12 + '"' + key + '",\n'
         res = res[:-2] + '\n' + ' ' * 8 + '}'
     return '''
