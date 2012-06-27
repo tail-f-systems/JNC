@@ -32,7 +32,7 @@ Or, if you like to keep things simple:
 from __future__ import with_statement  # Not required from Python 2.6 and
 # ... onwards, but kept for the sake of backwards compatibility
 
-import optparse  # FIXME Deprecated in python 2.7, should use argparse instead
+import optparse  # TODO Deprecated in python 2.7, should use argparse instead
 # ... See http://stackoverflow.com/questions/3217673/why-use-argparse-rather-
 # ... than-optparse and http://docs.python.org/dev/library
 # ... /argparse.html#upgrading-optparse-code
@@ -153,7 +153,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                     util.get_latest_revision(module) + '".'
                 generate_classes(module, directory, src, ctx)
                 if module.keyword == 'submodule':
-                    # FIXME add support for submodule
+                    # TODO add support for submodule
                     print >> sys.stderr, \
                         'Warning: no support for submodule'
                 if ctx.opts.debug or ctx.opts.verbose:
@@ -168,7 +168,8 @@ class JPyangPlugin(plugin.PyangPlugin):
         directory_listing = os.listdir(d)
         java_files = filter(is_java_file, directory_listing)
         class_hierarchy = generate_javadoc(modules, java_files, ctx)
-        gen_package_info(class_hierarchy, directory, ctx)
+        write_file(d, 'package-info.java',
+            gen_package_info(class_hierarchy, directory, ctx), ctx)
         javadir = ctx.opts.javadoc_directory
         if javadir:
             if ctx.opts.debug or ctx.opts.verbose:
@@ -394,7 +395,7 @@ def generate_classes(module, package, src, ctx):
     (filename, name) = extract_names(prefix.arg)
     for stmt in module.substmts:
         if (stmt.keyword == 'container' or
-            stmt.keyword == 'list'):  # FIXME add support for submodule, etc.
+            stmt.keyword == 'list'):  # TODO add support for submodule, etc.
             generate_class(stmt, package, src, '', ns_arg, name,
                 top_level=True, ctx=ctx)
     if ctx.opts.verbose:
@@ -431,121 +432,134 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
     (filename, name) = extract_names(stmt.arg)
     access_methods = constructors = cloners = support_methods = ''
     fields = []
+    try:
+        for ch in stmt.i_children:
+            if ch in stmt.substmts:
+                continue
+            tmp_access_methods, tmp_fields = generate_child(stmt, ch,
+                package, src, path, ns, prefix_name, ctx)
+            access_methods += tmp_access_methods
+            fields.extend(tmp_fields)
+    except AttributeError:
+        pass
+    # TODO preserve correct order in generated class
     for sub in stmt.substmts:
-    # FIXME Perhaps better to have several loops to get correct order and be
-    #      able to call generate_class outside of if-statements
-        if sub.keyword == 'list':
-            generate_class(sub, package + '.' + stmt.arg, src,
-                path + stmt.arg + '/', ns, prefix_name, ctx)
-            key, _, confm_keys, _ = extract_keys(sub, ctx)
-            access_methods += access_methods_comment(sub) + \
-            get_stmt(sub, confm_keys) + \
-            get_stmt(sub, confm_keys, string=True) + \
-            child_iterator(sub) + \
-            add_stmt(sub, args=[(sub.arg, sub.arg)]) + \
-            add_stmt(sub, args=confm_keys) + \
-            add_stmt(sub, args=confm_keys, string=True) + \
-            add_stmt(sub, args=[]) + \
-            delete_stmt(sub, args=confm_keys) + \
-            delete_stmt(sub, args=confm_keys, string=True)
-        elif sub.keyword == 'container':
-            generate_class(sub, package + '.' + stmt.arg, src,
-                path + stmt.arg + '/', ns, prefix_name, ctx)
-            fields.append(sub.arg)  # FIXME might have to append more fields
-            access_methods += access_methods_comment(sub) + \
-            child_field(sub) + \
-            add_stmt(sub, args=[(sub.arg, sub.arg)], field=True) + \
-            add_stmt(sub, args=[], field=True) + \
-            delete_stmt(sub)
-        elif sub.keyword == 'leaf':
-            key = stmt.search_one('key')
-            if key is not None and sub.arg in key.arg.split(' '):
-                temp = statements.Statement(None, None, None, 'key',
-                    arg=sub.arg)
-                optional = False
-                # Pass temp to avoid multiple keys
-                access_methods += access_methods_comment(temp, optional)
-            else:
-                optional = True
-                access_methods += access_methods_comment(sub, optional)
-                # TODO ensure that the leaf is really optional
-            type_stmt = sub.search_one('type')
-            if type_stmt.arg == 'uint32':
-                type_str = 'com.tailf.confm.xs.UnsignedInt'
-                access_methods += get_value(sub, ret_type=type_str) + \
-                    set_value(sub, prefix=prefix_name, arg_type=type_str) + \
-                    set_value(sub, prefix='', arg_type='String',
-                        confm_type=type_str) + \
-                    set_value(sub, prefix='', arg_type='long',
-                        confm_type=type_str)
-            elif type_stmt.arg == 'string':
-                type_str = 'com.tailf.confm.xs.String'
-                access_methods += get_value(sub, ret_type=type_str) + \
-                    set_value(sub, prefix=prefix_name, arg_type=type_str) + \
-                    set_value(sub, prefix='', arg_type='String',
-                        confm_type=type_str)
-            else:
-                if ctx.opts.debug or ctx.opts.verbose:
-                    print >> sys.stderr, 'WARNING! No support for type "' + \
-                        type_stmt.arg + '", defaulting to string.'
-                    type_str = 'com.tailf.confm.xs.String'
-                access_methods += get_value(sub, ret_type=type_str) + \
-                    set_value(sub, prefix=prefix_name, arg_type=type_str) + \
-                    set_value(sub, prefix='')
-            if optional:
-                access_methods += unset_value(sub)
-            access_methods += add_value(sub, prefix_name)
-            if optional:
-                access_methods += mark(sub, 'replace') + \
-                mark(sub, 'merge') + \
-                mark(sub, 'create') + \
-                mark(sub, 'delete')
-        elif sub.keyword == 'leaf-list':
-            type_stmt = sub.search_one('type')
-            access_methods += access_methods_comment(sub, optional=False) + \
-                child_iterator(sub)
-            if type_stmt.arg == 'uint32':
-                type_str = 'com.tailf.confm.xs.UnsignedInt'
-                access_methods += set_value(sub, prefix=prefix_name,
-                    arg_type=type_str) + \
-                    set_value(sub, prefix='', arg_type='String',
-                        confm_type=type_str) + \
-                    set_value(sub, prefix='', arg_type='long',
-                        confm_type=type_str)
-            elif type_stmt.arg == 'string':
-                type_str = 'com.tailf.confm.xs.String'
-                access_methods += set_value(sub, prefix=prefix_name,
-                    arg_type=type_str) + \
-                    set_value(sub, prefix='', arg_type='String',
-                        confm_type=type_str)
-            else:
-                if ctx.opts.debug or ctx.opts.verbose:
-                    print >> sys.stderr, 'WARNING! No support for type "' + \
-                        type_stmt.arg + '", defaulting to string.'
-                    type_str = 'com.tailf.confm.xs.String'
-                access_methods += set_value(sub, prefix=prefix_name,
-                    arg_type=type_str) + \
-                    set_value(sub, prefix='', arg_type='String',
-                        confm_type=type_str)
-            access_methods += delete_stmt(sub,
-                    args=[(type_str, sub.arg + 'Value')], keys=False) + \
-                delete_stmt(sub, args=[(type_str, sub.arg + 'Value')],
-                    string=True, keys=False) + \
-                add_value(sub, prefix_name) + \
-                mark(sub, 'replace', arg_type=type_str) + \
-                mark(sub, 'replace', arg_type='String') + \
-                mark(sub, 'merge', arg_type=type_str) + \
-                mark(sub, 'merge', arg_type='String') + \
-                mark(sub, 'create', arg_type=type_str) + \
-                mark(sub, 'create', arg_type='String') + \
-                mark(sub, 'delete', arg_type=type_str) + \
-                mark(sub, 'delete', arg_type='String')
-        elif sub.keyword == 'uses':
-            print 'USES..... ' + sub.arg
-        elif sub.keyword == 'grouping':
-            print 'Grouping: ' + sub.arg
-        else:
-            print sub.keyword + ': ' + sub.arg
+        tmp_access_methods, tmp_fields = generate_child(stmt, sub, package,
+            src, path, ns, prefix_name, ctx)
+        access_methods += tmp_access_methods
+        fields.extend(tmp_fields)
+#        if sub.keyword in ['list', 'container']:
+#            generate_class(sub, package + '.' + stmt.arg, src,
+#                path + stmt.arg + '/', ns, prefix_name, ctx)
+#        if sub.keyword == 'list':
+#            key, _, confm_keys, _ = extract_keys(sub, ctx)
+#            access_methods += access_methods_comment(sub) + \
+#            get_stmt(sub, confm_keys) + \
+#            get_stmt(sub, confm_keys, string=True) + \
+#            child_iterator(sub) + \
+#            add_stmt(sub, args=[(sub.arg, sub.arg)]) + \
+#            add_stmt(sub, args=confm_keys) + \
+#            add_stmt(sub, args=confm_keys, string=True) + \
+#            add_stmt(sub, args=[]) + \
+#            delete_stmt(sub, args=confm_keys) + \
+#            delete_stmt(sub, args=confm_keys, string=True)
+#        elif sub.keyword == 'container':
+#            fields.append(sub.arg)  # TODO might have to append more fields
+#            access_methods += access_methods_comment(sub) + \
+#            child_field(sub) + \
+#            add_stmt(sub, args=[(stmt.arg + '.' + sub.arg, sub.arg)],
+#                field=True) + \
+#            add_stmt(sub, args=[], field=True) + \
+#            delete_stmt(sub)
+#        elif sub.keyword == 'leaf':
+#            key = stmt.search_one('key')
+#            if key is not None and sub.arg in key.arg.split(' '):
+#                temp = statements.Statement(None, None, None, 'key',
+#                    arg=sub.arg)
+#                optional = False
+#                # Pass temp to avoid multiple keys
+#                access_methods += access_methods_comment(temp, optional)
+#            else:
+#                optional = True
+#                access_methods += access_methods_comment(sub, optional)
+#                # TODO ensure that the leaf is really optional
+#            type_stmt = sub.search_one('type')
+#            if type_stmt.arg == 'uint32':
+#                type_str = 'com.tailf.confm.xs.UnsignedInt'
+#                access_methods += get_value(sub, ret_type=type_str) + \
+#                    set_value(sub, prefix=prefix_name, arg_type=type_str) + \
+#                    set_value(sub, prefix='', arg_type='String',
+#                        confm_type=type_str) + \
+#                    set_value(sub, prefix='', arg_type='long',
+#                        confm_type=type_str)
+#            elif type_stmt.arg == 'string':
+#                type_str = 'com.tailf.confm.xs.String'
+#                access_methods += get_value(sub, ret_type=type_str) + \
+#                    set_value(sub, prefix=prefix_name, arg_type=type_str) + \
+#                    set_value(sub, prefix='', arg_type='String',
+#                        confm_type=type_str)
+#            else:
+#                if ctx.opts.debug or ctx.opts.verbose:
+#                    print >> sys.stderr, 'WARNING! No support for type "' + \
+#                        type_stmt.arg + '", defaulting to string.'
+#                    type_str = 'com.tailf.confm.xs.String'
+#                access_methods += get_value(sub, ret_type=type_str) + \
+#                    set_value(sub, prefix=prefix_name, arg_type=type_str) + \
+#                    set_value(sub, prefix='')
+#            if optional:
+#                access_methods += unset_value(sub)
+#            access_methods += add_value(sub, prefix_name)
+#            if optional:
+#                access_methods += mark(sub, 'replace') + \
+#                mark(sub, 'merge') + \
+#                mark(sub, 'create') + \
+#                mark(sub, 'delete')
+#        elif sub.keyword == 'leaf-list':
+#            type_stmt = sub.search_one('type')
+#            access_methods += access_methods_comment(sub, optional=False) + \
+#                child_iterator(sub)
+#            if type_stmt.arg == 'uint32':
+#                type_str = 'com.tailf.confm.xs.UnsignedInt'
+#                access_methods += set_value(sub, prefix=prefix_name,
+#                    arg_type=type_str) + \
+#                    set_value(sub, prefix='', arg_type='String',
+#                        confm_type=type_str) + \
+#                    set_value(sub, prefix='', arg_type='long',
+#                        confm_type=type_str)
+#            elif type_stmt.arg == 'string':
+#                type_str = 'com.tailf.confm.xs.String'
+#                access_methods += set_value(sub, prefix=prefix_name,
+#                    arg_type=type_str) + \
+#                    set_value(sub, prefix='', arg_type='String',
+#                        confm_type=type_str)
+#            else:
+#                if ctx.opts.debug or ctx.opts.verbose:
+#                    print >> sys.stderr, 'WARNING! No support for type "' + \
+#                        type_stmt.arg + '", defaulting to string.'
+#                    type_str = 'com.tailf.confm.xs.String'
+#                access_methods += set_value(sub, prefix=prefix_name,
+#                    arg_type=type_str) + \
+#                    set_value(sub, prefix='', arg_type='String',
+#                        confm_type=type_str)
+#            access_methods += delete_stmt(sub,
+#                    args=[(type_str, sub.arg + 'Value')], keys=False) + \
+#                delete_stmt(sub, args=[(type_str, sub.arg + 'Value')],
+#                    string=True, keys=False) + \
+#                add_value(sub, prefix_name) + \
+#                mark(sub, 'replace', arg_type=type_str) + \
+#                mark(sub, 'replace', arg_type='String') + \
+#                mark(sub, 'merge', arg_type=type_str) + \
+#                mark(sub, 'merge', arg_type='String') + \
+#                mark(sub, 'create', arg_type=type_str) + \
+#                mark(sub, 'create', arg_type='String') + \
+#                mark(sub, 'delete', arg_type=type_str) + \
+#                mark(sub, 'delete', arg_type='String')
+#        elif sub.keyword == 'uses':
+#            print 'USES..... ' + sub.arg
+#        elif sub.keyword == 'grouping':
+#            print 'Grouping: ' + sub.arg
+#        else:
+#            print sub.keyword + ': ' + sub.arg
     if ctx.opts.verbose:
         print 'Generating Java class "' + filename + '"...'
     if filter(is_container, stmt.substmts):  # TODO Verify correctness of cond.
@@ -574,7 +588,7 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
     write_file(package, filename,
         java_class(filename, package,
             ['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
-            # FIXME Hashtable not used in generated code
+            # TODO Hashtable not used in generated code
             'This class represents a "' + path + stmt.arg +
             '" element\n * from the namespace ' + ns,
             constructors + cloners + key_names(stmt) +
@@ -584,6 +598,132 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
             modifiers=' extends Container'
         ),
         ctx)
+
+
+def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
+    """
+
+    stmt        -- Parent
+    sub         -- A data model subtree
+    package     -- Name of Java package, also used as path to where files
+                   should be written
+    src         -- The .yang file from which the module was parsed, or the
+                   module name and revision if filename is unknown
+    path        -- The XPath of stmt in the original module
+    ns          -- The XML namespace of the module
+    prefix_name -- The module prefix
+    ctx         -- Context used to fetch option parameters
+
+    """
+    access_methods = ''
+    fields = []
+    if sub.keyword in ['list', 'container']:
+        generate_class(sub, package + '.' + stmt.arg, src,
+            path + stmt.arg + '/', ns, prefix_name, ctx)
+    if sub.keyword == 'list':
+        key, _, confm_keys, _ = extract_keys(sub, ctx)
+        access_methods += access_methods_comment(sub) + \
+        get_stmt(sub, confm_keys) + \
+        get_stmt(sub, confm_keys, string=True) + \
+        child_iterator(sub) + \
+        add_stmt(sub, args=[(sub.arg, sub.arg)]) + \
+        add_stmt(sub, args=confm_keys) + \
+        add_stmt(sub, args=confm_keys, string=True) + \
+        add_stmt(sub, args=[]) + \
+        delete_stmt(sub, args=confm_keys) + \
+        delete_stmt(sub, args=confm_keys, string=True)
+    elif sub.keyword == 'container':
+        fields.append(sub.arg)  # TODO might have to append more fields
+        access_methods += access_methods_comment(sub) + \
+        child_field(sub) + \
+        add_stmt(sub, args=[(stmt.arg + '.' + sub.arg, sub.arg)],
+            field=True) + \
+        add_stmt(sub, args=[], field=True) + \
+        delete_stmt(sub)
+    elif sub.keyword == 'leaf':
+        key = stmt.search_one('key')
+        if key is not None and sub.arg in key.arg.split(' '):
+            temp = statements.Statement(None, None, None, 'key',
+                arg=sub.arg)
+            optional = False
+            # Pass temp to avoid multiple keys
+            access_methods += access_methods_comment(temp, optional)
+        else:
+            optional = True
+            access_methods += access_methods_comment(sub, optional)
+            # TODO ensure that the leaf is really optional
+        type_stmt = sub.search_one('type')
+        if type_stmt.arg == 'uint32':
+            type_str = 'com.tailf.confm.xs.UnsignedInt'
+            access_methods += get_value(sub, ret_type=type_str) + \
+                set_value(sub, prefix=prefix_name, arg_type=type_str) + \
+                set_value(sub, prefix='', arg_type='String',
+                    confm_type=type_str) + \
+                set_value(sub, prefix='', arg_type='long',
+                    confm_type=type_str)
+        elif type_stmt.arg == 'string':
+            type_str = 'com.tailf.confm.xs.String'
+            access_methods += get_value(sub, ret_type=type_str) + \
+                set_value(sub, prefix=prefix_name, arg_type=type_str) + \
+                set_value(sub, prefix='', arg_type='String',
+                    confm_type=type_str)
+        else:
+            if ctx.opts.debug or ctx.opts.verbose:
+                print >> sys.stderr, 'WARNING! No support for type "' + \
+                    type_stmt.arg + '", defaulting to string.'
+            type_str = 'com.tailf.confm.xs.String'
+            access_methods += get_value(sub, ret_type=type_str) + \
+                set_value(sub, prefix=prefix_name, arg_type=type_str) + \
+                set_value(sub, prefix='')
+        if optional:
+            access_methods += unset_value(sub)
+        access_methods += add_value(sub, prefix_name)
+        if optional:
+            access_methods += mark(sub, 'replace') + \
+            mark(sub, 'merge') + \
+            mark(sub, 'create') + \
+            mark(sub, 'delete')
+    elif sub.keyword == 'leaf-list':
+        type_stmt = sub.search_one('type')
+        access_methods += access_methods_comment(sub, optional=False) + \
+            child_iterator(sub)
+        if type_stmt.arg == 'uint32':
+            type_str = 'com.tailf.confm.xs.UnsignedInt'
+            access_methods += set_value(sub, prefix=prefix_name,
+                arg_type=type_str) + \
+                set_value(sub, prefix='', arg_type='String',
+                    confm_type=type_str) + \
+                set_value(sub, prefix='', arg_type='long',
+                    confm_type=type_str)
+        elif type_stmt.arg == 'string':
+            type_str = 'com.tailf.confm.xs.String'
+            access_methods += set_value(sub, prefix=prefix_name,
+                arg_type=type_str) + \
+                set_value(sub, prefix='', arg_type='String',
+                    confm_type=type_str)
+        else:
+            if ctx.opts.debug or ctx.opts.verbose:
+                print >> sys.stderr, 'WARNING! No support for type "' + \
+                    type_stmt.arg + '", defaulting to string.'
+            type_str = 'com.tailf.confm.xs.String'
+            access_methods += set_value(sub, prefix=prefix_name,
+                arg_type=type_str) + \
+                set_value(sub, prefix='', arg_type='String',
+                    confm_type=type_str)
+        access_methods += delete_stmt(sub,
+                args=[(type_str, sub.arg + 'Value')], keys=False) + \
+            delete_stmt(sub, args=[(type_str, sub.arg + 'Value')],
+                string=True, keys=False) + \
+            add_value(sub, prefix_name) + \
+            mark(sub, 'replace', arg_type=type_str) + \
+            mark(sub, 'replace', arg_type='String') + \
+            mark(sub, 'merge', arg_type=type_str) + \
+            mark(sub, 'merge', arg_type='String') + \
+            mark(sub, 'create', arg_type=type_str) + \
+            mark(sub, 'create', arg_type='String') + \
+            mark(sub, 'delete', arg_type=type_str) + \
+            mark(sub, 'delete', arg_type='String')
+    return access_methods, fields
 
 
 def generate_javadoc(stmts, java_files, ctx):
@@ -705,7 +845,7 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
                 elif arg_type == 'long':
                     decl = 'new com.tailf.confm.xs.UnsignedInt('
                 else:
-                    # FIXME support more types!
+                    # TODO support more types!
                     if ctx.opts.debug or ctx.opts.verbose:
                         print >> sys.stderr, 'WARNING, at line ' + \
                             str(currentframe().f_lineno) + \
@@ -714,12 +854,13 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
                     decl = 'new com.tailf.confm.xs.String('
                 values.append(decl + arg_name + 'Value)')
         for (arg_type, arg_name), value in zip(args, values):
+            # TODO http://en.wikipedia.org/wiki/Loop_unswitching
             inserts += '''
         // Set key element: ''' + arg_name + '''
         Leaf ''' + arg_name + ' = new Leaf(' + root + '.NAMESPACE, "' + \
             arg_name + '''");
         ''' + arg_name + '.setValue(' + value + ''');
-        insertChild(''' + arg_name + ', childrenNames());'  # FIXME throws
+        insertChild(''' + arg_name + ', childrenNames());'
             arg_name = arg_name + 'Value'
             docstring += '\n     * @param ' + arg_name + \
                 ' Key argument of child.'
@@ -778,7 +919,7 @@ def clone(class_name, key_names=[], shallow='False'):
     if not shallow:
         copy = 'n exact'
         signature = 'Object clone()'
-        cast = '(' + class_name + ')'  # FIXME Maybe not always required
+        cast = '(' + class_name + ')'  # TODO Not always required
         method = 'cloneContent'
     else:
         copy = ' shallow'
@@ -821,7 +962,7 @@ def key_names(stmt):
     public String[] keyNames() {
         ''' + res + ''';
     }
-'''  # FIXME Add support for multiple keys
+'''  # TODO Add support for multiple keys
 
 
 def children_names(stmt):
@@ -831,7 +972,7 @@ def children_names(stmt):
     stmt -- A pyang Statement, typically a list or a container
 
     """
-    children = filter(lambda x:  # x.keyword != 'key' and # FIXME add more
+    children = filter(lambda x:  # x.keyword != 'key' and # TODO add more
         x.keyword != 'key',
         stmt.substmts)
     names = [ch.arg for ch in children]
@@ -953,7 +1094,7 @@ def get_stmt(stmt, keys, string=False):
         spec = '\n     * The keys are specified as Strings'
     for (key_type, key_name) in keys:
         spec += '\n     * @param ' + key_name + ' Key argument of child.'
-        if string:  # TODO http://en.wikipedia.org/wiki/Loop_unswitching
+        if string:
             arguments += 'String ' + key_name + ', '
         else:
             arguments += key_type + ' ' + key_name + ', '
@@ -1014,9 +1155,6 @@ def set_value(stmt, prefix='', arg_type='', confm_type=''):
         spec2 = 'string representation of the '
     elif arg_type == 'long':
         spec1 = ', using the java primitive value'
-    print('set' + name + 'Value(' + arg_type + ' ' + stmt.arg + \
-        'Value): \nlen(spec1)=' + \
-        str(len(spec1)) + ' MAX_COLS=' + str(MAX_COLS))
     if len(spec1) > MAX_COLS:
         spec1 = ',\n     * ' + spec1[2:]
     if prefix:
@@ -1162,7 +1300,7 @@ def add_stmt(stmt, args=[], field=False, string=False):
     string -- If set to True, the keys are specified with the ordinary String
               type instead of the Tail-f ConfM String type.
     field  -- If set to True, the statement is added to a field, typically
-              in a container class.
+              in a class representing a YANG container element.
 
     """
     name = stmt.arg.capitalize()
@@ -1229,6 +1367,7 @@ def delete_stmt(stmt, args=[], string=False, keys=True):
         elif string:
             spec1 += '\n     * The value is specified as a String'
         for (arg_type, arg_name) in args:
+            # TODO http://en.wikipedia.org/wiki/Loop_unswitching
             if string:
                 arguments += 'String ' + arg_name + ', '
             else:
@@ -1282,7 +1421,7 @@ def support_add(fields=[]):
         super.addChild($child);
         ''' + assignments + '''
     }
-'''  # FIXME '$' should be removed unless it is actually needed
+'''  # TODO '$' should be removed unless it is actually needed
 
 
 def is_not_list(entry):
@@ -1368,8 +1507,9 @@ instantiating Device objects and setting up NETCONF sessions with real devices
 using a compatible YANG model.
 
 '''
-    with open('package-info.java', 'w + ') as f:
-        f.write('/**' + java_docify(specification + html_hierarchy) + '''
+    # XXX These strings should probably be rewritten for code readability and
+    # ... to comply with the actual functionality of the class
+    return ('/**' + java_docify(specification + html_hierarchy) + '''
  *
  * @see <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">''' + \
     'JPyang project page</a>\n * @see <a target="_top" ' + \
@@ -1381,4 +1521,4 @@ using a compatible YANG model.
     'target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">' + \
     'RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>\n' + \
     ' * @see <a target="_top" href="http://www.tail-f.com">Tail-f ' + \
-    '\n */\npackage ' + package + ';')
+    'Systems</a>\n */\npackage ' + package + ';')
