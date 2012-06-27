@@ -62,7 +62,7 @@ class JPyangPlugin(plugin.PyangPlugin):
         fmts['java'] = fmts['jpyang'] = self
 
     def add_opts(self, optparser):
-        """Adds the --jpyang-help option"""
+        """Adds options to pyang"""
         optlist = [
             optparse.make_option(
                 '-d', '--java-package',
@@ -128,49 +128,30 @@ class JPyangPlugin(plugin.PyangPlugin):
         fd      -- File descriptor ignored.
 
         """
-        directory = ctx.opts.directory
-        wd = os.getcwd()
         # Create directory
+        directory = ctx.opts.directory
         d = directory.replace('.', '/')
-        try:
-            os.makedirs(d, 0777)
-        except OSError as exc:
-            if exc.errno == errno.EEXIST:
-                pass  # The directory already exists
-            else:
-                raise
-        try:
-            os.chdir(d)
-        except OSError as exc:
-            if exc.errno == errno.ENOTDIR:
-                if ctx.opts.debug or ctx.opts.verbose:
-                    print 'WARNING: Unable to change directory to ' + d + \
-                        '. Probably a non-directory file with same name' + \
-                        'as one of the subdirectories already exists.'
-            else:
-                raise
-        if ctx.opts.debug or ctx.opts.verbose:
-            print 'GENERATING FILES TO: ' + os.getcwd()
         for module in modules:
             if module.keyword == 'module' or module.keyword == 'submodule':
                 if not ctx.opts.no_schema:
                     # Generate schema
                     ns = module.search_one('namespace').arg
                     name = module.search_one('prefix').arg.capitalize()
-                    with open(os.getcwd() + '/' + name + '.schema', 'w+') as f:
-                        f.write('<schema>\n' + indent( \
+                    write_file(d,
+                        name + '.schema',
+                        '<schema>\n' + indent( \
                             ('<node>\n' + \
                                 indent(schema_node(module, '/', ns, ctx)) + \
                                 '\n</node>' + \
                                 schema_nodes(module.substmts, '/', ns, ctx) \
-                            ).splitlines()) + '\n</schema>'
-                    )
+                            ).splitlines()) + '\n</schema>',
+                        ctx)
                     if ctx.opts.debug or ctx.opts.verbose:
                         print 'Schema generation COMPLETE.'
                 # Generate Java classes
                 src = 'module "' + module.arg + '", revision: "' + \
                     util.get_latest_revision(module) + '".'
-                generate_classes(module, os.getcwd(), directory, src, ctx)
+                generate_classes(module, directory, src, ctx)
                 if module.keyword == 'submodule':
                     # FIXME add support for submodule
                     print >> sys.stderr, \
@@ -184,11 +165,10 @@ class JPyangPlugin(plugin.PyangPlugin):
                 self.fatal()
         # Generate javadoc
         is_java_file = lambda s: s.endswith('.java')
-        directory_listing = os.listdir(os.getcwd())
+        directory_listing = os.listdir(d)
         java_files = filter(is_java_file, directory_listing)
         class_hierarchy = generate_javadoc(modules, java_files, ctx)
-        gen_package(class_hierarchy, directory, ctx)
-        os.chdir(wd)
+        gen_package_info(class_hierarchy, directory, ctx)
         javadir = ctx.opts.javadoc_directory
         if javadir:
             if ctx.opts.debug or ctx.opts.verbose:
@@ -221,6 +201,38 @@ The two formats java and jpyang produce identical results.
 
 Type '$ pyang --help' for more details on how to use pyang.
 '''
+
+
+def write_file(d, file_name, file_content, ctx):
+    """Creates the directory d if it does not yet exist and writes a file to it
+    named file_name with file_content in it.
+
+    """
+    d = d.replace('.', '/')
+    wd = os.getcwd()
+    try:
+        os.makedirs(d, 0777)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST:
+            pass  # The directory already exists
+        else:
+            raise
+    try:
+        os.chdir(d)
+    except OSError as exc:
+        if exc.errno == errno.ENOTDIR:
+            if ctx.opts.debug or ctx.opts.verbose:
+                print 'WARNING: Unable to change directory to ' + d + \
+                    '. Probably a non-directory file with same name' + \
+                    'as one of the subdirectories already exists.'
+        else:
+            raise
+    finally:
+        if ctx.opts.verbose:
+            print 'Writing file to: ' + os.getcwd()
+        os.chdir(wd)
+    with open(d + '/' + file_name, 'w+') as f:
+        f.write(file_content)
 
 
 def extract_keys(stmt, ctx):
@@ -361,12 +373,12 @@ def schema_node(stmt, tagpath, ns, ctx):
     return res
 
 
-def generate_classes(module, directory, package, src, ctx):
+def generate_classes(module, package, src, ctx):
     """Generates a Java class hierarchy providing an interface to a YANG module
 
     module    -- A data model tree, parsed from a YANG model
-    directory -- Path to where files should be written
-    package   -- Name of Java package
+    package   -- Name of Java package, also used as path to where files should
+                 be written
     src       -- The .yang file from which the module was parsed, or the module
                  name and revision if filename is unknown
     ctx       -- Context used to fetch option parameters
@@ -383,12 +395,12 @@ def generate_classes(module, directory, package, src, ctx):
     for stmt in module.substmts:
         if (stmt.keyword == 'container' or
             stmt.keyword == 'list'):  # FIXME add support for submodule, etc.
-            generate_class(stmt, directory, package, src, '', ns_arg, name,
+            generate_class(stmt, package, src, '', ns_arg, name,
                 top_level=True, ctx=ctx)
     if ctx.opts.verbose:
         print 'Generating Java class "' + filename + '"...'
-    with open(directory + '/' + filename, 'w + ') as f:
-        f.write(java_class(filename, package,
+    write_file(package, filename,
+        java_class(filename, package,
             ['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
             'The root class for namespace ' + ns_arg + \
             ' (accessible from \n * ' + name + '.NAMESPACE) with prefix "' + \
@@ -396,17 +408,17 @@ def generate_classes(module, directory, package, src, ctx):
             class_fields(ns_arg, prefix.arg) +
             enable(name) + register_schema(name),
             source=src
-        )
-    )
+        ),
+        ctx)
 
 
-def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
+def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
         top_level=False):
     """Generates a Java class hierarchy providing an interface to a YANG module
 
     stmt        -- A data model subtree
-    directory   -- Path to where files should be written
-    package     -- Name of Java package
+    package     -- Name of Java package, also used as path to where files
+                   should be written
     src         -- The .yang file from which the module was parsed, or the
                    module name and revision if filename is unknown
     path        -- The XPath of stmt in the original module
@@ -423,8 +435,8 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
     # FIXME Perhaps better to have several loops to get correct order and be
     #      able to call generate_class outside of if-statements
         if sub.keyword == 'list':
-            generate_class(sub, directory, package, src, path + stmt.arg + '/',
-                ns, prefix_name, ctx)
+            generate_class(sub, package + '.' + stmt.arg, src,
+                path + stmt.arg + '/', ns, prefix_name, ctx)
             key, _, confm_keys, _ = extract_keys(sub, ctx)
             access_methods += access_methods_comment(sub) + \
             get_stmt(sub, confm_keys) + \
@@ -437,8 +449,8 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
             delete_stmt(sub, args=confm_keys) + \
             delete_stmt(sub, args=confm_keys, string=True)
         elif sub.keyword == 'container':
-            generate_class(sub, directory, package, src, path + stmt.arg + '/',
-                ns, prefix_name, ctx)
+            generate_class(sub, package + '.' + stmt.arg, src,
+                path + stmt.arg + '/', ns, prefix_name, ctx)
             fields.append(sub.arg)  # FIXME might have to append more fields
             access_methods += access_methods_comment(sub) + \
             child_field(sub) + \
@@ -456,7 +468,7 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
             else:
                 optional = True
                 access_methods += access_methods_comment(sub, optional)
-                #TODO ensure that the leaf is really optional
+                # TODO ensure that the leaf is really optional
             type_stmt = sub.search_one('type')
             if type_stmt.arg == 'uint32':
                 type_str = 'com.tailf.confm.xs.UnsignedInt'
@@ -559,8 +571,8 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
         cloners = clone(name, map(str.capitalize, key.arg.split(' ')),
             shallow=False) + \
             clone(name, map(str.capitalize, key.arg.split(' ')), shallow=True)
-    with open(directory + '/' + filename, 'w + ') as f:
-        f.write(java_class(filename, package,
+    write_file(package, filename,
+        java_class(filename, package,
             ['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
             # FIXME Hashtable not used in generated code
             'This class represents a "' + path + stmt.arg +
@@ -570,8 +582,8 @@ def generate_class(stmt, directory, package, src, path, ns, prefix_name, ctx,
             # TODO add getters, setters, etc. for children stmts
             source=src,
             modifiers=' extends Container'
-        )
-    )
+        ),
+        ctx)
 
 
 def generate_javadoc(stmts, java_files, ctx):
@@ -616,9 +628,8 @@ def java_class(filename, package, imports, description, body, version='1.0',
     # Fetch current date and set date format
     time = datetime.date.today()
     date = str(time.day) + '/' + str(time.month) + '/' + str(time.year % 100)
-    # The header_comment is placed in the beginning of the Java file
-    header_comment = '/* \n * @(#)' + filename + ' ' * 8 + version + ' ' + \
-        date + '''
+    # The header is placed in the beginning of the Java file
+    header = '/* \n * @(#)' + filename + ' ' * 8 + version + ' ' + date + '''
  *
  * This file has been auto-generated by JPyang, the Java output format plug-in
  * of pyang. Origin: ''' + source + '\n */'
@@ -631,7 +642,7 @@ def java_class(filename, package, imports, description, body, version='1.0',
  * @author    Auto Generated
  */'''
     # package and import statement goes here
-    header = header_comment + '\n\npackage ' + package + ';\n'
+    header += '\n\npackage ' + package.replace('/', '.') + ';\n'
     if len(imports) > 0:
         header += '\n'
     for im in imports:
@@ -1321,7 +1332,7 @@ def parse_hierarchy(hierarchy):
     return res
 
 
-def gen_package(class_hierarchy, package, ctx):
+def gen_package_info(class_hierarchy, package, ctx):
     """Writes a package-info.java file to the package directory with a high
     level description of the package functionality and requirements.
 
@@ -1370,4 +1381,4 @@ using a compatible YANG model.
     'target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">' + \
     'RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>\n' + \
     ' * @see <a target="_top" href="http://www.tail-f.com">Tail-f ' + \
-    'Systems</a>\n */\npackage ' + package + ';')
+    '\n */\npackage ' + package + ';')
