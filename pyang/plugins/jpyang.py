@@ -39,7 +39,6 @@ import optparse  # TODO Deprecated in python 2.7, should use argparse instead
 import os
 import errno
 import sys
-from inspect import currentframe
 import datetime
 
 from pyang import plugin
@@ -125,11 +124,10 @@ class JPyangPlugin(plugin.PyangPlugin):
         if ctx.opts.jpyang_help:
             print_help()
             sys.exit(0)
-        if (ctx.opts.format in ['java', 'jpyang'] and
-            ctx.opts.directory is None):
-            print >> sys.stderr, 'ERROR: Option -d (or --java-package) is' \
-                ' mandatory when using the JPyang plug-in/Java output format'
-            sys.exit(1)  # Makes above message more visible than self.fatal()
+        if ctx.opts.format in ['java', 'jpyang'] and not ctx.opts.directory:
+            ctx.opts.directory = 'gen'
+            print_warning(msg='Option -d (or --java-package) not set, ' + \
+                'defaulting to "gen".')
 
     def setup_fmt(self, ctx):
         """Disables implicit errors for the Context"""
@@ -145,6 +143,14 @@ class JPyangPlugin(plugin.PyangPlugin):
         fd      -- File descriptor ignored.
 
         """
+        for (epos, etag, eargs) in ctx.errors:
+            if (error.is_error(error.err_level(etag)) and
+                etag in ('MODULE_NOT_FOUND', 'MODULE_NOT_FOUND_REV')):
+                self.fatal("%s contains errors" % epos.top.arg)
+            if (etag in ('TYPE_NOT_FOUND', 'FEATURE_NOT_FOUND',
+                'IDENTITY_NOT_FOUND', 'GROUPING_NOT_FOUND')):
+                print_warning(msg=etag.lower() + ', generated class ' + \
+                    'hierarchy might be incomplete.', key=etag)
         directory = ctx.opts.directory
         d = directory.replace('.', '/')
         for module in modules:
@@ -170,16 +176,11 @@ class JPyangPlugin(plugin.PyangPlugin):
                 src = 'module "' + module.arg + '", revision: "' + \
                     util.get_latest_revision(module) + '".'
                 generate_classes(module, directory, src, ctx)
-                if (module.keyword == 'submodule' and
-                    module.keyword not in outputted_warnings):
-                    print >> sys.stderr, \
-                        'Warning: no support for submodule'
-                    outputted_warnings.append(module.keyword)
                 if ctx.opts.debug or ctx.opts.verbose:
                     print 'Java classes generation COMPLETE.'
             else:
-                print >> sys.stderr, 'WARNING: Top-level element "' + \
-                    module.keyword + ' ' + module.arg + '" should be a module'
+                print_warning(msg='Ignoring schema tree rooted at "' + \
+                    module.keyword + ' ' + module.arg + '" - not a module')
         # Generate javadoc
         for module in modules:
             if module.keyword == 'module':
@@ -196,9 +197,9 @@ class JPyangPlugin(plugin.PyangPlugin):
                     ' >/dev/null')
             if ctx.opts.debug or ctx.opts.verbose:
                 print 'Javadoc generation COMPLETE.'
-        if len(modules) != 1 and (ctx.opts.debug or ctx.opts.verbose):
-            print >> sys.stderr, 'WARNING: Generating code for several ' + \
-                'modules has not been tested thoroughly.'
+        if len(modules) != 1:
+            print_warning(msg='Generating code for several modules has not' + \
+                ' been tested thoroughly.', ctx=ctx)
 
     def fatal(self, exitCode=1):
         """Raise an EmitError"""
@@ -222,6 +223,24 @@ Type '$ pyang --help' for more details on how to use pyang.
 '''
 
 
+def print_warning(msg='', key='', ctx=None):
+    """Prints msg to stderr if ctx is None or the debug or verbose flags are
+    set in context ctx and key is empty or not in outputted_warnings. If key is
+    not empty and not in outputted_warnings, it is added to it. If msg is empty
+    'No support for type "' + key + '", defaulting to string.' is printed.
+
+    """
+    if ((not key or key not in outputted_warnings) and
+        (not ctx or ctx.opts.debug or ctx.opts.verbose)):
+        if msg:
+            print >> sys.stderr, 'WARNING: ' + msg
+            if key:
+                outputted_warnings.append(key)
+        else:
+            print_warning('No support for type "' + key + '", defaulting ' + \
+                'to string.', key, ctx)
+
+
 def write_file(d, file_name, file_content, modules, ctx):
     """Creates the directory d if it does not yet exist and writes a file to it
     named file_name with file_content in it.
@@ -240,10 +259,9 @@ def write_file(d, file_name, file_content, modules, ctx):
         os.chdir(d)
     except OSError as exc:
         if exc.errno == errno.ENOTDIR:
-            if ctx.opts.debug or ctx.opts.verbose:
-                print 'WARNING: Unable to change directory to ' + d + \
-                    '. Probably a non-directory file with same name' + \
-                    'as one of the subdirectories already exists.'
+            print_warning(msg='Unable to change directory to ' + d + \
+                '. Probably a non-directory file with same name as one of ' + \
+                'the subdirectories already exists.', key=d, ctx=ctx)
         else:
             raise
     finally:
@@ -287,7 +305,7 @@ def make_valid_identifier(stmt):
     """
     if stmt.keyword is not 'range':
         stmt.arg = camelize(stmt.arg)
-    if stmt.arg in java_reserved_words:
+    if stmt.keyword is not 'type' and stmt.arg in java_reserved_words:
         stmt.arg = 'J' + stmt.arg
     return stmt
 
@@ -332,11 +350,7 @@ def extract_keys(stmt, ctx):
             primitive_keys.append(('long', arg))
         # TODO add support for more types
         else:
-            if ((ctx.opts.debug or ctx.opts.verbose) and
-                key_type.arg not in outputted_warnings):
-                print >> sys.stderr, 'WARNING! No support for type "' + \
-                key_type.arg + '", defaulting to string.'
-                outputted_warnings.append(key_type.arg)
+            print_warning(key=key_type.arg, ctx=ctx)
             confm_keys.append(('com.tailf.confm.xs.String', arg))
             primitive_keys.append(('String', arg))
         only_strings *= primitive_keys[-1][0] == 'String'
@@ -636,11 +650,7 @@ def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
                 set_value(sub, prefix='', arg_type='String',
                     confm_type=type_str)
         else:
-            if ((ctx.opts.debug or ctx.opts.verbose) and
-                type_stmt.arg not in outputted_warnings):
-                print >> sys.stderr, 'WARNING! No support for type "' + \
-                    type_stmt.arg + '", defaulting to string.'
-                outputted_warnings.append(type_stmt.arg)
+            print_warning(key=type_stmt.arg, ctx=ctx)
             type_str = 'com.tailf.confm.xs.String'
             access_methods += get_value(sub, ret_type=type_str) + \
                 set_value(sub, prefix=prefix_name, arg_type=type_str) + \
@@ -672,11 +682,7 @@ def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
                 set_value(sub, prefix='', arg_type='String',
                     confm_type=type_str)
         else:
-            if ((ctx.opts.debug or ctx.opts.verbose) and
-                type_stmt.arg not in outputted_warnings):
-                print >> sys.stderr, 'WARNING! No support for type "' + \
-                    type_stmt.arg + '", defaulting to string.'
-                outputted_warnings.append(type_stmt.arg)
+            print_warning(key=type_stmt.arg, ctx=ctx)
             type_str = 'com.tailf.confm.xs.String'
             access_methods += set_value(sub, prefix=prefix_name,
                 arg_type=type_str) + \
@@ -838,13 +844,7 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
                     decl = 'new com.tailf.confm.xs.UnsignedInt('
                 else:
                     # TODO support more types!
-                    if ((ctx.opts.debug or ctx.opts.verbose) and
-                        arg_type not in outputted_warnings):
-                        print >> sys.stderr, 'WARNING, at line ' + \
-                            str(currentframe().f_lineno) + \
-                            ' constructor argument' + \
-                            ' defaulting to string from: ' + arg_type
-                        outputted_warnings.append(arg_type)
+                    print_warning(key=arg_type, ctx=ctx)
                     decl = 'new com.tailf.confm.xs.String('
                 values.append(decl + arg_name + 'Value)')
         for (arg_type, arg_name), value in zip(args, values):
