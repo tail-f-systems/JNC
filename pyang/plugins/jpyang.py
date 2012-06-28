@@ -155,6 +155,7 @@ class JPyangPlugin(plugin.PyangPlugin):
         d = directory.replace('.', '/')
         for module in modules:
             if module.keyword == 'module':
+                print_tree(module, indent='')
                 if not ctx.opts.no_schema:
                     # Generate external schema
                     ns = module.search_one('namespace').arg
@@ -239,6 +240,25 @@ def print_warning(msg='', key='', ctx=None):
         else:
             print_warning('No support for type "' + key + '", defaulting ' + \
                 'to string.', key, ctx)
+
+
+def print_tree(stmt, indent=''):
+    """For debugging purposes, print a schema subtree"""
+    pass
+#    print indent + stmt.keyword + ' ' + stmt.arg
+#    children = stmt.substmts
+#    try:
+#        children.extend(stmt.i_children)
+#    except AttributeError:
+#        pass
+#    if len(children) > 20:
+#        print indent + '  TOO MANY CHILDREN'
+#        return
+#    for ch in children:
+#        if len(indent) < 10:
+#            print_tree(ch, indent + ' ')
+#        else:
+#            print indent + '  <subtree>'
 
 
 def write_file(d, file_name, file_content, modules, ctx):
@@ -334,38 +354,48 @@ def get_types(yang_type, confm_keys, primitive_keys, ctx, arg=''):
 
     """
     confm = 'com.tailf.confm.xs.'
-    if yang_type.arg == 'string':
-        confm_keys.append((confm + '.String', arg))
-        primitive_keys.append(('String', arg))
-    elif yang_type.arg in ('int8', 'int16', 'int32', 'int64', 'uint8',
+    primitive = 'String'
+    alt = ''
+    if yang_type.arg in ('int8', 'int16', 'int32', 'int64', 'uint8',
             'uint16', 'uint32', 'uint64'):
         if yang_type.arg[:1] == 'u':
             confm += 'Unsigned'
         if yang_type.arg[-1:] == '8':
-            confm_keys.append((confm + 'Byte', arg))
-            primitive_keys.append(('byte', arg))
+            primitive = 'byte'
         elif yang_type.arg[-2:] == '16':
-            confm_keys.append((confm + 'Short', arg))
-            primitive_keys.append(('short', arg))
+            primitive = 'short'
         elif yang_type.arg[-2:] == '32':
-            confm_keys.append((confm + 'Int', arg))
-            primitive_keys.append(('int', arg))
+            primitive = 'int'
         elif yang_type.arg[-2:] == '64':
-            confm_keys.append((confm + 'Long', arg))
-            primitive_keys.append(('long', arg))
+            primitive = 'long'
         else:
             print_warning('Parsed ' + yang_type.arg + ' as an integer.',
                 key=yang_type.arg, ctx=ctx)
-            confm_keys.append((confm + 'Int', arg))
-            primitive_keys.append(('int', arg))
+            primitive = 'int'
+    elif yang_type.arg == 'decimal64':
+        primitive = 'double'
+        # TODO Maybe this should be com.tailf.confm.confd.Decimal64
+    elif yang_type.arg == 'enumeration':
+        enum_stmts = yang_type.search('enum')
+        for stmt in enum_stmts:
+            primitive += 'enum: ' + stmt.arg + ', '  # FIXME This is for debug
+        primitive = primitive[:-2]
+        print primitive
     elif yang_type.arg == 'boolean':
-        confm_keys.append(('com.tailf.confm.xs.Boolean', arg))
-        primitive_keys.append(('boolean', arg))
-    # TODO add support for more types
+        primitive = 'boolean'
+    elif yang_type.arg == 'binary':
+        confm = confm[:-3] + 'Confd.OctetList'
+        primitive = ''
+        alt = 'byte[]'
+        print 'Found a binary'
+    # TODO add support for built-in datatypes binary, bits, empty, identityref,
+    # instance-identifier, leafref and union
+    # TODO enumeration and derived datatypes?
     else:
         print_warning(key=yang_type.arg, ctx=ctx)
-        confm_keys.append(('com.tailf.confm.xs.String', arg))
-        primitive_keys.append(('String', arg))
+        print_tree(yang_type)
+    confm_keys.append((confm + primitive.capitalize(), arg))
+    primitive_keys.append((primitive + alt, arg))
 
 
 def extract_keys(stmt, ctx):
@@ -851,9 +881,10 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
             else:
                 docstring = '\n     * with primitive Java types.'
             for (arg_type, arg_name) in args:
-                tmp_list_confm = []
-                get_types(arg_type, tmp_list_confm, [], ctx)
-                decl = 'new ' + tmp_list_confm[0][0] + '('
+#                tmp_list_confm = []
+#                get_types(arg_type, tmp_list_confm, [], ctx)
+#                decl = 'new ' + tmp_list_confm[0][0] + '('
+                decl = 'new String('  # FIXME should call get_types with a stmt
                 values.append(decl + arg_name + 'Value)')
         for (arg_type, arg_name), value in zip(args, values):
             # TODO http://en.wikipedia.org/wiki/Loop_unswitching
