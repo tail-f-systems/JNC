@@ -303,10 +303,11 @@ def make_valid_identifier(stmt):
     keyword. Replaces hyphens and dots with an underscore character.
 
     """
-    if stmt.keyword is not 'range':
-        stmt.arg = camelize(stmt.arg)
-    if stmt.keyword is not 'type' and stmt.arg in java_reserved_words:
-        stmt.arg = 'J' + stmt.arg
+    if 'type' not in stmt.keyword:
+        if stmt.keyword is not 'range':
+            stmt.arg = camelize(stmt.arg)
+        if stmt.arg in java_reserved_words:
+            stmt.arg = 'J' + stmt.arg
     return stmt
 
 
@@ -327,6 +328,46 @@ def make_valid_identifiers(stmt):
     return stmt
 
 
+def get_types(yang_type, confm_keys, primitive_keys, ctx, arg=''):
+    """Appends confm and Java a tuple with primitive counterparts of yang_type
+    to confm_keys and primitive_keys, respectively, and arg as 2nd component.
+
+    """
+    confm = 'com.tailf.confm.xs.'
+    if yang_type.arg == 'string':
+        confm_keys.append((confm + '.String', arg))
+        primitive_keys.append(('String', arg))
+    elif yang_type.arg in ('int8', 'int16', 'int32', 'int64', 'uint8',
+            'uint16', 'uint32', 'uint64'):
+        if yang_type.arg[:1] == 'u':
+            confm += 'Unsigned'
+        if yang_type.arg[-1:] == '8':
+            confm_keys.append((confm + 'Byte', arg))
+            primitive_keys.append(('byte', arg))
+        elif yang_type.arg[-2:] == '16':
+            confm_keys.append((confm + 'Short', arg))
+            primitive_keys.append(('short', arg))
+        elif yang_type.arg[-2:] == '32':
+            confm_keys.append((confm + 'Int', arg))
+            primitive_keys.append(('int', arg))
+        elif yang_type.arg[-2:] == '64':
+            confm_keys.append((confm + 'Long', arg))
+            primitive_keys.append(('long', arg))
+        else:
+            print_warning('Parsed ' + yang_type.arg + ' as an integer.',
+                key=yang_type.arg, ctx=ctx)
+            confm_keys.append((confm + 'Int', arg))
+            primitive_keys.append(('int', arg))
+    elif yang_type.arg == 'boolean':
+        confm_keys.append(('com.tailf.confm.xs.Boolean', arg))
+        primitive_keys.append(('boolean', arg))
+    # TODO add support for more types
+    else:
+        print_warning(key=yang_type.arg, ctx=ctx)
+        confm_keys.append(('com.tailf.confm.xs.String', arg))
+        primitive_keys.append(('String', arg))
+
+
 def extract_keys(stmt, ctx):
     """Returns the key statement of stmt and lists containing tuples with the
     confm (and primitive, respectively) type of the key and its identifier.
@@ -340,20 +381,10 @@ def extract_keys(stmt, ctx):
     primitive_keys = []
     only_strings = True
     for arg in key.arg.split(' '):
-        key_type =  \
-            stmt.search_one('leaf', arg).search_one('type')
-        if key_type.arg == 'string':
-            confm_keys.append(('com.tailf.confm.xs.String', arg))
-            primitive_keys.append(('String', arg))
-        elif key_type.arg == 'uint32':
-            confm_keys.append(('com.tailf.confm.xs.UnsignedInt', arg))
-            primitive_keys.append(('long', arg))
-        # TODO add support for more types
-        else:
-            print_warning(key=key_type.arg, ctx=ctx)
-            confm_keys.append(('com.tailf.confm.xs.String', arg))
-            primitive_keys.append(('String', arg))
+        key_type = stmt.search_one('leaf', arg).search_one('type')
+        get_types(key_type, confm_keys, primitive_keys, ctx, arg)
         only_strings *= primitive_keys[-1][0] == 'String'
+        # XXX 'b *= a' is syntactically equivalent to b = b and a
     return key, only_strings, confm_keys, primitive_keys
 
 
@@ -633,28 +664,20 @@ def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
         else:
             optional = True
             access_methods += access_methods_comment(sub, optional)
-            # TODO ensure that the leaf is really optional
+            # TODO ensure that the leaf is truly optional
         type_stmt = sub.search_one('type')
-        if type_stmt.arg == 'uint32':
-            type_str = 'com.tailf.confm.xs.UnsignedInt'
-            access_methods += get_value(sub, ret_type=type_str) + \
-                set_value(sub, prefix=prefix_name, arg_type=type_str) + \
-                set_value(sub, prefix='', arg_type='String',
-                    confm_type=type_str) + \
-                set_value(sub, prefix='', arg_type='long',
-                    confm_type=type_str)
-        elif type_stmt.arg == 'string':
-            type_str = 'com.tailf.confm.xs.String'
-            access_methods += get_value(sub, ret_type=type_str) + \
-                set_value(sub, prefix=prefix_name, arg_type=type_str) + \
-                set_value(sub, prefix='', arg_type='String',
-                    confm_type=type_str)
-        else:
-            print_warning(key=type_stmt.arg, ctx=ctx)
-            type_str = 'com.tailf.confm.xs.String'
-            access_methods += get_value(sub, ret_type=type_str) + \
-                set_value(sub, prefix=prefix_name, arg_type=type_str) + \
-                set_value(sub, prefix='')
+        tmp_list_confm = []
+        tmp_list_primitive = []
+        get_types(type_stmt, tmp_list_confm, tmp_list_primitive, ctx)
+        type_str1 = tmp_list_confm[0][0]
+        type_str2 = tmp_list_primitive[0][0]
+        access_methods += get_value(sub, ret_type=type_str1) + \
+            set_value(sub, prefix=prefix_name, arg_type=type_str1) + \
+            set_value(sub, prefix='', arg_type='String',
+                confm_type=type_str1)
+        if type_str2 != 'String':
+            access_methods += set_value(sub, prefix='', arg_type=type_str2,
+                confm_type=type_str1)
         if optional:
             access_methods += unset_value(sub)
         access_methods += add_value(sub, prefix_name)
@@ -665,41 +688,30 @@ def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
             mark(sub, 'delete')
     elif sub.keyword == 'leaf-list':
         type_stmt = sub.search_one('type')
+        tmp_list_confm = []
+        tmp_list_primitive = []
+        get_types(type_stmt, tmp_list_confm, tmp_list_primitive, ctx)
+        type_str1 = tmp_list_confm[0][0]
+        type_str2 = tmp_list_primitive[0][0]
         access_methods += access_methods_comment(sub, optional=False) + \
-            child_iterator(sub)
-        if type_stmt.arg == 'uint32':
-            type_str = 'com.tailf.confm.xs.UnsignedInt'
-            access_methods += set_value(sub, prefix=prefix_name,
-                arg_type=type_str) + \
-                set_value(sub, prefix='', arg_type='String',
-                    confm_type=type_str) + \
-                set_value(sub, prefix='', arg_type='long',
-                    confm_type=type_str)
-        elif type_stmt.arg == 'string':
-            type_str = 'com.tailf.confm.xs.String'
-            access_methods += set_value(sub, prefix=prefix_name,
-                arg_type=type_str) + \
-                set_value(sub, prefix='', arg_type='String',
-                    confm_type=type_str)
-        else:
-            print_warning(key=type_stmt.arg, ctx=ctx)
-            type_str = 'com.tailf.confm.xs.String'
-            access_methods += set_value(sub, prefix=prefix_name,
-                arg_type=type_str) + \
-                set_value(sub, prefix='', arg_type='String',
-                    confm_type=type_str)
+            child_iterator(sub) + \
+            set_value(sub, prefix=prefix_name, arg_type=type_str1) + \
+            set_value(sub, prefix='', arg_type='String', confm_type=type_str1)
+        if type_str2 != 'String':
+            access_methods += set_value(sub, prefix='', arg_type=type_str2,
+                confm_type=type_str1)
         access_methods += delete_stmt(sub,
-                args=[(type_str, sub.arg + 'Value')], keys=False) + \
-            delete_stmt(sub, args=[(type_str, sub.arg + 'Value')],
+                args=[(type_str1, sub.arg + 'Value')], keys=False) + \
+            delete_stmt(sub, args=[(type_str1, sub.arg + 'Value')],
                 string=True, keys=False) + \
             add_value(sub, prefix_name) + \
-            mark(sub, 'replace', arg_type=type_str) + \
+            mark(sub, 'replace', arg_type=type_str1) + \
             mark(sub, 'replace', arg_type='String') + \
-            mark(sub, 'merge', arg_type=type_str) + \
+            mark(sub, 'merge', arg_type=type_str1) + \
             mark(sub, 'merge', arg_type='String') + \
-            mark(sub, 'create', arg_type=type_str) + \
+            mark(sub, 'create', arg_type=type_str1) + \
             mark(sub, 'create', arg_type='String') + \
-            mark(sub, 'delete', arg_type=type_str) + \
+            mark(sub, 'delete', arg_type=type_str1) + \
             mark(sub, 'delete', arg_type='String')
     return access_methods, fields
 
@@ -720,7 +732,8 @@ def generate_package_info(d, stmt, ctx):
         for sub in stmt.substmts:
             # XXX refactor
             if camelize(sub.arg.capitalize()) == camelize( \
-                    directory.capitalize().replace('.', '?')).replace('?', '.'):
+                    directory.capitalize().replace('.',
+                    '?')).replace('?', '.'):
                 generate_package_info(d + '/' + directory, sub, ctx)
 
 
@@ -838,14 +851,9 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
             else:
                 docstring = '\n     * with primitive Java types.'
             for (arg_type, arg_name) in args:
-                if arg_type == 'String':
-                    decl = 'new com.tailf.confm.xs.String('
-                elif arg_type == 'long':
-                    decl = 'new com.tailf.confm.xs.UnsignedInt('
-                else:
-                    # TODO support more types!
-                    print_warning(key=arg_type, ctx=ctx)
-                    decl = 'new com.tailf.confm.xs.String('
+                tmp_list_confm = []
+                get_types(arg_type, tmp_list_confm, [], ctx)
+                decl = 'new ' + tmp_list_confm[0][0] + '('
                 values.append(decl + arg_name + 'Value)')
         for (arg_type, arg_name), value in zip(args, values):
             # TODO http://en.wikipedia.org/wiki/Loop_unswitching
@@ -1140,7 +1148,7 @@ def set_value(stmt, prefix='', arg_type='', confm_type=''):
                   to be used in the method
 
     """
-    # TODO This function is hard to read, should refactor
+    # XXX This function is hard to read, should refactor
     name = stmt.arg.capitalize()
     spec1 = spec2 = ''
     MAX_COLS = 80 - len('     * Sets the value for child ' + stmt.keyword + \
