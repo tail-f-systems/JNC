@@ -48,7 +48,7 @@ from pyang import error
 from pyang import statements
 
 
-java_reserved_words = ['abstract', 'assert', 'boolean', 'break', 'byte',
+java_reserved_words = {'abstract', 'assert', 'boolean', 'break', 'byte',
     'case', 'catch', 'char', 'class', 'const*', 'continue', 'default',
     'double', 'do', 'else', 'enum', 'extends', 'false',
     'final', 'finally', 'float', 'for', 'goto*', 'if',
@@ -56,7 +56,13 @@ java_reserved_words = ['abstract', 'assert', 'boolean', 'break', 'byte',
     'native', 'new', 'null', 'package', 'private', 'protected',
     'public', 'return', 'short', 'static', 'strictfp', 'super',
     'switch', 'synchronized', 'this', 'throw', 'throws', 'transient',
-    'true', 'try', 'void', 'volatile', 'while']
+    'true', 'try', 'void', 'volatile', 'while'}
+"""A set of identifiers that are reserved in Java"""
+
+
+outputted_warnings = []
+"""A list of warning message IDs that are used to avoid duplicate warnings"""
+# TODO Might be more efficient to use dicts instead of set and list
 
 
 def pyang_plugin_init():
@@ -142,12 +148,12 @@ class JPyangPlugin(plugin.PyangPlugin):
         directory = ctx.opts.directory
         d = directory.replace('.', '/')
         for module in modules:
-            if module.keyword == 'module' or module.keyword == 'submodule':
+            if module.keyword == 'module':
                 if not ctx.opts.no_schema:
                     # Generate external schema
                     ns = module.search_one('namespace').arg
                     name = module.search_one('prefix').arg.capitalize()
-                    write_file(d,  #XXX This might ruins the directory structure
+                    write_file(d,  # XXX This might ruin directory structure
                         name + '.schema',
                         '<schema>\n' + indent( \
                             ('<node>\n' + \
@@ -164,21 +170,21 @@ class JPyangPlugin(plugin.PyangPlugin):
                 src = 'module "' + module.arg + '", revision: "' + \
                     util.get_latest_revision(module) + '".'
                 generate_classes(module, directory, src, ctx)
-                if module.keyword == 'submodule':
-                    # TODO add support for submodule
+                if (module.keyword == 'submodule' and
+                    module.keyword not in outputted_warnings):
                     print >> sys.stderr, \
                         'Warning: no support for submodule'
+                    outputted_warnings.append(module.keyword)
                 if ctx.opts.debug or ctx.opts.verbose:
                     print 'Java classes generation COMPLETE.'
             else:
-                print >> sys.stderr, \
-                    'Error: unrecognized keyword: ' + module.keyword + \
-                    'top-level element should be module or submodule'
-                self.fatal()
+                print >> sys.stderr, 'WARNING: Top-level element "' + \
+                    module.keyword + ' ' + module.arg + '" should be a module'
         # Generate javadoc
         for module in modules:
-            module = make_valid_identifiers(module)
-            generate_package_info(d, module, ctx)
+            if module.keyword == 'module':
+                module = make_valid_identifiers(module)
+                generate_package_info(d, module, ctx)
         javadir = ctx.opts.javadoc_directory
         if javadir:
             if ctx.opts.debug or ctx.opts.verbose:
@@ -190,6 +196,9 @@ class JPyangPlugin(plugin.PyangPlugin):
                     ' >/dev/null')
             if ctx.opts.debug or ctx.opts.verbose:
                 print 'Javadoc generation COMPLETE.'
+        if len(modules) != 1 and (ctx.opts.debug or ctx.opts.verbose):
+            print >> sys.stderr, 'WARNING: Generating code for several ' + \
+                'modules has not been tested thoroughly.'
 
     def fatal(self, exitCode=1):
         """Raise an EmitError"""
@@ -323,9 +332,11 @@ def extract_keys(stmt, ctx):
             primitive_keys.append(('long', arg))
         # TODO add support for more types
         else:
-            if ctx.opts.debug or ctx.opts.verbose:
+            if ((ctx.opts.debug or ctx.opts.verbose) and
+                key_type.arg not in outputted_warnings):
                 print >> sys.stderr, 'WARNING! No support for type "' + \
                 key_type.arg + '", defaulting to string.'
+                outputted_warnings.append(key_type.arg)
             confm_keys.append(('com.tailf.confm.xs.String', arg))
             primitive_keys.append(('String', arg))
         only_strings *= primitive_keys[-1][0] == 'String'
@@ -625,9 +636,11 @@ def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
                 set_value(sub, prefix='', arg_type='String',
                     confm_type=type_str)
         else:
-            if ctx.opts.debug or ctx.opts.verbose:
+            if ((ctx.opts.debug or ctx.opts.verbose) and
+                type_stmt.arg not in outputted_warnings):
                 print >> sys.stderr, 'WARNING! No support for type "' + \
                     type_stmt.arg + '", defaulting to string.'
+                outputted_warnings.append(type_stmt.arg)
             type_str = 'com.tailf.confm.xs.String'
             access_methods += get_value(sub, ret_type=type_str) + \
                 set_value(sub, prefix=prefix_name, arg_type=type_str) + \
@@ -659,9 +672,11 @@ def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
                 set_value(sub, prefix='', arg_type='String',
                     confm_type=type_str)
         else:
-            if ctx.opts.debug or ctx.opts.verbose:
+            if ((ctx.opts.debug or ctx.opts.verbose) and
+                type_stmt.arg not in outputted_warnings):
                 print >> sys.stderr, 'WARNING! No support for type "' + \
                     type_stmt.arg + '", defaulting to string.'
+                outputted_warnings.append(type_stmt.arg)
             type_str = 'com.tailf.confm.xs.String'
             access_methods += set_value(sub, prefix=prefix_name,
                 arg_type=type_str) + \
@@ -823,11 +838,13 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
                     decl = 'new com.tailf.confm.xs.UnsignedInt('
                 else:
                     # TODO support more types!
-                    if ctx.opts.debug or ctx.opts.verbose:
+                    if ((ctx.opts.debug or ctx.opts.verbose) and
+                        arg_type not in outputted_warnings):
                         print >> sys.stderr, 'WARNING, at line ' + \
                             str(currentframe().f_lineno) + \
                             ' constructor argument' + \
                             ' defaulting to string from: ' + arg_type
+                        outputted_warnings.append(arg_type)
                     decl = 'new com.tailf.confm.xs.String('
                 values.append(decl + arg_name + 'Value)')
         for (arg_type, arg_name), value in zip(args, values):
