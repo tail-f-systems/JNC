@@ -155,7 +155,6 @@ class JPyangPlugin(plugin.PyangPlugin):
         d = directory.replace('.', '/')
         for module in modules:
             if module.keyword == 'module':
-                print_tree(module, indent='')
                 if not ctx.opts.no_schema:
                     # Generate external schema
                     ns = module.search_one('namespace').arg
@@ -231,34 +230,15 @@ def print_warning(msg='', key='', ctx=None):
     'No support for type "' + key + '", defaulting to string.' is printed.
 
     """
-#    if ((not key or key not in outputted_warnings) and
-#        (not ctx or ctx.opts.debug or ctx.opts.verbose)):
-#        if msg:
-#            print >> sys.stderr, 'WARNING: ' + msg
-#            if key:
-#                outputted_warnings.append(key)
-#        else:
-#            print_warning('No support for type "' + key + '", defaulting ' + \
-#                'to string.', key, ctx)
-
-
-def print_tree(stmt, indent=''):
-    """For debugging purposes, print a schema subtree"""
-    pass
-#    print indent + stmt.keyword + ' ' + stmt.arg
-#    children = stmt.substmts
-#    try:
-#        children.extend(stmt.i_children)
-#    except AttributeError:
-#        pass
-#    if len(children) > 20:
-#        print indent + '  TOO MANY CHILDREN'
-#        return
-#    for ch in children:
-#        if len(indent) < 10:
-#            print_tree(ch, indent + ' ')
-#        else:
-#            print indent + '  <subtree>'
+    if ((not key or key not in outputted_warnings) and
+        (not ctx or ctx.opts.debug or ctx.opts.verbose)):
+        if msg:
+            print >> sys.stderr, 'WARNING: ' + msg
+            if key:
+                outputted_warnings.append(key)
+        else:
+            print_warning('No support for type "' + key + '", defaulting ' + \
+                'to string.', key, ctx)
 
 
 def write_file(d, file_name, file_content, modules, ctx):
@@ -290,50 +270,6 @@ def write_file(d, file_name, file_content, modules, ctx):
         os.chdir(wd)
     with open(d + '/' + file_name, 'w+') as f:
         f.write(file_content)
-
-
-#def complete_search(type_stmt, ctx, stmt=None):
-#    """Searches the module that contains type_stmt and returns the first match if any, otherwise None
-#    
-#    """
-#    try:
-#        if not stmt:
-#            module = type_stmt.top
-#            if not module:
-#                module = type_stmt
-#            if module.keyword == 'submodule':
-#                belongs = module.search_one('belongs_to')
-#                for m in ctx.modules:
-#                    if ctx.modules[m] and ctx.modules[m].arg == belongs.arg:
-#                        print m.arg
-#                        module = handle
-#                        break
-#            assert module.keyword == 'module', 'module not found'
-#            complete_search(type_stmt, ctx, stmt=module)
-#        assert stmt, 'module not found'
-#        substmts = []
-#        substmts.extend(stmt.substmts)
-#        try:
-#            # TODO 
-#            substmts.extend(stmt.i_children)
-#        except AttributeError:
-#            pass
-#        for substmt in substmts:
-#            if substmt.keyword == 'typedef' and substmt.arg.endswith(type_stmt.arg):
-#                assert False, 'Yay!'
-#                return substmt
-#            if substmt.keyword == 'typedef':
-#                print substmt.keyword + ' ' + substmt.arg
-#                print '!= ' + 'typedef' + ' ' + type_stmt.arg
-#        for substmt in substmts:
-#            result = complete_search(type_stmt, ctx, stmt=substmt)
-#            if result:
-#                return result
-#        return None
-#    except Exception, ex:
-#        print str(ex)
-#        raise ex
-#        sys.exit(1)
 
 
 def get_package(stmt, ctx):
@@ -420,7 +356,7 @@ def get_types(yang_type, confm_keys, primitive_keys, ctx, arg=''):
     if yang_type in ('binary', 'instance-identifier', 'empty'):
         primitive, alt = alt, primitive
         if yang_type.arg == 'binary':
-            # confm = confm[:-3] + 'Confd.OctetList'
+            # confm = confm[:-3] + 'Confd.OctetList'  # Possible alternative...
             confm += 'Base64Binary'
         elif yang_type.arg == 'instance-identifier':
             confm = confm[:-3] + 'confd.ObjectRef'
@@ -448,12 +384,7 @@ def get_types(yang_type, confm_keys, primitive_keys, ctx, arg=''):
         primitive = 'boolean'
         # TODO Maybe this should be com.tailf.confm.confd.Decimal64
     # elif yang_type.arg == 'enumeration':  # Handled by else clause
-#        enum_stmts = yang_type.search('enum')  # Move this to generate_class
-#        primitive = yang_type.parent.keyword + ' ' + yang_type.parent.arg + ': '
-#        for stmt in enum_stmts:
-#            primitive += stmt.arg + ', '  # FIXME This is for debug
-#        primitive = primitive[:-2]
-#        print primitive
+    # elif yang_type.arg == 'bits':  # Handled by else clause
     # TODO add support for built-in datatypes bits, empty, identityref,
     # instance-identifier, leafref and union
     # TODO enumeration and derived datatypes?
