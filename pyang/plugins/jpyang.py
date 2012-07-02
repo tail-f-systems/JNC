@@ -409,6 +409,19 @@ def get_types(yang_type, ctx):
     return confm + primitive.capitalize(), primitive + alt
 
 
+def get_base_type(stmt):
+    type_stmt = stmt.search_one('type')
+    try:
+        typedef = type_stmt.i_typedef
+    except AttributeError:
+        return type_stmt
+    else:
+        if typedef is not None:
+            return get_base_type(typedef)
+        else:
+            return type_stmt
+
+
 def extract_keys(stmt, ctx):
     """Returns the key statement of stmt and lists containing tuples with the
     confm (and primitive, respectively) type of the key and its identifier.
@@ -662,8 +675,41 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
                 typedef_path = get_package(type_stmt.i_typedef, ctx)
                 generate_class(type_stmt.i_typedef, typedef_path, src,
                     typedef_path.replace('.', '/') + '/', ns, prefix_name, ctx)
-        confm, primitive = get_types(type_stmt, ctx)
-        mods = ' extends ' + confm
+        super_type = get_types(type_stmt, ctx)[0]
+        mods = ' extends ' + super_type
+        base_type = get_base_type(stmt)
+        primitive = get_types(base_type, ctx)[1]
+        constructors = typedef_constructor(stmt)
+        if primitive != 'String':
+            constructors += typedef_constructor(stmt, primitive)
+        '''
+    /**
+     * Constructor for Bogus3 object from a string.
+     * @param value Value to construct the Bogus3 from.
+     */
+    public Bogus3(String value) 
+        throws ConfMException {
+        super(value);
+        check();
+    }
+
+    /**
+     * Sets the value using a string value.
+     * @param value The value to set.
+     */
+    public void setValue(String value) 
+        throws ConfMException {
+        super.setValue(value);
+        check();
+    }
+
+    /**
+     * Checks all restrictions (if any).
+     */
+    public void check()
+        throws ConfMException {
+    }
+        '''
         # print 'typedef ' + stmt.arg
         # print 'package: ' + package + ', filename: ' + filename
         defined_types.append(stmt.arg)
@@ -959,6 +1005,30 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
         inserts + setters + '''
     }
 '''
+
+
+def typedef_constructor(stmt, arg='String'):
+    return '''
+    /**
+     * Constructor for ''' + stmt.arg + ' object from a ' + arg.lower() + '''.
+     * @param value Value to construct the ''' + stmt.arg + ''' from.
+     */
+    public ''' + stmt.arg + '(' + arg + ''' value) 
+        throws ConfMException {
+        super(value);
+        check();
+    }
+'''
+
+    '''/**
+     * Constructor for Bogus3 object from a long.
+     * @param value Value to construct the Bogus3 from.
+     */
+    public Bogus3(long value)
+        throws ConfMException {
+        super(value);
+        check();
+    }'''
 
 
 def clone(class_name, key_names=[], shallow='False'):
