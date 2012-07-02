@@ -740,6 +740,10 @@ def generate_child(sub, package, src, path, ns, prefix_name, ctx):
                 mark(sub, 'create', arg_type='String') + \
                 mark(sub, 'delete', arg_type=type_str1) + \
                 mark(sub, 'delete', arg_type='String')
+    if sub.keyword == 'type':
+        print 'type ' + sub.arg + ':'
+        for ch in sub.substmts:
+            print '  ' + ch.keyword + ' ' + ch.arg
     return access_methods, fields
 
 
