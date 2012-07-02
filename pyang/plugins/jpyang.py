@@ -619,8 +619,6 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
                 res.extend(expand(sub_children))
             return res
         expanded_i_children = expand(stmt.i_children)
-        for sub in stmt.substmts:
-                print 'Not in i_children: ' + sub.keyword + ' ' + sub.arg
     for sub in stmt.substmts:
         # TODO Avoid quadratic time duplication check
         # FIXME Possible bug in 
