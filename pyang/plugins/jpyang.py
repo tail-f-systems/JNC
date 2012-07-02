@@ -59,6 +59,13 @@ java_reserved_words = {'abstract', 'assert', 'boolean', 'break', 'byte',
 """A set of identifiers that are reserved in Java"""
 
 
+defined_types = ['empty', 'int8', 'int16', 'int32', 'int64', 'uint8', 'uint16',
+    'uint32', 'uint64', 'binary', 'bits', 'boolean', 'decimal64',
+    'enumeration', 'identityref', 'instance-identifier', 'leafref', 'string', 
+    'union']
+"""A list of types that are built in or for which a generated class exists"""
+
+
 outputted_warnings = []
 """A list of warning message IDs that are used to avoid duplicate warnings"""
 # TODO Might be more efficient to use dicts instead of set and list for these
@@ -590,21 +597,40 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
     access_methods = constructors = cloners = support_methods = ''
     fields = []
     try:
+        i_children_exists = stmt.i_children != None and stmt.i_children != []
+    except AttributeError:
+        i_children_exists = False
+    # TODO preserve correct order in generated class
+    if i_children_exists:
         for ch in stmt.i_children:
-            if ch in stmt.substmts:
-                continue
             tmp_access_methods, tmp_fields = generate_child(ch,
                 package, src, path, ns, prefix_name, ctx)
             access_methods += tmp_access_methods
             fields.extend(tmp_fields)
-    except AttributeError:
-        pass
-    # TODO preserve correct order in generated class
-    for sub in stmt.substmts:
-        tmp_access_methods, tmp_fields = generate_child(sub, package,
-            src, path, ns, prefix_name, ctx)
-        access_methods += tmp_access_methods
-        fields.extend(tmp_fields)
+            if ch.keyword == 'key':
+                print 'key ' + ch.arg
+        def expand(children):
+            res = []
+            res.extend(children)
+            for ch in children:
+                sub_children = []
+                try:
+                    sub_children.extend(ch.i_children)
+                except AttributeError:
+                    pass
+                sub_children.extend(ch.substmts)
+                res.extend(expand(sub_children))
+            return res
+        expanded_i_children = expand(stmt.i_children)
+        for sub in stmt.substmts:
+            if sub not in expanded_i_children:
+                print 'Not in i_children: ' + sub.keyword + ' ' + sub.arg
+    else:
+        for sub in stmt.substmts:
+            tmp_access_methods, tmp_fields = generate_child(sub, package,
+                src, path, ns, prefix_name, ctx)
+            access_methods += tmp_access_methods
+            fields.extend(tmp_fields)
     if ctx.opts.verbose:
         print 'Generating Java class "' + filename + '"...'
     if filter(is_container, stmt.substmts):  # TODO Verify correctness of cond.
@@ -740,10 +766,12 @@ def generate_child(sub, package, src, path, ns, prefix_name, ctx):
                 mark(sub, 'create', arg_type='String') + \
                 mark(sub, 'delete', arg_type=type_str1) + \
                 mark(sub, 'delete', arg_type='String')
-    if sub.keyword == 'type':
+    elif sub.keyword == 'type':
         print 'type ' + sub.arg + ':'
         for ch in sub.substmts:
             print '  ' + ch.keyword + ' ' + ch.arg
+    else:
+        pass  # print '(' + sub.keyword + ' ' + sub.arg + ')'
     return access_methods, fields
 
 
