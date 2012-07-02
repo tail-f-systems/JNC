@@ -665,86 +665,81 @@ def generate_child(sub, package, src, path, ns, prefix_name, ctx):
     if sub.keyword in ['list', 'container']:
         generate_class(sub, package + '.' + sub.parent.arg, src,
             path + sub.parent.arg + '/', ns, prefix_name, ctx)
-    if sub.keyword == 'list':
-        key, _, confm_keys, _ = extract_keys(sub, ctx)
-        access_methods += access_methods_comment(sub) + \
-        get_stmt(sub, confm_keys) + \
-        get_stmt(sub, confm_keys, string=True) + \
-        child_iterator(sub) + \
-        add_stmt(sub, args=[(sub.arg, sub.arg)]) + \
-        add_stmt(sub, args=confm_keys) + \
-        add_stmt(sub, args=confm_keys, string=True) + \
-        add_stmt(sub, args=[]) + \
-        delete_stmt(sub, args=confm_keys) + \
-        delete_stmt(sub, args=confm_keys, string=True)
-    elif sub.keyword == 'container':
-        fields.append(sub.arg)
-        access_methods += access_methods_comment(sub) + \
-        child_field(sub) + \
-        add_stmt(sub, args=[(sub.parent.arg + '.' + sub.arg, sub.arg)],
-            field=True) + \
-        add_stmt(sub, args=[], field=True) + \
-        delete_stmt(sub)
-    elif sub.keyword == 'leaf':
-        key = sub.parent.search_one('key')
-        if key is not None and sub.arg in key.arg.split(' '):
-            temp = statements.Statement(None, None, None, 'key',
-                arg=sub.arg)
-            optional = False
-            # Pass temp to avoid multiple keys
-            access_methods += access_methods_comment(temp, optional)
-        else:
-            optional = True
-            access_methods += access_methods_comment(sub, optional)
-            # TODO ensure that the leaf is truly optional
-        type_stmt = sub.search_one('type')
-        tmp_list_confm = []
-        tmp_list_primitive = []
-        get_types(type_stmt, tmp_list_confm, tmp_list_primitive, ctx)
-        type_str1 = tmp_list_confm[0][0]
-        type_str2 = tmp_list_primitive[0][0]
-        access_methods += get_value(sub, ret_type=type_str1) + \
-            set_value(sub, prefix=prefix_name, arg_type=type_str1) + \
-            set_value(sub, prefix='', arg_type='String',
-                confm_type=type_str1)
-        if type_str2 != 'String':
-            access_methods += set_value(sub, prefix='', arg_type=type_str2,
-                confm_type=type_str1)
-        if optional:
-            access_methods += unset_value(sub)
-        access_methods += add_value(sub, prefix_name)
-        if optional:
-            access_methods += mark(sub, 'replace') + \
-            mark(sub, 'merge') + \
-            mark(sub, 'create') + \
-            mark(sub, 'delete')
-    elif sub.keyword == 'leaf-list':
-        type_stmt = sub.search_one('type')
-        tmp_list_confm = []
-        tmp_list_primitive = []
-        get_types(type_stmt, tmp_list_confm, tmp_list_primitive, ctx)
-        type_str1 = tmp_list_confm[0][0]
-        type_str2 = tmp_list_primitive[0][0]
-        access_methods += access_methods_comment(sub, optional=False) + \
+        if sub.keyword == 'list':
+            key, _, confm_keys, _ = extract_keys(sub, ctx)
+            access_methods += access_methods_comment(sub) + \
+            get_stmt(sub, confm_keys) + \
+            get_stmt(sub, confm_keys, string=True) + \
             child_iterator(sub) + \
-            set_value(sub, prefix=prefix_name, arg_type=type_str1) + \
-            set_value(sub, prefix='', arg_type='String', confm_type=type_str1)
-        if type_str2 != 'String':
-            access_methods += set_value(sub, prefix='', arg_type=type_str2,
-                confm_type=type_str1)
-        access_methods += delete_stmt(sub,
-                args=[(type_str1, sub.arg + 'Value')], keys=False) + \
-            delete_stmt(sub, args=[(type_str1, sub.arg + 'Value')],
-                string=True, keys=False) + \
-            add_value(sub, prefix_name) + \
-            mark(sub, 'replace', arg_type=type_str1) + \
-            mark(sub, 'replace', arg_type='String') + \
-            mark(sub, 'merge', arg_type=type_str1) + \
-            mark(sub, 'merge', arg_type='String') + \
-            mark(sub, 'create', arg_type=type_str1) + \
-            mark(sub, 'create', arg_type='String') + \
-            mark(sub, 'delete', arg_type=type_str1) + \
-            mark(sub, 'delete', arg_type='String')
+            add_stmt(sub, args=[(sub.arg, sub.arg)]) + \
+            add_stmt(sub, args=confm_keys) + \
+            add_stmt(sub, args=confm_keys, string=True) + \
+            add_stmt(sub, args=[]) + \
+            delete_stmt(sub, args=confm_keys) + \
+            delete_stmt(sub, args=confm_keys, string=True)
+        elif sub.keyword == 'container':
+            fields.append(sub.arg)
+            access_methods += access_methods_comment(sub) + \
+            child_field(sub) + \
+            add_stmt(sub, args=[(sub.parent.arg + '.' + sub.arg, sub.arg)],
+                field=True) + \
+            add_stmt(sub, args=[], field=True) + \
+            delete_stmt(sub)
+    elif sub.keyword in ['leaf', 'leaf-list']:
+        type_stmt = sub.search_one('type')
+        tmp_list_confm = []
+        tmp_list_primitive = []
+        get_types(type_stmt, tmp_list_confm, tmp_list_primitive, ctx)
+        type_str1 = tmp_list_confm[0][0]
+        type_str2 = tmp_list_primitive[0][0]
+        if sub.keyword == 'leaf':
+            key = sub.parent.search_one('key')
+            if key is not None and sub.arg in key.arg.split(' '):
+                temp = statements.Statement(None, None, None, 'key',
+                    arg=sub.arg) #TODO Copy sub instead?
+                optional = False
+                # Pass temp to avoid multiple keys
+                access_methods += access_methods_comment(temp, optional)
+            else:
+                optional = True
+                access_methods += access_methods_comment(sub, optional)
+                # TODO ensure that the leaf is truly optional
+            access_methods += get_value(sub, ret_type=type_str1) + \
+                set_value(sub, prefix=prefix_name, arg_type=type_str1) + \
+                set_value(sub, prefix='', arg_type='String',
+                    confm_type=type_str1)
+            if type_str2 != 'String':
+                access_methods += set_value(sub, prefix='', arg_type=type_str2,
+                    confm_type=type_str1)
+            if optional:
+                access_methods += unset_value(sub)
+            access_methods += add_value(sub, prefix_name)
+            if optional:
+                access_methods += mark(sub, 'replace') + \
+                mark(sub, 'merge') + \
+                mark(sub, 'create') + \
+                mark(sub, 'delete')
+        elif sub.keyword == 'leaf-list':
+            access_methods += access_methods_comment(sub, optional=False) + \
+                child_iterator(sub) + \
+                set_value(sub, prefix=prefix_name, arg_type=type_str1) + \
+                set_value(sub, prefix='', arg_type='String', confm_type=type_str1)
+            if type_str2 != 'String':
+                access_methods += set_value(sub, prefix='', arg_type=type_str2,
+                    confm_type=type_str1)
+            access_methods += delete_stmt(sub,
+                    args=[(type_str1, sub.arg + 'Value')], keys=False) + \
+                delete_stmt(sub, args=[(type_str1, sub.arg + 'Value')],
+                    string=True, keys=False) + \
+                add_value(sub, prefix_name) + \
+                mark(sub, 'replace', arg_type=type_str1) + \
+                mark(sub, 'replace', arg_type='String') + \
+                mark(sub, 'merge', arg_type=type_str1) + \
+                mark(sub, 'merge', arg_type='String') + \
+                mark(sub, 'create', arg_type=type_str1) + \
+                mark(sub, 'create', arg_type='String') + \
+                mark(sub, 'delete', arg_type=type_str1) + \
+                mark(sub, 'delete', arg_type='String')
     return access_methods, fields
 
 
