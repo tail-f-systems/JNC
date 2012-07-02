@@ -387,9 +387,9 @@ def get_types(yang_type, confm_keys, primitive_keys, ctx, arg=''):
             primitive = 'int'
     elif yang_type.arg == 'decimal64':
         primitive = 'double'
+        # TODO Maybe this should be com.tailf.confm.confd.Decimal64
     elif yang_type.arg == 'boolean':
         primitive = 'boolean'
-        # TODO Maybe this should be com.tailf.confm.confd.Decimal64
     # elif yang_type.arg == 'enumeration':  # Handled by else clause
     # elif yang_type.arg == 'bits':  # Handled by else clause
     # TODO add support for built-in datatypes bits, empty, identityref,
@@ -557,8 +557,7 @@ def generate_classes(module, package, src, ctx):
         ns_arg = '<unknown/prefix: ' + prefix.arg + '>'
     (filename, name) = extract_names(prefix.arg)
     for stmt in module.substmts:
-        if (stmt.keyword == 'container' or
-            stmt.keyword == 'list'):  # TODO add support for submodule, etc.
+        if stmt.keyword in ['container', 'list']:  # TODO other top-level stmts
             generate_class(stmt, package, src, '', ns_arg, name,
                 top_level=True, ctx=ctx)
     if ctx.opts.verbose:
@@ -596,19 +595,17 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
     (filename, name) = extract_names(stmt.arg)
     access_methods = constructors = cloners = support_methods = ''
     fields = []
-    try:
+    i_children_exists = hasattr(stmt, 'i_children')
+    if i_children_exists:
         i_children_exists = stmt.i_children != None and stmt.i_children != []
-    except AttributeError:
-        i_children_exists = False
     # TODO preserve correct order in generated class
+    expanded_i_children = []
     if i_children_exists:
         for ch in stmt.i_children:
             tmp_access_methods, tmp_fields = generate_child(ch,
                 package, src, path, ns, prefix_name, ctx)
             access_methods += tmp_access_methods
             fields.extend(tmp_fields)
-            if ch.keyword == 'key':
-                print 'key ' + ch.arg
         def expand(children):
             res = []
             res.extend(children)
@@ -623,10 +620,11 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
             return res
         expanded_i_children = expand(stmt.i_children)
         for sub in stmt.substmts:
-            if sub not in expanded_i_children:
                 print 'Not in i_children: ' + sub.keyword + ' ' + sub.arg
-    else:
-        for sub in stmt.substmts:
+    for sub in stmt.substmts:
+        # TODO Avoid quadratic time duplication check
+        # FIXME Possible bug in 
+        if sub not in expanded_i_children:
             tmp_access_methods, tmp_fields = generate_child(sub, package,
                 src, path, ns, prefix_name, ctx)
             access_methods += tmp_access_methods
