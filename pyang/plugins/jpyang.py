@@ -352,15 +352,16 @@ def make_valid_identifiers(stmt):
     return stmt
 
 
-def get_types(yang_type, confm_keys, primitive_keys, ctx, arg=''):
-    """Appends confm and Java a tuple with primitive counterparts of yang_type
-    to confm_keys and primitive_keys, respectively, and arg as 2nd component.
+def get_types(yang_type, ctx):
+    """Returns confm and primitive counterparts of the type statement yang_type
 
     """
     confm = 'com.tailf.confm.xs.'
     primitive = 'String'
     alt = ''
-    if yang_type in ('binary', 'instance-identifier', 'empty'):
+    if yang_type.arg == 'string':
+        pass  # String is the default
+    elif yang_type in ('binary', 'instance-identifier', 'empty'):
         primitive, alt = alt, primitive
         if yang_type.arg == 'binary':
             # confm = confm[:-3] + 'Confd.OctetList'  # Possible alternative...
@@ -403,9 +404,9 @@ def get_types(yang_type, confm_keys, primitive_keys, ctx, arg=''):
             print_warning(key=type_id, ctx=ctx)
         else:
             package = get_package(typedef, ctx)
-            primitive = package + ' ' + yang_type.arg
-    confm_keys.append((confm + primitive.capitalize(), arg))
-    primitive_keys.append((primitive + alt, arg))
+            confm = package + '.'
+            primitive = yang_type.arg
+    return confm + primitive.capitalize(), primitive + alt
 
 
 def extract_keys(stmt, ctx):
@@ -422,7 +423,9 @@ def extract_keys(stmt, ctx):
     only_strings = True
     for arg in key.arg.split(' '):
         key_type = stmt.search_one('leaf', arg).search_one('type')
-        get_types(key_type, confm_keys, primitive_keys, ctx, arg)
+        confm, primitive = get_types(key_type, ctx)
+        confm_keys.append((confm, arg))
+        primitive_keys.append((primitive, arg))
         only_strings *= primitive_keys[-1][0] == 'String'
         # XXX 'b *= a' is syntactically equivalent to b = b and a
     return key, only_strings, confm_keys, primitive_keys
@@ -595,9 +598,10 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
     (filename, name) = extract_names(stmt.arg)
     access_methods = constructors = cloners = support_methods = ''
     fields = []
-    i_children_exists = hasattr(stmt, 'i_children')
-    if i_children_exists:
-        i_children_exists = stmt.i_children != None and stmt.i_children != []
+    mods = ' extends Container'
+    i_children_exists = (hasattr(stmt, 'i_children') 
+        and stmt.i_children != None 
+        and stmt.i_children != [])
     # TODO preserve correct order in generated class
     expanded_i_children = []
     if i_children_exists:
@@ -621,7 +625,6 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
         expanded_i_children = expand(stmt.i_children)
     for sub in stmt.substmts:
         # TODO Avoid quadratic time duplication check
-        # FIXME Possible bug in 
         if sub not in expanded_i_children:
             tmp_access_methods, tmp_fields = generate_child(sub, package,
                 src, path, ns, prefix_name, ctx)
@@ -652,6 +655,18 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
         cloners = clone(name, map(str.capitalize, key.arg.split(' ')),
             shallow=False) + \
             clone(name, map(str.capitalize, key.arg.split(' ')), shallow=True)
+    elif stmt.keyword == 'typedef':
+        type_stmt = stmt.search_one('type')
+        if type_stmt.i_typedef:
+            if type_stmt.i_typedef.arg not in defined_types:
+                typedef_path = get_package(type_stmt.i_typedef, ctx)
+                generate_class(type_stmt.i_typedef, typedef_path, src,
+                    typedef_path.replace('.', '/') + '/', ns, prefix_name, ctx)
+        confm, primitive = get_types(type_stmt, ctx)
+        mods = ' extends ' + confm
+        # print 'typedef ' + stmt.arg
+        # print 'package: ' + package + ', filename: ' + filename
+        defined_types.append(stmt.arg)
     write_file(package, filename,
         java_class(filename, package,
             ['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
@@ -660,16 +675,17 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
             '" element\n * from the namespace ' + ns,
             constructors + cloners + key_names(stmt) +
             children_names(stmt) + access_methods + support_methods,
-            # TODO add getters, setters, etc. for children stmts
             source=src,
-            modifiers=' extends Container'
+            modifiers=mods
         ),
         [stmt],
         ctx)
 
 
 def generate_child(sub, package, src, path, ns, prefix_name, ctx):
-    """
+    """Returns a tuple of two strings representing java methods and fields
+    corresponding to access methods to the sub statement. Uses mutual recursion
+    with generate_class.
 
     sub         -- A data model subtree statement. Its parent most not be None.
     package     -- Name of Java package, also used as path to where files
@@ -709,11 +725,14 @@ def generate_child(sub, package, src, path, ns, prefix_name, ctx):
             delete_stmt(sub)
     elif sub.keyword in ['leaf', 'leaf-list']:
         type_stmt = sub.search_one('type')
-        tmp_list_confm = []
-        tmp_list_primitive = []
-        get_types(type_stmt, tmp_list_confm, tmp_list_primitive, ctx)
-        type_str1 = tmp_list_confm[0][0]
-        type_str2 = tmp_list_primitive[0][0]
+        if type_stmt.i_typedef:
+            if type_stmt.i_typedef.arg not in defined_types:
+                typedef_path = get_package(type_stmt.i_typedef, ctx)
+                generate_class(type_stmt.i_typedef, 
+                    typedef_path, src,
+                    typedef_path.replace('.', '/') + '/', ns,
+                    prefix_name, ctx)
+        type_str1, type_str2 = get_types(type_stmt, ctx)
         if sub.keyword == 'leaf':
             key = sub.parent.search_one('key')
             if key is not None and sub.arg in key.arg.split(' '):
@@ -762,12 +781,12 @@ def generate_child(sub, package, src, path, ns, prefix_name, ctx):
                 mark(sub, 'create', arg_type='String') + \
                 mark(sub, 'delete', arg_type=type_str1) + \
                 mark(sub, 'delete', arg_type='String')
-    elif sub.keyword == 'type':
-        print 'type ' + sub.arg + ':'
-        for ch in sub.substmts:
-            print '  ' + ch.keyword + ' ' + ch.arg
-    else:
-        pass  # print '(' + sub.keyword + ' ' + sub.arg + ')'
+#    elif sub.keyword == 'type':
+#        print 'type ' + sub.arg + ':'
+#        for ch in sub.substmts:
+#            print '  ' + ch.keyword + ' ' + ch.arg
+#    else:
+#        pass  # print '(' + sub.keyword + ' ' + sub.arg + ')'
     return access_methods, fields
 
 
