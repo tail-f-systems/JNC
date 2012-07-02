@@ -374,18 +374,22 @@ def get_types(yang_type, ctx):
             'uint16', 'uint32', 'uint64'):
         if yang_type.arg[:1] == 'u':
             confm += 'Unsigned'
-        if yang_type.arg[-1:] == '8':
-            primitive = 'byte'
-        elif yang_type.arg[-2:] == '16':
-            primitive = 'short'
+            integer_type = ['long', 'long', 'int', 'short']
+        else:
+            integer_type = ['long', 'int', 'short', 'byte']
+        # XXX One might want to implement uint8 as short instead of byte, etc.
+        if yang_type.arg[-2:] == '64':
+            primitive = integer_type[0]
         elif yang_type.arg[-2:] == '32':
-            primitive = 'int'
-        elif yang_type.arg[-2:] == '64':
-            primitive = 'long'
+            primitive = integer_type[1]
+        elif yang_type.arg[-2:] == '16':
+            primitive = integer_type[2]
+        elif yang_type.arg[-1:] == '8':
+            primitive = integer_type[3]
         else:
             print_warning('Parsed ' + yang_type.arg + ' as an integer.',
                 key=yang_type.arg, ctx=ctx)
-            primitive = 'int'
+            primitive = 'long'
     elif yang_type.arg == 'decimal64':
         primitive = 'double'
         # TODO Maybe this should be com.tailf.confm.confd.Decimal64
