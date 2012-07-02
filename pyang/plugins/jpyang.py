@@ -593,7 +593,7 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
         for ch in stmt.i_children:
             if ch in stmt.substmts:
                 continue
-            tmp_access_methods, tmp_fields = generate_child(stmt, ch,
+            tmp_access_methods, tmp_fields = generate_child(ch,
                 package, src, path, ns, prefix_name, ctx)
             access_methods += tmp_access_methods
             fields.extend(tmp_fields)
@@ -601,7 +601,7 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
         pass
     # TODO preserve correct order in generated class
     for sub in stmt.substmts:
-        tmp_access_methods, tmp_fields = generate_child(stmt, sub, package,
+        tmp_access_methods, tmp_fields = generate_child(sub, package,
             src, path, ns, prefix_name, ctx)
         access_methods += tmp_access_methods
         fields.extend(tmp_fields)
@@ -646,11 +646,10 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
         ctx)
 
 
-def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
+def generate_child(sub, package, src, path, ns, prefix_name, ctx):
     """
 
-    stmt        -- Parent
-    sub         -- A data model subtree
+    sub         -- A data model subtree statement. Its parent most not be None.
     package     -- Name of Java package, also used as path to where files
                    should be written
     src         -- The .yang file from which the module was parsed, or the
@@ -664,8 +663,8 @@ def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
     access_methods = ''
     fields = []
     if sub.keyword in ['list', 'container']:
-        generate_class(sub, package + '.' + stmt.arg, src,
-            path + stmt.arg + '/', ns, prefix_name, ctx)
+        generate_class(sub, package + '.' + sub.parent.arg, src,
+            path + sub.parent.arg + '/', ns, prefix_name, ctx)
     if sub.keyword == 'list':
         key, _, confm_keys, _ = extract_keys(sub, ctx)
         access_methods += access_methods_comment(sub) + \
@@ -679,15 +678,15 @@ def generate_child(stmt, sub, package, src, path, ns, prefix_name, ctx):
         delete_stmt(sub, args=confm_keys) + \
         delete_stmt(sub, args=confm_keys, string=True)
     elif sub.keyword == 'container':
-        fields.append(sub.arg)  # TODO might have to append more fields
+        fields.append(sub.arg)
         access_methods += access_methods_comment(sub) + \
         child_field(sub) + \
-        add_stmt(sub, args=[(stmt.arg + '.' + sub.arg, sub.arg)],
+        add_stmt(sub, args=[(sub.parent.arg + '.' + sub.arg, sub.arg)],
             field=True) + \
         add_stmt(sub, args=[], field=True) + \
         delete_stmt(sub)
     elif sub.keyword == 'leaf':
-        key = stmt.search_one('key')
+        key = sub.parent.search_one('key')
         if key is not None and sub.arg in key.arg.split(' '):
             temp = statements.Statement(None, None, None, 'key',
                 arg=sub.arg)
