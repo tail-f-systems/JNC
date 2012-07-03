@@ -1,0 +1,24 @@
+submodule foo-topology-types {
+    belongs-to foo-topology {
+        prefix foo-topology;
+    }
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    typedef nameType {
+        type string {
+            length "0..63";
+        }
+    }
+
+    typedef heartBeatIntervalType {
+        type uint16 {
+            range "0..3600";
+        }
+    }
+}

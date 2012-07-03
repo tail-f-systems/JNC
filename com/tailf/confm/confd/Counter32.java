@@ -35,7 +35,6 @@ public class Counter32 extends com.tailf.confm.xs.UnsignedInt implements Seriali
         check();
     }
 
-
     /**
      * Sets the value.
      */
@@ -54,6 +53,5 @@ public class Counter32 extends com.tailf.confm.xs.UnsignedInt implements Seriali
 
     private void check() throws ConfMException {
     }
-
 
 }

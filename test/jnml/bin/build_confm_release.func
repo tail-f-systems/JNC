@@ -1,0 +1,189 @@
+#!/bin/sh
+
+########################################################################################
+#                                                                                      #
+# This script should not be invoked directly; it is called from ./bin/build_release.sh #
+#                                                                                      #
+########################################################################################
+
+INCLUDE_TESTS="1-element 2-session 3-confdsession 4-notifications \
+               5-confm 6-readwrite 10-dhcp 11-yang"
+
+
+. ./bin/build_confd.func
+
+set_defaults ()
+{
+    vsn=`cat jnml/vsn.mk | grep "CONFM" | awk -F= '{print $2}'`
+    build_confdc=1
+    build_examples=1
+    if [ -z "${build_otp}" ]; then
+        build_otp=1
+    fi
+    if [ "x$build_devtools_bundle" = "x" ]; then
+        build_devtools_bundle=1
+    fi
+    skip_snmp=1
+    skip_js=1
+    skip_man=0
+    skip_pyang=0
+}
+
+
+build_confm_product ()
+{
+    ant -f jnml/build.xml clean
+    if [ $build_doc_bundle != "only" ]; then
+	ant -f jnml/build.xml clean inm confm
+    fi
+    
+    if [ $build_doc_bundle != "no" ]; then
+        (cd doc && $MAKE confm_release) || exit 1
+    fi
+}
+
+build_product ()
+{
+    build_confd
+    build_confm_product
+}
+
+
+
+tar_opts="--owner=0 --group=0"
+native_system=`uname -s | tr '[A-Z]' '[a-z]'`
+case $native_system in
+    darwin)
+        tar_opts=;;
+esac
+
+
+copy_confm_to_target()
+{
+    cp jnml/system/README.confm.target ${target}/README
+    cp jnml/LICENSE ${target}
+    cp jnml/system/CHANGES ${target}/
+    
+    mkdir -p ${target}/jar
+    mkdir -p ${target}/jar/ganymed/
+    cp jnml/ganymed/*.txt ${target}/jar/ganymed/
+    cp jnml/ganymed/ganymed-ssh2-build251beta1.jar ${target}/jar/ganymed/
+    cp jnml/build/jar/INM.jar ${target}/jar
+    cp jnml/build/jar/ConfM.jar ${target}/jar
+    
+    # remove any Makefiles in the install structure unless they are under src dir
+    # (Solaris find doesn't have -path)
+    (cd ${target} && dirs=`ls | grep -v '^src$'` && \
+        find $dirs -name Makefile -exec rm -rf {} \;)
+     cp jnml/LICENSE ${target}/LICENSE
+    
+    # now copy the source code and the tests
+     mkdir -p ${target}/src/confm/test
+     if [ ! "${skip_src}" = "1" ]; then
+         cp -fr jnml/src ${target}/src/confm
+         cp jnml/README.srcinstall ${target}/src/confm/README
+         cp -fr jnml/ganymed ${target}/src/confm
+     fi
+     for tst in `echo ${INCLUDE_TESTS}`; do
+         cp -fr jnml/test/${tst} ${target}/src/confm/test
+     done
+     cp -fr jnml/test/Makefile ${target}/src/confm/test
+     cp -fr jnml/test/include.mk.target ${target}/src/confm/test/include.mk
+     cp -fr jnml/test/subdirs.mk ${target}/src/confm/test
+     cp jnml/build.xml ${target}/src/confm
+
+     cp jnml/confmrc ${target}/
+     copy_pyang
+}
+
+copy_confm_examples_to_target()
+{
+    mkdir -p ${target}/examples
+    cp -fr jnml/examples/confm_intro ${target}/examples
+    cp -fr jnml/examples/rpc_and_actions ${target}/examples
+    cp -fr jnml/examples/inm_intro ${target}/examples
+    cp -fr jnml/examples/dhcp ${target}/examples
+    cp -fr jnml/examples/VpnApp ${target}/examples
+    cp -fr jnml/examples/revisioning ${target}/examples
+    cp -fr examples.confspec/demo/quagga/src/quagga/cs ${target}/examples/VpnApp/model/
+    find ${target}/examples -name '*.java' | xargs perl -ni -e 'print unless /M3_/'
+}
+
+delete_unwanted() 
+{
+        # remove any .svn directory in the target structure
+    find ${target} -depth -name .svn -exec rm -rf {} \;
+    rm -f ${target}/lib/confd/priv/confd/cmdwrapper  
+    rm -f ${target}/lib/confd/priv/confd/cmdptywrapper
+    for d in `echo netconf confd mibs config aaa webspec ncspec clispec confd_cfg`; do
+        rm -rf ${target}/src/confd/schema/ns/${d}
+    done
+    rm -rf ${target}/src/confd/aaa/
+    rm -rf ${target}/src/confd/build/
+    rm -rf ${target}/etc
+}
+
+build_packages ()
+{
+
+    if [  "${skip_src}" = "1" ]; then
+        CONFM_PACKAGE="confm-${vsn}.${kernel}.${machine}"
+        DEVTOOLS_PACKAGE="confm-${vsn}.devtools.${kernel}.${machine}"
+    else
+        CONFM_PACKAGE="confm-${vsn}.src.${kernel}.${machine}"
+        DEVTOOLS_PACKAGE="confm-${vsn}.src.devtools.${kernel}.${machine}"
+    fi
+    JAR_PACKAGE="confm-${vsn}.jars"
+    DOC_PACKAGE="confm-${vsn}.doc.tar.gz"
+
+    mkdir -p ${target}
+
+    if [ "$build_doc_bundle" != "only" ]; then
+        copy_devtools_files
+        find ${target} -depth -name .svn -exec rm -rf {} \;
+	if [ $build_devtools_bundle != "no" ]; then
+            echo "Creating devtools package..."
+            (
+		cd ${pkgdir}
+		$TAR -cf ${DEVTOOLS_PACKAGE}.tar ${tar_opts} ${product}-${vsn} && \
+		    gzip -9 ${DEVTOOLS_PACKAGE}.tar
+		) || exit 1
+	fi
+
+        cp LICENSE.confdc ${target}
+
+	copy_confm_to_target
+    
+        if [ "$build_examples" != "0" ]; then
+	    copy_confm_examples_to_target
+        fi
+    fi
+    
+    delete_unwanted;
+
+    (
+        cd ${pkgdir}
+    
+	if [ $build_doc_bundle != "no" ]; then
+            echo "Copying doc package to target dir..."
+            cp ../doc/${DOC_PACKAGE} .
+	fi
+	
+	if [ $build_doc_bundle != "only" ]; then
+	    if [ $build_lib_bundle = "yes" ]; then
+                echo "Creating JAR package..."
+                ($TAR -cf ${JAR_PACKAGE}.tar ${tar_opts} ${product}-${vsn}/jar && \
+    		    gzip -9 ${JAR_PACKAGE}.tar) || exit 1
+	    fi
+            echo "Creating complete product package..."
+            ($TAR -cf ${CONFM_PACKAGE}.tar ${tar_opts} ${product}-${vsn} && \
+		gzip -9 ${CONFM_PACKAGE}.tar) || exit 1
+	fi
+    )
+}
+
+
+build_test_packages ()
+{
+   echo "Test packet for CONFM not supported"
+}

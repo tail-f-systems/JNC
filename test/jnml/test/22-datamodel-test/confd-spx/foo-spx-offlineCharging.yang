@@ -1,0 +1,60 @@
+submodule foo-spx-offlineCharging {
+    belongs-to foo-spx {
+        prefix foo-spx;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    include foo-spx-types;
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    container offlineCharging {
+        tailf:info "Offline charging related configuration";
+
+        list client {
+            key ipAddr;
+            tailf:info "Offline charging client configuration (faces CAE)";
+
+            leaf ipAddr {
+                type inet:ipv4-address;
+                tailf:info "source IP address to be used while connecting to CAE";
+            }
+            leaf fileAccessMethod {
+                type fileAccessMethodType;
+                mandatory true;
+                tailf:info "file access method to download files from CAE";
+            }
+        }
+
+        list server {
+            key "ipAddr port";
+            tailf:info "Offline charging server configuration (faces Billing System)";
+
+            leaf ipAddr {
+                type inet:ipv4-address;
+                tailf:info "file server IP address";
+            }
+            leaf port {
+                type inet:port-number;
+                tailf:info "file server port number";
+            }
+            leaf fileAccessMethod {
+                type fileAccessMethodType;
+                mandatory true;
+                tailf:info "file server type";
+            }
+        }
+    }
+}

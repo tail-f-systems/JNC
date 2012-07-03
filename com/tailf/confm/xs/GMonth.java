@@ -38,7 +38,6 @@ public class GMonth implements Serializable {
     public GMonth() {
     }
 
-
     /**
      * Constructor for "xs:gMonth" from a String in the format
      * "--MM".
@@ -75,14 +74,12 @@ public class GMonth implements Serializable {
         throwException( month<1 );
     }
 
-
     public java.lang.String toString() {
         java.lang.String s = new java.lang.String();
         s = s + "--" + Date.two_digits(month);
         if (timezoned) s = s + Date.timezone_toString(tz_neg,tz_hh,tz_mm);
         return s;
     }
-
 
     /**
      * Checks if the value space of two GMonth objects
@@ -97,7 +94,6 @@ public class GMonth implements Serializable {
             return true;
         return false;
     }
-
 
     /**
      * Checks if the value space of two GMonth objects
@@ -116,7 +112,6 @@ public class GMonth implements Serializable {
         return toString().compareTo( value.toString());
     }
 
-
     /**
      * Returns a Calendar object from the GMonth.
      *
@@ -134,7 +129,6 @@ public class GMonth implements Serializable {
         return c;
     }
 
-
     /**
      * Returns the current time, for this GMonth object.
      *
@@ -142,7 +136,6 @@ public class GMonth implements Serializable {
     public java.util.Date getTime() {
         return getCalendar().getTime();
     }
-
 
     /**
      * Help method to parse and set the value.
@@ -182,7 +175,6 @@ public class GMonth implements Serializable {
             throwException(true, value);
         }
     }
-
 
     /** ---------- Restrictions ---------- */
 
@@ -231,7 +223,6 @@ public class GMonth implements Serializable {
         throw new ConfMException(ConfMException.BAD_VALUE,this);
     }
 
-
     /**
      * Assert that the value is 'false'
      * Throw an ConfMException otherwise
@@ -240,6 +231,5 @@ public class GMonth implements Serializable {
         if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,value);
     }
-
 
 }

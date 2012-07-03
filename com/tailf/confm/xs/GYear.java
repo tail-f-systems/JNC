@@ -46,7 +46,6 @@ public class GYear implements Serializable {
     public GYear() {
     }
 
-
     /**
      * Constructor for xs:date from a String in the format
      * "CCYY-MM-DD".
@@ -82,7 +81,6 @@ public class GYear implements Serializable {
     private void check() throws ConfMException {
     }
 
-
     public java.lang.String toString() {
         java.lang.String s = new java.lang.String();
         if (neg) s = s + "-";
@@ -91,7 +89,6 @@ public class GYear implements Serializable {
             s = s + Date.timezone_toString(tz_neg,tz_hh,tz_mm);
         return s;
     }
-
 
     /**
      * Checks if the value space of two GYear objects
@@ -106,7 +103,6 @@ public class GYear implements Serializable {
             return true;
         return false;
     }
-
 
     /**
      * Checks if the value space of two GYear objects
@@ -125,7 +121,6 @@ public class GYear implements Serializable {
         return toString().compareTo( value.toString());
     }
 
-
     /**
      * Returns a Calendar object from the GYear.
      *
@@ -142,7 +137,6 @@ public class GYear implements Serializable {
         }
         return c;
     }
-
 
     /**
      * Returns the current time, for this GYear object.
@@ -192,7 +186,6 @@ public class GYear implements Serializable {
             throwException( true, value );
         }
     }
-
 
     /** ---------- Restrictions ---------- */
 
@@ -249,6 +242,5 @@ public class GYear implements Serializable {
         if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,value);
     }
-
 
 }

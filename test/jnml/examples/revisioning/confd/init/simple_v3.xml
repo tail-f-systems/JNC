@@ -1,0 +1,8 @@
+<config xmlns="http://acme.example.com/simple">
+  <mode>energy-saving</mode>
+  <host-metrics>200</host-metrics>
+  <login>
+    <message>Carpe diem...</message>
+    <monthly-message>Eat an apple today...</monthly-message>
+  </login>
+</config>

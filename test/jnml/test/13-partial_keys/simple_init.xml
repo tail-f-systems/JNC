@@ -1,0 +1,26 @@
+<zapp xmlns="http://tail-f.com/ns/simple">
+
+  <foo >
+    <app>app1</app>
+    <bar>1</bar>
+    <saft>1</saft>
+  </foo>
+  <foo>
+    <app>app1</app>
+    <bar>1</bar>
+    <saft>1</saft>
+  </foo>
+
+  <foo >
+    <app>app2</app>
+    <bar>1</bar>
+    <saft>2</saft>
+  </foo>
+
+  <foo >
+    <app>app3</app>
+    <bar>3</bar>
+    <saft>3</saft>
+  </foo>
+</zapp>
+

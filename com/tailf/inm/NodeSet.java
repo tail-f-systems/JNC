@@ -35,14 +35,12 @@ public class NodeSet extends ArrayList {
         super();
     }
 
-
     /**
      * Gets an element from the node set.
      */
     public Element getElement(int index) {
         return (Element) super.get(index);
     }
-
 
     /**
      * 'Get' using path expression on
@@ -60,7 +58,6 @@ public class NodeSet extends ArrayList {
         return result;
     }
 
-
     /**
      * 'Get' using path expression on
      * nodes within the set. returning the first Element that matches
@@ -75,8 +72,6 @@ public class NodeSet extends ArrayList {
         return null;
     }
 
-
-
     /**
      * Gets first element from node set.
      */
@@ -85,7 +80,6 @@ public class NodeSet extends ArrayList {
             return getElement(0);
         return null;
     }
-
 
     /**
      * Checks if an element is a member of
@@ -101,7 +95,6 @@ public class NodeSet extends ArrayList {
        return false;
     }
 
-
     /**
      * Checks if an element is a member of
      * the NodeSet.
@@ -116,7 +109,6 @@ public class NodeSet extends ArrayList {
         }
         return null;
     }
-
 
     /**
      * Removes a member element from the NodeSet.
@@ -135,8 +127,6 @@ public class NodeSet extends ArrayList {
         }
         return false;
     }
-
-
 
     /**
      * This will format the NodeSet in XML format.

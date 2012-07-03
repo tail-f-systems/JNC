@@ -1,0 +1,170 @@
+<!-- -*- nxml -*- -->
+<chapter>
+  <title>Notifications</title>
+  <section>
+    <title>Notifications</title>
+    <body>
+      <p>
+        NETCONF notifications are defined in the IETF draft: 
+      </p>
+      <p>
+	<em>
+	  "NETCONF Event Notifications" -
+          "draft-ietf-netconf-notification-11.txt" </em>
+      </p>
+      <p>
+	A NETCONF client indicates interest in receiving event 
+	notifications from a NETCONF server by creating a subscription
+	to receive event notifications. The NETCONF server replies to 
+	indicate whether the subscription request was successful and, 
+	if it was successful, begins sending the event notifications 
+	to the NETCONF client as the events occur within the system.  
+	These event notifications will continue to be sent until
+	either the NETCONF session is terminated or the subscription
+	terminates for some other reason.  The event notification
+	subscription allows a number of options to enable the NETCONF client
+	to specify which events are of interest.  These are specified when
+	the subscription is created.
+      </p>
+
+      <p>
+        The NETCONF notification draft also defines a repaly
+        mechanism. Replay is the ability to create an event
+        subscription that will resend recently generated
+        notifications, or in some cases send them for the first time
+        to a particular NETCONF client.  These notifications are sent
+        the same way as normal notifications.
+      </p>
+
+      <p>
+        The NetconfSession class provides a few methods for the notifications:
+	<dl termtype="em">
+	  <dt>createSubscription()</dt>
+	  <dd> 
+	    creates a subscription to the standard NETCONF stream.
+	  </dd>
+	  <dt>createSubscription(String streamName)</dt>
+	  <dd>
+	    creates a subscription to the given streamName.
+	  </dd>
+	  <dt>createSubscription(String streamName, NodeSet|String eventFilter,String startTime, String stopTime)</dt>
+	  <dd>creates a subscription to the given streamName, an eventFilter is provided to filter 
+	    events on the server side, and a startTime and stopTime is used for replaying old events 
+	    from the event log.
+	    <dl termtype="em">
+	      <dt>eventFilter</dt>
+	      <dd>
+		indicates which subset of
+		all possible events is of interest.  This is either a subtree
+		filter, or an XPath string expression 
+		(then the server needs to suport the :xpath capability).
+		If not present, all events not
+		precluded by other parameters will be sent.
+	      </dd>
+	      <dt>startTime</dt>
+	      <dd>
+		triggers the replay feature
+		and indicate that the replay should start at the time
+		specified.  If startTime is not present, 
+		this is not a replay subscription.  
+		It is not valid to specify start times that are
+		later than the current time.  If the startTime specified is
+		earlier than the log can support, the replay will begin with
+		the earliest available notification.
+		This parameter is of type dateTime.		  
+	      </dd>
+	      <dt>stopTime</dt>
+	      <dd>
+		is used with the optional replay feature to 
+		indicate the newest notifications of
+		interest.  If stop time is not present, the notifications will
+		continue until the subscription is terminated.  Must be used
+		with and be later than startTime.  Values of stopTime in
+		the future are valid.  This parameter is of type dateTime.
+	      </dd>	      
+	    </dl>
+	  </dd>
+	  <dt>getStreams()</dt> 
+	  <dd> 
+	    returns the available streams.
+	  </dd>
+	  <dt>receiveNotification()</dt>
+	  <dd>
+	    performs a blocking read. 
+	    This method will return the received notification.
+	  </dd>
+	</dl>
+      </p>
+      
+      <p>
+        Here's an example of how the NETCONF notifications class can be used.
+	A subscription is made and the thread will do a blocking read 
+	with the <c>receiveNotification()</c> method.
+      </p>
+      
+      <code caption="How to receive NETCONF notifications"><![CDATA[
+     Transport tr = new SSHTransport("127.0.0.1", 2022);
+     tr.authenticateWithPassword( "admin", "admin");
+     NetconfSession sess= new NetconfSession( tr );
+     // Query streams
+     NodeSet reply = sess.getStreams();	    
+     System.out.println("got streams:"+ reply.toXMLString());	
+
+     // create subscription. subscribe to "interface" stream
+     sess.createSubscription("interface");
+
+     // receive notifications
+     while (true) {
+	    notif= sess.receiveNotification();
+	    System.out.println("Got: "+notif.toXMLString());
+     }
+     ]]></code>        
+      
+    </body>
+  </section>
+  
+  
+  <section>
+    <title>Replay Feature</title>
+    <body>        
+      <p>
+	A replay of notifications is specified by including the optional
+	startTime parameter to the subscription command, which indicates
+	the start time of the replay.  The end time is specified using the
+	optional stopTime parameter.  If not present, notifications will
+	continue to be sent until the subscription is terminated.
+      </p>
+      
+      <p>
+	A notification stream that supports replay is not expected to have an
+	unlimited supply of saved notifications available to accommodate any
+	replay request.
+      </p>
+      
+      <p>
+	The actual number of stored notifications available for retrieval at
+	any given time is a NETCONF server implementation specific matter.
+	Control parameters for this aspect of the feature are outside the
+	scope of this document.
+      </p>
+      
+    </body>
+  </section>
+
+
+  <section>
+    <title>Interleave Capability</title>
+    <body>        
+      <p>
+	Theres an Interleave capability that 
+	indicates that the NETCONF peer supports the ability to interleave 
+	other NETCONF operations within a Notification subscription.
+	This means the NETCONF server must receive, process and respond 
+	to NETCONF requests on a session with an active notification subscription.	
+      </p>
+
+    </body>
+  </section>
+  
+</chapter>
+

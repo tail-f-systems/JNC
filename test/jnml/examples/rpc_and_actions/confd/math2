@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# We'll get this input:
+# ./math2 add __BEGIN operand "2 3" add __END
+
+op=$1
+set -- $4
+oper1=$1
+oper2=$2
+
+if [ "$op" = "add" ]; then
+   if [ "$oper1" = "10" ]; then
+      # this should be a correct rpc-reply with rpc-error
+      echo "error-type application error-tag foobar"
+      echo "error-message 'cannot add to 10'"
+      exit 1
+   fi
+   if [ "$oper1" = "11" ]; then
+      # this should be a generic operation failed error
+      echo "something bad"
+      exit 1
+   fi
+   res=`expr $oper1 + $oper2`
+elif [ "$op" = "sub" ]; then
+   res=`expr $oper1 - $oper2`
+else
+  exit 2
+fi
+
+echo "result $res"

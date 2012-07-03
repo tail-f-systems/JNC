@@ -1,0 +1,33 @@
+<project name="AwareClasses" basedir="." default="all">
+  <property name="build.dir" value="build"/>
+  <property name="jar.dir" value="${build.dir}/jar"/>
+  <property name="classes.dir" value="${build.dir}/classes"/>
+  <property name="src.dir" value="src"/>
+  
+  <target name="all" depends="quagga,hosts" />
+
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+  </target>
+  
+  <target name="compile">
+    <mkdir dir="${classes.dir}"/>
+    <javac srcdir="${src.dir}" destdir="${classes.dir}">
+      <classpath location="../build/jar/NML.jar"/>
+      <classpath location="../build/jar/INM.jar"/>
+      <classpath location="ganymed/ganymed-ssh2-build251beta1.jar"/>
+    </javac>
+  </target>
+
+  <target name="quagga" depends="compile">
+    <mkdir dir="${jar.dir}"/>
+    <jar destfile="${jar.dir}/quagga.jar" basedir="${classes.dir}"
+	 includes="quagga/*.class"/>
+  </target>
+
+  <target name="hosts" depends="compile">
+    <mkdir dir="${jar.dir}"/>
+    <jar destfile="${jar.dir}/hosts.jar" basedir="${classes.dir}"
+	 includes="hosts/*.class"/>
+  </target>
+</project>

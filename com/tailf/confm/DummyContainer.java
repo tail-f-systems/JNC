@@ -21,13 +21,11 @@ class DummyContainer extends Container {
      */
     protected String[] childrenNames() { return new String[0]; }
 
-
     /**
      * Structure information.
      * An array of the names of the key children.
      */
     protected String[] keyNames() { return new String[0]; }
-
 
     /**
      * Clones this object, returning an exact copy.
@@ -49,7 +47,6 @@ class DummyContainer extends Container {
             return cloneShallowContent(new DummyContainer(namespace,name));
         } catch (Exception e) { return null; }
     }
-
 
     /**
      * Constructor for the container

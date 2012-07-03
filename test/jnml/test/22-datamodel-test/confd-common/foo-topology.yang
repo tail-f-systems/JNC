@@ -1,0 +1,149 @@
+module foo-topology {
+    namespace "http://foo.net/ns/foo-topology";
+    prefix foo-topology;
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    include foo-topology-types;
+
+    organization "Foo Networks, Inc.";
+    description  "Managed objects for topology.";
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    /*  This element describes general network topology w.r.to all foo nodes  */
+    container topology {
+        tailf:info "Topology of the network containing CAE, SPX and GGSN nodes";
+
+        /*  network has "some" SPX nodes  */
+        list spx {
+            key name;
+            unique ipAddr;
+            tailf:info "SPX node";
+
+            leaf name {
+                type nameType;
+                tailf:info "A unique name for this SPX";
+            }
+            leaf ipAddr {
+                type inet:ipv4-address;
+                mandatory true;
+                tailf:info "IP address for general management activity";
+            }
+            leaf profileAccessPort {
+                type inet:port-number;
+                default 8901;
+                tailf:info "SPX listens on this port for profile management related communication from CAE";
+            }
+            leaf policyAccessPort {
+                type inet:port-number;
+                default 8902;
+                tailf:info "SPX listens on this port for policy access related communication from CAE";
+            }
+            leaf ocsPort {
+                type inet:port-number;
+                default 8903;
+                tailf:info "SPX listens on this port for OCS related communication from CAE";
+            }
+            leaf heartBeatInterval {
+                type heartBeatIntervalType;
+                default 60;
+                tailf:info "SPX expects a heartbeat from CAE atleast once in the specified interval.
+                      DIAMETER based profileAccess connection is used as primary health indication of the CAE.";
+            }
+
+            container status {
+                config false;
+                tailf:cdb-oper;
+
+                leaf type {
+                    type string;
+                }
+                leaf transport {
+                    type string;
+                }
+                leaf reason {
+                    type string;
+                }
+                leaf lastHeartBeat {
+                    type uint32;
+                }
+                leaf incomingMessages {
+                    type uint64;
+                }
+                leaf outgoingMessages {
+                    type uint64;
+                }
+            }
+        }
+
+        /*  network has "some" GGSN nodes  */
+        list ggsn {
+            key name;
+            tailf:info "GGSN node";
+
+            leaf name {
+                type nameType;
+                tailf:info "A unique name for this GGSN ";
+            }
+
+            /*  each GGSN handles multiple user APNs  */
+            list apn {
+                key name;
+                tailf:info "An APN that this GGSN serves";
+
+                leaf name {
+                    type nameType;
+                    tailf:info "APN name";
+                }
+
+                list subnet {
+                    key prefix;
+                    min-elements 1;
+
+                    leaf prefix {
+                        type inet:ipv4-prefix;
+                        tailf:info "IP subnet used for this APN";
+                    }
+                }
+            }
+
+            /*  each GGSN is associated with one or two SPX nodes  */
+            container associatedSpx {
+                tailf:info "SPX nodes associated with this GGSN";
+
+                leaf primary {
+                    tailf:info "Primary SPX associated with this GGSN";
+
+                    type leafref {
+                        path "../../../spx/name";
+                    }
+                }
+
+                leaf secondary {
+                    tailf:info "Secondary SPX associated with this GGSN";
+
+                    type leafref {
+                        path "../../../spx/name";
+                    }
+                }
+
+                must "((count(primary) = 0) or (count(secondary) = 0) or (primary != secondary))" {
+                    tailf:dependency '.';
+                    error-message "ggsn/associatedSpx/primary must != ggsn/associatedSpx/secondary";
+                }
+            }
+        }
+    }
+}

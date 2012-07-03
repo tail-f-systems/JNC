@@ -1,0 +1,23 @@
+module foo-cae {
+    namespace "http://foo.net/ns/foo-cae";
+    prefix foo-cae;
+
+    include foo-cae-types;
+    include foo-cae-service;
+    include foo-cae-atm;
+    include foo-cae-ss7;
+    include foo-cae-threeGpp;
+    include foo-cae-simulator;
+    include foo-cae-node;
+    include foo-cae-ethernet;
+
+
+    organization "Foo Networks, Inc.";
+    description  "Managed objects for alarms.";
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+}

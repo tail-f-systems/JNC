@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.lang.StringBuffer;
 import java.io.*;
 
-
-
 /**
  * A configuration element sub-tree.
  * Makes it possible to create and/or manipulate an element tree. The
@@ -54,24 +52,20 @@ public class Element implements Serializable  {
   public static final String NETCONF_NAMESPACE =
     "urn:ietf:params:xml:ns:netconf:base:1.0";
 
-
   /**
    * The namespace this element name belongs to.
    */
   public String namespace;
-
 
   /**
    * The name of the node.
    */
   public String name;
 
-
   /**
    * The value of the element.
    */
   public Object value;
-
 
   /**
    * Attributes on the node.
@@ -156,7 +150,6 @@ public class Element implements Serializable  {
     return Element.create( prefixMap, pathStr);
   }
 
-
   /**
    * Static method that creates a new configuration element tree,
    * given a path. A prefix mapping will be added to the top
@@ -176,7 +169,6 @@ public class Element implements Serializable  {
     prefixMap.add( prefix );
     return Element.create( prefixMap, pathStr);
   }
-
 
   /**
    * Static method that creates a new configuration element tree,
@@ -200,7 +192,6 @@ public class Element implements Serializable  {
     return t;
   }
 
-
   /**
    * Creates a new path. This is a value for mode in {@link #createPath(int, String)}.
    */
@@ -217,8 +208,6 @@ public class Element implements Serializable  {
    */
   public static final int CREATE_MERGE_MULTI = 3;
 
-
-
   /**
    * Creates a child element to the context node.
    * @param name The name of the child element
@@ -228,7 +217,6 @@ public class Element implements Serializable  {
     addChild( elem );
     return elem;
   }
-
 
   /**
    * Creates a child element with specified value.
@@ -242,7 +230,6 @@ public class Element implements Serializable  {
     return elem;
   }
 
-
   /**
    * Creates a child element with specified value.
    * @param namespace The namespace that the name belongs to
@@ -255,7 +242,6 @@ public class Element implements Serializable  {
     addChild(elem);
     return elem;
   }
-
 
   /**
    * Returns the path for this element including an appended sub-path.
@@ -279,7 +265,6 @@ public class Element implements Serializable  {
     return createPath(CREATE_MERGE,null,pathStr);
   }
 
-
   /**
    * Creates an element tree as a child to the context node
    * from a create path expression.
@@ -294,7 +279,6 @@ public class Element implements Serializable  {
   public Element createPath(int mode, String pathStr) throws INMException {
     return createPath(mode,null,pathStr);
   }
-
 
   /**
    * Creates an element tree as a child to the context node
@@ -318,7 +302,6 @@ public class Element implements Serializable  {
     return createPath(CREATE_MERGE,p,pathStr);
   }
 
-
   /**
    * Creates an element tree as a child to the context node
    * from a create path expression.
@@ -341,7 +324,6 @@ public class Element implements Serializable  {
     return createPath(CREATE_MERGE,p,pathStr);
   }
 
-
   /**
    * Creates an element tree as a child to the context node
    * from a create path expression.
@@ -361,7 +343,6 @@ public class Element implements Serializable  {
     throws INMException {
     return createPath(CREATE_MERGE,addPrefixes,pathStr);
   }
-
 
   /**
    * Creates an element tree as a child to the context node.
@@ -429,7 +410,6 @@ public class Element implements Serializable  {
     }
   }
 
-
   /**
    * Sets the default prefix mapping on this node.
    * xmlns= 'NAMESPACE'
@@ -439,7 +419,6 @@ public class Element implements Serializable  {
   public void setDefaultPrefix() {
     setPrefix(new Prefix("",namespace));
   }
-
 
   /**
    * Removes the default prefix mapping on this node (if any).
@@ -451,7 +430,6 @@ public class Element implements Serializable  {
     removePrefix("");
   }
 
-
   /**
    * Sets a prefix mapping to the context node.
    * A prefix map is used for resolving prefix to namespace
@@ -462,7 +440,6 @@ public class Element implements Serializable  {
   public void setPrefix(String prefix) {
     setPrefix(new Prefix(prefix,namespace));
   }
-
 
   /**
    * Sets prefix mappings to the context node.
@@ -476,7 +453,6 @@ public class Element implements Serializable  {
     prefixes.set( prefixMap );
   }
 
-
   /**
    * Sets a prefix map to the context node.
    * A prefix map is used for resolving prefix to namespace
@@ -488,7 +464,6 @@ public class Element implements Serializable  {
     prefixes.set( prefix );
   }
 
-
   /**
    * Removes a prefix map from the context node.
    */
@@ -497,12 +472,10 @@ public class Element implements Serializable  {
     prefixes.remove( prefix );
   }
 
-
   /**
    * ------------------------------------------------------------
    * Parent and Children
    */
-
 
   /**
    * Returns the parent node of this node. or <code>null</code>.
@@ -624,7 +597,6 @@ public class Element implements Serializable  {
     return parent.children.indexOf( this );
   }
 
-
   /**
    * Deletes child node(s).
    * All children matching the path string will be deleted.
@@ -644,7 +616,6 @@ public class Element implements Serializable  {
     return nodes;
   }
 
-
   /**
    * Deletes this node.
    * Means that the parent will no longer have reference to
@@ -656,7 +627,6 @@ public class Element implements Serializable  {
     if (parent!=null)
       parent.deleteChild(this);
   }
-
 
   /**
    * Deletes a child node.
@@ -673,7 +643,6 @@ public class Element implements Serializable  {
       }
   }
 
-
   /**
    * Returns <code>true</code> if this node has any children, <code>false</code> otherwise.
    * @return <code>true</code> or <code>false</code>
@@ -683,7 +652,6 @@ public class Element implements Serializable  {
       if (children.size()>0) return true;
     return false;
   }
-
 
   /**
    * ------------------------------------------------------------
@@ -699,7 +667,6 @@ public class Element implements Serializable  {
     attrs.add( attr );
   }
 
-
   /**
    * Gets all attributes for this element.
    * @return An array of configuration attributes or <code>null</code>
@@ -709,7 +676,6 @@ public class Element implements Serializable  {
       return (Attribute[]) attrs.toArray(new Attribute[attrs.size()] );
     return null;
   }
-
 
   /**
    * Gets an Attribute
@@ -724,7 +690,6 @@ public class Element implements Serializable  {
       }
     return null; // not found
   }
-
 
   /**
    * Returns the string value of the named attribute.
@@ -743,7 +708,6 @@ public class Element implements Serializable  {
       }
     return null; // not found
   }
-
 
   /**
    * Sets an attribute on this XML element.
@@ -783,7 +747,6 @@ public class Element implements Serializable  {
     }
   }
 
-
   /**
    * Sets an attribute on this XML element.
    *
@@ -814,7 +777,6 @@ public class Element implements Serializable  {
     return attr;
   }
 
-
   /**
    * Removes an attribute with specified name.
    * This method does not consider namespace so note that it
@@ -834,7 +796,6 @@ public class Element implements Serializable  {
       }
   }
 
-
   /**
    * Removes an attribute with specified namespace and name from
    * the elements attribute list.
@@ -853,7 +814,6 @@ public class Element implements Serializable  {
       }
   }
 
-
   /**
    * ------------------------------------------------------------
    * Values
@@ -871,7 +831,6 @@ public class Element implements Serializable  {
     return null;
   }
 
-
   /**
    * Returns the value of this element.
    * @return The value of the element.
@@ -879,7 +838,6 @@ public class Element implements Serializable  {
   public Object getValue() {
     return value;
   }
-
 
   /**
    * Returns the value of a subnode or null.
@@ -911,7 +869,6 @@ public class Element implements Serializable  {
         return false;
     }
 
-
   /**
    * Returns the value(s) of nodes in a given path expression.
    * <p>
@@ -932,7 +889,6 @@ public class Element implements Serializable  {
     else return null;
   }
 
-
   /**
    * Sets a new value for this node element.
    *
@@ -942,7 +898,6 @@ public class Element implements Serializable  {
     trace("setValue: "+name+"=\""+value+"\"");
     this.value = value;
   }
-
 
   /**
    * Sets a new value for node element(s).
@@ -958,7 +913,6 @@ public class Element implements Serializable  {
       nodes.getElement(i).setValue(value);
   }
 
-
   /**
    * Deletes value of node(s)
    * <p>
@@ -972,7 +926,6 @@ public class Element implements Serializable  {
       nodes.getElement(i).deleteValue();
   }
 
-
   /**
    * Deletes the value for this node.
    *
@@ -981,12 +934,10 @@ public class Element implements Serializable  {
     value = null;
   }
 
-
   /**
    * ------------------------------------------------------------
    * Get
    */
-
 
   /**
    * Returns first node that fullfill the path expression,
@@ -1011,7 +962,6 @@ public class Element implements Serializable  {
     return nodeSet.getElement(0);
   }
 
-
   /**
    * Returns the last node that fullfill the path expression.
    * <p>
@@ -1026,7 +976,6 @@ public class Element implements Serializable  {
     if (nodeSet == null || nodeSet.size()==0) return null;
     return (Element) nodeSet.get( nodeSet.size() -1 );
   }
-
 
   /**
    * Gets a all nodes given a path expression.
@@ -1046,8 +995,6 @@ public class Element implements Serializable  {
     return path.eval( this );
   }
 
-
-
   /**
    * Returns the children of this node.
    * @return The children node set of this node or <code>null</code>
@@ -1055,8 +1002,6 @@ public class Element implements Serializable  {
   public NodeSet getChildren() {
     return children;
   }
-
-
 
   /**
    * Get the children with specified name, from children list
@@ -1075,7 +1020,6 @@ public class Element implements Serializable  {
         return n;
     }
 
-
   /**
    * Get the (first) child with specified name, from children list
    * @param name Name of child
@@ -1091,8 +1035,6 @@ public class Element implements Serializable  {
     }
     return null;
   }
-
-
 
   /**
    * Clones the tree, making an exact copy.
@@ -1119,8 +1061,6 @@ public class Element implements Serializable  {
     return copy;
   }
 
-
-
   /**
    * Find a container (possibly dynamic with keys) within children
    * Return null if not found
@@ -1134,7 +1074,6 @@ public class Element implements Serializable  {
       }
     return null;
   }
-
 
   /**
    * Clones the tree, making an exact copy.
@@ -1166,7 +1105,6 @@ public class Element implements Serializable  {
    * Operation flag to be used with {@link #merge(Element,int)}.
    */
   public final static int OP_MERGE = 4;
-
 
   /**
    * Merges a subtree into a resulting target subtree.
@@ -1272,8 +1210,6 @@ public class Element implements Serializable  {
     return root;
   }
 
-
-
   /**
    * clones the attributes to the target copy.
    * Note: help method to Containers clone and
@@ -1297,7 +1233,6 @@ public class Element implements Serializable  {
     return copy;
   }
 
-
   /**
    * clones the value to the target copy.
    * Note: help method to Containers clone and
@@ -1310,13 +1245,11 @@ public class Element implements Serializable  {
     return copy;
   }
 
-
   /**
    * ------------------------------------------------------------
    * Mark operations.
    * Uses the nc:operations attribute
    */
-
 
   /**
    * Removes the operation attribute from a node.
@@ -1327,7 +1260,6 @@ public class Element implements Serializable  {
   public void removeMark() {
     removeAttr(NETCONF_NAMESPACE,"operation");
   }
-
 
   /**
    * Removes all operation attributes from a sub-tree.
@@ -1362,14 +1294,12 @@ public class Element implements Serializable  {
         nodeSet.getElement(i).markDelete();
   }
 
-
   /**
    * Marks a node with operation replace.
    */
   public void markReplace() {
     setAttr(NETCONF_NAMESPACE,"operation","replace");
   }
-
 
   /**
    * Marks node(s) with operation replace.
@@ -1386,14 +1316,12 @@ public class Element implements Serializable  {
         nodeSet.getElement(i).markReplace();
   }
 
-
   /**
    * Marks a node with operation merge.
    */
   public void markMerge() {
     setAttr(NETCONF_NAMESPACE,"operation","merge");
   }
-
 
   /**
    * Marks node(s) with operation merge.
@@ -1409,14 +1337,12 @@ public class Element implements Serializable  {
         nodeSet.getElement(i).markMerge();
   }
 
-
   /**
    * Marks a node with operation create
    */
   public void markCreate() {
     setAttr(NETCONF_NAMESPACE,"operation","create");
   }
-
 
   /**
    * Marks node(s) with operation create.
@@ -1433,14 +1359,11 @@ public class Element implements Serializable  {
         nodeSet.getElement(i).markCreate();
   }
 
-
-
   /**
    * ------------------------------------------------------------
    * Info methods
    *
    */
-
 
   /**
    * A qualified name is a prefixed name.
@@ -1474,7 +1397,6 @@ public class Element implements Serializable  {
     return nsToPrefix( namespace );
   }
 
-
   /**
    * Returns a prefix map, as it is in the current context.
    * The prefix map is built up by traversing the parents.
@@ -1494,7 +1416,6 @@ public class Element implements Serializable  {
       p.merge( defaultPrefixes );
     return p;
   }
-
 
   /**
    * Lookups a prefix and returns the associated namespace,
@@ -1519,7 +1440,6 @@ public class Element implements Serializable  {
       return defaultPrefixes.prefixToNs(prefix);
     return null;
   }
-
 
   /**
    * This method will find the prefix of a specified namespace,
@@ -1548,7 +1468,6 @@ public class Element implements Serializable  {
     return null;
   }
 
-
   /**
    * Returns the path as a string
    * @return The path of element
@@ -1576,7 +1495,6 @@ public class Element implements Serializable  {
     if (s2!=null) return s1 + "/" + s2;
     return s1;
   }
-
 
   /**
    * Compare if two elements are equal.
@@ -1609,7 +1527,6 @@ public class Element implements Serializable  {
     return false;
   }
 
-
   /**
    * Compare two elements.
    * Compares the name, namespace, and value.
@@ -1641,7 +1558,6 @@ public class Element implements Serializable  {
         return -1;
     }
 
-
   /**
    * Returns the path of the node as a string.
    * @return String representation of this element
@@ -1671,7 +1587,6 @@ public class Element implements Serializable  {
                          ", attrs=["+s_attrs+ "], path="+getPath()+"}");
     return s;
   }
-
 
   /**
    * This will format the tree as an XML string,
@@ -1717,7 +1632,6 @@ public class Element implements Serializable  {
     s.append(tabs(flag,indent)+"</"+qName+">"+ newline(true));
   }
 
-
   /**
    * Make a newline
    */
@@ -1725,7 +1639,6 @@ public class Element implements Serializable  {
     if (flag) return "\n";
     else return "";
   }
-
 
   /**
    * Indent XML text
@@ -1768,7 +1681,6 @@ public class Element implements Serializable  {
     throws INMException{
     encode(out, newline_at_end, null);
   }
-
 
   protected void encode(Transport out, boolean newline_at_end,
                         Capabilities capas) throws INMException {
@@ -1853,7 +1765,6 @@ public class Element implements Serializable  {
     return new ElementChildrenIterator(children, name);
   }
 
-
   /**
    * Write the configuration tree to a file.
    * The configuration tree is written as XML text.
@@ -1872,7 +1783,6 @@ public class Element implements Serializable  {
     dos.writeBytes( toXMLString() );
     fos.close();
   }
-
 
   /**
    * Read file with XML text and parse it into

@@ -1,0 +1,156 @@
+submodule foo-spx-onlineCharging {
+    belongs-to foo-spx {
+        prefix foo-spx;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    include foo-spx-types;
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    /*  online charging related configuration  */
+    container onlineCharging {
+        tailf:info "Online charging related configiration and status";
+
+        container OCSSelectionFailureAction {
+            tailf:hidden debug;
+
+            leaf action {
+                type OCSSelectionFailureHandlingPolicy;
+                default selectFirstAvailableServer;
+                tailf:info "Action to be taken if Policy based OCS selection fails";
+            }
+        }
+
+        list session {
+            key imsi;
+            config false;
+            tailf:cdb-oper;
+
+            tailf:secondary-index apnIp {
+                tailf:index-leafs "apn userIpAddr";
+            }
+
+            leaf imsi {
+                type uint64;
+            }
+            leaf apn {
+                type string;
+                mandatory true;
+            }
+            leaf userIpAddr {
+                type inet:ipv4-address;
+                mandatory true;
+            }
+
+            leaf currentState {
+                type string;
+            }
+
+            container attributes {
+                uses ocsSessionAttributesType;
+            }
+
+            container volumeUnits {
+                uses ocsVolumeUnitsType;
+            }
+        }
+
+        container statistics {
+            config false;
+            tailf:info "SCM statistics";
+            tailf:cdb-oper;
+
+            leaf numUsmSessCreationAttempts {
+                type uint64;
+            }
+            leaf numUsmSessionCreationCompletions {
+                type uint64;
+            }
+            leaf numUsmSessionCreationFailures {
+                type uint64;
+            }
+            leaf numUsmDeleteSessionRcvd {
+                type uint64;
+            }
+            leaf numUsmDeleteReqForNoSession {
+                type uint64;
+            }
+            leaf numOcsInitialRespRcvd {
+                type uint64;
+            }
+            leaf numOcsInitialRespRcvdNoSession {
+                type uint64;
+            }
+            leaf numOcsInterimRespRcvd {
+                type uint64;
+            }
+            leaf numOcsInterimRespRcvdNoSession {
+                type uint64;
+            }
+            leaf numOcsFinalUnitsRespRcvd {
+                type uint64;
+            }
+            leaf numOcsFinalUnitsRespRcvdNoSession {
+                type uint64;
+            }
+            leaf numOcsInitialSuccessRespRcvd {
+                type uint64;
+            }
+            leaf numOcsInitialFailureRespRcvd {
+                type uint64;
+            }
+            leaf numOcsReAuthReqRcvd {
+                type uint64;
+            }
+            leaf numOcsReAuthReqRcvdNoSession {
+                type uint64;
+            }
+            leaf numOcsMsgDecodeError {
+                type uint64;
+            }
+            leaf numCcmSessionInterimReqRcvd {
+                type uint64;
+            }
+            leaf numCcmInterimReqRcvdNoSession {
+                type uint64;
+            }
+            leaf numCcmFinalUnitsRcvd {
+                type uint64;
+            }
+            leaf numCcmFinalUnitsRcvdNoSession {
+                type uint64;
+            }
+            leaf numCcmSessionInterimRespSent {
+                type uint64;
+            }
+            leaf numCcmSessionReAuthReqSent {
+                type uint64;
+            }
+            leaf numCcmSessionReAuthRespRcvd {
+                type uint64;
+            }
+            leaf numCcmReAuthRespRcvdNoSession {
+                type uint64;
+            }
+            leaf numSessionDeleteTimerExpired {
+                type uint64;
+            }
+            leaf numUsmSessOCSSelectionFailure {
+                type uint64;
+            }
+        }
+    }
+}

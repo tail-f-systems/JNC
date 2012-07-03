@@ -1,0 +1,163 @@
+submodule foo-spx-types {
+    belongs-to foo-spx {
+        prefix foo-spx;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    typedef profileCacheDurationType {
+        type uint32 {
+            range "1 .. 10080";
+            /*  1 minute  */
+            /*  7 days  */
+        }
+    }
+
+    typedef radiusAttributeType {
+        type uint32 {
+            range "1 .. 255";
+        }
+    }
+
+    typedef radiusVendorType {
+        type uint32 {
+            range "1 .. 65535";
+        }
+    }
+
+    typedef radiusVendorAttributeType {
+        type uint32 {
+            range "1 .. 255";
+        }
+    }
+
+    typedef radiusLengthType {
+        type uint32 {
+            range "1 .. 255";
+        }
+    }
+
+    typedef fileAccessMethodType {
+        type enumeration {
+            enum ftp;
+            enum sftp;
+        }
+    }
+
+    typedef OCSSelectionFailureHandlingPolicy {
+        type enumeration {
+            enum selectFirstAvailableServer;
+            enum considerFailureScenario;
+        }
+    }
+
+    typedef profileAccessMethodType {
+        type enumeration {
+            enum diameter;
+            enum radius;
+            enum ldap;
+            enum local;
+        }
+    }
+
+    typedef onlineChargingComplianceType {
+        type enumeration {
+            enum gy;
+            enum clciv2;
+        }
+    }
+
+    typedef chargingCharacteristicsType {
+        type string {
+            length 4;
+            pattern "[0-9a-fA-F]{4}";
+        }
+    }
+
+    typedef cdrFormatType {
+        type enumeration {
+            enum 32.298;
+        }
+    }
+
+    grouping ocsSessionAttributesType {
+        leaf msisdn {
+            type uint64;
+        }
+        leaf sessionId {
+            type uint32;
+            tailf:hidden debug;
+        }
+        leaf diameterStackHandle {
+            type int32;
+            tailf:hidden debug;
+        }
+        leaf sessionLifeTime {
+            type uint32;
+        }
+        leaf timeSpentInCurrentState {
+            type uint32;
+        }
+        leaf lac {
+            type uint16;
+        }
+        leaf sac {
+            type uint16;
+        }
+        leaf mcc {
+            type uint16;
+        }
+        leaf mnc {
+            type uint16;
+        }
+        leaf sgsn {
+            type inet:ipv4-address;
+        }
+        leaf nsapi {
+            type uint8;
+        }
+    }
+
+    grouping ocsVolumeUnitsType {
+        leaf totalGrantedInputUnits {
+            type uint64;
+        }
+        leaf totalGrantedOutputUnits {
+            type uint64;
+        }
+        leaf totalGrantedTotalUnits {
+            type uint64;
+        }
+        leaf totalUsedInputUnits {
+            type uint64;
+        }
+        leaf totalUsedOutputUnits {
+            type uint64;
+        }
+        leaf totalUsedTotalUnits {
+            type uint64;
+        }
+        leaf lastUpdatedInputUnits {
+            type uint64;
+        }
+        leaf lastUpdatedOutputUnits {
+            type uint64;
+        }
+        leaf lastUpdatedTotalUnits {
+            type uint64;
+        }
+    }
+}

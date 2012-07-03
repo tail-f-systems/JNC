@@ -1,0 +1,62 @@
+<project name="inm_intro" basedir="." default="main">
+  <property environment="env"/>
+  <property name="src.dir"     value="."/>
+  <property name="build.dir"   value="build"/>
+  <property name="classes.dir" value="${build.dir}/classes"/>
+  <property name="confm-jar.dir" value="${env.CONFM_DIR}/jar"/>
+  <property name="ganymed.dir" value="${env.CONFM_DIR}/jar/ganymed"/>
+  <property name="confdc"        value="${env.CONFM_DIR}/bin/confdc"/>
+
+  <target name="main" depends="environ,compile,GetConfig"/>
+  
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+  </target>
+
+  <target name="compile">
+    <mkdir dir="${classes.dir}"/>
+    <javac srcdir="${src.dir}" destdir="${classes.dir}"
+           debug="on" debuglevel="lines,vars,source"  >
+      <classpath location="${confm-jar.dir}/INM.jar"/>
+    </javac>
+  </target>
+  
+  <target name="GetConfig" depends="compile">
+    <java classname="GetConfig" fork="true">
+      <classpath location="${classes.dir}"/>
+      <classpath location="${confm-jar.dir}/INM.jar"/>
+      <classpath location="${ganymed.dir}/ganymed-ssh2-build251beta1.jar" />
+    </java>
+  </target>
+
+  <target name="UpdateConfig" depends="compile">
+    <java classname="UpdateConfig" fork="true">
+      <classpath location="${classes.dir}"/>
+      <classpath location="${confm-jar.dir}/INM.jar"/>
+      <classpath location="${ganymed.dir}/ganymed-ssh2-build251beta1.jar" />
+    </java>
+  </target>
+
+  <target name="RevertConfig" depends="compile">
+    <java classname="RevertConfig" fork="true">
+      <classpath location="${classes.dir}"/>
+      <classpath location="${confm-jar.dir}/INM.jar"/>
+      <classpath location="${ganymed.dir}/ganymed-ssh2-build251beta1.jar" />
+    </java>
+  </target>
+
+  <target name="notpresent" if="environ.badpath">
+    <fail message="** You need to set environment varible CONFM_DIR to where ConfM was installed "/>
+  </target>
+
+  <target name="environ">
+    <condition property="environ.badpath" >
+      <not>
+        <available classname="com.tailf.confm.Confd"
+                   classpath="${confm-jar.dir}/ConfM.jar"/>
+      </not>
+    </condition>
+    <antcall target="notpresent"/>
+  </target>
+
+</project>

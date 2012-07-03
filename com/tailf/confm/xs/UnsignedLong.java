@@ -16,7 +16,6 @@ import java.math.BigInteger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-
 /**
  * This class implements the "xs:unsignedLong" datatype from
  * the 'http://www.w3.org/2001/XMLSchema' namespace.
@@ -61,7 +60,6 @@ public class UnsignedLong implements Serializable {
         check();
     }
 
-
     public BigInteger getValue() {
         return value;
     }
@@ -69,8 +67,6 @@ public class UnsignedLong implements Serializable {
     public java.lang.String toString() {
         return value.toString();
     }
-
-
 
     private void check() throws ConfMException {
         if (this.value.compareTo(new BigInteger("0")) < 0) {
@@ -81,12 +77,10 @@ public class UnsignedLong implements Serializable {
         }
     }
 
-
     public boolean equals(long value) {
         return (this.value.compareTo(
                     new BigInteger(value + "")) == 0);
     }
-
 
     public boolean equals(Object value) {
         if (value instanceof BigInteger) {
@@ -160,7 +154,6 @@ public class UnsignedLong implements Serializable {
         throwException(cmp == 0 || cmp > 0);
     }
 
-
     /**
      * xs:minLength defines a minimum length measured in number of characters
      * or bytes.
@@ -194,7 +187,6 @@ public class UnsignedLong implements Serializable {
         // compare against the lexical value representation
         throwException(Decimal.numTotalDigits(toString()) > digits);
     }
-
 
     /**
      * xs:pattern
@@ -234,6 +226,5 @@ public class UnsignedLong implements Serializable {
         if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,o);
     }
-
 
 }

@@ -49,7 +49,6 @@ public class DefaultIOSubscriber extends IOSubscriber {
         this.devName = devName;
     }
 
-
     /**
      * Will get called as soon as we have input
      * (data which is received).
@@ -70,5 +69,4 @@ public class DefaultIOSubscriber extends IOSubscriber {
         System.out.println(s);
     }
 }
-
 

@@ -1,0 +1,36 @@
+<mspp xmlns="http://tail-f.com/ns/test/msp/1.0" 
+      xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <interface>
+    <Ethernet>
+      <port>1/1/3</port>
+      <duplex>full</duplex>
+      <speed>100</speed>
+      <!-- <qos> -->
+      <!--   <scheduler>aaa</scheduler> -->
+      <!-- </qos> -->
+      <vlan>
+        <vlan>400</vlan>
+      </vlan>
+      <vlan>
+        <vlan>3504</vlan>
+      </vlan>
+      <vlan>
+        <vlan>3510</vlan>
+      </vlan>
+      <vlan>
+        <vlan>3518</vlan>
+      </vlan>
+      <vlan>
+        <vlan>3550</vlan>
+        <vid>3514</vid>
+      </vlan>
+      <vlan>
+        <vlan>3554</vlan>
+        <vid>3534</vid>
+      </vlan>
+      <pluggable-module>
+        <mismatch-check/>
+      </pluggable-module>
+    </Ethernet>
+  </interface>
+</mspp>

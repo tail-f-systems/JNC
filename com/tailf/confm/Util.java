@@ -44,7 +44,6 @@ public class Util {
         return ret;
     }
 
-
     public static String[] parseTokens(String source, char delimiter) {
 
         int numtoken = 1;
@@ -71,7 +70,6 @@ public class Util {
         }
         return list;
     }
-
 
     public static InetAddress parseIPv4Address(String host)
         throws UnknownHostException {

@@ -35,7 +35,6 @@ public class Base64Binary implements Serializable {
         check();
     }
 
-
     /**
      * Sets the value.
      */
@@ -60,7 +59,6 @@ public class Base64Binary implements Serializable {
         return value;
     }
 
-
     /**
      * Check the value.
      * Put restrictions on the value here.
@@ -68,13 +66,9 @@ public class Base64Binary implements Serializable {
     private void check() throws ConfMException {
     }
 
-
-
     public java.lang.String toString() {
         return Base64Coder.decodeString(new java.lang.String(value));
     }
-
-
 
     /** ---------- Restrictions ---------- */
 

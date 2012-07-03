@@ -1,0 +1,794 @@
+submodule foo-cae-service {
+    belongs-to foo-cae {
+        prefix foo-cae;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    import foo-system {
+        prefix foo-system;
+    }
+
+    include foo-cae-types;
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    container service {
+        container netMon {
+            container featureFlags {
+                leaf IuDataAnalysis {
+                    type boolean;
+                    default true;
+                }
+                leaf userDataAnalysis {
+                    type boolean;
+                    default true;
+                }
+                leaf userMonitor {
+                    type boolean;
+                    default true;
+                }
+                leaf serverMonitor {
+                    type boolean;
+                    default true;
+                }
+                leaf bwMonitorGlobal {
+                    type boolean;
+                    default true;
+                }
+                leaf bwMonitorServiceArea {
+                    type boolean;
+                    default true;
+                }
+                leaf saveZeroCounters {
+                    type boolean;
+                    default false;
+                    tailf:hidden debug;
+                }
+                leaf flushBoundary {
+                    type uint32;
+                    default 300;
+                }
+                leaf anonymizer {
+                    type boolean;
+                    default false;
+                    tailf:hidden debug;
+                }
+                leaf recordImsi {
+                    type boolean;
+                    default true;
+                }
+                leaf tcpThreads {
+                    type uint32;
+                    default 4;
+                }
+                leaf enablePacketCapture {
+                    type boolean;
+                    default true;
+                }
+            }
+
+            container tcpFlags {
+                leaf tcpAnalysis {
+                    type boolean;
+                    default true;
+                }
+                leaf tcpFlowMonitor {
+                    type boolean;
+                    default true;
+                }
+                leaf tcpIdleTimer {
+                    type uint32;
+                    default 3600;
+                }
+                leaf dnsAnalysis {
+                    type boolean;
+                    default false;
+                }
+                leaf dnsPort {
+                    type uint32;
+                    default 53;
+                }
+                leaf maxTcpOooPackets {
+                    type uint32;
+                    default 200000;
+                }
+            }
+
+            container udpFlags {
+                leaf udpAnalysis {
+                    type boolean;
+                    default true;
+                }
+                leaf udpFlowMonitor {
+                    type boolean;
+                    default true;
+                }
+                leaf udpFlowIdleTimer {
+                    type uint32;
+                    default 300;
+                }
+                leaf dnsAnalysis {
+                    type boolean;
+                    default false;
+                }
+                leaf dnsPort {
+                    type uint32;
+                    default 53;
+                }
+                leaf gtpPort {
+                    type uint32;
+                    default 2152;
+                }
+                leaf gtpTunnelIdleTimer {
+                    type uint32;
+                    default 14400;
+                }
+                leaf gtpMessageCounters {
+                    type boolean;
+                    default true;
+                }
+            }
+
+            container httpFlags {
+                leaf httpPort {
+                    type uint32;
+                    default 80;
+                }
+                leaf userAgentTacMapping {
+                    type boolean;
+                    default false;
+                }
+                leaf userAgentLookupInterval {
+                    type uint32;
+                    default 300;
+                }
+            }
+
+            /*  signaling flags  */
+            container signalingFlags {
+                leaf sccpConnectionIdleTimer {
+                    type uint32;
+                    default 3600;
+                }
+            }
+        }
+
+        container tcp {
+            leaf userRecvWinKB {
+                type bufferSizeKBType;
+                default 0;
+            }
+            leaf userSendWinKB {
+                type bufferSizeKBType;
+                default 0;
+            }
+            leaf userTcpCongest {
+                type tcpCongestControlType;
+                default reno;
+            }
+            leaf networkRecvWinKB {
+                type bufferSizeKBType;
+                default 64;
+            }
+            leaf networkSendWinKB {
+                type bufferSizeKBType;
+                default 0;
+            }
+            leaf networkTcpCongest {
+                type tcpCongestControlType;
+                default reno;
+            }
+            leaf connectionStateSharing {
+                type foo-system:enableDisableType;
+                default enable;
+                tailf:hidden deprecated;
+            }
+            leaf connectionStateHoldTimeSecs {
+                type uint32;
+                default 10;
+                tailf:hidden deprecated;
+            }
+        }
+
+        container tcpProxy {
+            container summaryStats {
+                config false;
+                tailf:cdb-oper;
+
+                leaf upstreamAttempts {
+                    type uint64;
+                }
+                leaf upstreamConnections {
+                    type uint64;
+                }
+                leaf upstreamActiveConnections {
+                    type uint64;
+                }
+                leaf upstreamAvgDurationMs {
+                    type uint32;
+                }
+                leaf downstreamAttempts {
+                    type uint64;
+                }
+                leaf downstreamConnections {
+                    type uint64;
+                }
+                leaf downstreamActiveConnections {
+                    type uint64;
+                }
+                leaf downstreamAvgDurationMs {
+                    type uint32;
+                }
+                leaf stateSharingConnections {
+                    type uint64;
+                    tailf:hidden deprecated;
+                }
+                leaf userRxBytes {
+                    type uint64;
+                }
+                leaf userTxBytes {
+                    type uint64;
+                }
+                leaf userAvgRttMs {
+                    type uint32;
+                }
+                leaf userAvgCwnd {
+                    type uint32;
+                }
+                leaf userAvgMss {
+                    type uint32;
+                }
+                leaf userAvgTxRateKbps {
+                    type uint32;
+                }
+                leaf networkRxBytes {
+                    type uint64;
+                }
+                leaf networkTxBytes {
+                    type uint64;
+                }
+                leaf networkAvgRttMs {
+                    type uint32;
+                }
+                leaf networkAvgCwnd {
+                    type uint32;
+                }
+                leaf networkAvgMss {
+                    type uint32;
+                }
+                leaf networkAvgTxRateKbps {
+                    type uint32;
+                }
+                leaf upstreamConnectionFailures {
+                    type uint64;
+                }
+                leaf downstreamConnectionFailures {
+                    type uint64;
+                }
+                leaf totalActiveConnections {
+                    type uint64;
+                }
+                leaf totalConnectionFailures {
+                    type uint64;
+                }
+            }
+
+            list activeConnections {
+                key "userIpAddr userPort networkIpAddr networkPort";
+                config false;
+                tailf:cdb-oper;
+
+                leaf userIpAddr {
+                    type inet:ipv4-address;
+                }
+                leaf userPort {
+                    type inet:port-number;
+                }
+                leaf networkIpAddr {
+                    type inet:ipv4-address;
+                }
+                leaf networkPort {
+                    type inet:port-number;
+                }
+                leaf direction {
+                    type foo-system:direction2Type;
+                }
+                leaf state {
+                    type tcpConnectionState;
+                }
+                leaf userRxBytes {
+                    type uint64;
+                }
+                leaf userRxStalls {
+                    type uint64;
+                }
+                leaf userTxBytes {
+                    type uint64;
+                }
+                leaf userTxStalls {
+                    type uint64;
+                }
+                leaf userQueueDepthKB {
+                    type uint32;
+                }
+                leaf userMaxQueueDepthKB {
+                    type uint32;
+                }
+                leaf networkRxBytes {
+                    type uint64;
+                }
+                leaf networkRxStalls {
+                    type uint64;
+                }
+                leaf networkTxBytes {
+                    type uint64;
+                }
+                leaf networkTxStalls {
+                    type uint64;
+                }
+                leaf networkQueueDepthKB {
+                    type uint32;
+                }
+                leaf networkMaxQueueDepthKB {
+                    type uint32;
+                }
+            }
+        }
+
+        /*  http  */
+        container http {
+            list secondaryPort {
+                key port;
+                tailf:hidden debug;
+
+                /*  only allow cli changes if scope = node  */
+
+                leaf port {
+                    type inet:port-number;
+                }
+                leaf scope {
+                    type foo-system:networkScope;
+                    default node;
+                    tailf:hidden debug;
+                }
+
+                /*  disallow port 80  */
+                must "port != 80" {
+                    tailf:dependency '.';
+                    error-message "port 80 is the primary HTTP port";
+                }
+            }
+
+            container httpCaching {
+                leaf httpCaching {
+                    type boolean;
+                    default true;
+                    tailf:info '"Enable/Disable HTTP caching."';
+                }
+                leaf youtubeCaching {
+                    type boolean;
+                    default true;
+                    tailf:info '"Enable/Disable youtube caching."';
+                }
+                leaf prefixCaching {
+                    type boolean;
+                    default true;
+                    tailf:info '"Enable/Disable Prefix caching."';
+                }
+                leaf prefixCacheLength {
+                    type uint32;
+                    default 2048;
+                    tailf:hidden deprecated;
+                    tailf:info '"Prefix Cache length in KB"';
+                }
+                leaf prefixTypes {
+                    type string;
+                    default *;
+                    tailf:info '"Supported mimetypes for Prefix caching."';
+                }
+                leaf forceTopPageRevalidation {
+                    type boolean;
+                    default false;
+                    tailf:info '"Enable/Disable forced revalidation for top level pages"';
+                }
+            }
+
+            container httpLog {
+                leaf accessLog {
+                    type boolean;
+                    default false;
+                    tailf:info '"Enable/Disable access logging."';
+                }
+                leaf headerDump {
+                    type boolean;
+                    default false;
+                    tailf:info '"Enable/Disable header dump."';
+                }
+                leaf debugIp {
+                    type inet:ipv4-address;
+                    default 0.0.0.0;
+                    tailf:info '"Ip for which debug logs are set."';
+                }
+                leaf requestDump {
+                    type boolean;
+                    default false;
+                    tailf:info '"Enable/Disable requestDump on error."';
+                }
+                leaf responseDump {
+                    type boolean;
+                    default false;
+                    tailf:info '"Enable/Disable responseDump on error."';
+                }
+            }
+
+            container httpCompression {
+                leaf compression {
+                    type boolean;
+                    default true;
+                    tailf:info '"Enable/Disable compression."';
+                }
+                leaf detectContentType {
+                    type boolean;
+                    default true;
+                    tailf:info '"Enable/Disable content-type detection."';
+                }
+                leaf compressionTypes {
+                    type string;
+                    default "text/html,text/plain,text/css,text/javascript,text/xml";
+                    tailf:info '"Supported mimetypes for compression."';
+                }
+            }
+
+            container httpDns {
+                leaf enabled {
+                    type boolean;
+                    default true;
+                    tailf:info '"Enable/Disable DNS service"';
+                }
+
+                list dnsServer {
+                    key ipAddr;
+
+                    leaf ipAddr {
+                        type inet:ipv4-address;
+                    }
+                }
+            }
+
+            container httpConnection {
+                leaf persistent {
+                    type boolean;
+                    default true;
+                    tailf:info '"Enable/Disable persistent connection"';
+                }
+                leaf maxKeepAliveRequests {
+                    type uint32;
+                    default 100;
+                    tailf:info '"Max number of Keep-Alive requests per session."';
+                }
+                leaf maxKeepAliveIdle {
+                    type TimeoutTimeType;
+                    default 90;
+                    tailf:info '"Max seconds before Keep-Alive idling time-out.(0 to 3600 seconds)"';
+                }
+                leaf maxReadIdle {
+                    type TimeoutTimeType;
+                    default 90;
+                    tailf:info '"Max seconds before read idling time-out.(0 to 3600 seconds)"';
+                }
+                leaf maxWriteIdle {
+                    type TimeoutTimeType;
+                    default 90;
+                    tailf:info '"Max seconds before write idling time-out.(0 to 3600 seconds)"';
+                }
+            }
+
+            container httpCompliance {
+                tailf:hidden debug;
+
+                leaf viaHeaderEnabled {
+                    type boolean;
+                    default true;
+                    tailf:info '"Enable/Disable Via headers in request and response."';
+                }
+                leaf viaHeaderString {
+                    type string;
+                    default Foo-HTTP-Proxy-2.2.0;
+                    tailf:info '"String that appears in Via headers in request and response."';
+                }
+                leaf hopByHopHeaderTransparency {
+                    type boolean;
+                    default false;
+                    tailf:info '"Enable/Disable hop-by-hop header transparency."';
+                }
+                leaf methodTransparency {
+                    type boolean;
+                    default false;
+                    tailf:info '"Enable/Disable method transparency."';
+                }
+                leaf debugHeaders {
+                    type boolean;
+                    default true;
+                    tailf:info '"Enable/Disable X-Foo headers in the response."';
+                }
+            }
+
+            container httpVideoPacing {
+                leaf videoPacing {
+                    type boolean;
+                    default true;
+                    tailf:info '"Enable/Disable Video Pacing."';
+                }
+                leaf videoPacingTypes {
+                    type string;
+                    default "video/x-flv,video/flv,video/mp4,video/3gpp";
+                    tailf:info '"Supported mimetypes for video pacing."';
+                }
+            }
+
+            container httpOffload {
+                leaf enabled {
+                    type boolean;
+                    default true;
+                    tailf:info '"Enable/Disable Traffic Offloading."';
+                }
+                leaf sourceBindFailureRetries {
+                    type uint32;
+                    default 3;
+                    tailf:info '"Number of times bind() should be retried on failure."';
+                }
+                leaf dnsFailureRetries {
+                    type uint32;
+                    default 3;
+                    tailf:info '"Number of times dns lookup should be retried on failure."';
+                }
+                leaf sourceBindFailureAction {
+                    type offloadFailureActionType;
+                    default drop;
+                    tailf:info '"drop or continue"';
+                }
+                leaf dnsFailureAction {
+                    type offloadFailureActionType;
+                    default drop;
+                    tailf:info '"drop or continue"';
+                }
+            }
+        }
+
+        container httpCaching {
+            /*  Any Changes within this container above must be appropriatly co-ordinated with the showTemplate container in foo-cae.cli  */
+            container transactionStats {
+                uses httpTransactionStats;
+                config false;
+                tailf:cdb-oper;
+            }
+
+            container connectionStats {
+                uses httpConnectionStats;
+                config false;
+                tailf:cdb-oper;
+            }
+
+            container compressionStats {
+                uses httpCompressionStats;
+                config false;
+                tailf:cdb-oper;
+            }
+
+            container cacheStats {
+                uses httpCacheStats;
+                config false;
+                tailf:cdb-oper;
+            }
+
+            container videopacingStats {
+                uses httpVideoPacingStats;
+                config false;
+                tailf:cdb-oper;
+            }
+
+            container offloadStats {
+                uses httpOffloadStats;
+                config false;
+                tailf:cdb-oper;
+            }
+
+            container tCacheStats {
+                uses httpTransitCacheStats;
+                config false;
+                tailf:cdb-oper;
+            }
+
+            container cacheCleanStats {
+                uses httpCacheCleanStats;
+                config false;
+                tailf:cdb-oper;
+            }
+
+            /*  card-based stats  */
+            list card {
+                key slot;
+                config false;
+                tailf:cdb-oper;
+
+                leaf slot {
+                    type leafref {
+                        path "/foo-system:card/foo-system:slot";
+                    }
+                }
+
+                container transactionStats {
+                    uses httpTransactionStats;
+                }
+                container connectionStats {
+                    uses httpConnectionStats;
+                }
+                container compressionStats {
+                    uses httpCompressionStats;
+                }
+                container cacheStats {
+                    uses httpCacheStats;
+                }
+                container videopacingStats {
+                    uses httpVideoPacingStats;
+                }
+                container offloadStats {
+                    uses httpOffloadStats;
+                }
+                container tCacheStats {
+                    uses httpTransitCacheStats;
+                }
+                container cacheCleanStats {
+                    uses httpCacheCleanStats;
+                }
+            }
+        }
+
+        container arpMgmt {
+            leaf arpMgmtControl {
+                type foo-system:enableDisableType;
+                default enable;
+            }
+
+            list arpTable {
+                key "vlan arpIpAddr";
+                config false;
+                tailf:cdb-oper;
+
+                leaf vlan {
+                    type uint16;
+                    tailf:info '"vlan 0 implies no vlan present"';
+                }
+                leaf arpIpAddr {
+                    type inet:ipv4-address;
+                }
+                leaf arpMacAddr {
+                    type foo-system:MacAddrType;
+                }
+            }
+
+            container arpMgmtStats {
+                config false;
+                tailf:cdb-oper;
+
+                leaf framesReceived {
+                    type uint64;
+                }
+                leaf reqFromSouth {
+                    type uint64;
+                }
+                leaf replyFromSouth {
+                    type uint64;
+                }
+                leaf reqFromNorth {
+                    type uint64;
+                }
+                leaf replyFromNorth {
+                    type uint64;
+                }
+                leaf framesDecodeFailures {
+                    type uint64;
+                }
+                leaf notCompLen {
+                    type uint64;
+                }
+                leaf invalidMacAddr {
+                    type uint64;
+                }
+                leaf ethPIp {
+                    type uint64;
+                }
+                leaf ethPVlan {
+                    type uint64;
+                }
+                leaf ethPVlanUnexpProto {
+                    type uint64;
+                }
+                leaf unexpProto {
+                    type uint64;
+                }
+                leaf nonEthOrIpV4 {
+                    type uint64;
+                }
+                leaf nonReqReply {
+                    type uint64;
+                }
+                leaf arpProbeReqs {
+                    type uint64;
+                }
+                leaf arpRequests {
+                    type uint64;
+                }
+                leaf arpReplies {
+                    type uint64;
+                }
+                leaf arpUnknownOpCode {
+                    type uint64;
+                }
+                leaf gratArpReplies {
+                    type uint64;
+                }
+                leaf gratArpRequests {
+                    type uint64;
+                }
+                leaf normalArpRequests {
+                    type uint64;
+                }
+                leaf normalArpReplies {
+                    type uint64;
+                }
+                leaf entryExistsSameMac {
+                    type uint64;
+                }
+                leaf entryExistsDiffMac {
+                    type uint64;
+                }
+                leaf entriesOverwritten {
+                    type uint64;
+                }
+                leaf entriesAdded {
+                    type uint64;
+                }
+                leaf pubSyncRx {
+                    type uint64;
+                }
+                leaf pubSyncStartTx {
+                    type uint64;
+                }
+                leaf pubUpdateTx {
+                    type uint64;
+                }
+                leaf pubEchoRx {
+                    type uint64;
+                }
+                leaf pubEchoTx {
+                    type uint64;
+                }
+                leaf pubSyncEndTx {
+                    type uint64;
+                }
+                leaf subSyncStartRx {
+                    type uint64;
+                }
+                leaf subUpdateRx {
+                    type uint64;
+                }
+                leaf subSyncEndRx {
+                    type uint64;
+                }
+            }
+        }
+    }
+}

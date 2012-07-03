@@ -1,0 +1,250 @@
+submodule foo-system-types {
+    belongs-to foo-system {
+        prefix foo-system;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    typedef nonNullNameType {
+        type string {
+            length "1 .. 63";
+        }
+    }
+
+    typedef nameType {
+        type string {
+            length "min .. 63";
+        }
+    }
+
+    typedef adminOperType {
+        type enumeration {
+            enum down;
+            enum up;
+        }
+    }
+
+    typedef safOperState {
+        type enumeration {
+            enum enabled;
+            enum disabled;
+        }
+    }
+
+    typedef safPresenceState {
+        type enumeration {
+            enum Uninstantiated;
+            enum Instantiating;
+            enum Instantiated;
+            enum Terminating;
+            enum Restarting;
+            enum "Instantiation Failed";
+            enum "Termination Failed";
+        }
+    }
+
+    typedef safReadinessState {
+        type enumeration {
+            enum outOfService;
+            enum inService;
+            enum stopping;
+        }
+    }
+
+    typedef cardTypeType {
+        type enumeration {
+            enum telcoServer;
+            enum controller;
+            enum standbyController;
+            enum lineCard;
+        }
+    }
+
+    typedef slotType {
+        type uint16 {
+            range "1 .. 12";
+        }
+    }
+
+    typedef subSlotType {
+        type uint16 {
+            range "1 .. 8";
+        }
+    }
+
+    typedef vidType {
+        type uint16 {
+            range "0 .. 4095";
+        }
+    }
+
+    typedef mtuType {
+        type uint16 {
+            range "576 .. 9216";
+        }
+    }
+
+    typedef enableDisableType {
+        type enumeration {
+            enum disable;
+            enum enable;
+            enum notapplicable;
+        }
+    }
+
+    typedef resourceStateType {
+        type enumeration {
+            enum normal;
+            enum error;
+            enum nonRevertive;
+        }
+    }
+
+    typedef networkScope {
+        type enumeration {
+            enum node;
+            enum network;
+        }
+    }
+
+    typedef wildCardType {
+        type enumeration {
+            enum *;
+        }
+    }
+
+    typedef wildCardPortType {
+        type enumeration {
+            enum *;
+            enum notHttp;
+        }
+    }
+
+    typedef wildCardString {
+        type union {
+            type wildCardType;
+            type string;
+        }
+    }
+
+    typedef wildCardIPv4 {
+        type union {
+            type inet:ipv4-address;
+            type wildCardType;
+        }
+    }
+
+    typedef wildCardPort {
+        type union {
+            type inet:port-number;
+            type wildCardPortType;
+        }
+    }
+
+    typedef direction3Type {
+        type enumeration {
+            enum upstream;
+            enum downstream;
+            enum both;
+        }
+    }
+
+    typedef direction2Type {
+        type enumeration {
+            enum upstream;
+            enum downstream;
+        }
+    }
+
+    typedef dscpType {
+        type enumeration {
+            enum dontCare;
+            enum cs7;
+            enum cs6;
+            enum ef;
+            enum afStar;
+            enum af1Star;
+            enum af11;
+            enum af12;
+            enum af13;
+            enum af2Star;
+            enum af21;
+            enum af22;
+            enum af23;
+            enum af3Star;
+            enum af31;
+            enum af32;
+            enum af33;
+            enum af4Star;
+            enum af41;
+            enum af42;
+            enum af43;
+            enum df;
+        }
+    }
+
+    typedef MacAddrType {
+        type string {
+            length 17;
+            pattern "([0-9a-fA-F][0-9a-fA-F]:){5}([0-9a-fA-F][0-9a-fA-F])";
+        }
+    }
+
+    typedef yesNoType {
+        type enumeration {
+            enum yes;
+            enum no;
+        }
+    }
+
+    typedef imsiType {
+        type string {
+            pattern "([0-9]{6,15})";
+        }
+    }
+
+    typedef tacType {
+        type uint32 {
+            range 100000..19999999;
+        }
+    }
+
+    typedef peerStateType {
+        type enumeration {
+            enum active;
+            enum inactive;
+        }
+    }
+
+    typedef haStateType {
+        type enumeration {
+            enum none;
+            enum active;
+            enum standby;
+            enum quiesced;
+            enum quiescing;
+        }
+    }
+
+    typedef applicationStateType {
+        type enumeration {
+            enum invalid;
+            enum provisioning;
+            enum adminDisabled;
+            enum syncing;
+            enum waitingToBeActive;
+            enum runningStandby;
+            enum runningActive;
+            enum safDisabled;
+        }
+    }
+}

@@ -67,9 +67,6 @@ public class AnyURI implements Serializable {
         return false;
     }
 
-
-
-
     /** ---------- Restrictions ---------- */
 
     /**
@@ -164,10 +161,7 @@ public class AnyURI implements Serializable {
         throw new ConfMException(ConfMException.BAD_VALUE,o);
     }
 
-
-
     /** ---------- package private --------- */
-
 
     /**
      * xs:whiteSpace replace.

@@ -60,7 +60,6 @@ import com.tailf.inm.*;
 public class Device
     implements Serializable {
 
-
     // named session specific connection data
     static private class SessionConnData {
         String sessionName;
@@ -85,7 +84,6 @@ public class Device
         }
     }
 
-
     /**
      * The device should have a name.
      * If nothing else choose the IP address as name.
@@ -99,7 +97,6 @@ public class Device
      */
     protected transient SSHConnection con = null;
 
-
     /**
      * The NETCONF sessions (channels) for this device.
      */
@@ -107,8 +104,6 @@ public class Device
     // list of SessionConnData
     protected transient ArrayList trees;
     // list of SessionTree
-
-
 
     /**
      * A list of configuration changes.
@@ -119,13 +114,11 @@ public class Device
      */
     protected ArrayList backlog;
 
-
     /**
      * A list of users.
      *
      */
     protected ArrayList users;         // list of DeviceUser
-
 
     String mgmt_ip;                 // ip address as string
     int mgmt_port;
@@ -169,8 +162,6 @@ public class Device
         trees = new ArrayList();
     }
 
-
-
     /**
      * If Device is stored on disk as a serialized object, we need to
      * init the transient variables after we read a Device from disk.
@@ -208,7 +199,6 @@ public class Device
         t.configTree = null;
     }
 
-
     /**
      * Returns the accumulated config tree for a named NETCONF session.
      * This feature is a convenience feature. It makes sense to perform
@@ -233,12 +223,10 @@ public class Device
      * @param readTimeout timeout in milliseconds
      */
 
-
     public void setReadTimeout(String sessionName, int readTimeout) {
         SessionConnData p = getConnData(sessionName);
         p.sshSession.setReadTimeout(readTimeout);
     }
-
 
     /**
      * Gets the readTimeout associated to a named session
@@ -250,7 +238,6 @@ public class Device
         SessionConnData p = getConnData(sessionName);
         return p.sshSession.getReadTimeout();
     }
-
 
     /**
      * Check if the named session have a saved configuration
@@ -264,7 +251,6 @@ public class Device
         return false;
     }
 
-
     /**
      * Sets the accumulation config tree for a named session
      * @param sessionName symbolic Name of the session
@@ -275,7 +261,6 @@ public class Device
         t.configTree = e;
     }
 
-
     /**
      * Checks if a backlog is saved for this device.
      *
@@ -284,7 +269,6 @@ public class Device
     public boolean hasBacklog() {
         return (backlog.size() > 0);
     }
-
 
     /**
      * Whenever new  ConfDSession objects are created through newSession()
@@ -295,7 +279,6 @@ public class Device
     public void setDefaultReadTimeout(int defaultReadTimeout) {
         this.defaultReadTimeout = defaultReadTimeout;
     }
-
 
     /**
      * Close the named session associated with this device.
@@ -345,8 +328,6 @@ public class Device
         }
     }
 
-
-
     /**
      * Checks if this device have any sessions.
      *
@@ -354,8 +335,6 @@ public class Device
     public boolean hasSession(String name) {
         return (getSession(name)  != null);
     }
-
-
 
     /**
      * Returns a named ConfDSession for this NETCONF enabled device.
@@ -376,7 +355,6 @@ public class Device
         return data.session;
     }
 
-
     /**
      * Returns a named SSHSession for this NETCONF enabled device.
      * We need the {@link SSHSession} object if we for example
@@ -389,7 +367,6 @@ public class Device
         return data.sshSession;
     }
 
-
     /**
      * This method finds the {@link DeviceUser} associated to the localUser
      * user name and SSH connects to the device, this method must be
@@ -398,7 +375,6 @@ public class Device
     public void connect(String localUser) throws IOException, INMException {
         connect(localUser, 0);
     }
-
 
     /**
      * This connect() method has an additional timeout paramater.
@@ -422,14 +398,11 @@ public class Device
             throw new INMException(INMException.AUTH_FAILED,
                                    "No such user: " + localUser);
 
-
         XMLParser parser = new com.tailf.confm.XMLParser();
         con = new SSHConnection(mgmt_ip, mgmt_port, connectTimeout);
         auth(u);
         return;
     }
-
-
 
     /**
      * This method is mostly interesting if we want to use
@@ -491,7 +464,6 @@ public class Device
         return;
     }
 
-
     /**
      * Adds the given configuration tree to the list of backlogs.
      * @param e Config tree to be saved.
@@ -499,7 +471,6 @@ public class Device
     public void addBackLog(Element e) {
         backlog.add(e);
     }
-
 
     /**
      * Return the backlog.
@@ -511,8 +482,6 @@ public class Device
         }
         return null;
     }
-
-
 
     /**
      * Run the backlog.
@@ -540,8 +509,6 @@ public class Device
         }
     }
 
-
-
     /**
      * Returns a string with information about this device.
      *
@@ -556,7 +523,6 @@ public class Device
         return s;
     }
 
-
     private SessionConnData getConnData(String sessionName) {
         for (int i=0; i<connSessions.size(); i++) {
             SessionConnData p = (SessionConnData)connSessions.get(i);
@@ -566,7 +532,6 @@ public class Device
         return null;
     }
 
-
     private SessionTree getTreeData(String sessionName) {
         for (int i=0; i<trees.size(); i++) {
             SessionTree t = (SessionTree)trees.get(i);
@@ -575,8 +540,6 @@ public class Device
         }
         return null;
     }
-
-
 
     private SessionConnData removeConnData(String sessionName) {
         for (int i=0; i<connSessions.size(); i++) {
@@ -588,8 +551,6 @@ public class Device
         }
         return null;
     }
-
-
 
     private void auth(DeviceUser currentUser)
         throws IOException, INMException {
@@ -605,7 +566,5 @@ public class Device
                                               currentUser.pemFile,
                                               currentUser.keyPassPhrase);
     }
-
-
 
 }

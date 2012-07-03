@@ -39,7 +39,6 @@ public class GMonthDay implements Serializable {
     public GMonthDay() {
     }
 
-
     /**
      * Constructor for "xs:gDay" from a String in the format
      * "--MM-DD".
@@ -87,7 +86,6 @@ public class GMonthDay implements Serializable {
         return s;
     }
 
-
     /**
      * Checks if the value space of two GMonthDay objects
      * are equal.
@@ -101,7 +99,6 @@ public class GMonthDay implements Serializable {
             return true;
         return false;
     }
-
 
     /**
      * Checks if the value space of two GMonthDay objects
@@ -120,7 +117,6 @@ public class GMonthDay implements Serializable {
         return toString().compareTo( value.toString());
     }
 
-
     /**
      * Returns a Calendar object from the GMonthDay.
      *
@@ -138,7 +134,6 @@ public class GMonthDay implements Serializable {
         return c;
     }
 
-
     /**
      * Returns the current time, for this GMonthDay object.
      *
@@ -146,7 +141,6 @@ public class GMonthDay implements Serializable {
     public java.util.Date getTime() {
         return getCalendar().getTime();
     }
-
 
     /**
      * Help method to parse and set the value.
@@ -190,7 +184,6 @@ public class GMonthDay implements Serializable {
             throwException(true, value);
         }
     }
-
 
     /** ---------- Restrictions ---------- */
 
@@ -239,7 +232,6 @@ public class GMonthDay implements Serializable {
         throw new ConfMException(ConfMException.BAD_VALUE,this);
     }
 
-
     /**
      * Assert that the value is 'false'
      * Throw an ConfMException otherwise
@@ -248,6 +240,5 @@ public class GMonthDay implements Serializable {
         if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,value);
     }
-
 
 }

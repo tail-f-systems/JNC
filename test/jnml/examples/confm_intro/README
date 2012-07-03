@@ -1,0 +1,145 @@
+                         ConfM Introductory Example
+                         ==========================
+
+1. Purpose
+==========
+
+This example demonstrates a simple application using ConfM to manage a NETCONF
+capable device.
+
+For more information about this example, please consult the ConfM manual
+chapter 1.5.
+
+2. Topology
+===========
+
+This example uses two nodes as follows:
+
+  * Our ConfM application.
+
+  * A NETCONF capable device, in this particular example, we assume that
+    Tail-f ConfD is used, but in fact any NETCONF enabled device would do.
+
+For the sake of simplicity, the following simplification has been made:
+
+Both nodes run on the same computer and communicates over the loopback
+interface (i.e. remote host is set to "localhost" on both nodes). In a real
+life situation, they would normally run on different computers. If your ConfD
+node runs on a different machine than ConfM, there are a couple of additional
+steps to take, please see section 5 below.
+
+3. Prerequisites
+================
+
+In order to run this demonstration, you need the following:
+
+  * One computer with Linux operating system installed.
+  * ConfD version 2.5. or later.
+  * ConfM version 1.2.3 or later.
+  * Tools to build C programs, e.g. gcc, make.
+  * Java version 1.4 or later.
+  * ant program.
+
+4. Building and Running the ConfM Introductory Example
+======================================================
+
+4.1 Building and Starting ConfD
+===============================
+
+Open a shell and set your current working directory to the directory where
+your installation of ConfD resides:
+
+  # cd <your confd installation dir>
+
+Source the rc script in the ConfD root directory:
+
+  # source <confd_dir>/confdrc
+
+        or if you are using the tcsh:
+
+  # source <confd_dir>/confdrc.tcsh
+
+Source the rc script in the ConfM root directory
+  # cd <your confm installation dir>
+  # source ./confmrc
+
+This sets environment variable CONFM_DIR to where
+ConfM was installed. This is used by the ant build.xml to
+find the ConfM jar files.
+
+Then change directory 
+
+  # cd ${CONFM_DIR}/examples/confm_intro
+
+Build the ConfD node and start it:
+
+  # cd confd
+  # make clean all start
+  # cd ..
+
+4.2 Building ConfM example
+========================
+
+Set your current working directory to the directory where
+this ConfM example resides:
+
+  # cd ${CONFM_DIR}/examples/confm_intro
+
+
+Build the ConfM example:
+
+  # ant clean compile
+
+4.3 Run the Example
+===============================
+
+Run this example by doing:
+
+  # ant run
+
+4.4 Stopping ConfD
+===============================
+
+After completing the examples above, stop ConfD as follows:
+
+  # cd confd
+  # make stop
+  # cd ..
+
+5. ConfD and ConfM on different hosts
+=====================================
+
+You can also run the example above having ConfD and ConfM on separate
+machines. If so, the following additional steps has to be made:
+This is the required procedure for users using the win32 version of 
+ConfM.
+
+5.1 Building and Starting ConfD
+===============================
+
+On the machine where ConfD is installed, execute the steps above
+that start ConfD
+
+On the machine where ConfM runs, execute the ant script.
+
+5.2. Building and Running the ConfM examples
+===========================================
+
+The ConfM example assumes that the ConfD server is running on the same
+machine. Edit the file src/app/Main.java as follows
+
+There are two occurences of the following line:
+
+  dev = new Device("mydev", duser, "localhost", 2022);
+
+
+Replace the string "localhost" with the IP address or host name of your ConfD
+server, e.g.:
+
+  dev = new Device("mydev", duser, "mydevice", 2022);
+
+or
+
+  dev = new Device("mydev", duser, "192.168.1.1", 2022);
+
+Then rerun the ant script.

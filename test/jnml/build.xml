@@ -1,0 +1,69 @@
+<project name="ConfM" basedir="." default="all">
+  <property name="build.dir" value="build"/>
+  <property name="classes.dir" value="${build.dir}/classes"/>
+  <property name="src.dir" value="src"/>
+  <property name="jar.dir" value="${build.dir}/jar"/>
+  <property name="doc.dir" value="${build.dir}/javadoc"/>
+  
+  <target name="all" depends="inm,confm"/>
+
+  <target name="inm" depends="compile">
+    <mkdir dir="${jar.dir}"/>
+    <jar destfile="${jar.dir}/INM.jar" basedir="${classes.dir}"
+         includes="com/tailf/inm/*.class"/>
+  </target>
+  
+  <target name="confm" depends="compile">
+    <mkdir dir="${jar.dir}"/>
+    <jar destfile="${jar.dir}/ConfM.jar" basedir="${classes.dir}"
+	 includes="com/tailf/confm/*.class,
+                   com/tailf/confm/confd/*.class,
+                   com/tailf/confm/xs/*.class,
+                   com/tailf/confm/yang/*.class"/>
+  </target>
+  
+  <target name="javadoc" depends="inmJavadoc,confmJavadoc"/>
+
+  <target name="user_guides">
+    <exec dir="../doc" executable="make" failonerror="true">
+      <arg value="PRODUCT=confm"/>
+      <arg value="doc"/>
+    </exec>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+  </target>
+
+  <!-- Utility targets -->
+
+  <target name="compile">
+    <mkdir dir="${classes.dir}"/>
+    <javac srcdir="${src.dir}" destdir="${classes.dir}" debug="on"
+           debuglevel="lines,vars,source"  >
+      <classpath location="ganymed/ganymed-ssh2-build251beta1.jar"/>
+    </javac>
+  </target>
+  
+  <target name="inmJavadoc" depends="inm">
+    <mkdir dir="${doc.dir}"/>
+    <javadoc destdir="${doc.dir}/inm" public="true" author="true"
+             version="true" use="true" windowtitle="INM API">
+      <classpath location="ganymed/ganymed-ssh2-build251beta1.jar"/>
+      <packageset dir="${src.dir}" defaultexcludes="yes">
+        <include name="com/tailf/inm/**"/>
+      </packageset>
+    </javadoc>
+  </target>
+  
+  <target name="confmJavadoc" depends="inm,confm">
+    <mkdir dir="${doc.dir}"/>
+    <javadoc destdir="${doc.dir}/confm" public="true" author="true"
+             version="true" use="true" windowtitle="ConfM API">
+      <classpath location="ganymed/ganymed-ssh2-build251beta1.jar"/>
+      <packageset dir="${src.dir}" defaultexcludes="yes">
+	<include name="**"/>
+      </packageset>
+    </javadoc>
+  </target>
+</project>

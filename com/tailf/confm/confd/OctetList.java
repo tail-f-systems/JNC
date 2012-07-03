@@ -54,7 +54,6 @@ public class OctetList implements Serializable {
         check();
     }
 
-
     /**
      * Returns the value space.
      */
@@ -64,7 +63,6 @@ public class OctetList implements Serializable {
 
     private void check() {
     }
-
 
     /**
      * Parse octet list
@@ -97,7 +95,6 @@ public class OctetList implements Serializable {
         return v;
     }
 
-
     public java.lang.String toString() {
         String s = new String();
         boolean dot= false;
@@ -108,7 +105,6 @@ public class OctetList implements Serializable {
         }
         return s;
     }
-
 
     public boolean equals(OctetList v) {
         byte[] v1= value;
@@ -124,8 +120,6 @@ public class OctetList implements Serializable {
             return equals( (OctetList)value);
         return false;
     }
-
-
 
     /** ---------- Restrictions ---------- */
 

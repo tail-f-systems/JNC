@@ -1,0 +1,31 @@
+module multi {
+  namespace "http://tail-f.com/ns/example/multi";
+  prefix multi;
+  
+  list foo {
+    key fname;
+    
+    leaf fname {
+      type string;
+    }
+    leaf fint {
+      type int32;
+      mandatory true;
+    }
+  }
+
+
+  list bar {
+    key bname;
+    
+    leaf bname {
+      type string;
+    }
+    leaf bint {
+      type int32;
+      mandatory true;
+    }
+  }
+}
+
+

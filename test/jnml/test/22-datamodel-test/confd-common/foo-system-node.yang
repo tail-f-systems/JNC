@@ -1,0 +1,126 @@
+submodule foo-system-node {
+    belongs-to foo-system {
+        prefix foo-system;
+    }
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    include foo-system-types;
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    container node {
+        /*  application  */
+        list application {
+            key "slot service component";
+            config false;
+            tailf:cdb-oper;
+
+            leaf slot {
+                type slotType;
+            }
+            leaf service {
+                type nameType;
+            }
+            leaf component {
+                type nameType;
+            }
+            leaf appType {
+                type string;
+                tailf:hidden deprecated;
+            }
+            leaf operState {
+                type safOperState;
+            }
+            leaf presenceState {
+                type safPresenceState;
+            }
+            leaf readinessState {
+                type safReadinessState;
+            }
+            leaf startCount {
+                type uint32;
+                tailf:hidden deprecated;
+            }
+            leaf failCount {
+                type uint32;
+                tailf:hidden deprecated;
+            }
+            leaf startTime {
+                type string;
+                tailf:hidden deprecated;
+            }
+            leaf haState {
+                type haStateType;
+            }
+            leaf appState {
+                type applicationStateType;
+                tailf:hidden deprecated;
+            }
+            leaf forwarding {
+                type enableDisableType;
+                tailf:hidden deprecated;
+            }
+        }
+
+        /*  service  */
+        list service {
+            key "slot service";
+            config false;
+            tailf:hidden experimental;
+            tailf:cdb-oper;
+
+            leaf slot {
+                type slotType;
+            }
+            leaf service {
+                type nameType;
+            }
+            leaf operState {
+                type safOperState;
+            }
+            leaf presenceState {
+                type safPresenceState;
+            }
+            leaf readinessState {
+                type safReadinessState;
+            }
+            leaf haState {
+                type haStateType;
+            }
+        }
+
+        /*  resources  */
+        container resources {
+            list resource {
+                key name;
+                config false;
+                tailf:cdb-oper;
+
+                leaf name {
+                    type nameType;
+                }
+                leaf state {
+                    type resourceStateType;
+                }
+            }
+
+            tailf:action revert {
+                tailf:actionpoint nodeResources;
+                tailf:confirm-text "Do you want to proceed?";
+                output {
+                    leaf reply {
+                        type string;
+                    }
+                }
+            }
+        }
+    }
+}

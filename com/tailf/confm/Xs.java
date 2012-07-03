@@ -13,7 +13,6 @@ package com.tailf.confm;
 import com.tailf.inm.*;
 import java.io.Serializable;
 
-
 /**
  * This class implements the XML schema data types.
  * the 'http://www.w3.org/2001/XMLSchema' namespace.
@@ -40,7 +39,6 @@ public class Xs {
         }
     }
 
-
     /**
      * This class implements the "xs:normalizedString" datatype.
      *
@@ -52,7 +50,6 @@ public class Xs {
             super(value);
         }
     }
-
 
     /**
      * This class implements the "xs:token" datatype.
@@ -102,7 +99,6 @@ public class Xs {
         }
     }
 
-
     /**
      * This class implements the "xs:ID" datatype.
      *
@@ -115,7 +111,6 @@ public class Xs {
         }
     }
 
-
     /**
      * This class implements the "xs:language" datatype.
      *
@@ -127,7 +122,6 @@ public class Xs {
             super(value);
         }
     }
-
 
     /**
      * This class implements the "xs:boolean" datatype.
@@ -144,7 +138,6 @@ public class Xs {
             super(value);
         }
     }
-
 
     /**
      * This class implements the "xs:byte" datatype.
@@ -167,7 +160,6 @@ public class Xs {
         }
     }
 
-
     /**
      * This class implements the "xs:short" datatype.
      * Represents a 16-bit signed integer.
@@ -189,7 +181,6 @@ public class Xs {
         }
     }
 
-
     /**
      * This class implements the "xs:int" datatype.
      * Represents a 32-bit signed integer.
@@ -206,7 +197,6 @@ public class Xs {
             super(value);
         }
     }
-
 
     /**
      * This class implements the "xs:long" datatype.
@@ -225,7 +215,6 @@ public class Xs {
         }
 
     }
-
 
     /**
      * This class implements the "xs:integer" datatype.
@@ -249,7 +238,6 @@ public class Xs {
 
     }
 
-
     /**
      * This class implements the "xs:unsignedByte" datatype.
      * Represents an unsigned 8-bit integer.
@@ -271,7 +259,6 @@ public class Xs {
         }
     }
 
-
     /**
      * This class implements the "xs:unsignedShort" datatype.
      * Represents an unsigned 16-bit integer.
@@ -288,7 +275,6 @@ public class Xs {
             super(value);
         }
     }
-
 
     /**
      * This class implements the "xs:unsignedInt" datatype.
@@ -307,7 +293,6 @@ public class Xs {
         }
 
     }
-
 
     /**
      * This class implements the "xs:unsignedLong" datatype.
@@ -329,7 +314,6 @@ public class Xs {
 
     }
 
-
     /**
      * This class implements the "xs:decimal" datatype.
      *
@@ -345,7 +329,6 @@ public class Xs {
             super(value);
         }
     }
-
 
     /**
      * This class implements the "xs:float" datatype.
@@ -368,7 +351,6 @@ public class Xs {
 
     }
 
-
     /**
      * This class implements the "xs:double" datatype.
      *
@@ -384,7 +366,6 @@ public class Xs {
             super(value);
         }
     }
-
 
     /**
      * This class implements the "xs:positiveInteger" datatype.
@@ -403,7 +384,6 @@ public class Xs {
             super(value);
         }
     }
-
 
     /**
      * This class implements the "xs:nonPositiveInteger" datatype.
@@ -424,7 +404,6 @@ public class Xs {
         }
     }
 
-
     /**
      * This class implements the "xs:negativeInteger" datatype.
      * Represents a negative integer.
@@ -442,7 +421,6 @@ public class Xs {
             super(value);
         }
     }
-
 
     /**
      * This class implements the "xs:nonNegativeInteger" datatype.
@@ -462,7 +440,6 @@ public class Xs {
             super(value);
         }
     }
-
 
     /**
      * This class implements the "xs:duration" datatype.
@@ -488,7 +465,6 @@ public class Xs {
         }
     }
 
-
     /**
      * This class implements the "xs:date" datatype.
      *
@@ -500,7 +476,6 @@ public class Xs {
             super(value);
         }
     }
-
 
     /**
      * This class implements the "xs:gYearMonth" datatype.
@@ -562,7 +537,6 @@ public class Xs {
         }
     }
 
-
     /**
      * This class implements the "xs:gDay" datatype.
      *
@@ -574,7 +548,6 @@ public class Xs {
             super(value);
         }
     }
-
 
     /**
      * This class implements the "xs:QName" datatype.
@@ -588,7 +561,6 @@ public class Xs {
         }
     }
 
-
     /**
      * This class implements the "xs:anyURI" datatype.
      *
@@ -600,7 +572,6 @@ public class Xs {
             super(value);
         }
     }
-
 
     /**
      * This class implements the "xs:HexBinary" datatype.
@@ -623,8 +594,6 @@ public class Xs {
         }
 
     }
-
-
 
 }
 

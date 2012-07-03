@@ -14,7 +14,6 @@ package com.tailf.inm;
 import java.util.ArrayList;
 import java.io.IOException;
 
-
 /**
  * A NETCONF session class.
  * It makes it possible to connect to a NETCONF agent using a preferred
@@ -137,7 +136,6 @@ import java.io.IOException;
 
 public class NetconfSession {
 
-
     /**
      * Monotonically increased message identifier for this session.
      */
@@ -168,8 +166,6 @@ public class NetconfSession {
      */
     protected Capabilities capabilities;
 
-
-
     /**
      * Return a Capabilities object with the
      * NETCONF capabilities for this session.
@@ -187,7 +183,6 @@ public class NetconfSession {
     public boolean hasCapability(String uri) {
         return capabilities.hasCapability(uri);
     }
-
 
     /**
      * The XML parser instance.
@@ -222,7 +217,6 @@ public class NetconfSession {
         hello();
     }
 
-
     /**
      * Creates a new session object
      * using the given transport object.
@@ -250,9 +244,6 @@ public class NetconfSession {
      *                             new com.tailf.confm.XMLParser() );
      * </pre>
      **/
-
-
-
 
     public NetconfSession( Transport transport, XMLParser parser )
         throws INMException, IOException {
@@ -379,7 +370,6 @@ public class NetconfSession {
         return  parser.parse( reply.toString() );
     }
 
-
     /**
      * Sends rpc request and return.
      * This method may be used for sending an XML string over
@@ -434,8 +424,6 @@ public class NetconfSession {
         return  parser.parse( reply.toString() );
     }
 
-
-
     /**
      * Gets the device configuration data specified by
      * subtree filtering.
@@ -447,7 +435,6 @@ public class NetconfSession {
         return getConfig(RUNNING,subtreeFilter);
     }
 
-
     /**
      * Gets the device configuration data.
      *
@@ -456,7 +443,6 @@ public class NetconfSession {
         throws INMException, IOException {
         return getConfig(RUNNING);
     }
-
 
     /**
      * Gets the device configuration data.
@@ -494,7 +480,6 @@ public class NetconfSession {
         return getConfig(RUNNING,xpath);
     }
 
-
     /**
      * Gets the device configuration data specified by
      * subtree filtering.
@@ -510,7 +495,6 @@ public class NetconfSession {
         out.flush();
         return recv_rpc_reply_data(mid);
     }
-
 
     /**
      * Gets the device configuration data specified by
@@ -532,8 +516,6 @@ public class NetconfSession {
         return recv_rpc_reply_data(mid);
     }
 
-
-
     /**
      * Retrieves running configuration and device state information.
      */
@@ -544,7 +526,6 @@ public class NetconfSession {
         out.flush();
         return recv_rpc_reply_data(mid);
     }
-
 
     /**
      * Retrieves running configuration and device state information.
@@ -557,7 +538,6 @@ public class NetconfSession {
         out.flush();
         return recv_rpc_reply_data(mid);
     }
-
 
     /**
      * Retrieves running configuration and device state information.
@@ -576,7 +556,6 @@ public class NetconfSession {
         return recv_rpc_reply_data(mid);
     }
 
-
     /**
      * Edits the configuration.
      * The <code>edit-config</code> operation loads all or part of a specified
@@ -588,7 +567,6 @@ public class NetconfSession {
         editConfig(RUNNING, configTree);
     }
 
-
     /**
      * Edits the configuration. If we have multiple top elements
      * in our configuration schema (YANG model) we must send a
@@ -599,8 +577,6 @@ public class NetconfSession {
         throws INMException, IOException {
         editConfig(RUNNING, configTrees);
     }
-
-
 
     /**
      * Edits the configuration.
@@ -620,7 +596,6 @@ public class NetconfSession {
         recv_rpc_reply_ok(mid);
     }
 
-
     public void editConfig(int datastore, NodeSet configTrees)
         throws INMException, IOException {
         trace("editConfig: target="+datastoreToString(datastore)+"\n"
@@ -629,9 +604,6 @@ public class NetconfSession {
         out.flush();
         recv_rpc_reply_ok(mid);
     }
-
-
-
 
     /**
      * Edits the configuration.
@@ -670,7 +642,6 @@ public class NetconfSession {
      * @see #setDefaultOperation(int)
      */
     public static final int NONE =    3;
-
 
     /**
      * Specifies the default operation for all edit-config operations
@@ -714,7 +685,6 @@ public class NetconfSession {
      */
     private int defaultOperation = NOT_SET;
 
-
     /** Value for test option.
      * @see #setTestOption(int)
      */
@@ -729,7 +699,6 @@ public class NetconfSession {
      * @see #setTestOption(int)
      */
     public static final int TEST_ONLY = 3;
-
 
     /**
      * Specifies the test-option parameter for the edit-config operations
@@ -756,12 +725,10 @@ public class NetconfSession {
         testOption= testoption;
     }
 
-
     /**
      * The test-option parameter sent in editConfig.
      */
     private int testOption= NOT_SET;
-
 
     /** Value for error option.
      * @see #setErrorOption(int)
@@ -777,7 +744,6 @@ public class NetconfSession {
      * @see #setErrorOption(int)
      */
     public static final int ROLLBACK_ON_ERROR = 3;
-
 
     /**
      * Specifies the error-option for the edit-config operations for the
@@ -814,7 +780,6 @@ public class NetconfSession {
      */
     private int errorOption = NOT_SET;
 
-
     /**
      * Creates or replace an entire configuration datastore with the
      * contents of another complete configuration datastore.  If the
@@ -843,7 +808,6 @@ public class NetconfSession {
         recv_rpc_reply_ok();
     }
 
-
     /**
      * Same as {@link #copyConfig(Element,int)} but
      * uses an url as target.
@@ -857,7 +821,6 @@ public class NetconfSession {
         copyConfig(new NodeSet(sourceTree), targetUrl);
     }
 
-
     public void copyConfig(NodeSet sourceTrees, String targetUrl)
         throws INMException, IOException {
 
@@ -867,8 +830,6 @@ public class NetconfSession {
         out.flush();
         recv_rpc_reply_ok();
     }
-
-
 
     /**
      * Creates or replace an entire configuration datastore with the
@@ -889,8 +850,6 @@ public class NetconfSession {
         recv_rpc_reply_ok();
     }
 
-
-
     /**
      * Same as {@link #copyConfig(int,int)} but
      * uses an url as target.
@@ -907,7 +866,6 @@ public class NetconfSession {
         out.flush();
         recv_rpc_reply_ok();
     }
-
 
     /**
      * Same as {@link #copyConfig(int,int)} but
@@ -926,7 +884,6 @@ public class NetconfSession {
         recv_rpc_reply_ok();
     }
 
-
     /**
      * Same as {@link #copyConfig(int,int)} but
      * uses an url as the source.
@@ -944,7 +901,6 @@ public class NetconfSession {
         recv_rpc_reply_ok();
     }
 
-
     /**
      * Deletes a configuration datastore.  The <running> configuration
      * datastore cannot be deleted.
@@ -958,7 +914,6 @@ public class NetconfSession {
         recv_rpc_reply_ok();
     }
 
-
     /**
      * Deletes a configuration target url.
      *
@@ -971,7 +926,6 @@ public class NetconfSession {
         out.flush();
         recv_rpc_reply_ok();
     }
-
 
     /**
      * The lock operation allows the client to lock the configuration
@@ -994,7 +948,6 @@ public class NetconfSession {
         recv_rpc_reply_ok();
     }
 
-
     /**
      * The unlock operation is used to release a configuration lock,
      * previously obtained with the {@link #lock} operation.
@@ -1007,8 +960,6 @@ public class NetconfSession {
         out.flush();
         recv_rpc_reply_ok();
     }
-
-
 
     /**
      * The partial-lock operation allows the client to lock a portion of a
@@ -1070,7 +1021,6 @@ public class NetconfSession {
         }
     }
 
-
     /**
      * Same as {@link #lockPartial(int,String[])} except it
      * only takes one selection as argument.
@@ -1080,7 +1030,6 @@ public class NetconfSession {
         throws INMException, IOException {
         return lockPartial(new String[] { select });
     }
-
 
     /**
      * The unlock operation is used to release a configuration lock,
@@ -1104,7 +1053,6 @@ public class NetconfSession {
         out.flush();
         recv_rpc_reply_ok(mid);
     }
-
 
     /**
      * When a candidate configuration's content is complete, the
@@ -1138,7 +1086,6 @@ public class NetconfSession {
         out.flush();
         recv_rpc_reply_ok(mid);
     }
-
 
     /**
      * The <code>:confirmed-commit</code> capability indicates that the server
@@ -1194,8 +1141,6 @@ public class NetconfSession {
         recv_rpc_reply_ok(mid);
     }
 
-
-
     /**
      * If the client decides that the candidate configuration should not be
      * committed, the <discard-changes> operation can be used to revert the
@@ -1213,7 +1158,6 @@ public class NetconfSession {
         recv_rpc_reply_ok(mid);
     }
 
-
     /**
      * Requests graceful termination of a NETCONF session.
      * <p>
@@ -1229,7 +1173,6 @@ public class NetconfSession {
         out.flush();
         recv_rpc_reply_ok(mid);
     }
-
 
     /**
      * Force the termination of a NETCONF session.
@@ -1255,7 +1198,6 @@ public class NetconfSession {
         recv_rpc_reply_ok(mid);
     }
 
-
     /**
      * This protocol operation validates the contents of the specified
      * configuration.
@@ -1274,8 +1216,6 @@ public class NetconfSession {
         recv_rpc_reply_ok(mid);
     }
 
-
-
     /**
      * This protocol operation validates the given datastore.
      * For example the {@link #CANDIDATE} datastore.
@@ -1292,7 +1232,6 @@ public class NetconfSession {
         out.flush();
         recv_rpc_reply_ok(mid);
     }
-
 
     /**
      * This protocol operation validates the given URL.
@@ -1312,8 +1251,6 @@ public class NetconfSession {
         out.flush();
         recv_rpc_reply_ok(mid);
     }
-
-
 
     /**
      * The notification capability makes it possible to receive
@@ -1344,7 +1281,6 @@ public class NetconfSession {
         throws IOException, INMException {
         createSubscription(stream,(String)null,null,null);
     }
-
 
     /**
      * The notification capability makes it possible to receive
@@ -1401,7 +1337,6 @@ public class NetconfSession {
         recv_rpc_reply_ok(mid);
     }
 
-
     /**
      * Same as {@link #createSubscription(String,NodeSet,String,String)}
      * except a filter in xpath format can be given instead of a subtree filter.
@@ -1432,7 +1367,6 @@ public class NetconfSession {
         recv_rpc_reply_ok(mid);
     }
 
-
     /**
      * Method to get the available streams from the agent.
      * This will do:
@@ -1450,7 +1384,6 @@ public class NetconfSession {
                            "netconf/streams");
         return get( filter );
     }
-
 
     /**
      * Receive one notification. This is a blocking call - it blocks
@@ -1473,8 +1406,6 @@ public class NetconfSession {
         throw new INMException(INMException.NOTIFICATION_ERROR,t);
     }
 
-
-
     /** ------------------------------------------------------------
      *  Receive from session
      */
@@ -1491,7 +1422,6 @@ public class NetconfSession {
     void recv_rpc_reply_ok(int mid) throws INMException, IOException {
         recv_rpc_reply_ok(Integer.toString(mid));
     }
-
 
     void recv_rpc_reply_ok(String mid) throws INMException, IOException {
         StringBuffer reply = in.readOne();
@@ -1511,7 +1441,6 @@ public class NetconfSession {
         /* rpc-error */
         throw new INMException(INMException.RPC_REPLY_ERROR,t);
     }
-
 
     /**
      * Reads one rpc-reply from session and
@@ -1579,7 +1508,6 @@ public class NetconfSession {
      *  Extending the session with new capabilities.
      */
 
-
     /**
      * Set a proprietary capability.
      * This capability will be advertised in the
@@ -1601,19 +1529,15 @@ public class NetconfSession {
 
     private ArrayList proprietaryClientCaps;
 
-
     /**
      * Used by ConfDSession to set the withDefaults Attribute.
      * Will be included in the RPC header, if set
      */
     Attribute withDefaultsAttr=null;
 
-
-
     /** ------------------------------------------------------------
      *  Encoding
      */
-
 
     /**
      * Encodes the hello message.
@@ -1638,7 +1562,6 @@ public class NetconfSession {
         out.print("</hello>");
         // do no end with newline
     }
-
 
     /**
      * Encodes the RPC header and writes it to the
@@ -1681,7 +1604,6 @@ public class NetconfSession {
         return mid;
     }
 
-
     /** Temporary holder for the encode functions.
      * Hold the prefix to be appended on NETCONF NAMESPACE
      * operations.
@@ -1692,8 +1614,6 @@ public class NetconfSession {
      */
     private String nc;
 
-
-
     /**
      * Closes the rpc tag.
      *
@@ -1703,7 +1623,6 @@ public class NetconfSession {
         out.print( "</"+nc+"rpc>" );
         // do not end with newline
     }
-
 
     /**
      * Encode the <getConfig>.
@@ -1781,7 +1700,6 @@ public class NetconfSession {
         return mid;
     }
 
-
     /**
      * Encode the <getConfig>.
      * Example:
@@ -1803,7 +1721,6 @@ public class NetconfSession {
         return mid;
     }
 
-
     /**
      * Help function to print datastore in readable format.
      */
@@ -1815,7 +1732,6 @@ public class NetconfSession {
         }
         return "UNKNOWN_DATASTORE("+datastore+")";
     }
-
 
     /**
      * Encode datastore
@@ -1834,7 +1750,6 @@ public class NetconfSession {
                                 "unknown datastore: "+datastore);
     }
 
-
     /**
      * Encode URL
      */
@@ -1845,7 +1760,6 @@ public class NetconfSession {
                 "the url: \""+url+"\" is not a supported :url scheme");
         return "<url>"+url+"</url>";
     }
-
 
     /**
      * Check if given url is supported by the <code>:url</code> capabililty
@@ -1862,7 +1776,6 @@ public class NetconfSession {
         }
         return false;
     }
-
 
     /**
      * Encode the <get>.
@@ -1889,7 +1802,6 @@ public class NetconfSession {
         return mid;
     }
 
-
     /**
      * Encode the <get>.
      * Example:
@@ -1912,8 +1824,6 @@ public class NetconfSession {
         encode_rpc_end(out);
         return mid;
     }
-
-
 
     /**
      * Encode the <edit-Config>.
@@ -1958,10 +1868,6 @@ public class NetconfSession {
         return mid;
     }
 
-
-
-
-
     /**
      * Encode the <edit-Config>.
      * Example:
@@ -1990,7 +1896,6 @@ public class NetconfSession {
         return mid;
     }
 
-
     /**
      * Encode default-operation for editConfig.
      */
@@ -2017,7 +1922,6 @@ public class NetconfSession {
                                     +defaultOperation);
         }
     }
-
 
     /**
      * Encode test-option for editConfig
@@ -2057,7 +1961,6 @@ public class NetconfSession {
         }
     }
 
-
     /**
      * Encode error-option for editConfig
      */
@@ -2088,7 +1991,6 @@ public class NetconfSession {
         }
     }
 
-
     /**
      * Encode the <copy-config>.
      * Example:
@@ -2114,7 +2016,6 @@ public class NetconfSession {
         return encode_copyConfig(out, new NodeSet(sourceTree), target);
     }
 
-
     /**
      * If we have multiple top nodes in our schema, we must pass a NodeSet to
      * the copyConfig oeration
@@ -2136,8 +2037,6 @@ public class NetconfSession {
         encode_rpc_end(out);
         return mid;
     }
-
-
 
     /**
      * Encode the <copy-config>.
@@ -2174,7 +2073,6 @@ public class NetconfSession {
         return mid;
     }
 
-
     /**
      * Encode the <delete-config>.
      * Example:
@@ -2196,9 +2094,6 @@ public class NetconfSession {
         encode_rpc_end(out);
         return mid;
     }
-
-
-
 
     /**
      * Encode the <lock>.
@@ -2222,7 +2117,6 @@ public class NetconfSession {
         return mid;
     }
 
-
     /**
      * Encode the <unlock>.
      * Example:
@@ -2244,7 +2138,6 @@ public class NetconfSession {
         encode_rpc_end(out);
         return mid;
     }
-
 
     /**
      * Encode the <partial-lock>.
@@ -2283,7 +2176,6 @@ public class NetconfSession {
         return mid;
     }
 
-
     /**
      * Encode the <partial-unlock>.
      * Example:
@@ -2312,8 +2204,6 @@ public class NetconfSession {
         return mid;
     }
 
-
-
     /**
      * Encode the <commit>.
      * Example:
@@ -2329,7 +2219,6 @@ public class NetconfSession {
         encode_rpc_end(out);
         return mid;
     }
-
 
     /**
      * Encode the <commit>. (confirmed)
@@ -2355,7 +2244,6 @@ public class NetconfSession {
         return mid;
     }
 
-
     /**
      * Encode the <discard-changes>.
      * Example:
@@ -2372,8 +2260,6 @@ public class NetconfSession {
         return mid;
     }
 
-
-
     /**
      * Encode the <close-session>.
      * Example:
@@ -2389,7 +2275,6 @@ public class NetconfSession {
         encode_rpc_end(out);
         return mid;
     }
-
 
     /**
      * Encode the <kill-session>.
@@ -2412,7 +2297,6 @@ public class NetconfSession {
         encode_rpc_end(out);
         return mid;
     }
-
 
     /**
      * Encode the <validate>.
@@ -2447,7 +2331,6 @@ public class NetconfSession {
         return mid;
     }
 
-
     /**
      * Encode the <validate>.
      * Example:
@@ -2469,7 +2352,6 @@ public class NetconfSession {
         encode_rpc_end(out);
         return mid;
     }
-
 
     /**
      * Encode the <create-subscription>.
@@ -2515,7 +2397,6 @@ public class NetconfSession {
         encode_rpc_end(out);
         return mid;
     }
-
 
     /**
      * Encode the <create-subscription>.
@@ -2564,10 +2445,6 @@ public class NetconfSession {
         return mid;
     }
 
-
-
-
-
     /** ------------------------------------------------------------
      *  help functions
      */
@@ -2582,7 +2459,6 @@ public class NetconfSession {
         else return prefix+":";
     }
 
-
     /**
      * Help function to make xmlns attr from prefix and namespace.
      * Returns either: "xmlns=NAMESPACE" or "xmlns:PREFIX=NAMESPACE".
@@ -2595,8 +2471,6 @@ public class NetconfSession {
             return "xmlns=\""+ns+"\"";
         else return "xmlns:"+prefix+"=\""+ns+"\"";
     }
-
-
 
     /**
      * Printout trace if 'debug'-flag is enabled.

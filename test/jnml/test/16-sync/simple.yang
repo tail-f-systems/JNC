@@ -1,0 +1,24 @@
+
+module simple {
+  namespace "http://tail-f.com/ns/simple";
+  prefix simple;
+  
+  container hosts {
+    list host {
+      key name;
+      leaf name {type string; }
+      leaf enabled {mandatory true; type boolean;}
+      leaf numberOfServers {mandatory true; type uint32;}
+      list zapper {
+        key z;
+        leaf z {type string;}
+        leaf zz {type int32; }
+      }
+    }
+  }
+  list storage {
+    key alias;
+    leaf alias {type string;}
+    leaf type {mandatory true; type string;}
+  }
+}

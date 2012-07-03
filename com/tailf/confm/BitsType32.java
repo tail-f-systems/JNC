@@ -61,18 +61,15 @@ public class BitsType32 implements Serializable {
         return value;
     }
 
-
     public void check(int all, String[] smap, int[] imap)
         throws ConfMException {
         if ((all | value) != all)
             throw new ConfMException(ConfMException.BAD_VALUE,this);
     }
 
-
     public String toString(String[] smap, int[] imap) {
         return int2str(value, smap, imap);
     }
-
 
     /**
      * Artihmetic 'or'

@@ -13,7 +13,6 @@ package com.tailf.inm;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-
 /**
  * A path expression.
  * This is a small subset of the W3C recommendations of
@@ -49,7 +48,6 @@ public class Path {
     Path() {
     }
 
-
     /**
      * Evaluates the Path given a contextNode.
      * <p>
@@ -70,7 +68,6 @@ public class Path {
         return nodeSet;
     }
 
-
     /**
      * Evaluate the Path given a NodeSet.
      * <p>
@@ -88,7 +85,6 @@ public class Path {
         return nodeSet;
     }
 
-
     /**
      * Return the number of LocationSteps in this Path.
      * Steps are numbered from 0 to NumberOfSteps-1.
@@ -97,8 +93,6 @@ public class Path {
     int steps() {
         return locationSteps.size();
     }
-
-
 
     /** ------------------------------------------------------------
      *  Internal section
@@ -109,7 +103,6 @@ public class Path {
     static final int AXIS_SELF  = 2;
     static final int AXIS_PARENT= 3;
     static final int AXIS_ROOT  = 4;
-
 
     /**
      * Flag says if it's a 'path' or a 'create path' expression.
@@ -125,7 +118,6 @@ public class Path {
      * The original path string.
      */
     String pathStr;
-
 
     /** Location step.
      * <p>
@@ -232,7 +224,6 @@ public class Path {
             return result;
         }
 
-
         /**
          * Creates a Element node from this LocationStep.
          * Used from PathCreate.eval() to build a structure
@@ -268,7 +259,6 @@ public class Path {
             }
         }
 
-
         /**
          * Return the string representation of this LocationStep.
          */
@@ -300,7 +290,6 @@ public class Path {
             return s;
         }
 
-
         /**
          *
          */
@@ -310,7 +299,6 @@ public class Path {
         }
 
     }
-
 
     /**
      * Predicate expression
@@ -439,7 +427,6 @@ public class Path {
             }
         }
 
-
         /** compare */
         private int compare(Object x,Object y) throws INMException {
             if ((x instanceof Boolean) && (y instanceof Boolean))
@@ -460,7 +447,6 @@ public class Path {
                                     +x+", "+y);
         }
 
-
         private boolean isBoolean(Object x) {
             if (x instanceof Boolean) return true;
             return false;
@@ -478,7 +464,6 @@ public class Path {
             if (x instanceof NodeSet) return true;
             return false;
         }
-
 
         /** boolean() function */
         private Boolean f_boolean(Object x) throws INMException {
@@ -503,7 +488,6 @@ public class Path {
             return new Boolean(x);
         }
 
-
         /** number() function. */
         private Number f_number(Object x) throws INMException {
             if (x instanceof Float) return (Float)x;
@@ -526,7 +510,6 @@ public class Path {
             throw new INMException(INMException.PATH_ERROR,
                                     "badarg to function number(): "+x);
         }
-
 
         /** nodeset() function */
         private NodeSet f_nodeSet(Object x) throws INMException {
@@ -566,7 +549,6 @@ public class Path {
             return new Float( xf.floatValue() + yf.floatValue());
         }
 
-
         /** the float() function. */
         private Float f_float(Object x) throws INMException {
             if (x instanceof Float) return (Float)x;
@@ -576,7 +558,6 @@ public class Path {
             throw new INMException(INMException.PATH_ERROR,
                                     "badarg to function float(): "+x);
         }
-
 
         /** the string() function. */
         private String f_string(Object x) throws INMException {
@@ -589,7 +570,6 @@ public class Path {
             if (x==null) return null;
             return x.toString();
         }
-
 
         /** evalCreate will create attributes and values on
          * the Elementent that is being created.
@@ -639,7 +619,6 @@ public class Path {
             }
         }
 
-
         /**
          * Returns a string representation of this Expr.
          */
@@ -684,13 +663,11 @@ public class Path {
 
     }
 
-
     /**
      * ------------------------------------------------------------
      *                        Parser
      * ------------------------------------------------------------
      */
-
 
     /** OP codes in Expr (Predicate) */
     static final int AND          = 1;
@@ -716,8 +693,6 @@ public class Path {
     static final int FUN_NEG      = 21;
     static final int ATTR_VALUE   = 22;
     static final int CHILD_VALUE  = 23;
-
-
 
     /**
      * Returns a list of LocationSteps for
@@ -810,7 +785,6 @@ public class Path {
         return steps;
     }
 
-
     /**
      * check axis
      */
@@ -820,7 +794,6 @@ public class Path {
         throw new INMException(INMException.PATH_ERROR,
                                 "unsupported or unknown axis: "+str);
     }
-
 
     /**
      * parse out predicates
@@ -867,7 +840,6 @@ public class Path {
         return;
     }
 
-
     /**
      * Parses a predicate expression.
      * must consume all tokens from 'from' to 'to'.
@@ -903,7 +875,6 @@ public class Path {
         }
         return null;
     }
-
 
     /**
      * Parses an rvalue of the predicate expression.
@@ -947,7 +918,6 @@ public class Path {
         return null;
     }
 
-
     /**
      * Throws a parse error exception.
      *
@@ -968,15 +938,11 @@ public class Path {
             throw new INMException(INMException.PATH_ERROR,errStr);
     }
 
-
-
-
     /**
      * ------------------------------------------------------------
      *                    Tokenizer
      * ------------------------------------------------------------
      */
-
 
     /** Tokens */
     static final int SLASH        = 1;
@@ -996,8 +962,6 @@ public class Path {
     static final int LPRED        = 15;
     static final int RPRED        = 16;
     static final int COMMA        = 17;
-
-
 
     /**
      * A list of Tokens
@@ -1023,7 +987,6 @@ public class Path {
             return s;
         }
     }
-
 
     /**
      * A Token
@@ -1075,7 +1038,6 @@ public class Path {
             }
         }
     }
-
 
     /**
      * Returns a TokenList (ArrayList) of Tokens.
@@ -1236,14 +1198,11 @@ public class Path {
         return tokens;
     }
 
-
-
     /**
      * ------------------------------------------------------------
      *                   help functions
      * ------------------------------------------------------------
      */
-
 
     /**
      * Returns a string representation of this Path.
@@ -1259,7 +1218,6 @@ public class Path {
         s=s+"]";
         return s;
     }
-
 
     /**
      *

@@ -1,0 +1,48 @@
+submodule foo-spx-profileAccess {
+    belongs-to foo-spx {
+        prefix foo-spx;
+    }
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    include foo-spx-types;
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    container profileAccess {
+        tailf:info "profile management related configuration";
+
+        leaf accessMethod {
+            type profileAccessMethodType;
+            default local;
+            tailf:info "profile access method can be RADIUS, DIAMETER, LDAP or Local/confd";
+        }
+        leaf defaultProfile {
+            type string;
+            default default;
+            tailf:info "default profile name (assigned when SPX could not resolve the profile)";
+        }
+
+        container maxCacheDuration {
+            tailf:info "profile access max cache duration, in minutes";
+
+            leaf neverUsedProfile {
+                type profileCacheDurationType;
+                default 5;
+                tailf:info "cache duration (minutes) of profiles of users that never showed up on CAE";
+            }
+            leaf usedProfile {
+                type profileCacheDurationType;
+                default 1440;
+                tailf:info "cache duration (minutes) of profiles of users that showed up on CAE";
+            }
+        }
+    }
+}

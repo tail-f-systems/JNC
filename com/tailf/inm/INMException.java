@@ -51,7 +51,6 @@ public class INMException extends Exception {
         }
     }
 
-
     /**
      * An error code indicating what went wrong. This field may take
      * any of these values:
@@ -83,14 +82,12 @@ public class INMException extends Exception {
      */
     public Object opaqueData = null;
 
-
     /**
      * If errorCode is RPC_REPLY_ERROR the
      * rpc-error is parsed and the rpcErrors array
      * will contain the returned error information.
      */
     public RpcError[] rpcErrors;
-
 
     public static final int NOT_SET                = 0;
     public static final int AUTH_FAILED            = -1;
@@ -136,7 +133,6 @@ public class INMException extends Exception {
      */
     public static final int TIMEOUT_ERROR = -11;
 
-
     /**
      * Revision error. When we tried to encode a configuration
      * tree in order to send it to a device - A revision error was
@@ -146,7 +142,6 @@ public class INMException extends Exception {
      * value the node cannot understand
      */
      public static final int REVISION_ERROR = -12;
-
 
     /**
      * Message-id mismatch. The message-id attribute in the rpc-reply

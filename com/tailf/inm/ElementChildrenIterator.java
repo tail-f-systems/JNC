@@ -36,7 +36,6 @@ public class ElementChildrenIterator implements Iterator {
     private boolean hasNextChild = false;
     private String name;
 
-
     /**
      * Constructor to create new children iterator
      * for all children.
@@ -49,7 +48,6 @@ public class ElementChildrenIterator implements Iterator {
         name = null;
     }
 
-
     /**
      * Constructor to create a new children iterator
      * for children of a specific name.
@@ -61,7 +59,6 @@ public class ElementChildrenIterator implements Iterator {
             childrenIterator = null;
         this.name = name;
     }
-
 
     /**
      * Return true if there are more children,
@@ -86,7 +83,6 @@ public class ElementChildrenIterator implements Iterator {
         return false;
     }
 
-
     /**
      * Return next child or null.
      *
@@ -106,15 +102,12 @@ public class ElementChildrenIterator implements Iterator {
         return null;
     }
 
-
     /**
      * Return next child or null.
      */
     public Object next() {
         return nextElement();
     }
-
-
 
     /**
      * Remove is not supported.

@@ -58,7 +58,6 @@ public class Ipv4Prefix implements Serializable {
         check();
     }
 
-
     /**
      * Sets the value.
      */
@@ -80,7 +79,6 @@ public class Ipv4Prefix implements Serializable {
         this.masklen = masklen;
         check();
     }
-
 
     /**
      * Return the value space.
@@ -111,7 +109,6 @@ public class Ipv4Prefix implements Serializable {
             return ipaddr.equals(b.ipaddr);
         return false;
     }
-
 
     /**
      * Assert that the value is 'false'

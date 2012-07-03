@@ -1,0 +1,244 @@
+submodule foo-spx-radius {
+    belongs-to foo-spx {
+        prefix foo-spx;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    import foo-system {
+        prefix foo-system;
+    }
+
+    include foo-spx-types;
+    include foo-spx-serviceAttribute;
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    container radius {
+        tailf:info "RADIUS related configuration of SPX";
+
+        /*  SPX acts as a RADIUS server to receive messages from GGSN  */
+        list server {
+            key "ipAddr number";
+            tailf:info "RADIUS server parameters (running on SPX)";
+
+            leaf ipAddr {
+                type inet:ipv4-address;
+                tailf:info "IP address that SPX RADIUS server listens on";
+            }
+            leaf number {
+                type inet:port-number;
+                tailf:info "UDP port hat SPX RADIUS server listens on";
+            }
+            leaf sharedSecret {
+                type string;
+                mandatory true;
+                tailf:info "shared secret for RADIUS md5 authentication";
+            }
+        }
+
+        /*  network has one or more RADIUS clients (e.g., GGSN) that send RADIUS messages to SPX  */
+        list client {
+            key ipAddr;
+            tailf:info "RADIUS client (e.g., GGSN) configuration";
+
+            leaf ipAddr {
+                type inet:ipv4-address;
+                tailf:info "IP address of a RADIUS client (e.g., GGSN)";
+            }
+            leaf sharedSecret {
+                type string;
+                mandatory true;
+                tailf:info "client specific shared secret (overrides radius/server/sharedSecret)";
+            }
+        }
+
+        container attributeMap {
+            tailf:info "mapping of RADIUS attributes to Foo usable attributes";
+            list simple {
+                key name;
+                unique attr;
+                tailf:info "mapping of simple RADIUS attribute";
+
+                leaf name {
+                    type foo-system:nameType;
+                    tailf:info "unique name for the map entry";
+                }
+                leaf attr {
+                    type radiusAttributeType;
+                    mandatory true;
+                    tailf:info "RADIUS attribute type";
+                }
+                leaf fooAttribute {
+                    type leafref {
+                        path "../../../../serviceAttribute/name";
+                    }
+                    mandatory true;
+                    tailf:info "foo attribute type";
+                }
+            }
+
+            list vsa {
+                key name;
+                unique "vendor attr";
+                tailf:info "mapping of RADIUS vendor specific attribute";
+
+                leaf name {
+                    type foo-system:nameType;
+                    tailf:info "unique name for the map entry";
+                }
+                leaf vendor {
+                    type radiusVendorType;
+                    mandatory true;
+                    tailf:info "vendor id";
+                }
+                leaf attr {
+                    type radiusAttributeType;
+                    mandatory true;
+                    tailf:info "vendor attribute type";
+                }
+                leaf fooAttribute {
+                    type leafref {
+                        path "../../../../serviceAttribute/name";
+                    }
+                    mandatory true;
+                    tailf:info "foo attribute type";
+                }
+            }
+        }
+
+        /*  defines implementation specific tuning parameters  */
+        container threading {
+            tailf:hidden debug;
+            tailf:info "non-operator-serviceable performance tuning parameters of RADIUS";
+
+            leaf maxRecieverThreads {
+                type uint32;
+                default 1;
+                tailf:info "number of reciever threads in RADIUS server";
+            }
+            leaf maxProcessingThreads {
+                type uint32;
+                default 1;
+                tailf:info "number of processing threads in RADIUS server";
+            }
+            leaf maxQueueSize {
+                type uint32;
+                default 131072;
+                tailf:info "size of queue between reciever and processing thread in RADIUS server";
+            }
+        }
+
+        container cumulativeStats {
+            config false;
+            tailf:info "cumulative RADIUS server statistics";
+            tailf:cdb-oper;
+
+            leaf totalRequests {
+                type uint64;
+            }
+            leaf totalReceivedAccountingRequests {
+                type uint64;
+            }
+            leaf totalReceivedAccountingStarts {
+                type uint64;
+            }
+            leaf totalReceivedAccountingStops {
+                type uint64;
+            }
+            leaf totalReceivedAccountingUpdates {
+                type uint64;
+            }
+            leaf totalInvalidRequests {
+                type uint64;
+            }
+            leaf totalBadAuthenticators {
+                type uint64;
+            }
+            leaf totalPacketsDropped {
+                type uint64;
+            }
+            leaf totalUnknownRequestsTypes {
+                type uint64;
+            }
+            leaf totalRetransmitsReceived {
+                type uint64;
+            }
+            leaf totalRequestsFromUnknownClients {
+                type uint64;
+            }
+        }
+
+        container errorStats {
+            config false;
+            tailf:hidden debug;
+            tailf:info "cumulative RADIUS server error statistics";
+            tailf:cdb-oper;
+
+            leaf memoryAllocFails {
+                type uint64;
+            }
+            leaf invalidQueueElem {
+                type uint64;
+            }
+            leaf invalidPacketLength {
+                type uint64;
+            }
+            leaf accountingRequestsParsingFailed {
+                type uint64;
+            }
+            leaf malformedPackets {
+                type uint64;
+            }
+        }
+
+        list clientStats {
+            key clientIpAddr;
+            config false;
+            tailf:info "client specific RADIUS statistics";
+            tailf:cdb-oper;
+
+            leaf clientIpAddr {
+                type inet:ipv4-address;
+            }
+            leaf accountingStartSent {
+                type uint64;
+            }
+            leaf accountingStopSent {
+                type uint64;
+            }
+            leaf accountingAliveSent {
+                type uint64;
+            }
+            leaf malformedRequestsSent {
+                type uint64;
+            }
+            leaf badAuthenticatorsSent {
+                type uint64;
+            }
+            leaf packetsDropped {
+                type uint64;
+            }
+            leaf unknownRequestTypes {
+                type uint64;
+            }
+            leaf totalRetransmissions {
+                type uint64;
+            }
+            leaf totalParsingFailures {
+                type uint64;
+            }
+        }
+    }
+}

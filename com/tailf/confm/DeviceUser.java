@@ -11,7 +11,6 @@
 package com.tailf.confm;
 import java.io.*;
 
-
 /**
  * This class represents a user to be used
  * with the {@link Device} class.
@@ -35,7 +34,6 @@ public class DeviceUser implements Serializable {
     File pemFile = null;
     char[] pemPrivateKey = null;
     String keyPassPhrase = null;
-
 
     /**
      * Constructor. Creates a user with a local name, remote user name, and

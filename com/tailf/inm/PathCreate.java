@@ -12,7 +12,6 @@ package com.tailf.inm;
 
 import java.util.ArrayList;
 
-
 /**
  * A "path create" expression.
  * <p>
@@ -44,7 +43,6 @@ public class PathCreate extends Path {
         locationSteps = parse( tokenize( pathStr ));
     }
 
-
     /**
      * Evaluates the path expression and build a
      * new Element subtree.
@@ -66,7 +64,6 @@ public class PathCreate extends Path {
         return top;
     }
 
-
     /**
      * Evaluates one step in the path create expression an build a
      * new Element node.
@@ -82,12 +79,10 @@ public class PathCreate extends Path {
         return child;
     }
 
-
     /**
      * ------------------------------------------------------------
      *
      */
-
 
     /**
      * Returns a string representation of this PathCreate.
@@ -103,7 +98,6 @@ public class PathCreate extends Path {
         s=s+"]";
         return s;
     }
-
 
     /** ------------------------------------------------------------
      *  help functions

@@ -1,0 +1,7 @@
+   <node xmlns="http://movik.net/ns/movik-system/1.0">
+      <application>
+        <component>xyz</component>
+        <operStatus>enable</operStatus>
+      </application>
+    </node>
+

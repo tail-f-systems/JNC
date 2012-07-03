@@ -12,7 +12,6 @@
 package com.tailf.confm;
 import java.util.*;
 
-
 public class RevisionInfo {
 
     public static final int R_ENUM_ADDED = 1;

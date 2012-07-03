@@ -1,0 +1,74 @@
+=========================================================================
+
+    Tail-f ConfM
+
+    ConfM is a Java-based software application that allows developers
+    to augment their EMS/NMS applications with support for southbound
+    NETCONF sessions and additional powerful configuration management
+    functions.
+
+    For further information about Tail-f ConfM, see
+    http://www.tail-f.com
+
+    Copyright Tail-f Systems AB 2005-2012
+
+=========================================================================
+
+Installation
+~~~~~~~~~~~~
+
+ConfM is delivered as an archive file. Documentation is delivered in a
+separate archive file. Both files are compressed via tar and gzip program.
+
+To install ConfM on your system, simply unpack these archive files, e.g.
+
+  $ cd <your ConfM installation path>
+  $ gunzip confm-<version>.<platform>.tar.gz
+  $ tar xvf confm-<version>.<platform>.tar
+
+And the documentation:
+
+  $ gunzip confm-<version>.doc.tar.gz
+  $ tar xvf confm-<version>.doc.tar
+
+
+Setting up Your Environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The JAR files have been generated with SUN's JDK-1.5. The JAR files
+have been verified to work with SUN's JDK 1.5 or better.
+At the toplevel of the unpacked release, there is a file called
+confmrc, source this file to get all environment variables correctly set.
+
+# source ./confmrc
+
+
+ConfM Documentation
+~~~~~~~~~~~~~~~~~~~
+
+The ConfM User Guide is the recommended starting point for new users.
+
+    PDF: confm-<version>/doc/user_guide.pdf
+
+The Javadoc documentation describes ConfM's API in detail:
+
+    HTML: confm-<version>/doc/javadoc/index.html
+
+Examples
+~~~~~~~~
+
+To understand the examples under confm-<version>/examples/ please read
+the User Guide and/or the README found in each example directory.
+
+Support
+~~~~~~~
+
+If you are evaluating ConfM, you should have a designated support
+contact. You are also welcome to mail eval-support@tail-f.com.
+
+If you have a ConfM support agreement, please use the support channels
+specified in the agreement. You are also welcome to mail
+support@tail-f.com.
+
+In either case, please, do not hesitate to send us any questions or
+feedback you may come up with.

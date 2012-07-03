@@ -90,8 +90,6 @@ public class Byte implements Serializable {
         return false;
     }
 
-
-
     /** ---------- Restrictions ---------- */
 
     /**

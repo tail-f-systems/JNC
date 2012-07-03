@@ -1,0 +1,241 @@
+submodule foo-cae-ss7 {
+    belongs-to foo-cae {
+        prefix foo-cae;
+    }
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    container ss7 {
+        container sccp {
+            leaf tConGuard {
+                type uint32;
+                default 2;
+                tailf:info '"Days"';
+            }
+            leaf tA {
+                type uint32;
+                default 60;
+                tailf:info '"ms"';
+            }
+            leaf tD {
+                type uint32;
+                default 1;
+                tailf:info '"sec"';
+            }
+            leaf tCon {
+                type uint32;
+                default 1;
+                tailf:info '"sec"';
+            }
+            leaf tStatInfoStart {
+                type uint32;
+                default 5;
+                tailf:info '"sec"';
+            }
+            leaf tStatInfoEnd {
+                type uint32;
+                default 10;
+                tailf:info '"min"';
+            }
+            leaf tReass {
+                type uint32;
+                default 10;
+                tailf:info '"sec"';
+            }
+            leaf tConnEst {
+                type uint32;
+                default 60;
+                tailf:info '"sec"';
+            }
+            leaf tIas {
+                type uint32;
+                default 5;
+                tailf:info '"min"';
+            }
+            leaf tIar {
+                type uint32;
+                default 11;
+                tailf:info '"min"';
+            }
+            leaf tRel {
+                type uint32;
+                default 10;
+                tailf:info '"sec"';
+            }
+            leaf tRepRel {
+                type uint32;
+                default 10;
+                tailf:info '"sec"';
+            }
+            leaf tInt {
+                type uint32;
+                default 50;
+                tailf:info '"sec"';
+            }
+            leaf tGuard {
+                type uint32;
+                default 23;
+                tailf:info '"min"';
+            }
+            leaf tReset {
+                type uint32;
+                default 10;
+                tailf:info '"sec"';
+            }
+            leaf tFreeze {
+                type uint32;
+                default 60;
+                tailf:info '"sec"';
+            }
+        }
+
+        container mtp3 {
+            leaf t1 {
+                type uint32;
+                default 500;
+                tailf:info '"ms"';
+            }
+            leaf t2 {
+                type uint32;
+                default 700;
+                tailf:info '"ms"';
+            }
+            leaf t3 {
+                type uint32;
+                default 500;
+                tailf:info '"ms"';
+            }
+            leaf t4 {
+                type uint32;
+                default 500;
+                tailf:info '"ms"';
+            }
+            leaf t5 {
+                type uint32;
+                default 500;
+                tailf:info '"ms"';
+            }
+            leaf t6 {
+                type uint32;
+                default 500;
+                tailf:info '"ms"';
+            }
+            leaf t7 {
+                type uint32;
+                default 1000;
+                tailf:info '"ms"';
+            }
+            leaf t8 {
+                type uint32;
+                default 800;
+                tailf:info '"ms"';
+            }
+            /*  t9 intentionally omitted  */
+            leaf t10 {
+                type uint32;
+                default 30;
+                tailf:info '"sec"';
+            }
+            leaf t11 {
+                type uint32;
+                default 30;
+                tailf:info '"sec"';
+            }
+            leaf t12 {
+                type uint32;
+                default 800;
+                tailf:info '"ms"';
+            }
+            leaf t13 {
+                type uint32;
+                default 800;
+                tailf:info '"ms"';
+            }
+            leaf t14 {
+                type uint32;
+                default 2000;
+                tailf:info '"ms"';
+            }
+            leaf t15 {
+                type uint32;
+                default 2000;
+                tailf:info '"ms"';
+            }
+            leaf t16 {
+                type uint32;
+                default 1400;
+                tailf:info '"ms"';
+            }
+            leaf t17 {
+                type uint32;
+                default 800;
+                tailf:info '"ms"';
+            }
+            leaf t18 {
+                type uint32;
+                default 40;
+                tailf:info '"sec"';
+            }
+            leaf t19 {
+                type uint32;
+                default 67;
+                tailf:info '"sec"';
+            }
+            leaf t20 {
+                type uint32;
+                default 59;
+                tailf:info '"sec"';
+            }
+            leaf t21 {
+                type uint32;
+                default 63;
+                tailf:info '"sec"';
+            }
+            leaf t22 {
+                type uint32;
+                default 180;
+                tailf:info '"sec"';
+            }
+            leaf t23 {
+                type uint32;
+                default 180;
+                tailf:info '"sec"';
+            }
+            leaf t24 {
+                type uint32;
+                default 500;
+                tailf:info '"ms"';
+            }
+            leaf tTm1 {
+                type uint32;
+                default 8;
+                tailf:info '"sec"';
+            }
+            leaf tTm2 {
+                type uint32;
+                default 3;
+                tailf:info '"sec"';
+            }
+            leaf tSpRestart {
+                type uint32;
+                default 3;
+                tailf:info '"sec"';
+            }
+            leaf tResponse {
+                type uint32;
+                default 1;
+                tailf:info '"sec"';
+            }
+        }
+    }
+}
+

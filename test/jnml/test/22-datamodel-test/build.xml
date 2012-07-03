@@ -1,0 +1,214 @@
+<project name="simple" basedir="." default="test">
+  <property environment="env"/>
+  <property name="src.dir"       value="src"/>
+  <property name="gen.dir"       value="src/gen"/>
+  <property name="build.dir"     value="build"/>
+  <property name="classes.dir"   value="${build.dir}/classes"/>
+  <property name="jar.dir"       value="${build.dir}/jar"/>
+  <property name="main-class"    value="dhcp.Main"/>
+  <property name="confm-jar.dir" value="${env.CONFM_DIR}/jar"/>
+  <property name="ganymed.dir" value="${env.CONFM_DIR}/jar/ganymed"/>
+  <property name="confdc"        value="${env.CONFM_DIR}/bin/confdc"/>
+
+  <target name="test" depends="environ,all,confd,GetConfig">
+    <exec dir="confd" executable="make" failonerror="true">
+      <arg value="stop"/>
+    </exec>
+    <antcall target="clean"/>
+  </target>
+  
+  <target name="confd">
+    <exec dir="confd" executable="make" failonerror="true">
+      <arg value="start"/>
+    </exec>
+    <sleep seconds="5"/>
+  </target>
+
+  <target name="all" depends="environ,jar"/>
+  
+  <target name="compile_generated" depends="generate_java">
+    <mkdir dir="${classes.dir}"/>
+    <javac srcdir="${src.dir}/gen" destdir="${classes.dir}" debug="on"
+           debuglevel="lines,vars,source"  >
+      <classpath location="${confm-jar.dir}/ConfM.jar"/>
+      <classpath location="${confm-jar.dir}/INM.jar"/>
+    </javac>
+  </target>
+  
+  <target name="compile" depends="compile_generated">
+    <mkdir dir="${classes.dir}"/>
+    <javac srcdir="${src.dir}/app" destdir="${classes.dir}" debug="on"
+           debuglevel="lines,vars,source"  >
+      <classpath location="${confm-jar.dir}/ConfM.jar"/>
+      <classpath location="${confm-jar.dir}/INM.jar"/>
+    </javac>
+  </target>
+  
+  <target name="jar" depends="compile">
+    <mkdir dir="${jar.dir}"/>
+    <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+      <manifest>
+        <attribute name="Main-Class" value="${main-class}"/>
+      </manifest>
+    </jar>
+  </target>
+  
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+    <delete dir="${gen.dir}"/>
+    <delete file="fxs.built"/> 
+    <delete file="java.built"/> 
+    <delete file="Foo_cae.schema"/>
+    <delete>
+      <fileset dir="." includes="*/*.fxs"/>
+    </delete>
+    <exec dir="confd" executable="make" failonerror="true">
+      <arg value="clean"/>
+    </exec>
+  </target>
+  
+  <target name="-fxs-built" unless="fxs.built">
+    <available property="fxs.built" file="fxs.built"/>
+  </target>
+
+  <target name="generate_fxs" depends="-fxs-built" unless="${fxs.built}">
+    <!-- confd-common fxs -->
+    <exec executable="${confdc}" dir="confd-common" failonerror="true">
+      <arg line="-c foo-alarm.yang"/>
+    </exec>
+    <exec executable="${confdc}" dir="confd-common" failonerror="true">
+      <arg line="-c foo-policy.yang"/>
+    </exec>
+    <exec executable="${confdc}" dir="confd-common" failonerror="true">
+      <arg line="-c foo-system.yang"/>
+    </exec>
+    <exec executable="${confdc}" dir="confd-common" failonerror="true">
+      <arg line="-c foo-topology.yang"/>
+    </exec>
+    <exec executable="${confdc}" dir="confd-common" failonerror="true">
+      <arg line="-c foo-trace.yang"/>
+    </exec>
+    <!-- confd-cae fxs -->
+    <exec executable="${confdc}" dir="confd-cae" failonerror="true">
+      <arg line="--yangpath ../confd-common -c foo-cae.yang"/>
+    </exec>
+    <!-- confd-diameter fxs -->
+    <exec executable="${confdc}" dir="confd-diameter" failonerror="true">
+      <arg line="--yangpath ../confd-common -c foo-diameter.yang"/>
+    </exec>
+    <!-- confd-sdbi fxs -->
+    <exec executable="${confdc}" dir="confd-sdbi" failonerror="true">
+      <arg line="--yangpath ../confd-common -c foo-sdbi.yang"/>
+    </exec>
+    <!-- confd-sim fxs -->
+    <exec executable="${confdc}" dir="confd-sim" failonerror="true">
+      <arg line="--yangpath ../confd-common -c foo-a11sim.yang"/>
+    </exec>
+    <exec executable="${confdc}" dir="confd-sim" failonerror="true">
+      <arg line="--yangpath ../confd-common -c foo-simulator.yang"/>
+    </exec>
+    <!-- confd-spx fxs -->
+    <exec executable="${confdc}" dir="confd-spx" failonerror="true">
+      <arg line="--yangpath ../confd-common -c foo-spx.yang"/>
+    </exec>
+    <!-- confd-spx fxs -->
+    <exec executable="${confdc}" dir="confd-spx" failonerror="true">
+      <arg line="--yangpath ../confd-common -c foo-spx.yang"/>
+    </exec>
+    <exec executable="touch">
+      <arg line="fxs.built"/>
+    </exec>
+  </target>
+
+  <target name="-java-built" unless="java.built">
+    <available property="java.built" file="java.built"/>
+  </target>
+
+  <target name="generate_java" depends="-java-built,generate_fxs"
+          unless="${java.built}">
+    <delete dir="${gen.dir}"/>
+    <mkdir dir="${gen.dir}"/>
+    <!-- urn:ietf:params:xml:ns:yang:ietf-inet-types -->
+    <mkdir dir="${gen.dir}/inet"/>
+    <exec executable="${confdc}" failonerror="true">
+      <arg line="--java-class-naming 2 --external-schema --confm-emit-java src/gen/inet ${env.CONFD_DIR}/etc/confd/ietf-inet-types.fxs"/>
+    </exec>
+    <!-- confd-common java -->
+    <mkdir dir="${gen.dir}/foo_alarm"/>
+    <exec executable="${confdc}" failonerror="true">
+      <arg line="-f ${env.CONFD_DIR}/etc/confd --java-class-naming 2 --external-schema --confm-emit-java src/gen/foo_alarm confd-common/foo-alarm.fxs"/>
+    </exec>
+    <mkdir dir="${gen.dir}/foo_system"/>
+    <exec executable="${confdc}" failonerror="true">
+      <arg line="-f ${env.CONFD_DIR}/etc/confd --java-class-naming 2 --external-schema --confm-emit-java src/gen/foo_system confd-common/foo-system.fxs"/>
+    </exec>
+    <mkdir dir="${gen.dir}/foo_policy"/>
+    <exec executable="${confdc}" failonerror="true">
+      <arg line="-f confd-common/foo-system.fxs -f ${env.CONFD_DIR}/etc/confd --java-class-naming 2 --external-schema --confm-emit-java src/gen/foo_policy confd-common/foo-policy.fxs"/>
+    </exec>
+    <mkdir dir="${gen.dir}/foo_topology"/>
+    <exec executable="${confdc}" failonerror="true">
+      <arg line="-f ${env.CONFD_DIR}/etc/confd --java-class-naming 2 --external-schema --confm-emit-java src/gen/foo_topology confd-common/foo-topology.fxs"/>
+    </exec>
+    <mkdir dir="${gen.dir}/foo_trace"/>
+    <exec executable="${confdc}" failonerror="true">
+      <arg line="-f ${env.CONFD_DIR}/etc/confd --java-class-naming 2 --external-schema --confm-emit-java src/gen/foo_trace confd-common/foo-trace.fxs"/>
+    </exec>
+    <!-- confd-cae java -->
+    <mkdir dir="${gen.dir}/foo_cae"/>
+    <exec executable="${confdc}" failonerror="true">
+      <arg line="-f ${env.CONFD_DIR}/etc/confd -f confd-common --java-class-naming 2 --external-schema --confm-emit-java src/gen/foo_cae confd-cae/foo-cae.fxs"/>
+    </exec>
+    <!-- confd-diameter java -->
+    <mkdir dir="${gen.dir}/foo_diameter"/>
+    <exec executable="${confdc}" failonerror="true">
+      <arg line="-f ${env.CONFD_DIR}/etc/confd -f confd-common --java-class-naming 2 --external-schema --confm-emit-java src/gen/foo_diameter confd-diameter/foo-diameter.fxs"/>
+    </exec>
+    <!-- confd-sdbi java -->
+    <mkdir dir="${gen.dir}/foo_sdbi"/>
+    <exec executable="${confdc}" failonerror="true">
+      <arg line="-f ${env.CONFD_DIR}/etc/confd -f confd-common --java-class-naming 2 --external-schema --confm-emit-java src/gen/foo_sdbi confd-sdbi/foo-sdbi.fxs"/>
+    </exec>
+    <!-- confd-sim java -->
+    <mkdir dir="${gen.dir}/foo_a11sim"/>
+    <exec executable="${confdc}" failonerror="true">
+      <arg line="-f ${env.CONFD_DIR}/etc/confd -f confd-common --java-class-naming 2 --external-schema --confm-emit-java src/gen/foo_a11sim confd-sim/foo-a11sim.fxs"/>
+    </exec>
+    <mkdir dir="${gen.dir}/foo_simulator"/>
+    <exec executable="${confdc}" failonerror="true">
+      <arg line="-f ${env.CONFD_DIR}/etc/confd -f confd-common --java-class-naming 2 --external-schema --confm-emit-java src/gen/foo_simulator confd-sim/foo-simulator.fxs"/>
+    </exec>
+    <!-- confd-spx java -->
+    <mkdir dir="${gen.dir}/foo_spx"/>
+    <exec executable="${confdc}" failonerror="true">
+      <arg line="-f ${env.CONFD_DIR}/etc/confd -f confd-common --java-class-naming 2 --external-schema --confm-emit-java src/gen/foo_spx confd-spx/foo-spx.fxs"/>
+    </exec>
+    <copy file="${gen.dir}/foo_cae/Foo_cae.schema" todir="."/>
+    <exec executable="touch">
+      <arg line="java.built"/>
+    </exec>
+  </target>
+  
+  <target name="GetConfig" depends="jar">
+    <java classname="GetConfig" fork="true">
+      <classpath location="${classes.dir}"/>
+      <classpath location="${confm-jar.dir}/INM.jar"/>
+      <classpath location="${confm-jar.dir}/ConfM.jar"/>
+      <classpath location="${ganymed.dir}/ganymed-ssh2-build251beta1.jar"/>
+    </java>
+  </target>
+  
+  <target name="notpresent" if="environ.badpath">
+    <fail message="** You need to set environment varible CONFM_DIR to where ConfM was installed "/>
+  </target>
+
+  <target name="environ">
+    <condition property="environ.badpath" >
+      <not>
+        <available classname="com.tailf.confm.Confd"
+                   classpath="${confm-jar.dir}/ConfM.jar"/>
+      </not>
+    </condition>
+    <antcall target="notpresent"/>
+  </target>
+</project>

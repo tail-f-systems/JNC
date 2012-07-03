@@ -1,0 +1,56 @@
+Example: Implementing a new NETCONF RPC operation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This example shows how to implement a simple NETCONF RPC operation in
+an executable using three different techniques; an executable that
+parses the XML, an executable that gets parsed data on the command line,
+and a C-callback function.
+
+The RPC we want to implement will look like this:
+
+  <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1">
+    <math xmlns="http://example.com/math">
+      <add>
+         <operand>2</operand>
+         <operand>3</operand>
+      </add>
+    </math>
+  </rpc>
+
+and a reply:
+
+  <rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1">
+    <result xmlns="http://example.com/math">5</result>
+  </rpc-reply>
+
+The new RPC operations are specified in math-rpc.yang.
+
+The code which reads XML is implemented in math.c, which is compiled into
+the executable math.
+
+The code which gets parsed XML is implemented in the shell script math2.
+
+The code which has the callback is implemented in math-capi.c.
+
+
+Starting the Example
+~~~~~~~~~~~~~~~~~~~~
+
+ 1. Build the necessary files and start ConfD by typing 
+
+        $ make all start
+
+ 2. To send the sample query defined in cmd-math.xml, type
+
+        $ make query
+
+ 3. To send the sample query defined in cmd-math2.xml, type
+
+        $ make query2
+
+ 4. To send the sample query defined in cmd-math3.xml, type
+
+        $ make query3
+
+
+        

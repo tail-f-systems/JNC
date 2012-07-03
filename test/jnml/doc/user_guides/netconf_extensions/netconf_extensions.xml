@@ -1,0 +1,180 @@
+<!-- -*- nxml -*- -->
+<chapter>
+  <title>Proprietary NETCONF Extensions</title>
+  <section>
+    <title>Overview</title>
+    <body>
+      <p>
+        NETCONF allows a client to discover the set of protocol extensions
+        supported by a server.  These <em>capabilities</em> permit the client to
+          adjust its behavior to take advantage of the features exposed by the
+          device. Each peer advertises its capabilities by sending them
+          during an initial capabilities exchange.  Each peer needs to
+          understand only those capabilities that it might use and must ignore
+          any capability received from the other peer that it does not require
+          or does not understand.         
+      </p>
+    </body>
+  </section>
+  
+  <section>
+    <title>ConfD Capabilities</title>
+    <body>
+      <p>
+        Tail-f's ConfD implementation of NETCONF have the following
+        additional capabilities:
+      </p>
+      
+      <dl termtype="c">
+        <dt>:with-defaults</dt>
+        <dd>The <c>:with-defaults</c> capability introduces an 
+        attribute 'with-defaults' which can be used in the 'rpc'
+        element when the operation is 'get', 'get-config', or
+        'copy-config', to control if default values are to be
+        returned by the NETCONF server or not.  If 'with-defaults'
+        is 'true', default values are included.  If
+        'with-defaults' is "false", default values are not included.  
+        </dd>
+        <dt>:action</dt>
+        <dd>The 'action' capability introduces a new rpc method which 
+        is used to invoke actions (methods) defined in the data model. 
+        When an action is invoked, the instance on which the
+        action is invoked is explicitly identified by an hierarchy
+        of configuration or state data.
+        </dd>
+        <dt>:transactions</dt>
+        <dd>The 'transactions' capability introduces four new rpc
+        methods which are used to control a two-phase commit
+        transaction on the NETCONF server.  The normal
+        'editConfig' operation is used to write data in the
+        transaction, but the modifications are not applied until
+        an explicit 'commitTransaction' is sent.
+        </dd>
+      </dl>
+      
+      <p>
+        A typical sequence of operations looks like this:
+        <code caption="Transaction using candidates"><![CDATA[
+  C                           S
+  |                           |
+  |  capability exchange      |
+  |-------------------------->|
+  |<------------------------->|
+  |                           |
+  |   <start-transaction>     |
+  |-------------------------->|
+  |<--------------------------|
+  |         <ok/>             |
+  |                           |
+  |     <edit-config>         |
+  |-------------------------->|
+  |<--------------------------|
+  |         <ok/>             |
+  |                           |
+  |  <prepare-transaction>    |
+  |-------------------------->|
+  |<--------------------------|
+  |         <ok/>             |
+  |                           |
+  |   <commit-transaction>    |
+  |-------------------------->|
+  |<--------------------------|
+  |         <ok/>             |
+  |                           |
+]]></code>      
+      </p>
+    </body>
+  </section>
+  
+  <section>
+    <title>Implementing Proprietary Capabilities</title>
+    <body>
+      <p>
+        <c>ConfDSession.class</c> implements the ConfD specific capabilities.
+        It extends the <c>NetconfSession</c> class, and all NetconfSessions methods are 
+        inherited and can be used from ConfDSession.
+        
+        <code caption="ConfDSession with a TCPTransport (works only with ConfD)"><![CDATA[
+Transport tr = new TCPTransport("127.0.0.1", 2023, "admin", "501",
+                                "501", "", "/Users/ola", "");
+ConfDSession sess= new ConfDSession( tr );       
+sess.setWithDefaults(true);
+NodeSet config = sess.get("hosts");
+]]></code>      
+      </p>
+      <p>
+        At the constructor, the ConfDSession needs to set the Transport object,
+        register its capabilities towards the  NetconfSession class and send out
+        the initial hello message. 
+      </p>
+      <code caption="Constructor for the ConfDSession class"><![CDATA[
+/**
+ * Constructor. Creates a new session object 
+ * using the given transport object.
+ *
+ * @see SSHTransport
+ * @see TCPTransport
+ *
+ * @param transport Transport object 
+ */
+public ConfDSession( Transport transport ) 
+    throws NMLException, IOException  {
+   super();
+   setTransport(transport);
+   setCapability(WITH_DEFAULTS_CAPABILITY);
+   setCapability(ACTIONS_CAPABILITY);
+   setCapability(TRANSACTIONS_CAPABILITY);
+   hello();
+   // parse capabilities returned from server.
+   ...
+]]></code>      
+      <p>
+        To implement a specific proprietary operation, there are a few
+        helpful <em>protected</em> (in Java terms) methods that can be used.
+        Encoding the RPC header is such a method, that typically we don't want
+        to do ourselves.
+      </p>
+      <code caption="Example implementation of the 'action' operation"><![CDATA[
+/**
+ * Action capability.
+ * An action that does not return any result value, replies
+ * with the standard 'ok' element. If a result value is returned,
+ * it is encapsulated within a returned 'data' element.
+ *
+ * @param data element tree with action-data
+ */
+public Element action(Element data) throws NMLException, IOException {
+   Transport out= getTransport();
+   encode_rpc_begin(out);
+   out.println("<action xmlns=\"http://tail-f.com/ns/netconf/actions/1.0\">");
+   out.print("<data>");
+   data.encode( out );
+   out.println("</data>");
+   out.println("</action>");
+   encode_rpc_end(out); 
+   out.flush();
+   // parse reply and return
+   return recv_rpc_reply();
+}
+]]></code>                  
+      <p>
+        The reply returned from an action can be either 'ok' or 
+        'data'. The reply element tree is returned.
+      </p>
+      <code caption="Read reply from server. Either 'ok' or 'data'"><![CDATA[
+Element recv_rpc_reply() throws NMLException, IOException {
+   Transport in= getTransport();
+   StringBuffer reply = in.readOne();
+   Element t= parser.parse( reply.toString() );
+   Element ok= t.getFirst("self::rpc-reply/ok");
+   if (ok!=null) return ok;
+   Element data= t.getFirst("self::rpc-reply/data");
+   if (data!=null) return data;
+   /* rpc-error */
+   throw new NMLException(NMLException.RPC_REPLY_ERROR,t);
+}
+]]></code>                  
+    </body>
+  </section>
+</chapter>
+

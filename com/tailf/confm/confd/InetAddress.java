@@ -57,7 +57,6 @@ public class InetAddress implements Serializable {
         check();
     }
 
-
     /**
      * Sets the value.
      */
@@ -82,7 +81,6 @@ public class InetAddress implements Serializable {
         check();
     }
 
-
     public void setValue(InetAddressDNS v) throws ConfMException {
         value = v;
         check();
@@ -95,7 +93,6 @@ public class InetAddress implements Serializable {
         else throwException( true, v );
         check();
     }
-
 
     /**
      * Return the value space.
@@ -126,7 +123,6 @@ public class InetAddress implements Serializable {
     public boolean equals(InetAddress b) {
         return value.equals( b.value );
     }
-
 
     /**
      * Assert that the value is 'false'

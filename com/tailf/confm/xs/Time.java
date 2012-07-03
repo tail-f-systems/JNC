@@ -41,7 +41,6 @@ public class Time implements Serializable {
     public Time() {
     }
 
-
     /**
      * Constructor for xs:time from a String in the format
      * "hh:mm:ss".
@@ -74,7 +73,6 @@ public class Time implements Serializable {
         return toString();
     }
 
-
     private void check() throws ConfMException {
         throwException( hour > 23 );
         throwException( hour < 0 );
@@ -83,7 +81,6 @@ public class Time implements Serializable {
         throwException( secs >= 60 );
         throwException( secs < 0 );
     }
-
 
     public java.lang.String toString() {
         java.lang.String s = new java.lang.String();
@@ -100,7 +97,6 @@ public class Time implements Serializable {
         return s;
     }
 
-
     /**
      * Checks if the value space of two Time objects
      * are equal.
@@ -114,7 +110,6 @@ public class Time implements Serializable {
             return true;
         return false;
     }
-
 
     /**
      * Checks if the value space of two Time objects
@@ -132,7 +127,6 @@ public class Time implements Serializable {
     public int compareTo(Time value) {
         return toString().compareTo( value.toString());
     }
-
 
     /**
      * Returns a Calendar object from the Time.
@@ -155,7 +149,6 @@ public class Time implements Serializable {
         return c;
     }
 
-
     /**
      * Returns the current time, for this Time object.
      *
@@ -163,7 +156,6 @@ public class Time implements Serializable {
     public java.util.Date getTime() {
         return getCalendar().getTime();
     }
-
 
     /**
      * Help method to parse and set the value.
@@ -225,8 +217,6 @@ public class Time implements Serializable {
         }
     }
 
-
-
     /** ---------- Restrictions ---------- */
 
     /**
@@ -274,7 +264,6 @@ public class Time implements Serializable {
         throw new ConfMException(ConfMException.BAD_VALUE,this);
     }
 
-
     /**
      * Assert that the value is 'false'
      * Throw an ConfMException otherwise
@@ -283,6 +272,5 @@ public class Time implements Serializable {
         if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,value);
     }
-
 
 }

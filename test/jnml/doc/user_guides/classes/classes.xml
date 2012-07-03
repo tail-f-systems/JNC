@@ -1,0 +1,213 @@
+<!-- -*- nxml -*- -->
+<chapter>
+  <title>An Overview of the INM Classes</title>
+  <section>
+    <title>Introduction</title>
+    <body>
+      <p>
+        The purpose of INM is to provide functionality to make it easy
+        to manage configuration and operational elements on a NETCONF enabled
+        device. The main classes <em>Element</em> and
+        <em>NetconfSession</em> are described in separate chapters.
+      </p>
+      
+      <p>
+        All INM classes are briefly introduced in the following
+        sub-sections. For implementation details please refer to the
+        Javadoc API documentation.
+      </p>
+    </body>
+  </section>
+
+  <section>
+    <title>The Element Class</title>
+    <body>
+      <p>
+        The <em>Element</em> class is used to represent a simplified
+        Document Object Model (DOM) tree of configuration
+        elements. For example <em>NetconfSession.get</em> and
+        <em>NetconfSession.getConfig</em> can be used to extract the
+        configuration from a NETCONF device as an Element object.
+      </p>
+      
+      <p>
+        There are many methods in this class with the sole purpose to
+        make it easy to create and manipulate element hierarchies.
+      </p>
+      
+      <p>
+        An Element class can also be used to represent a subtree
+        filter which is a standard filtering mechanism in NETCONF. 
+      </p>
+
+      <p>
+        An Element object always belongs to a namespace and has a
+        name, a set of attributes, an optional value, and an optional set
+        of Element children. Element also have a pointer to its
+        parent Element object (to make it easy to traverse the
+        tree). Element furthermore has a <em>PrefixMap</em> mapping
+        namespace URIs to XML prefixes.
+      </p>
+    </body>
+  </section>
+  
+  <section>
+    <title>The NetconfSession Class</title>
+    <body>
+      <p>
+        The <em>NetconfSession</em> class is the logical connection
+        between a network administrator or network configuration
+        application and a network device. A device must support at
+        least one NETCONF session and should support multiple
+        sessions.
+      </p>
+      
+      <p>
+        A NETCONF session towards a device is established by 
+        the NetconfSession constructor which takes a
+        <em>Transport</em> object as an argument. The Transport is
+        responsible for the underlying transport mechanism.
+      </p>
+      
+      <p>
+        Additional Transport classes can easily be realised as
+        custom implementations of the Transport interface.
+      </p>
+      
+      <p>
+        NETCONF operations are handled by the session using an RPC
+        mechanism. It is possible to extend this class to make
+        implementations of proprietary capabilities. The
+        <em>ConfDSession</em> class is an example of such an
+        extension.
+      </p>
+    </body>
+  </section>
+  
+  <section>
+    <title>The ConfDSession Class</title>
+    <body>
+      <p>
+        The <em>ConfDSession</em> class extends the NetconfSession
+        class and provides custom ConfD capabilities such as
+        <em>:transactions</em> and <em>:with-defaults</em>. Read more
+        about this topic in the ConfD User Guide.
+      </p>
+    </body>
+  </section>
+  
+  <section>
+    <title>The SSHTransport Class</title>
+    <body>
+      <p>
+        The <em>SSHTransport</em> class implements the Transport
+        interface and provides a SSH transport based on the Java2
+        Ganymed SSH implementation.
+      </p>
+    </body>
+  </section>
+  
+  <section>
+    <title>The TCPTransport Class</title>
+    <body>
+      <p>
+        The <em>TCPTransport</em> class implements the Transport
+        interface and provides a clear-text TCP transport. This is a
+        proprietary ConfD class and can only be used to connect to
+        a ConfD NETCONF server.
+      </p>
+    </body>
+  </section>
+
+  <section>
+    <title>The Attribute Class</title>
+    <body>
+      <p>
+        The <em>Attribute</em> class represents an attribute attached to an Element. An attribute must have a name and a
+        value.
+      </p>
+    </body>
+  </section>
+
+  <section>
+    <title>The Prefix Class</title>
+    <body>
+      <p>
+        The <em>Prefix</em> class is a sub-class of the
+        <em>Attribute</em> class and results in an XML specific
+        <em>xmlns</em> attribute when it reaches the NETCONF device
+        such as <c>&lt;bar
+        xmlns:foo="http://example.com/foo/1.0"&gt;</c>.
+      </p>
+    </body>
+  </section>
+
+  <section>
+    <title>The PrefixMap Class</title>
+    <body>
+      <p>
+        The <em>PrefixMap</em> represents a list of prefix
+        mappings. It is an <em>ArrayList</em> of
+        Prefix objects. An Element has a <em>PrefixMap</em>
+        which is used to find the namespace of any given prefix.
+      </p>
+    </body>
+  </section>
+
+  <section>
+    <title>The NodeSet Class</title>
+    <body>
+      <p>
+	Many of the methods in the library returns a set of Element
+	objects. A <em>NodeSet</em> is an <em>ArrayList</em> of
+	Element objects.
+      </p>
+    </body>
+  </section>
+
+  <section>
+    <title>The Path Class</title>
+    <body>
+      <p>
+        The <em>Path</em> class makes it possible to select elements
+        from a configuration tree, i.e. an Element tree. A Path
+        represents a small subset of the W3C XPATH 1.0
+        recommendation. For example:
+        <em>hosts/host[name="john"]</em> is a path expression 
+        which selects all host elements with the name 'john'.
+      </p>
+    </body>
+  </section>
+
+  <section>
+    <title>The PathCreate Class</title>
+    <body>
+      <p>
+        The <em>PathCreate</em> class makes it possible to create
+	a complete Element tree in a single operation. It is related to
+        the Path class but the path is used for Element tree creation
+        rather than selection.
+      </p>
+    </body>
+  </section>
+  
+  <section>
+    <title>The XMLParser Class</title>
+    <body>
+      <p>
+        The <em>XMLParser</em> class is an XML parser that builds
+	Element trees from string oriented XML.
+      </p>
+    </body>
+  </section>
+
+  <section>
+    <title>The NMLException Class</title>
+    <body>
+      <p>
+        Whenever an error occurs the INM library throws an instance
+        of this class.
+      </p>
+    </body>
+  </section>
+</chapter>

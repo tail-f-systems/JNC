@@ -1,0 +1,212 @@
+module foo-diameter {
+    namespace "http://foo.net/ns/foo-diameter";
+    prefix foo-diameter;
+
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    include foo-diameter-types;
+
+    organization "Foo Networks, Inc.";
+    description  "Managed objects for DIAMETER.";
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    container diameter {
+        tailf:info "DIAMETER configuration";
+
+        container origin {
+            tailf:info "Information about local DIAMETER node";
+
+            leaf hostName {
+                type string;
+                default "";
+                tailf:info "local hostname (for DIAMETER use)";
+            }
+            leaf realm {
+                type string;
+                default "";
+                tailf:info "local realm (i.e., domain name)";
+            }
+            leaf ipAddr {
+                type inet:ipv4-address;
+                default 0.0.0.0;
+                tailf:info "local IP address to listen on ";
+            }
+            leaf port {
+                type inet:port-number;
+                default 3868;
+                tailf:info "local port to listen on ";
+            }
+            leaf contextId {
+                type string;
+                default foo@3gpp.org;
+                tailf:info "context id for DIAMETER association";
+            }
+        }
+
+        list peer {
+            key hostName;
+            unique ipAddr;
+            tailf:info "Information about peer DIAMETER node";
+
+            leaf hostName {
+                type diameterNameType;
+                tailf:info "DIAMETER peer hostname (FQDN)";
+            }
+            leaf realm {
+                type diameterNameType;
+                mandatory true;
+                tailf:info "DIAMETER peer realm (i.e., domain name)";
+            }
+            leaf ipAddr {
+                type inet:ipv4-address;
+                mandatory true;
+                tailf:info "DIAMETER peer IP address";
+            }
+            leaf port {
+                type inet:port-number;
+                default 3868;
+                tailf:info "DIAMETER peer port";
+            }
+            leaf applications {
+                type diameterApplication;
+                default none;
+                tailf:info "Applications this DIAMETER server supports";
+            }
+
+            container status {
+                config false;
+                tailf:cdb-oper;
+
+                leaf connected {
+                    type string;
+                    mandatory true;
+                }
+            }
+
+            container viewOnGyApn {
+                config false;
+                tailf:hidden debug;
+                tailf:cdb-oper;
+
+                leaf statusOnGyApn {
+                    type string;
+                    mandatory true;
+                }
+            }
+        }
+
+        container protocolConfig {
+            tailf:info "DIAMETER Protocol Configuration";
+
+            leaf watchdogTimer {
+                type diameterWatchdogTimerType;
+                default 15;
+                tailf:info "Watchdog Interval (seconds)";
+            }
+            leaf connectionTimer {
+                type diameterConnectionTimerType;
+                default 30;
+                tailf:info "Connection Timer (Tc) (seconds)";
+            }
+            leaf cerTimer {
+                type diameterCERTimerType;
+                default 2;
+                tailf:info "Capability Exchange Response Timer (seconds)";
+            }
+            leaf maxConnectionAttempts {
+                type diameterMaxConnectionAttemptsType;
+                default 4294967295;
+                tailf:info "maximum TCP connection attempts";
+            }
+        }
+
+        container performanceConfig {
+            tailf:hidden debug;
+            tailf:info "DIAMETER Stack Performance Configuration";
+
+            leaf threads {
+                type diameterThreadCountType;
+                default 1;
+                tailf:info "Number of threads in the stack";
+            }
+            leaf transactionPoolSize {
+                type diameterTransactionPoolSizeType;
+                default 50;
+                tailf:info "Size of the DIAMETER transaction pool";
+            }
+            leaf maxUserData {
+                type diameterMaxUserDataType;
+                default 15000;
+                tailf:info "Size of maximum user data";
+            }
+            leaf buffersInPool {
+                type diameterbuffersInPoolType;
+                default 60000;
+                tailf:info "DIAMETER maximum TCP connection attempts";
+            }
+        }
+
+        list route {
+            key realm;
+            config false;
+            tailf:cdb-oper;
+
+            leaf realm {
+                type string;
+            }
+            leaf action {
+                type string;
+                mandatory true;
+            }
+            leaf destinations {
+                type string;
+                mandatory true;
+            }
+            leaf applications {
+                type string;
+                mandatory true;
+            }
+        }
+
+        /*  internal debug information for diameter APN status  */
+        list apn {
+            key index;
+            config false;
+            tailf:hidden debug;
+            tailf:cdb-oper;
+
+            leaf index {
+                type uint32;
+            }
+            leaf appName {
+                type string;
+                mandatory true;
+            }
+            leaf apnId {
+                type uint32;
+                mandatory true;
+            }
+            leaf status {
+                type string;
+                mandatory true;
+            }
+            leaf healthTimer {
+                type uint32;
+                mandatory true;
+            }
+        }
+    }
+}

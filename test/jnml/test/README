@@ -1,0 +1,13 @@
+
+This directory contains some of the test code for ConfM.
+To run all the tests, set CONFM_DIR  and CONFD_DIR by sourcing
+the relevant rc script at the top of the confd and confm installations
+respectively.
+
+(A proper installation of confd is required to run the tests)
+
+Then type:
+
+# make test
+
+

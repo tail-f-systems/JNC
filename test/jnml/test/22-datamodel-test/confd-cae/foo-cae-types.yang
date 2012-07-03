@@ -1,0 +1,1859 @@
+submodule foo-cae-types {
+    belongs-to foo-cae {
+        prefix foo-cae;
+    }
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    import foo-system {
+        prefix foo-system;
+    }
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    typedef signalingPointStatus {
+        type enumeration {
+            enum unavailable;
+            enum congested;
+            enum idle;
+            enum available;
+        }
+    }
+
+    typedef TimeoutTimeType {
+        type uint16 {
+            range "0 .. 3600";
+        }
+    }
+
+    typedef DontCareType {
+        type enumeration {
+            enum dontCare;
+        }
+    }
+
+    typedef ContentEncodingType {
+        type bits {
+            bit bzip2 { position 0; } 
+            bit deflate { position 1; } 
+            bit gzip { position 2; } 
+        }
+    }
+
+    typedef StorageTypeType {
+        type enumeration {
+            enum dontCare;
+            enum memory;
+            enum disk;
+        }
+    }
+
+    typedef StorageStrategy {
+        type enumeration {
+            enum dontCare;
+            enum prefix;
+            enum full;
+        }
+    }
+
+    typedef tcpConnectionState {
+        type enumeration {
+            enum pending;
+            enum connected;
+            enum closing;
+            enum other;
+        }
+    }
+
+    typedef atmPortType {
+        type uint16 {
+            range "1 .. 4";
+        }
+    }
+
+    typedef atmIwPortType {
+        type uint16 {
+            range "1 .. 3";
+        }
+    }
+
+    typedef atmVpiType {
+        type uint16 {
+            range "0 .. 4095";
+        }
+    }
+
+    typedef atmVciType {
+        type uint16 {
+            range "5 .. 65535";
+        }
+    }
+
+    typedef offloadFailureActionType {
+        type enumeration {
+            enum drop;
+            enum continue;
+        }
+    }
+
+    typedef atmControllerType {
+        type enumeration {
+            enum xs2000;
+        }
+    }
+
+    typedef atmClockingType {
+        type enumeration {
+            enum internal;
+            enum port1Recovered;
+        }
+    }
+
+    typedef atmFramingType {
+        type enumeration {
+            enum oc3;
+            enum stm1;
+            enum oc12;
+            enum stm4;
+        }
+    }
+
+    typedef atmLoopbackType {
+        type enumeration {
+            enum disabled;
+            enum line;
+            enum diagnostic;
+        }
+    }
+
+    typedef pvcTypeType {
+        type enumeration {
+            enum bearer;
+            enum signaling;
+            enum bypass;
+        }
+    }
+
+    typedef ranapStaleType {
+        type uint32 {
+            range "1 .. 14400";
+        }
+    }
+
+    typedef saalT1Type {
+        type uint32 {
+            range "1000 .. 10000";
+        }
+    }
+
+    typedef saalT2Type {
+        type uint32 {
+            range "10000 .. 60000";
+        }
+    }
+
+    typedef saalT3Type {
+        type uint32 {
+            range "5 .. 20";
+        }
+    }
+
+    typedef saalTPollType {
+        type uint32 {
+            range "50 .. 30000";
+        }
+    }
+
+    typedef saalTKeepAliveType {
+        type uint32 {
+            range "50 .. 30000";
+        }
+    }
+
+    typedef saalTIdleType {
+        type uint32 {
+            range "50 .. 30000";
+        }
+    }
+
+    typedef saalTNoRespType {
+        type uint32 {
+            range "600 .. 30000";
+        }
+    }
+
+    typedef saalTCcType {
+        type uint32 {
+            range "100 .. 30000";
+        }
+    }
+
+    typedef saalN1Type {
+        type uint32 {
+            range "50 .. 5000";
+        }
+    }
+
+    typedef saalMaxCcType {
+        type uint32 {
+            range "2 .. 14";
+        }
+    }
+
+    typedef saalMaxPdType {
+        type uint32 {
+            range "300 .. 510";
+        }
+    }
+
+    typedef saalMaxStatType {
+        type uint32 {
+            range "50 .. 87";
+        }
+    }
+
+    typedef bufferSizeKBType {
+        type uint32 {
+            range "0 .. 16384";
+        }
+    }
+
+    typedef tcpCongestControlType {
+        type enumeration {
+            enum reno;
+            enum hybla;
+            enum vegas;
+            enum veno;
+            enum westwood;
+        }
+    }
+
+    /*  note that the ATM alarm bit fields are coordinated with the xalyo driver definitions  */
+    typedef atmAlarmType {
+        type bits {
+            bit PAIS { position 0; } 
+            bit PRDI { position 1; } 
+            bit PFEBE { position 2; } 
+            bit BER3 { position 3; } 
+            bit LAIS { position 4; } 
+            bit LRDI { position 5; } 
+            bit LFEBE { position 6; } 
+            bit BER2 { position 7; } 
+            bit BER1 { position 8; } 
+            bit AIS { position 9; } 
+            bit RAI { position 10; } 
+            bit RED { position 11; } 
+            bit LOCD { position 12; } 
+            bit LOP { position 13; } 
+            bit LOF { position 14; } 
+            bit LOS { position 15; } 
+            bit OOF { position 16; } 
+            bit OCD { position 17; } 
+            bit FCS { position 18; } 
+            bit SIGDEG { position 19; } 
+            bit ROOL { position 20; } 
+            bit TOOL { position 21; } 
+            bit OVF { position 22; } 
+            bit OVR { position 23; } 
+            bit PAR { position 24; } 
+            bit TSOC { position 25; } 
+            bit MAXLEN { position 26; } 
+            bit RXABORT { position 27; } 
+            bit UDR { position 28; } 
+            bit FIFO { position 29; } 
+            bit K1K2 { position 30; } 
+        }
+    }
+
+    typedef latitudeType {
+        type int16 {
+            range "-90 .. 90";
+        }
+    }
+
+    typedef longitudeType {
+        type uint16 {
+            range "0 .. 360";
+        }
+    }
+
+    typedef ackPolicyType {
+        type enumeration {
+            enum ackForEverySecondDatagramReceived;
+            enum ackWithin200MilliSecOfDatagramArrival;
+            enum WhichEverEarlier;
+        }
+    }
+
+    typedef staleCookiePolicyType {
+        type enumeration {
+            enum newInitCookieSetup;
+            enum discardTransmissonBlock;
+            enum newInitaddCookieLifeTimeExtension;
+        }
+    }
+
+    typedef SctpAssociationStatusType {
+        type enumeration {
+            enum connecting;
+            enum up;
+            enum down;
+        }
+    }
+
+    typedef SctpDirectionType {
+        type enumeration {
+            enum rncToCn;
+            enum cnToRnc;
+        }
+    }
+
+    typedef SecondsType {
+        type uint8 {
+            range "0 .. 60";
+        }
+    }
+
+    typedef MinutesType {
+        type uint8 {
+            range "0 .. 60";
+        }
+    }
+
+    typedef HoursType {
+        type uint8 {
+            range "0 .. 24";
+        }
+    }
+
+    typedef validCookieLifeType {
+        type uint32 {
+            range "5000 .. 120000";
+        }
+    }
+
+    typedef assocMaxRetransType {
+        type uint8 {
+            range "2 .. 16";
+        }
+    }
+
+    typedef pathMaxRetransType {
+        type uint8 {
+            range "2 .. 8";
+        }
+    }
+
+    typedef maxInitRetransType {
+        type uint8 {
+            range "2 .. 16";
+        }
+    }
+
+    typedef maxInitPathRetransType {
+        type uint8 {
+            range "2 .. 6";
+        }
+    }
+
+    typedef bundlingTimeType {
+        type uint8 {
+            range "50 .. 150";
+        }
+    }
+
+    typedef sackPeriodType {
+        type uint16 {
+            range "150 .. 500";
+        }
+    }
+
+    typedef sackFrequencyType {
+        type uint8 {
+            range "1 .. 5";
+        }
+    }
+
+    typedef rtoInitType {
+        type uint16 {
+            range "10 .. 5000";
+        }
+    }
+
+    typedef rtoMinType {
+        type uint16 {
+            range "5 .. 2000";
+        }
+    }
+
+    typedef rtoMaxType {
+        type uint32 {
+            range "50 .. 120000";
+        }
+    }
+
+    typedef sctpHBIntervalType {
+        type uint16 {
+            range "1 .. 300";
+        }
+    }
+
+    typedef simMtu {
+        type uint16 {
+            range "576 .. 2000";
+        }
+    }
+
+    typedef pdpState {
+        type enumeration {
+            enum active;
+            enum inactive;
+            enum activation_requested;
+            enum deactivation_requested;
+            enum preserved;
+        }
+    }
+
+    typedef AtmPingType {
+        type enumeration {
+            enum segment;
+            enum endToEnd;
+        }
+    }
+
+    typedef ranapImeiCachePurgeTimerType {
+        type uint32 {
+            range "1 .. 1440";
+        }
+    }
+
+    typedef ranapImeiCacheSizeUpperBoundType {
+        type uint32 {
+            range "10000 .. 10000000";
+        }
+    }
+
+    typedef ranapImeiCacheEntryIdleTimeType {
+        type uint32 {
+            range "2 .. 43200";
+        }
+    }
+
+    grouping sctpCounters {
+        leaf rxInit {
+            type uint64;
+        }
+        leaf rxInitAck {
+            type uint64;
+        }
+        leaf rxCookie {
+            type uint64;
+        }
+        leaf rxCookieAck {
+            type uint64;
+        }
+        leaf rxShutDown {
+            type uint64;
+        }
+        leaf rxShutDownAck {
+            type uint64;
+        }
+        leaf rxShutDownComp {
+            type uint64;
+        }
+        leaf rxAbort {
+            type uint64;
+        }
+        leaf rxError {
+            type uint64;
+        }
+        leaf rxEcne {
+            type uint64;
+        }
+        leaf rxCwr {
+            type uint64;
+        }
+        leaf rxSack {
+            type uint64;
+        }
+        leaf rxHeartBeat {
+            type uint64;
+        }
+        leaf rxHeartBeatAck {
+            type uint64;
+        }
+        leaf rxData {
+            type uint64;
+        }
+    }
+
+    grouping sccpCounters {
+        leaf rxCR {
+            type uint64;
+        }
+        leaf rxCC {
+            type uint64;
+        }
+        leaf rxRLC {
+            type uint64;
+        }
+        leaf rxRLSD {
+            type uint64;
+        }
+        leaf rxCREF {
+            type uint64;
+        }
+        leaf rxDT1 {
+            type uint64;
+        }
+        leaf rxUDT {
+            type uint64;
+        }
+        leaf rxUDTS {
+            type uint64;
+        }
+        leaf rxXUDT {
+            type uint64;
+        }
+        leaf rxXUDTS {
+            type uint64;
+        }
+        leaf rxIT {
+            type uint64;
+        }
+        leaf rxLUDT {
+            type uint64;
+        }
+        leaf rxLUDTS {
+            type uint64;
+        }
+        leaf rxErr {
+            type uint64;
+        }
+    }
+
+    grouping ranapTransmitterCounters {
+        leaf rxRABAssignment {
+            type uint64;
+        }
+        leaf rxIuRelease {
+            type uint64;
+        }
+        leaf rxRelocationPreparation {
+            type uint64;
+        }
+        leaf rxRelocationResourceAllocation {
+            type uint64;
+        }
+        leaf rxRelocationCancel {
+            type uint64;
+        }
+        leaf rxSRNSContextTransfer {
+            type uint64;
+        }
+        leaf rxSecurityModeControl {
+            type uint64;
+        }
+        leaf rxDataVolumeReport {
+            type uint64;
+        }
+        leaf rxReserved8 {
+            type uint64;
+        }
+        leaf rxReset {
+            type uint64;
+        }
+        leaf rxRABReleaseRequest {
+            type uint64;
+        }
+        leaf rxIuReleaseRequest {
+            type uint64;
+        }
+        leaf rxRelocationDetect {
+            type uint64;
+        }
+        leaf rxRelocationComplete {
+            type uint64;
+        }
+        leaf rxPaging {
+            type uint64;
+        }
+        leaf rxCommonID {
+            type uint64;
+        }
+        leaf rxCNInvokeTrace {
+            type uint64;
+        }
+        leaf rxLocationReportingControl {
+            type uint64;
+        }
+        leaf rxLocationReport {
+            type uint64;
+        }
+        leaf rxInitialUEMessage {
+            type uint64;
+        }
+        leaf rxDirectTransfer {
+            type uint64;
+        }
+        leaf rxOverloadControl {
+            type uint64;
+        }
+        leaf rxErrorIndication {
+            type uint64;
+        }
+        leaf rxSRNSDataForward {
+            type uint64;
+        }
+        leaf rxForwardSRNSContext {
+            type uint64;
+        }
+        leaf rxprivateMessage {
+            type uint64;
+        }
+        leaf rxCNDeactivateTrace {
+            type uint64;
+        }
+        leaf rxResetResource {
+            type uint64;
+        }
+        leaf rxRANAPRelocation {
+            type uint64;
+        }
+        leaf rxRABModifyRequest {
+            type uint64;
+        }
+        leaf rxLocationRelatedData {
+            type uint64;
+        }
+        leaf rxInformationTransfer {
+            type uint64;
+        }
+        leaf rxUESpecificInformation {
+            type uint64;
+        }
+        leaf rxUplinkInformationExchange {
+            type uint64;
+        }
+        leaf rxDirectInformationTransfer {
+            type uint64;
+        }
+        leaf rxMBMSSessionStart {
+            type uint64;
+        }
+        leaf rxMBMSSessionUpdate {
+            type uint64;
+        }
+        leaf rxMBMSSessionStop {
+            type uint64;
+        }
+        leaf rxMBMSUELinking {
+            type uint64;
+        }
+        leaf rxMBMSRegistration {
+            type uint64;
+        }
+        leaf rxMBMSCNDeRegistrationProcedure {
+            type uint64;
+        }
+        leaf rxMBMSRABEstablishmentIndication {
+            type uint64;
+        }
+        leaf rxMBMSRABRelease {
+            type uint64;
+        }
+    }
+
+    grouping mtp3LinkCounters {
+        leaf sNumSioRx {
+            type uint64;
+        }
+        leaf sNumSifRx {
+            type uint64;
+        }
+        leaf sNumSioTx {
+            type uint64;
+        }
+        leaf sNumSifTx {
+            type uint64;
+        }
+        leaf sLinkUnavStartTime {
+            type uint64;
+        }
+        leaf sLinkUnavStopTime {
+            type uint64;
+        }
+        leaf sLinkUnavDuration {
+            type uint64;
+        }
+        leaf nNumSioRx {
+            type uint64;
+        }
+        leaf nNumSifRx {
+            type uint64;
+        }
+        leaf nNumSioTx {
+            type uint64;
+        }
+        leaf nNumSifTx {
+            type uint64;
+        }
+        leaf nLinkUnavStartTime {
+            type uint64;
+        }
+        leaf nLinkUnavStopTime {
+            type uint64;
+        }
+        leaf nLinkUnavDuration {
+            type uint64;
+        }
+    }
+
+    grouping sscfCounters {
+        leaf sStartLinkStat {
+            type uint64;
+        }
+        leaf sStopLinkStat {
+            type uint64;
+        }
+        leaf sProcOutageStat {
+            type uint64;
+        }
+        leaf sMsuFromMtp3Stat {
+            type uint64;
+        }
+        leaf sLastBsnRecvFromMtp3Stat {
+            type uint64;
+        }
+        leaf sLinkStatusFromMtp3Stat {
+            type uint64;
+        }
+        leaf sFlushRtbStat {
+            type uint64;
+        }
+        leaf sNonAckedMsuStat {
+            type uint64;
+        }
+        leaf sContinueStat {
+            type uint64;
+        }
+        leaf sMsuToMtp3Stat {
+            type uint64;
+        }
+        leaf sLinkStatusToMtp3Stat {
+            type uint64;
+        }
+        leaf sLastBsnRecvToMtp3Stat {
+            type uint64;
+        }
+        leaf sNonAckedMsuToMtp3Stat {
+            type uint64;
+        }
+        leaf sCongStatusStat {
+            type uint64;
+        }
+        leaf sBsnNotRetrvToMtp3Stat {
+            type uint64;
+        }
+        leaf nStartLinkStat {
+            type uint64;
+        }
+        leaf nStopLinkStat {
+            type uint64;
+        }
+        leaf nProcOutageStat {
+            type uint64;
+        }
+        leaf nMsuFromMtp3Stat {
+            type uint64;
+        }
+        leaf nLastBsnRecvFromMtp3Stat {
+            type uint64;
+        }
+        leaf nLinkStatusFromMtp3Stat {
+            type uint64;
+        }
+        leaf nFlushRtbStat {
+            type uint64;
+        }
+        leaf nNonAckedMsuStat {
+            type uint64;
+        }
+        leaf nContinueStat {
+            type uint64;
+        }
+        leaf nMsuToMtp3Stat {
+            type uint64;
+        }
+        leaf nLinkStatusToMtp3Stat {
+            type uint64;
+        }
+        leaf nLastBsnRecvToMtp3Stat {
+            type uint64;
+        }
+        leaf nNonAckedMsuToMtp3Stat {
+            type uint64;
+        }
+        leaf nCongStatusStat {
+            type uint64;
+        }
+        leaf nBsnNotRetrvToMtp3Stat {
+            type uint64;
+        }
+    }
+
+    grouping sscopCounters {
+        leaf sBgakTxStat {
+            type uint64;
+        }
+        leaf sBgnTxStat {
+            type uint64;
+        }
+        leaf sBgrejTxStat {
+            type uint64;
+        }
+        leaf sEndTxStat {
+            type uint64;
+        }
+        leaf sRsTxStat {
+            type uint64;
+        }
+        leaf sRsakTxStat {
+            type uint64;
+        }
+        leaf sEndakTxStat {
+            type uint64;
+        }
+        leaf sErakTxStat {
+            type uint64;
+        }
+        leaf sErTxStat {
+            type uint64;
+        }
+        leaf sStatTxStat {
+            type uint64;
+        }
+        leaf sPollTxStat {
+            type uint64;
+        }
+        leaf sUstatTxStat {
+            type uint64;
+        }
+        leaf sSdTxStat {
+            type uint64;
+        }
+        leaf sUdTxStat {
+            type uint64;
+        }
+        leaf sMdTxStat {
+            type uint64;
+        }
+        leaf sLinkEstbIndStat {
+            type uint64;
+        }
+        leaf sLinkEstbCnfStat {
+            type uint64;
+        }
+        leaf sLinkRelIndStat {
+            type uint64;
+        }
+        leaf sLinkRelCnfStat {
+            type uint64;
+        }
+        leaf sLinkResyncIndStat {
+            type uint64;
+        }
+        leaf sLinkResyncCnfStat {
+            type uint64;
+        }
+        leaf sLinkRecoverIndStat {
+            type uint64;
+        }
+        leaf sLinkRetrieveIndStat {
+            type uint64;
+        }
+        leaf sLinkRetrieveCompIndStaT {
+            type uint64;
+        }
+        leaf nBgakTxStat {
+            type uint64;
+        }
+        leaf nBgnTxStat {
+            type uint64;
+        }
+        leaf nBgrejTxStat {
+            type uint64;
+        }
+        leaf nEndTxStat {
+            type uint64;
+        }
+        leaf nRsTxStat {
+            type uint64;
+        }
+        leaf nRsakTxStat {
+            type uint64;
+        }
+        leaf nEndakTxStat {
+            type uint64;
+        }
+        leaf nErakTxStat {
+            type uint64;
+        }
+        leaf nErTxStat {
+            type uint64;
+        }
+        leaf nStatTxStat {
+            type uint64;
+        }
+        leaf nPollTxStat {
+            type uint64;
+        }
+        leaf nUstatTxStat {
+            type uint64;
+        }
+        leaf nSdTxStat {
+            type uint64;
+        }
+        leaf nUdTxStat {
+            type uint64;
+        }
+        leaf nMdTxStat {
+            type uint64;
+        }
+        leaf nLinkEstbIndStat {
+            type uint64;
+        }
+        leaf nLinkEstbCnfStat {
+            type uint64;
+        }
+        leaf nLinkRelIndStat {
+            type uint64;
+        }
+        leaf nLinkRelCnfStat {
+            type uint64;
+        }
+        leaf nLinkResyncIndStat {
+            type uint64;
+        }
+        leaf nLinkResyncCnfStat {
+            type uint64;
+        }
+        leaf nLinkRecoverIndStat {
+            type uint64;
+        }
+        leaf nLinkRetrieveIndStat {
+            type uint64;
+        }
+        leaf nLinkRetrieveCompIndStaT {
+            type uint64;
+        }
+    }
+
+    grouping mtp3PcCounters {
+        leaf sNumMsuDiscardRouteError {
+            type uint64;
+        }
+        leaf sNumMsuDiscardDpcCong {
+            type uint64;
+        }
+        leaf sDpcInaccCount {
+            type uint64;
+        }
+        leaf sDpcInaccStartTime {
+            type uint64;
+        }
+        leaf sDpcInaccStopTime {
+            type uint64;
+        }
+        leaf sDpcInaccDuration {
+            type uint64;
+        }
+        leaf nNumMsuDiscardRouteError {
+            type uint64;
+        }
+        leaf nNumMsuDiscardDpcCong {
+            type uint64;
+        }
+        leaf nDpcInaccCount {
+            type uint64;
+        }
+        leaf nDpcInaccStartTime {
+            type uint64;
+        }
+        leaf nDpcInaccStopTime {
+            type uint64;
+        }
+        leaf nDpcInaccDuration {
+            type uint64;
+        }
+    }
+
+    typedef sourceType {
+        type enumeration {
+            enum bearer;
+            enum signaling;
+        }
+    }
+
+    grouping pdpDetails {
+        leaf imsi {
+            type uint64;
+        }
+        leaf nsapi {
+            type uint16;
+        }
+        leaf pdpSlot {
+            type uint32;
+        }
+        leaf iuId {
+            type uint32;
+        }
+        leaf pdpId {
+            type uint32;
+        }
+        leaf ueIp {
+            type inet:ipv4-address;
+        }
+        leaf rncIp {
+            type inet:ipv4-address;
+        }
+        leaf sgsnIp {
+            type inet:ipv4-address;
+        }
+        leaf upTeid {
+            type uint32;
+        }
+        leaf downTeid {
+            type uint32;
+        }
+        leaf apn {
+            type string;
+        }
+        leaf imei {
+            type uint64;
+        }
+        leaf tac {
+            type uint32;
+        }
+        leaf lac {
+            type uint32;
+        }
+        leaf sac {
+            type uint32;
+        }
+        leaf sessionTime {
+            type uint32;
+        }
+        leaf life {
+            type uint32;
+        }
+        leaf inactivityCount {
+            type uint32;
+        }
+        leaf pdpState {
+            type pdpState;
+        }
+        leaf source {
+            type sourceType;
+        }
+    }
+
+    grouping ranapCounters {
+        leaf currPdpSessionsRequested {
+            type uint64;
+        }
+        leaf currPdpSessionsActive {
+            type uint64;
+        }
+        leaf currIuSessionsRequested {
+            type uint64;
+        }
+        leaf currIuSessionsActive {
+            type uint64;
+        }
+        leaf currPdpSessionsPreserved {
+            type uint64;
+        }
+        leaf pdpSessionsRequested {
+            type uint64;
+        }
+        leaf pdpSessionsActive {
+            type uint64;
+        }
+        leaf pdpSessionsDeleted {
+            type uint64;
+        }
+        leaf iuSessionsRequested {
+            type uint64;
+        }
+        leaf iuSessionsActive {
+            type uint64;
+        }
+        leaf implicitSessionCreated {
+            type uint64;
+        }
+        leaf implicitSessionUpdated {
+            type uint64;
+        }
+        leaf implicitSessionDeleted {
+            type uint64;
+        }
+        leaf implicitSessionOverridden {
+            type uint64;
+        }
+        leaf totalDroppedMsg {
+            type uint64;
+        }
+    }
+
+    grouping pvcStatusElem {
+        leaf sLinkAvail {
+            type foo-system:yesNoType;
+        }
+        leaf sLinkInsOos {
+            type foo-system:yesNoType;
+        }
+        leaf sLinkLocalBlk {
+            type foo-system:yesNoType;
+        }
+        leaf sLinkRemoteBlk {
+            type foo-system:yesNoType;
+        }
+        leaf sLinkLocalInh {
+            type foo-system:yesNoType;
+        }
+        leaf sLinkRemoteInh {
+            type foo-system:yesNoType;
+        }
+        leaf nLinkAvail {
+            type foo-system:yesNoType;
+        }
+        leaf nLinkInsOos {
+            type foo-system:yesNoType;
+        }
+        leaf nLinkLocalBlk {
+            type foo-system:yesNoType;
+        }
+        leaf nLinkRemoteBlk {
+            type foo-system:yesNoType;
+        }
+        leaf nLinkLocalInh {
+            type foo-system:yesNoType;
+        }
+        leaf nLinkRemoteInh {
+            type foo-system:yesNoType;
+        }
+        leaf LinkAvail {
+            type foo-system:yesNoType;
+        }
+    }
+
+    grouping httpTransactionStats {
+        leaf totalRequests {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf totalTraffic {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf reqsPerSecond {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf trafficPerSecond {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf currentReqsRate {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf currentTrafficRate {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf respTimeCacheHit {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf respTimeMemCacheHit {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf respTimeDiskCacheHit {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf respTimeCacheMiss {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf transactionLatencyCacheHit {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf transactionLatencyCacheMiss {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf avgRespTime {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf pathLatencyReq {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf pathLatencyResp {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf avgWireLatency {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+    }
+
+    grouping httpConnectionStats {
+        leaf currInbound {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf maxInbound {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf avgInbound {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf currOutbound {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf maxOutbound {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf avgOutbound {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf avgSrvConnLatency {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf avgDnsConnLatency {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf currentConnections {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf tcpConnError {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+    }
+
+    grouping httpCompressionStats {
+        leaf totalObjectsCompressedByCAE {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf totalBytesSavedByCAE {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+    }
+
+    grouping httpCacheStats {
+        leaf cacheMisses {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf cacheHits {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf memCacheHits {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf diskCacheHits {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf partialHits {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf cacheHitPercentage {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf objects {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf memCacheObjects {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf diskCacheObjects {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf minObjectSizeMissKB {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf maxObjectSizeMissKB {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf avgObjectSizeMissKB {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf minObjectSizeMemCacheKB {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf maxObjectSizeMemCacheKB {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf avgObjectSizeMemCacheKB {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf minObjectSizeDiskCacheKB {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf maxObjectSizeDiskCacheKB {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf avgObjectSizeDiskCacheKB {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf memCacheBytes {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf diskCacheBytes {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf cacheHitBytesPercentage {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf videoCacheHits {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf videoCacheMisses {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf videoBytesFromCache {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf videoBytesFromServer {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+    }
+
+    grouping httpVideoPacingStats {
+        leaf videoBytesReadFromServer {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf videoBytesWrittenToClient {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf videoBytesSavedByPacing {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf videoTTFBHit {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf videoTTFBMiss {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf videoPrematureCancellations {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf videoBurstPaced {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf videoAdaptivePaced {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf videoFallbackToBurst {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf currentAdaptiveVPSessions {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf currentBurstVPSessions {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf currentVPSessions {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+    }
+
+    grouping httpOffloadStats {
+        leaf offloadedRequests {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf offloadedBytes {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+    }
+
+    grouping httpTransitCacheStats {
+        leaf totalBytesFetched {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf totalBytesServed {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf totalVideoBytesFetched {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf totalVideoBytesServed {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf bytesFetched304 {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf bytesFetched206 {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf bytesFetched200 {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf totalRequests {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf numRequests304 {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf numRequests206 {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf numRequests200 {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf totalTransactionsCompleted {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf numOutstandingFdsNorth {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf total302Received {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf totalConnectReattempts {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf totalConnectFailures {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf totalDnsFailures {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf totalPrematureCloses {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+    }
+
+    grouping httpCacheCleanStats {
+        leaf cacheCleanTarget {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf cacheCleanStart {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf initTotalSize {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf finalTotalSize {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf initTotalEntries {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf finalTotalEntries {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf totalSizeOccByDirs {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+        leaf dirsRemoved {
+            type decimal64 {
+                fraction-digits 2;
+            }
+        }
+    }
+
+    grouping generalCounters {
+        leaf CurrentLoadRate {
+            type uint64;
+        }
+        leaf PeakLoadRate {
+            type uint64;
+        }
+        leaf TotalReceivedMsgs {
+            type uint64;
+        }
+        leaf TotalDroppedMsgs {
+            type uint64;
+        }
+        leaf TotalInvalidSrcDroppedMsgs {
+            type uint64;
+        }
+        leaf TotalPathNotFoundDroppedMsgs {
+            type uint64;
+        }
+        leaf TotalMissingSccpDataDroppedMsgs {
+            type uint64;
+        }
+        leaf TotalResetInProgressDroppedMsgs {
+            type uint64;
+        }
+        leaf TotalOpcDpcMismatchDroppedMsgs {
+            type uint64;
+        }
+        leaf TotalProxyToHbmMsgs {
+            type uint64;
+        }
+        leaf TotalReceivedCoMsgs {
+            type uint64;
+        }
+        leaf TotalReceivedClMsgs {
+            type uint64;
+        }
+        leaf TotalNtwrkMsgsDroppedInStandby {
+            type uint64;
+        }
+        leaf TotalNtwrkMsgsDroppedInSafDisabledState {
+            type uint64;
+        }
+        leaf TotalUpdateFromGtpForUeIp {
+            type uint64;
+        }
+    }
+
+    grouping ranapMsgDropCounters {
+        leaf TotalDroppedMsg {
+            type uint64;
+        }
+        leaf TotalDroppedMsgDueToNoIuSession {
+            type uint64;
+        }
+        leaf TotalDroppedDirectTransferMsgs {
+            type uint64;
+        }
+        leaf TotalDroppedRabAssignmentMsgs {
+            type uint64;
+        }
+        leaf TotalDroppedIuReleaseMsgs {
+            type uint64;
+        }
+        leaf TotalDroppedIuReleaseRequestMsgs {
+            type uint64;
+        }
+        leaf TotalDroppedRabReleaseRequestMsgs {
+            type uint64;
+        }
+        leaf TotalDroppedCommonIDMsgs {
+            type uint64;
+        }
+        leaf TotalDroppedRelocationPreparation {
+            type uint64;
+        }
+        leaf TotalDroppedRelocationResourceAllocation {
+            type uint64;
+        }
+        leaf TotalDroppedRelocationCancel {
+            type uint64;
+        }
+        leaf TotalDroppedSRNSContextTransfer {
+            type uint64;
+        }
+        leaf TotalDroppedSecurityModeControl {
+            type uint64;
+        }
+        leaf TotalDroppedDataVolumeReport {
+            type uint64;
+        }
+        leaf TotalDroppedReset {
+            type uint64;
+        }
+        leaf TotalDroppedRABReleaseRequest {
+            type uint64;
+        }
+        leaf TotalDroppedIuReleaseRequest {
+            type uint64;
+        }
+        leaf TotalDroppedRelocationDetect {
+            type uint64;
+        }
+        leaf TotalDroppedRelocationComplete {
+            type uint64;
+        }
+        leaf TotalDroppedPaging {
+            type uint64;
+        }
+        leaf TotalDroppedCommonID {
+            type uint64;
+        }
+        leaf TotalDroppedCNInvokeTrace {
+            type uint64;
+        }
+        leaf TotalDroppedLocationReportingControl {
+            type uint64;
+        }
+        leaf TotalDroppedLocationReport {
+            type uint64;
+        }
+        leaf TotalDroppedInitialUEMessage {
+            type uint64;
+        }
+        leaf TotalDroppedDirectTransfer {
+            type uint64;
+        }
+        leaf TotalDroppedOverloadControl {
+            type uint64;
+        }
+        leaf TotalDroppedErrorIndication {
+            type uint64;
+        }
+        leaf TotalDroppedSRNSDataForward {
+            type uint64;
+        }
+        leaf TotalDroppedForwardSRNSContext {
+            type uint64;
+        }
+        leaf TotalDroppedprivateMessage {
+            type uint64;
+        }
+        leaf TotalDroppedCNDeactivateTrace {
+            type uint64;
+        }
+        leaf TotalDroppedResetResource {
+            type uint64;
+        }
+        leaf TotalDroppedRANAPRelocation {
+            type uint64;
+        }
+        leaf TotalDroppedRABModifyRequest {
+            type uint64;
+        }
+        leaf TotalDroppedLocationRelatedData {
+            type uint64;
+        }
+        leaf TotalDroppedInformationTransfer {
+            type uint64;
+        }
+        leaf TotalDroppedUnknownMsgs {
+            type uint64;
+        }
+    }
+
+    typedef signalingStandardType {
+        type enumeration {
+            enum 3gpp;
+        }
+    }
+
+    typedef serviceType {
+        type enumeration {
+            enum bypass;
+            enum monitor;
+            enum inline;
+        }
+    }
+
+    typedef bypassSupportMaskType {
+        type bits {
+            bit enableOpticalBypass { position 0; } 
+        }
+    }
+
+    typedef bypassSwitchCommandsType {
+        type enumeration {
+            enum forceOpticalBypass;
+            enum manualNoBypass;
+            enum clear;
+        }
+    }
+
+    typedef bypassSwitchDebugCommandsType {
+        type enumeration {
+            enum forceNoBypass {
+                // value used to avoid collision with bypassSwitchCommands
+                value 99;
+            }
+        }
+    }
+
+    typedef bypassStatusType {
+        type enumeration {
+            enum bypassed;
+            enum none;
+        }
+    }
+}

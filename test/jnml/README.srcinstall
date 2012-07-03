@@ -1,0 +1,12 @@
+
+This is the ConfM source code base. It's all proprietary Tail-F systems
+code. To build this code, just run the ant script at the top.
+To run the tests, make sure CONFM_DIR and also CONFD_DIR are set
+to point to your ConfM installation and ConfD installation respectively.
+This is best done through the confmrc and confdrc source scripts 
+respectively.
+
+The build will not overwrite the jar files shipped with the release.
+
+
+

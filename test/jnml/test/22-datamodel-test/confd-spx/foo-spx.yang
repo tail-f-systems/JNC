@@ -1,0 +1,31 @@
+module foo-spx {
+    namespace "http://foo.net/ns/foo-spx";
+    prefix foo-spx;
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    import foo-system {
+        prefix foo-system;
+    }
+
+    include foo-spx-types;
+    include foo-spx-radius;
+    include foo-spx-offlineCharging;
+    include foo-spx-onlineCharging;
+    include foo-spx-profileAccess;
+    include foo-spx-protocolCompliance;
+    include foo-spx-userProfile;
+    include foo-spx-serviceAttribute;
+    include foo-spx-node;
+
+    organization "Foo Networks, Inc.";
+    description  "Managed objects for spx.";
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+}

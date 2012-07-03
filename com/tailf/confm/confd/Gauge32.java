@@ -35,7 +35,6 @@ public class Gauge32 extends com.tailf.confm.xs.UnsignedInt implements Serializa
         check();
     }
 
-
     /**
      * Sets the value.
      */

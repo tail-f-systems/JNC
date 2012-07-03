@@ -1,0 +1,20 @@
+
+   <dhcp xmlns="http://tail-f.com/examples/dhcp/1.0">
+      <defaultLeaseTime>PT600S</defaultLeaseTime>
+      <maxLeaseTime>PT7200S</maxLeaseTime>
+      <logFacility>local7</logFacility>
+      <subNets>
+        <subNet>
+          <net>10.1.2.0</net>
+          <mask>255.255.255.0</mask>
+          <range>
+            <dynamicBootP>false</dynamicBootP>
+            <lowAddr>10.1.2.100</lowAddr>
+            <hiAddr>10.1.2.200</hiAddr>
+          </range>
+          <maxLeaseTime>PT7200S</maxLeaseTime>
+        </subNet>
+      </subNets>
+      <sharedNetworks/>
+    </dhcp>
+

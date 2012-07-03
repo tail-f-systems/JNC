@@ -78,7 +78,6 @@ public class RpcError {
      */
     public String errorSeverity;
 
-
     /**
      * Contains a string identifying the data-model-specific
      * or implementation-specific error condition, if one exists.  This
@@ -87,7 +86,6 @@ public class RpcError {
      *
      */
     public String errorAppTag;
-
 
     /**
      * Contains the absolute XPath expression identifying
@@ -119,7 +117,6 @@ public class RpcError {
      */
     public NodeSet errorInfo;
 
-
     /**
      * Constructor
      */
@@ -149,12 +146,10 @@ public class RpcError {
         }
     }
 
-
     /**
      * The rpc-error element tree
      */
     public Element data;
-
 
     /**
      *

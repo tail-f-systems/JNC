@@ -1,0 +1,123 @@
+module foo-simulator {
+    namespace "http://foo.net/ns/foo-simulator";
+    prefix foo-simulator;
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    organization "Foo Networks, Inc.";
+    description  "Managed objects for simulator.";
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    container subscriber {
+        list ocssim {
+            key imsi;
+            tailf:info "Subscriber info used to authorize sessions by the OCS";
+
+            leaf imsi {
+                type uint64;
+            }
+            leaf userName {
+                type string;
+                default "";
+            }
+            leaf serviceCtxId {
+                type string;
+                default foo@3gpp.org;
+            }
+
+            container totalUnitsByVolume {
+                tailf:info "Total units subscriber has across multiple sessions";
+
+                leaf input {
+                    type uint64;
+                    default 0;
+                }
+                leaf output {
+                    type uint64;
+                    default 0;
+                }
+                leaf total {
+                    type uint64;
+                    default 0;
+                }
+                leaf volumeQuotaThreshold {
+                    type uint64;
+                    default 0;
+                }
+            }
+
+            container unitsGrantedOnRequest {
+                tailf:info "Granted units per subscriber request per session";
+
+                leaf input {
+                    type uint64;
+                    default 10000;
+                }
+                leaf output {
+                    type uint64;
+                    default 15000;
+                }
+                leaf total {
+                    type uint64;
+                    default 0;
+                }
+            }
+
+            container timeBasedUnits {
+                leaf creditTime {
+                    type uint64;
+                    default 0;
+                }
+                leaf timeQuotaThreshold {
+                    type uint64;
+                    default 0;
+                }
+            }
+
+            leaf validityTime {
+                type uint64;
+                default 86400;
+            }
+            leaf responseDelay {
+                type uint64;
+                default 0;
+            }
+            leaf tariffTimeChange {
+                type uint64;
+                default 0;
+            }
+
+            container ocsSimStats {
+                config false;
+                tailf:cdb-oper;
+
+                leaf NumInitialRequestRecvd {
+                    type uint64;
+                }
+                leaf NumUpdateRequestRecvd {
+                    type uint64;
+                }
+                leaf NumFinalRequestRecvd {
+                    type uint64;
+                }
+                leaf NumInitialResponseSent {
+                    type uint64;
+                }
+                leaf NumUpdateResponseSent {
+                    type uint64;
+                }
+                leaf NumFinalResponseSent {
+                    type uint64;
+                }
+            }
+        }
+    }
+}

@@ -13,10 +13,7 @@ package com.tailf.inm;
 
 import java.util.ArrayList;
 
-
 public class Capabilities {
-
-
 
     /**
      * The NETCONF namespace
@@ -37,8 +34,6 @@ public class Capabilities {
      */
     public static String NS_PARTIAL_LOCK =
         "urn:ietf:params:xml:ns:netconf:partial-lock:1.0";
-
-
 
     /** String constant for the NETCONF base capability.
      * "urn:ietf:params:netconf:base:1.0".
@@ -115,8 +110,7 @@ public class Capabilities {
     public static String PARTIAL_LOCK_CAPABILITY=
         "urn:ietf:params:netconf:capability:partial-lock:1.0";
 
-
-        /**
+    /**
      * The NETCONF actions namespace.
      * "http://tail-f.com/ns/netconf/actions/1.0"
      */
@@ -128,11 +122,8 @@ public class Capabilities {
      */
     public static final String NS_TRANSACTIONS= "http://tail-f.com/ns/netconf/transactions/1.0";
 
-
-
     // A set of Tail-f proprietary capabilities
     // that we also check and code for
-
 
     /** String constant for the <code>:actions</code> capability.
      * "http://tail-f.com/ns/netconf/actions/1.0".
@@ -151,9 +142,6 @@ public class Capabilities {
      */
     public static final String WITH_DEFAULTS_CAPABILITY=
         "http://tail-f.com/ns/netconf/with-defaults/1.0";
-
-
-
 
     /**
      * Capabilites
@@ -174,7 +162,6 @@ public class Capabilities {
     protected boolean actionsCapability = false;
     protected boolean transactionsCapability = false;
     protected boolean withDefaultsCapability = false;
-
 
     /**
      * Predicate for the <code>:writable-running</code> capability.
@@ -273,7 +260,6 @@ public class Capabilities {
         return urlSchemes;
     }
 
-
     protected String[] urlSchemes;
 
     /**
@@ -289,8 +275,6 @@ public class Capabilities {
     public boolean hasPartialLock() {
         return partialLockCapability;
     }
-
-
 
     /**
      * Predicate for the <code>:actions</code> capability.
@@ -313,11 +297,9 @@ public class Capabilities {
         return withDefaultsCapability;
     }
 
-
     public String[] getUrlSchemes() {
         return urlSchemes;
     }
-
 
     private ArrayList capas;
     private ArrayList data_capas;
@@ -329,7 +311,6 @@ public class Capabilities {
             this.uri = uri; this.revision = revision;
         }
     }
-
 
     protected Capabilities(Element e) throws INMException {
         NodeSet caps = e.get("capability");
@@ -414,8 +395,6 @@ public class Capabilities {
             else if (uri.equals(TRANSACTIONS_CAPABILITY))
                 transactionsCapability = true;
 
-
-
             else {
                 // It's either a proper data schema capability or some
                 // homegrown agent capability
@@ -426,8 +405,6 @@ public class Capabilities {
         }
     }
 
-
-
     /* Check all capabilities including the rfc 4711 ones */
     public boolean hasCapability(String uri) {
         for (int i=0; i<capas.size(); i++) {
@@ -437,7 +414,6 @@ public class Capabilities {
         }
         return false;
     }
-
 
     /*
      * Return the revision for a specific uri, return null
@@ -452,6 +428,5 @@ public class Capabilities {
         }
         return null;
     }
-
 
 }

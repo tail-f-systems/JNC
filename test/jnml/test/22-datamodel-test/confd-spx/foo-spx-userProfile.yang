@@ -1,0 +1,38 @@
+submodule foo-spx-userProfile {
+    belongs-to foo-spx {
+        prefix foo-spx;
+    }
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    import foo-system {
+        prefix foo-system;
+    }
+
+    include foo-spx-types;
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    list userProfile {
+        key name;
+        tailf:info "userProfile to userGroup map";
+
+        leaf name {
+            type foo-system:nameType;
+            tailf:info "userProfile name (obtained from RADIUS, LDAP etc.,)";
+        }
+        leaf userGroup {
+            type foo-system:nameType;
+            mandatory true;
+            /*  T.B.D add keyref to cae policy/userGroup  */
+            tailf:info "userGroup name (configured in CAE policy/userGroup)";
+        }
+    }
+}

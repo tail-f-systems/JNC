@@ -1,0 +1,6 @@
+  <node xmlns="http://movik.net/ns/movik-system/1.0">
+      <application>
+        <component>monitor</component>
+        <operStatus>3gpp</operStatus>
+      </application>
+    </node>

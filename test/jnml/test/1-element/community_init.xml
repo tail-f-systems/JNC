@@ -1,0 +1,32 @@
+<SNMP-COMMUNITY-MIB xmlns="http://tail-f.com/ns/mibs/SNMP-COMMUNITY-MIB/200308060000Z">
+  <snmpCommunityTable>
+    <snmpCommunityEntry>
+      <snmpCommunityIndex>all-rights</snmpCommunityIndex>
+      <snmpCommunityName>all-rights</snmpCommunityName>
+      <snmpCommunitySecurityName>all-rights</snmpCommunitySecurityName>
+      <snmpCommunityContextEngineID>80:00:61:81:05:01</snmpCommunityContextEngineID>
+      <snmpCommunityContextName/>
+      <snmpCommunityTransportTag/>
+      <snmpCommunityStorageType>permanent</snmpCommunityStorageType>
+    </snmpCommunityEntry>
+    <snmpCommunityEntry>
+      <snmpCommunityIndex>public</snmpCommunityIndex>
+      <snmpCommunityName>public</snmpCommunityName>
+      <snmpCommunitySecurityName>all-rights</snmpCommunitySecurityName>
+      <snmpCommunityContextEngineID>80:00:61:81:05:01</snmpCommunityContextEngineID>
+      <snmpCommunityContextName/>
+      <snmpCommunityTransportTag/>
+      <snmpCommunityStorageType>permanent</snmpCommunityStorageType>
+    </snmpCommunityEntry>
+    <snmpCommunityEntry>
+      <snmpCommunityIndex>standard trap</snmpCommunityIndex>
+      <snmpCommunityName>standard trap</snmpCommunityName>
+      <snmpCommunitySecurityName>initial</snmpCommunitySecurityName>
+      <snmpCommunityContextEngineID>80:00:61:81:05:01</snmpCommunityContextEngineID>
+      <snmpCommunityContextName/>
+      <snmpCommunityTransportTag/>
+      <snmpCommunityStorageType>permanent</snmpCommunityStorageType>
+    </snmpCommunityEntry>
+  </snmpCommunityTable>
+  <snmpTargetAddrExtTable/>
+</SNMP-COMMUNITY-MIB>

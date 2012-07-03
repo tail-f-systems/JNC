@@ -1,0 +1,164 @@
+submodule foo-policy-types {
+    belongs-to foo-policy {
+        prefix foo-policy;
+    }
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    typedef userEquipmentAttrsType {
+        type bits {
+            bit hsdpa { position 0; } 
+            bit hsupa { position 1; } 
+            bit hsdpaPlus { position 2; } 
+        }
+    }
+
+    typedef userGroupActionType {
+        type enumeration {
+            enum none;
+            enum bypass;
+            enum deny;
+        }
+    }
+
+    typedef chargingPolicyType {
+        type enumeration {
+            enum none;
+            enum online;
+            enum offline;
+        }
+    }
+
+    typedef httpCachingActionType {
+        type enumeration {
+            enum noCache;
+            enum cache;
+            enum cacheNoServe;
+            enum transitCache;
+        }
+    }
+
+    typedef httpBlackListActionType {
+        type enumeration {
+            enum accept;
+            enum deny;
+        }
+    }
+
+    typedef httpOffloadActionType {
+        type enumeration {
+            enum offload;
+            enum noOffload;
+        }
+    }
+
+    typedef httpTrafficControlActionType {
+        type enumeration {
+            enum none;
+            enum deny;
+            enum chunkPacing;
+        }
+    }
+
+    typedef httpVideoPacingActionType {
+        type enumeration {
+            enum none;
+            enum burstPacing;
+            enum adaptivePacing;
+        }
+    }
+
+    typedef httpCommonMediaTypeType {
+        type enumeration {
+            enum *;
+            enum "text/*";
+            enum "text/html";
+            enum "text/plain";
+            enum "text/css";
+            enum "video/*";
+            enum "video/x-flv";
+            enum "video/flv";
+            enum "video/mp4";
+            enum "video/mpeg";
+            enum "video/x-ms-wmv";
+            enum "video/x-ms-asf";
+            enum "video/3gpp";
+            enum "video/3gpp2";
+            enum "image/jpg";
+            enum "audio/*";
+            enum "application/*";
+        }
+    }
+
+    typedef httpMediaTypeType {
+        type union {
+            type httpCommonMediaTypeType;
+            type string;
+        }
+    }
+
+    typedef compressionCommonMediaTypeType {
+        type enumeration {
+            enum *;
+            enum "text/*";
+            enum "text/html";
+            enum "text/xml";
+            enum "text/plain";
+            enum "text/css";
+            enum "text/javascript";
+            enum "application/x-javascript";
+        }
+    }
+
+    typedef compressionMediaTypeType {
+        type union {
+            type compressionCommonMediaTypeType;
+            type string;
+        }
+    }
+
+    typedef videoCommonMediaTypeType {
+        type enumeration {
+            enum *;
+            enum "video/*";
+            enum "video/x-flv";
+            enum "video/flv";
+            enum "video/mp4";
+            enum "video/mpeg";
+            enum "video/x-ms-wmv";
+            enum "video/x-ms-asf";
+            enum "video/3gpp";
+            enum "video/3gpp2";
+        }
+    }
+
+    typedef videoMediaTypeType {
+        type union {
+            type videoCommonMediaTypeType;
+            type string;
+        }
+    }
+
+    typedef httpVideoPeriodSecondsType {
+        type uint32 {
+            range "1 .. 60";
+        }
+    }
+
+    typedef httpVideoBlockSizeKBType {
+        type uint32 {
+            range "100 .. 10000";
+        }
+    }
+
+    typedef httpCachingFlags {
+        type bits {
+            bit ignoreCacheControl { position 0; } 
+        }
+    }
+}

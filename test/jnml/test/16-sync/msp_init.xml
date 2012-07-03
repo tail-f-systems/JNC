@@ -1,0 +1,27 @@
+<mspp xmlns="http://tail-f.com/ns/test/msp/1.0" 
+      xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <interface>
+      <Ethernet>
+         <port>1/1/1</port>
+         <speed>100</speed>
+         <duplex>full</duplex>
+         <crc-threshold>1</crc-threshold>
+         <pluggable-module>
+            <mismatch-check></mismatch-check>
+         </pluggable-module>
+      </Ethernet>
+      <Ethernet>
+         <port>1/1/2</port>
+         <speed>100</speed>
+         <duplex>full</duplex>
+         <pluggable-module>
+            <mismatch-check></mismatch-check>
+         </pluggable-module>
+      </Ethernet>
+      <Ethernet>
+         <port>a/8/0</port>
+         <dot1ad-ethertype>88a8</dot1ad-ethertype>
+         <negotiation-auto></negotiation-auto>
+      </Ethernet>
+   </interface>
+</mspp>

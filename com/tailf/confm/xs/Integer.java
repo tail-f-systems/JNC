@@ -63,7 +63,6 @@ public class Integer implements Serializable {
         return value;
     }
 
-
     private void check() {
     }
 

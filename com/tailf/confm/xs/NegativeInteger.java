@@ -48,7 +48,6 @@ public class NegativeInteger extends Integer implements Serializable {
         check();
     }
 
-
     private void check() throws ConfMException {
         // restriction. Highest values is -1
         maxInclusive(-1);

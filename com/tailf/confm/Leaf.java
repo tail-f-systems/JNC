@@ -87,14 +87,12 @@ public class Leaf extends Element {
         super.encode(out, newline_at_end, capas);
     }
 
-
     public Leaf  clone() {
         Leaf copy= new Leaf(namespace, name);
         cloneAttrs(copy);
         cloneValue(copy);
         return copy;
     }
-
 
     /*
      * returns true if this Leaf  is a key leaf
@@ -111,6 +109,5 @@ public class Leaf extends Element {
         }
         return false;
     }
-
 
 }

@@ -1,0 +1,436 @@
+submodule foo-cae-ethernet {
+    belongs-to foo-cae {
+        prefix foo-cae;
+    }
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    import foo-system {
+        prefix foo-system;
+    }
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    augment "/foo-system:ethernet" {
+        list epl {
+            key name;
+
+            leaf name {
+                type foo-system:nameType;
+            }
+            leaf adminState {
+                type foo-system:adminOperType;
+                default up;
+            }
+            leaf bypass {
+                type boolean;
+                default false;
+            }
+            leaf layer3Mtu {
+                type foo-system:mtuType;
+                default 1500;
+            }
+
+            container north {
+                list lag {
+                    key name;
+
+                    leaf name {
+                        type leafref {
+                            path "/foo-system:ethernet/foo-system:lag/foo-system:name";
+                        }
+                    }
+
+                    /*  ensure endpoints are different  */
+                    must "count(/foo-system:ethernet/epl/south/lag[name=current()/name]) = 0" {
+                        error-message "north and south endpoints are the same";
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/epl/south/lag';
+                    }
+
+                    /*  ensure endpoint not in use by an /ethernet/evpl  */
+                    must  "(count(/foo-system:ethernet/evpl/north/lag[name=current()/name]) +"
+                        + " count(/foo-system:ethernet/evpl/south/lag[name=current()/name])) = 0" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/evpl/north/lag';
+                        tailf:dependency '/foo-system:ethernet/evpl/south/lag';
+                        error-message "north endpoint in use by an EVPL";
+                    }
+
+                    /*  ensure endpoint not in use by another /ethernet/epl  */
+                    must  "(count(/foo-system:ethernet/epl/north/lag[name=current()/name]) +"
+                        + "count(/foo-system:ethernet/epl/south/lag[name=current()/name])) <= 1" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/epl/north/lag';
+                        tailf:dependency '/foo-system:ethernet/epl/south/lag';
+                        error-message "north endpoint in use by an EPL";
+                    }
+                }
+
+                list port {
+                    key "slot port";
+
+                    leaf slot {
+                        type leafref {
+                            path "/foo-system:ethernet/foo-system:port/foo-system:slot";
+                        }
+                    }
+                    leaf port {
+                        type leafref {
+                            path "/foo-system:ethernet/foo-system:port/foo-system:port";
+                        }
+                    }
+
+                    /*  ensure endpoints are different  */
+                    must "count(/foo-system:ethernet/epl/south/port[slot=current()/slot][port=current()/port]) = 0" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/epl/south/port';
+                        error-message "north and south endpoints are the same";
+                    }
+
+                    /*  ensure endpoint not in use by an /ethernet/evpl  */
+                    must  "(count(/foo-system:ethernet/evpl/north/port[slot=current()/slot][port=current()/port]) +"
+                        + "count(/foo-system:ethernet/evpl/south/port[slot=current()/slot][port=current()/port])) = 0" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/evpl/north/port';
+                        tailf:dependency '/foo-system:ethernet/evpl/south/port';
+                        error-message "north endpoint in use by an EVPL";
+                    }
+
+                    /*  ensure endpoint not in use by another /ethernet/epl  */
+                    must  "(count(/foo-system:ethernet/epl/north/port[slot=current()/slot][port=current()/port]) +"
+                        + "count(/foo-system:ethernet/epl/south/port[slot=current()/slot][port=current()/port])) <= 1" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/epl/north/port';
+                        tailf:dependency '/foo-system:ethernet/epl/south/port';
+
+                        error-message "north endpoint in use by an EPL";
+                    }
+
+                    /*  ensure that the port is not part of a lag  */
+                    must "count(/foo-system:ethernet/foo-system:lag/foo-system:port[slot=current()/slot][port=current()/port]) = 0" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/foo-system:lag/foo-system:port';
+                        error-message "port is a member of an /ethernet/lag";
+                    }
+                }
+
+                /*  ensure that exactly 1 binding has been made  */
+                must "(count(lag) + count(port)) = 1" {
+                    tailf:dependency '.';
+                    error-message "must have exactly 1 binding";
+                }
+            }
+
+            container south {
+                list lag {
+                    key name;
+
+                    leaf name {
+                        type leafref {
+                            path "/foo-system:ethernet/foo-system:lag/foo-system:name";
+                        }
+                    }
+
+                    /*  ensure endpoints are different  */
+                    must "count(/foo-system:ethernet/epl/north/lag[name=current()/name]) = 0" {
+                        error-message "north and south endpoints are the same";
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/epl/north/lag';
+                    }
+
+                    /*  ensure endpoint not in use by an /ethernet/evpl  */
+                    must  "(count(/foo-system:ethernet/evpl/north/lag[name=current()/name]) +"
+                        + " count(/foo-system:ethernet/evpl/south/lag[name=current()/name])) = 0" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/evpl/north/lag';
+                        tailf:dependency '/foo-system:ethernet/evpl/south/lag';
+                        error-message "north endpoint in use by an EVPL";
+                    }
+
+                    /*  ensure endpoint not in use by another /ethernet/epl  */
+                    must  "(count(/foo-system:ethernet/epl/north/lag[name=current()/name]) +"
+                        + "count(/foo-system:ethernet/epl/south/lag[name=current()/name])) <= 1" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/epl/north/lag';
+                        tailf:dependency '/foo-system:ethernet/epl/south/lag';
+                        error-message "north endpoint in use by an EPL";
+                    }
+                }
+
+                list port {
+                    key "slot port";
+
+                    leaf slot {
+                        type leafref {
+                            path "/foo-system:ethernet/foo-system:port/foo-system:slot";
+                        }
+                    }
+                    leaf port {
+                        type leafref {
+                            path "/foo-system:ethernet/foo-system:port/foo-system:port";
+                        }
+                    }
+
+                    /*  ensure endpoint not in use by an /ethernet/evpl  */
+                    must  "(count(/foo-system:ethernet/evpl/north/port[slot=current()/slot][port=current()/port]) +"
+                        + "count(/foo-system:ethernet/evpl/south/port[slot=current()/slot][port=current()/port])) = 0" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/evpl/north/port';
+                        tailf:dependency '/foo-system:ethernet/evpl/south/port';
+                        error-message "south endpoint in use by an EVPL";
+                    }
+
+                    /*  ensure endpoint not in use by another /ethernet/epl  */
+                    must  "(count(/foo-system:ethernet/epl/north/port[slot=current()/slot][port=current()/port]) +"
+                        + "count(/foo-system:ethernet/epl/south/port[slot=current()/slot][port=current()/port])) <= 1" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/epl/north/port';
+                        tailf:dependency '/foo-system:ethernet/epl/south/port';
+                        error-message "south endpoint in use by an EPL";
+                    }
+
+                    /*  ensure that the port is not part of a lag  */
+                    must "count(/foo-system:ethernet/foo-system:lag/foo-system:port[slot=current()/slot][port=current()/port]) = 0" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/foo-system:lag/foo-system:port';
+                        error-message "port is a member of an /ethernet/lag";
+                    }
+                }
+
+                /*  ensure that exactly 1 binding has been made  */
+                must "(count(lag) + count(port)) = 1" {
+                    tailf:dependency '.';
+                    error-message "must have exactly 1 binding";
+                }
+            }
+        }
+
+        /*  evpl  */
+        list evpl {
+            key name;
+
+            leaf name {
+                type foo-system:nameType;
+            }
+            leaf adminState {
+                type foo-system:adminOperType;
+                default up;
+            }
+            leaf bypass {
+                type boolean;
+                default false;
+            }
+            leaf layer3Mtu {
+                type foo-system:mtuType;
+                default 1500;
+            }
+
+            container north {
+                list lag {
+                    key "name vid";
+
+                    leaf name {
+                        type leafref {
+                            path "/foo-system:ethernet/foo-system:lag/foo-system:name";
+                        }
+                    }
+                    leaf vid {
+                        type leafref {
+                            path "/foo-system:ethernet/foo-system:lag/foo-system:vlan/foo-system:vid";
+                        }
+                    }
+
+                    /*  ensure endpoints are different  */
+                    must "count(/foo-system:ethernet/evpl/south/lag[name=current()/name][vid=current()/vid]) = 0" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/evpl/south/lag';
+                        error-message "north and south endpoints are the same";
+                    }
+
+                    /*  ensure endpoint isn't in use by an /ethernet/epl  */
+                    must  "(count(/foo-system:ethernet/epl/north/lag[name=current()/name]) +"
+                        + " count(/foo-system:ethernet/epl/south/lag[name=current()/name])) = 0" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/epl/north/lag';
+                        tailf:dependency '/foo-system:ethernet/epl/south/lag';
+                        error-message "north endpoint in use by an EPL";
+                    }
+
+                    /*  ensure endpoint not in use by another /ethernet/evpl  */
+                    must  "(count(/foo-system:ethernet/evpl/north/lag[name=current()/name][vid=current()/vid]) +"
+                        + " count(/foo-system:ethernet/evpl/south/lag[name=current()/name][vid=current()/vid])) <= 1" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/evpl/north/lag';
+                        tailf:dependency '/foo-system:ethernet/evpl/south/lag';
+                        error-message "north endpoint in use by an EVPL";
+                    }
+                }
+
+                list port {
+                    key "slot port vid";
+                    leaf slot {
+                        type leafref {
+                            path "/foo-system:ethernet/foo-system:port/foo-system:slot";
+                        }
+                    }
+                    leaf port {
+                        type leafref {
+                            path "/foo-system:ethernet/foo-system:port/foo-system:port";
+                        }
+                    }
+                    leaf vid {
+                        type leafref {
+                            path "/foo-system:ethernet/foo-system:port/foo-system:vlan/foo-system:vid";
+                        }
+                    }
+
+                    /*  ensure endpoints are different  */
+                    must "count(/foo-system:ethernet/evpl/south/port[slot=current()/slot][port=current()/port][vid=current()/vid]) = 0" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/evpl/south/port';
+                        error-message "north and south endpoints are the same";
+                    }
+
+                    /*  ensure endpoint not in use by an EPL  */
+                    must  "(count(/foo-system:ethernet/epl/north/port[slot=current()/slot][port=current()/port]) +"
+                        + " count(/foo-system:ethernet/epl/south/port[slot=current()/slot][port=current()/port])) <= 1" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/epl/north/port';
+                        tailf:dependency '/foo-system:ethernet/epl/south/port';
+                        error-message "north endpoint in use by an EPL";
+                    }
+
+                    /*  ensure endpoint not in use by another /ethernet/evpl  */
+                    must  "(count(/foo-system:ethernet/evpl/north/port[slot=current()/slot][port=current()/port][vid=current()/vid]) +"
+                        + " count(/foo-system:ethernet/evpl/south/port[slot=current()/slot][port=current()/port][vid=current()/vid])) <= 1" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/evpl/north/port';
+                        tailf:dependency '/foo-system:ethernet/evpl/south/port';
+                        error-message "north endpoint in use by an EVPL";
+                    }
+
+                    /*  ensure that the port is not part of a lag  */
+                    must "count(/foo-system:ethernet/foo-system:lag/foo-system:port[slot=current()/slot][port=current()/port]) = 0" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/foo-system:lag/foo-system:port';
+                        error-message "port is a member of an /ethernet/lag";
+                    }
+                }
+
+                /*  ensure that exactly 1 binding has been made  */
+                must "(count(lag) + count(port)) = 1" {
+                    tailf:dependency '.';
+                    error-message "must have exactly 1 binding";
+                }
+            }
+
+            container south {
+                list lag {
+                    key "name vid";
+
+                    leaf name {
+                        type leafref {
+                            path "/foo-system:ethernet/foo-system:lag/foo-system:name";
+                        }
+                    }
+                    leaf vid {
+                        type leafref {
+                            path "/foo-system:ethernet/foo-system:lag/foo-system:vlan/foo-system:vid";
+                        }
+                    }
+
+                    /* ensure endpoints are different  */
+                    must "count(/foo-system:ethernet/evpl/north/lag[name=current()/name][vid=current()/vid]) = 0" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/evpl/north/lag';
+                        error-message "north and south endpoints are the same";
+                    }
+
+                    /*  ensure endpoint isn't in use by an /ethernet/epl  */
+                    must  "(count(/foo-system:ethernet/epl/north/lag[name=current()/name]) +"
+                        + " count(/foo-system:ethernet/epl/south/lag[name=current()/name])) = 0" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/epl/north/lag';
+                        tailf:dependency '/foo-system:ethernet/epl/south/lag';
+                        error-message "north endpoint in use by an EPL";
+                    }
+
+                    /*  ensure endpoint not in use by another /ethernet/evpl  */
+                    must  "(count(/foo-system:ethernet/evpl/north/lag[name=current()/name][vid=current()/vid]) +"
+                        + " count(/foo-system:ethernet/evpl/south/lag[name=current()/name][vid=current()/vid])) <= 1" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/evpl/north/lag';
+                        tailf:dependency '/foo-system:ethernet/evpl/south/lag';
+                        error-message "north endpoint in use by an EVPL";
+                    }
+                }
+
+                list port {
+                    key "slot port vid";
+
+                    leaf slot {
+                        type leafref {
+                            path "/foo-system:ethernet/foo-system:port/foo-system:slot";
+                        }
+                    }
+                    leaf port {
+                        type leafref {
+                            path "/foo-system:ethernet/foo-system:port/foo-system:port";
+                        }
+                    }
+                    leaf vid {
+                        type leafref {
+                            path "/foo-system:ethernet/foo-system:port/foo-system:vlan/foo-system:vid";
+                        }
+                    }
+
+                    /*  ensure endpoints are different  */
+                    must "count(/foo-system:ethernet/evpl/north/port[slot=current()/slot][port=current()/port][vid=current()/vid]) = 0" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/evpl/north/port';
+                        error-message "north and south endpoints are the same";
+                    }
+
+                    /*  ensure endpoint not in use by an EPL  */
+                    must  "(count(/foo-system:ethernet/epl/north/port[slot=current()/slot][port=current()/port]) +"
+                        + " count(/foo-system:ethernet/epl/south/port[slot=current()/slot][port=current()/port])) <= 1" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/epl/north/port';
+                        tailf:dependency '/foo-system:ethernet/epl/south/port';
+                        error-message "north endpoint in use by an EPL";
+                    }
+
+                    /*  ensure endpoint not in use by another /ethernet/evpl  */
+                    must  "(count(/foo-system:ethernet/evpl/north/port[slot=current()/slot][port=current()/port][vid=current()/vid]) +"
+                        + " count(/foo-system:ethernet/evpl/south/port[slot=current()/slot][port=current()/port][vid=current()/vid])) <= 1" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/evpl/north/port';
+                        tailf:dependency '/foo-system:ethernet/evpl/south/port';
+                        error-message "north endpoint in use by an EVPL";
+                    }
+
+                    /*  ensure that the port is not part of a lag  */
+                    must "count(/foo-system:ethernet/foo-system:lag/foo-system:port[slot=current()/slot][port=current()/port]) = 0" {
+                        tailf:dependency '.';
+                        tailf:dependency '/foo-system:ethernet/foo-system:lag/foo-system:port';
+                        error-message "port is a member of an /ethernet/lag";
+                    }
+                }
+
+                /*  ensure that exactly 1 binding has been made  */
+                must "(count(lag) + count(port)) = 1" {
+                    tailf:dependency '.';
+                    error-message "must have exactly 1 binding";
+                }
+            }
+        }
+    }
+}

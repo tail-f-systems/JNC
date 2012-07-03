@@ -85,8 +85,6 @@ public class Float implements Serializable {
         return false;
     }
 
-
-
     /** ---------- Restrictions ---------- */
 
     /**
@@ -170,7 +168,5 @@ public class Float implements Serializable {
         if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,this);
     }
-
-
 
 }

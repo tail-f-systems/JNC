@@ -1,0 +1,381 @@
+module foo-a11sim {
+    namespace "http://foo.net/ns/foo-a11sim";
+    prefix foo-a11sim;
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    include foo-a11sim-types;
+
+    organization "Foo Networks, Inc.";
+    description  "Managed objects for spx.";
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    container a11sim {
+        container pcf {
+            tailf:info "PCF node information";
+            list address {
+                key "ip port";
+
+                leaf ip {
+                    type inet:ipv4-address;
+                }
+                leaf port {
+                    type inet:port-number;
+                }
+
+                container status {
+                    config false;
+                    tailf:cdb-oper;
+
+                    leaf alive {
+                        type boolean;
+                    }
+                    leaf lastMessage {
+                        type uint32;
+                    }
+                }
+            }
+
+            container configuration {
+                tailf:info "PCF global configuration";
+                leaf regReqTimer {
+                    type uint32;
+                    default 2;
+                }
+                leaf lifeTimer {
+                    type uint32;
+                    default 600;
+                }
+                leaf regUpdatePolicy {
+                    type reqProcessingPolicy;
+                    default accept;
+                }
+                leaf loadBalancingMethod {
+                    type loadBalancingMethodType;
+                    default roundRobin;
+                }
+            }
+        }
+
+        container pdsn {
+            tailf:info "PDSN node information";
+            list address {
+                key "ip port";
+
+                leaf ip {
+                    type inet:ipv4-address;
+                }
+                leaf port {
+                    type inet:port-number;
+                }
+                leaf secret {
+                    type string;
+                    mandatory true;
+                }
+
+                container status {
+                    config false;
+                    tailf:cdb-oper;
+
+                    leaf alive {
+                        type boolean;
+                    }
+                    leaf lastMessage {
+                        type uint32;
+                    }
+                }
+            }
+
+            container configuration {
+                tailf:info "PDSN global configuration";
+
+                leaf regUpdateTimer {
+                    type uint32;
+                    default 2;
+                }
+                leaf lifeTimer {
+                    type uint32;
+                    default 600;
+                }
+                leaf regRequestPolicy {
+                    type reqProcessingPolicy;
+                    default accept;
+                }
+            }
+        }
+
+        list session {
+            key imsi;
+            config false;
+            tailf:info "A10 connections";
+            tailf:cdb-oper;
+
+            leaf imsi {
+                type uint64;
+            }
+            leaf pcf {
+                type string;
+            }
+            leaf pdsn {
+                type string;
+            }
+            leaf state {
+                type string;
+            }
+            leaf ipAddr {
+                type inet:ipv4-address;
+            }
+            leaf pcfSessionId {
+                type uint64;
+            }
+            leaf pcfIpAddr {
+                type inet:ipv4-address;
+            }
+            leaf pdsnSessionId {
+                type uint64;
+            }
+            leaf pdsnIpAddr {
+                type inet:ipv4-address;
+            }
+            leaf auxA10Present {
+                type boolean;
+            }
+
+            container statistics {
+                leaf refresh {
+                    type uint64;
+                }
+                leaf update {
+                    type uint64;
+                }
+                leaf activeStart {
+                    type uint64;
+                }
+                leaf activeStop {
+                    type uint64;
+                }
+                leaf sessionUpdate {
+                    type uint64;
+                }
+            }
+        }
+
+        container statistics {
+            config false;
+            tailf:info "PDSN/PCF global statistics";
+            tailf:cdb-oper;
+
+            container sessionStatistics {
+                uses sessionStatisticsType;
+            }
+
+            container messageStatistics {
+                uses messageStatisticsType;
+            }
+        }
+
+        tailf:action createUe {
+            tailf:info "Create one or more UEs and attach them to network";
+            tailf:actionpoint a11simCreateUe;
+            input {
+                leaf ueid {
+                    type uint32;
+                    mandatory true;
+                }
+                leaf startIp {
+                    type inet:ipv4-address;
+                    mandatory true;
+                }
+                leaf numberOfUes {
+                    type uint32;
+                    default 1;
+                }
+                leaf imsiPrefix {
+                    type uint32;
+                    default 0;
+                }
+                leaf imeiPrefix {
+                    type uint32;
+                    default 0;
+                }
+                leaf cellId {
+                    type uint32;
+                    default 0;
+                }
+            }
+            output {
+                leaf result {
+                    type boolean;
+                    mandatory true;
+                }
+                leaf reason {
+                    type string;
+                    mandatory true;
+                }
+            }
+        }
+
+        tailf:action deleteUe {
+            tailf:info "Create one or more UEs and attach them to network";
+            tailf:actionpoint a11simDeleteUe;
+            input {
+                leaf ueid {
+                    type uint32;
+                    mandatory true;
+                }
+                leaf numberOfUes {
+                    type uint32;
+                    default 1;
+                }
+            }
+            output {
+                leaf result {
+                    type boolean;
+                    mandatory true;
+                }
+                leaf reason {
+                    type string;
+                    mandatory true;
+                }
+            }
+        }
+
+        tailf:action startUe {
+            tailf:info "Create one or more UEs and attach them to network";
+            tailf:actionpoint a11simStartUe;
+            input {
+                leaf ueid {
+                    type uint32;
+                    mandatory true;
+                }
+            }
+            output {
+                leaf result {
+                    type boolean;
+                    mandatory true;
+                }
+                leaf reason {
+                    type string;
+                    mandatory true;
+                }
+            }
+        }
+
+        tailf:action stopUe {
+            tailf:info "Create one or more UEs and attach them to network";
+            tailf:actionpoint a11simStopUe;
+            input {
+                leaf ueid {
+                    type uint32;
+                    mandatory true;
+                }
+            }
+            output {
+                leaf result {
+                    type boolean;
+                    mandatory true;
+                }
+                leaf reason {
+                    type string;
+                    mandatory true;
+                }
+            }
+        }
+
+        tailf:action goIdleUe {
+            tailf:info "Create one or more UEs and attach them to network";
+            tailf:actionpoint a11simGoIdleUe;
+            input {
+                leaf ueid {
+                    type uint32;
+                    mandatory true;
+                }
+            }
+            output {
+                leaf result {
+                    type boolean;
+                    mandatory true;
+                }
+                leaf reason {
+                    type string;
+                    mandatory true;
+                }
+            }
+        }
+
+        tailf:action ueIntraPdsnDormantHandOff {
+            tailf:info "Create one or more UEs and attach them to network";
+            tailf:actionpoint a11simIntraPdsnDormantHandOffUe;
+            input {
+                leaf ueid {
+                    type uint32;
+                    mandatory true;
+                }
+            }
+            output {
+                leaf result {
+                    type boolean;
+                    mandatory true;
+                }
+                leaf reason {
+                    type string;
+                    mandatory true;
+                }
+            }
+        }
+
+        tailf:action ueIntraPdsnActiveHandOff {
+            tailf:info "Create one or more UEs and attach them to network";
+            tailf:actionpoint a11simIntraPdsnActiveHandOffUe;
+            input {
+                leaf ueid {
+                    type uint32;
+                    mandatory true;
+                }
+            }
+            output {
+                leaf result {
+                    type boolean;
+                    mandatory true;
+                }
+                leaf reason {
+                    type string;
+                    mandatory true;
+                }
+            }
+        }
+
+        tailf:action ueInterPdsnHandOff {
+            tailf:info "Create one or more UEs and attach them to network";
+            tailf:actionpoint a11simInterPdsnHandOffUe;
+            input {
+                leaf ueid {
+                    type uint32;
+                    mandatory true;
+                }
+            }
+            output {
+                leaf result {
+                    type boolean;
+                    mandatory true;
+                }
+                leaf reason {
+                    type string;
+                    mandatory true;
+                }
+            }
+        }
+    }
+}

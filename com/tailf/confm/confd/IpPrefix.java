@@ -93,7 +93,6 @@ public class IpPrefix implements Serializable {
         return value.equals( b.value );
     }
 
-
     /**
      * Assert that the value is 'false'
      * Throw an ConfMException otherwise

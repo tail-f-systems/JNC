@@ -83,9 +83,6 @@ public class Int implements Serializable {
         return false;
     }
 
-
-
-
     /** ---------- Restrictions ---------- */
 
     /**

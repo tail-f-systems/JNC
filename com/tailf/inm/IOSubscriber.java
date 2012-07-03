@@ -40,7 +40,6 @@ public abstract class IOSubscriber {
     private StringBuffer inb;
     private StringBuffer outb;
 
-
     /**
      * Constructor.
      * @param rawmode If true 'raw' text will appear instead of
@@ -58,7 +57,6 @@ public abstract class IOSubscriber {
     public IOSubscriber ()  {
     }
 
-
     /**
      * Will get called as soon as we have input
      * (data which is received).
@@ -72,7 +70,6 @@ public abstract class IOSubscriber {
      * @param s Text being sent
      */
     abstract public void output(String s);
-
 
     void inputChar(int i) {
         char ch = (char)i;
@@ -102,7 +99,6 @@ public abstract class IOSubscriber {
             output(res);
     }
 
-
     void inputFlush(String endMarker) {
         if (!rawmode)
             xmlFlush(inb, true);
@@ -119,8 +115,6 @@ public abstract class IOSubscriber {
             outb.setLength(0);
         }
     }
-
-
 
     private void outputChar(char ch) {
         outb.append(ch);

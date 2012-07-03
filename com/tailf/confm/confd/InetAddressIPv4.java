@@ -113,7 +113,6 @@ public class InetAddressIPv4 implements Serializable {
         }
     }
 
-
     public String toString() {
         String inaddr = value.toString();
         // on format "hostname/address"
@@ -136,7 +135,6 @@ public class InetAddressIPv4 implements Serializable {
         java.net.InetAddress v2 = v.getValue();
         return v1.equals(v2);
     }
-
 
     /**
      * Assert that the value is 'false'

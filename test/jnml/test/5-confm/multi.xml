@@ -1,0 +1,14 @@
+<config xmlns="http://tail-f.com/ns/config/1.0">
+    <foo xmlns="http://tail-f.com/ns/example/multi">
+      <fname>f1</fname>
+      <fint>33</fint>
+    </foo>
+    <foo xmlns="http://tail-f.com/ns/example/multi">
+      <fname>f2</fname>
+      <fint>55</fint>
+    </foo>
+    <bar xmlns="http://tail-f.com/ns/example/multi">
+      <bname>b1</bname>
+      <bint>77</bint>
+    </bar>
+</config>

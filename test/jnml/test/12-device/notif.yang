@@ -1,0 +1,54 @@
+module notif {
+  namespace "http://router.com/notif";
+  prefix notif;
+
+  // import interfaces {
+  //   prefix if;
+  // }
+
+
+  notification linkUp {
+    leaf ifName {
+      // type leafref {
+      //   path "/if:interface/if:name";
+      // }
+      // FIXME later - post 3.3
+      type string;
+      mandatory true;
+    }
+    leaf extraId {
+      type string;
+    }
+    list linkProperty {
+      max-elements 64;
+      leaf newlyAdded {
+        type empty;
+      }
+      leaf flags {
+        type uint32;
+        default 0;
+      }
+      list extensions {
+        max-elements 64;
+        leaf name {
+          type uint32;
+          mandatory true;
+        }
+        leaf value {
+          type uint32;
+          mandatory true;
+        }
+      }
+    }
+  }
+
+  notification linkDown {
+    leaf ifName {
+      // type leafref {
+      //   path "/if:interface/if:name";
+      // }
+      type string;
+      mandatory true;
+    }
+  }
+}

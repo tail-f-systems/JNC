@@ -57,7 +57,6 @@ public class Decimal implements Serializable {
         return value;
     }
 
-
     private void check() {
     }
 
@@ -79,7 +78,6 @@ public class Decimal implements Serializable {
             return ((Decimal)value).equals(this.value);
         return false;
     }
-
 
     /** ---------- Restrictions ---------- */
 
@@ -160,7 +158,6 @@ public class Decimal implements Serializable {
         throw new ConfMException(ConfMException.BAD_VALUE,this);
     }
 
-
     /** ---------- package private --------- */
 
     /**
@@ -183,7 +180,6 @@ public class Decimal implements Serializable {
         int fraction_digits= last_known-cpos;
         return fraction_digits;
     }
-
 
     /**
      * count xs:totalDigits

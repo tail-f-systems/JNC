@@ -1,0 +1,9 @@
+   <rt3538 xmlns="http://tail-f.com/ns/simple/1.0">
+      <msp>
+        <md>
+          <level>1</level>
+          <format>none</format>
+          <fault-alarms/>
+        </md>
+      </msp>
+    </rt3538>

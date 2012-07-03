@@ -19,13 +19,11 @@ import java.util.ArrayList;
  **/
 public class PrefixMap extends ArrayList {
 
-
     /**
      * Creates an empty prefix map object.
      */
     public PrefixMap() {
     }
-
 
     /**
      * Inserts a prefix initially in the
@@ -35,7 +33,6 @@ public class PrefixMap extends ArrayList {
         add(p);
     }
 
-
     /**
      * Inserts an array of prefixes initially
      * in the new prefix map.
@@ -44,8 +41,6 @@ public class PrefixMap extends ArrayList {
         for (int i=0; i<p.length;i++)
             add(p[i]);
     }
-
-
 
     /**
      * Merges two prefix maps.
@@ -58,7 +53,6 @@ public class PrefixMap extends ArrayList {
             merge( prefixes.getPrefix(i) );
     }
 
-
     /**
      * Merges in a prefix in the prefix map.
      * Will not replace already existing ones.
@@ -68,7 +62,6 @@ public class PrefixMap extends ArrayList {
         if (index==-1)
             add( prefix );
     }
-
 
     /**
      * Stores the prefixes in the prefix map.
@@ -81,7 +74,6 @@ public class PrefixMap extends ArrayList {
         for(int i=0;i<prefixes.size();i++)
             set( prefixes.getPrefix(i) );
     }
-
 
     /**
      * Stores a prefix in the prefix map.
@@ -100,7 +92,6 @@ public class PrefixMap extends ArrayList {
             set(index,prefix);
     }
 
-
     /**
      * Removes a prefix mapping.
      * @param prefix Name of prefix mapping to be removed.
@@ -111,7 +102,6 @@ public class PrefixMap extends ArrayList {
             remove(index);
     }
 
-
     /**
      * Gets the prefix at specified index.
      * @param i Index of prefix mapping to get.
@@ -120,7 +110,6 @@ public class PrefixMap extends ArrayList {
     public Prefix getPrefix(int i) {
         return (Prefix) super.get(i);
     }
-
 
     /**
      * Returns the index of the prefix name in the prefix map.
@@ -135,7 +124,6 @@ public class PrefixMap extends ArrayList {
         }
         return -1;
     }
-
 
     /**
      * Lookups prefix name in the prefix map.
@@ -153,7 +141,6 @@ public class PrefixMap extends ArrayList {
         return null;
     }
 
-
     /**
      * Lookups namespace and returns prefix for it.
      * @param ns The namespace to lookup in this prefix
@@ -168,7 +155,6 @@ public class PrefixMap extends ArrayList {
         return null;
     }
 
-
     /**
      * Lookups prefix and returns the associated namespace
      */
@@ -182,7 +168,6 @@ public class PrefixMap extends ArrayList {
         return null;
     }
 
-
     /** ------------------------------------------------------------
      *  help functions
      */
@@ -194,7 +179,6 @@ public class PrefixMap extends ArrayList {
         if (Element.debugLevel>=Element.DEBUG_LEVEL_PREFIXMAP)
             System.err.println("*PrefixMap: "+s);
     }
-
 
 }
 

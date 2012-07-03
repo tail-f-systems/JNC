@@ -1,0 +1,941 @@
+module foo-policy {
+    namespace "http://foo.net/ns/foo-policy";
+    prefix foo-policy;
+
+    import ietf-inet-types {
+        prefix inet;
+    }
+
+    import tailf-common {
+        prefix tailf;
+    }
+
+    /* http://foo.net/ns/foo-system/1.0 */
+    import foo-system {
+        prefix foo-system;
+    }
+
+    include foo-policy-types;
+
+    organization "Foo Networks, Inc.";
+    description  "Managed objects for policy.";
+
+    // add new revision statements here
+
+    revision 2011-01-06 {
+        description "Conversion from confspec.";
+    }
+
+
+    /*  see foo-policy-types.cs for data types  */
+    container policy {
+        tailf:info "Policy configuration";
+
+        /*  pcl  */
+        container pcl {
+            /*  tcpProxy  */
+            list tcpProxy {
+                key name;
+
+                /*  only allow cli changes if scope = node  */
+
+
+                leaf name {
+                    type foo-system:nameType;
+                }
+                leaf priority {
+                    type uint16;
+                    default 100;
+                }
+                leaf scope {
+                    type foo-system:networkScope;
+                    default node;
+                    tailf:hidden debug;
+                }
+
+                /*  pcr  */
+                list pcr {
+                    key id;
+
+                    leaf id {
+                        type uint32;
+                    }
+                    leaf priority {
+                        type uint16;
+                        default 100;
+                    }
+                    leaf action {
+                        type foo-system:enableDisableType;
+                        default enable;
+                    }
+                    leaf direction {
+                        type foo-system:direction2Type;
+                        default upstream;
+                    }
+                    leaf port {
+                        type foo-system:wildCardPort;
+                        mandatory true;
+                    }
+                }
+            }
+
+            /*  httpCaching  */
+            list httpCaching {
+                key name;
+
+                /*  only allow cli changes if scope = node  */
+
+
+                leaf name {
+                    type foo-system:nameType;
+                }
+                leaf priority {
+                    type uint16;
+                    default 100;
+                }
+                leaf scope {
+                    type foo-system:networkScope;
+                    default node;
+                    tailf:hidden debug;
+                }
+
+                /*  pcr  */
+                list pcr {
+                    key id;
+
+                    leaf id {
+                        type uint32;
+                    }
+                    leaf priority {
+                        type uint16;
+                        default 100;
+                    }
+                    leaf action {
+                        type httpCachingActionType;
+                        default cache;
+                    }
+                    leaf url {
+                        type string;
+                        mandatory true;
+                    }
+                    leaf urlCaseInsensitive {
+                        type boolean;
+                        default true;
+                    }
+                    leaf minCacheSizeKB {
+                        type uint32;
+                        default 0;
+                        tailf:hidden deprecated;
+                    }
+                    leaf maxCacheSizeKB {
+                        type uint32;
+                        default 2048;
+                    }
+                    leaf mediaType {
+                        type httpMediaTypeType;
+                        default *;
+                    }
+                    leaf mediaTypeCaseInsensitive {
+                        type boolean;
+                        default true;
+                    }
+                    leaf flags {
+                        type httpCachingFlags;
+                        default "";
+                    }
+                }
+            }
+
+            /*  httpBlackList  */
+            list httpBlackList {
+                key name;
+
+                /*  only allow cli changes if scope = node  */
+
+
+                leaf name {
+                    type foo-system:nameType;
+                }
+                leaf priority {
+                    type uint16;
+                    default 100;
+                }
+                leaf scope {
+                    type foo-system:networkScope;
+                    default node;
+                    tailf:hidden debug;
+                }
+
+                /*  pcr  */
+                list pcr {
+                    key id;
+
+                    leaf id {
+                        type uint32;
+                    }
+                    leaf priority {
+                        type uint16;
+                        default 100;
+                    }
+                    leaf action {
+                        type httpBlackListActionType;
+                        default deny;
+                    }
+                    leaf url {
+                        type string;
+                        mandatory true;
+                    }
+                    leaf urlCaseInsensitive {
+                        type boolean;
+                        default true;
+                    }
+                }
+            }
+
+            /*  httpOffload  */
+            list httpOffload {
+                key name;
+
+                /*  only allow cli changes if scope = node  */
+
+
+                leaf name {
+                    type foo-system:nameType;
+                }
+                leaf priority {
+                    type uint16;
+                    default 100;
+                }
+                leaf scope {
+                    type foo-system:networkScope;
+                    default node;
+                    tailf:hidden debug;
+                }
+
+                /*  pcr  */
+                list pcr {
+                    key id;
+
+                    leaf id {
+                        type uint32;
+                    }
+                    leaf priority {
+                        type uint16;
+                        default 100;
+                    }
+                    leaf action {
+                        type httpOffloadActionType;
+                        default offload;
+                    }
+                    leaf domain {
+                        type string;
+                        mandatory true;
+                    }
+                    leaf domainCaseInsensitive {
+                        type boolean;
+                        default true;
+                    }
+                    leaf offloadNetwork {
+                        type leafref {
+                            path "/policy/offloadNetwork/name";
+                        }
+                        mandatory true;
+                    }
+                }
+            }
+
+            /*  httpUrlRewrite  */
+            list httpUrlRewrite {
+                key name;
+
+                /*  only allow cli changes if scope = node  */
+
+                leaf name {
+                    type foo-system:nameType;
+                }
+                leaf priority {
+                    type uint16;
+                    default 100;
+                }
+                leaf scope {
+                    type foo-system:networkScope;
+                    default node;
+                    tailf:hidden debug;
+                }
+
+                /*  pcr  */
+                list pcr {
+                    key id;
+
+                    leaf id {
+                        type uint32;
+                    }
+                    leaf priority {
+                        type uint16;
+                        default 100;
+                    }
+                    leaf action {
+                        type foo-system:enableDisableType;
+                        default enable;
+                    }
+                    leaf url {
+                        type string;
+                        mandatory true;
+                    }
+                    leaf urlCaseInsensitive {
+                        type boolean;
+                        default true;
+                    }
+                    leaf userAgent {
+                        type string;
+                        default *;
+                    }
+                    leaf userAgentCaseInsensitive {
+                        type boolean;
+                        default true;
+                    }
+                }
+            }
+
+            /*  httpCompression  */
+            list httpCompression {
+                key name;
+
+                /*  only allow cli changes if scope = node  */
+
+                leaf name {
+                    type foo-system:nameType;
+                }
+                leaf priority {
+                    type uint16;
+                    default 100;
+                }
+                leaf scope {
+                    type foo-system:networkScope;
+                    default node;
+                    tailf:hidden debug;
+                }
+
+                /*  pcr  */
+                list pcr {
+                    key id;
+
+                    leaf id {
+                        type uint32;
+                    }
+                    leaf priority {
+                        type uint16;
+                        default 100;
+                    }
+                    leaf action {
+                        type foo-system:enableDisableType;
+                        default enable;
+                    }
+                    leaf url {
+                        type string;
+                        mandatory true;
+                    }
+                    leaf urlCaseInsensitive {
+                        type boolean;
+                        default true;
+                    }
+                    leaf mediaType {
+                        type compressionMediaTypeType;
+                        default "text/*";
+                    }
+                    leaf mediaTypeCaseInsensitive {
+                        type boolean;
+                        default true;
+                    }
+                }
+            }
+
+            /*  httpVideoPacing  */
+            list httpVideoPacing {
+                key name;
+
+                /*  only allow cli changes if scope = node  */
+
+                leaf name {
+                    type foo-system:nameType;
+                }
+                leaf priority {
+                    type uint16;
+                    default 100;
+                }
+                leaf scope {
+                    type foo-system:networkScope;
+                    default node;
+                    tailf:hidden debug;
+                }
+
+                /*  pcr  */
+                list pcr {
+                    key id;
+
+                    leaf id {
+                        type uint32;
+                    }
+                    leaf priority {
+                        type uint16;
+                        default 100;
+                    }
+                    leaf action {
+                        type httpVideoPacingActionType;
+                        default burstPacing;
+                    }
+                    leaf url {
+                        type string;
+                        mandatory true;
+                    }
+                    leaf urlCaseInsensitive {
+                        type boolean;
+                        default true;
+                    }
+                    leaf blockSizeKB {
+                        type httpVideoBlockSizeKBType;
+                        default 1024;
+                    }
+                    leaf initBlockSizeKB {
+                        type httpVideoBlockSizeKBType;
+                        default 2048;
+                    }
+                    leaf periodSeconds {
+                        type httpVideoPeriodSecondsType;
+                        default 20;
+                    }
+                    leaf keepAheadSeconds {
+                        type httpVideoPeriodSecondsType;
+                        default 10;
+                        tailf:display-when "../action='adaptivePacing'";
+                    }
+                    leaf latencySeconds {
+                        type httpVideoPeriodSecondsType;
+                        default 7;
+                        tailf:display-when "../action='adaptivePacing'";
+                    }
+                    leaf mediaType {
+                        type videoMediaTypeType;
+                        default "video/*";
+                    }
+                    leaf mediaTypeCaseInsensitive {
+                        type boolean;
+                        default true;
+                    }
+                }
+            }
+
+            /*  dnsProxy  */
+            list dnsProxy {
+                key name;
+
+                /*  only allow cli changes if scope = node  */
+
+                leaf name {
+                    type foo-system:nameType;
+                }
+                leaf priority {
+                    type uint16;
+                    default 100;
+                }
+                leaf scope {
+                    type foo-system:networkScope;
+                    default node;
+                    tailf:hidden debug;
+                }
+
+                /*  pcr  */
+                list pcr {
+                    key id;
+
+                    leaf id {
+                        type uint32;
+                    }
+                    leaf priority {
+                        type uint16;
+                        default 100;
+                    }
+                    leaf action {
+                        type foo-system:enableDisableType;
+                        default enable;
+                    }
+                    leaf domain {
+                        type string;
+                        mandatory true;
+                    }
+                    leaf domainCaseInsensitive {
+                        type boolean;
+                        default true;
+                    }
+                    leaf serverIpAddr {
+                        type inet:ipv4-address;
+                        mandatory true;
+                    }
+                }
+            }
+
+            /*  httpTrafficControl  */
+            list httpTrafficControl {
+                key name;
+
+                /*  only allow cli changes if scope = node  */
+
+                leaf name {
+                    type foo-system:nameType;
+                }
+                leaf priority {
+                    type uint16;
+                    default 100;
+                }
+                leaf scope {
+                    type foo-system:networkScope;
+                    default node;
+                    tailf:hidden debug;
+                }
+
+                /*  pcr  */
+                list pcr {
+                    key id;
+
+                    leaf id {
+                        type uint32;
+                    }
+                    leaf priority {
+                        type uint16;
+                        default 100;
+                    }
+                    leaf action {
+                        type httpTrafficControlActionType;
+                        mandatory true;
+                    }
+                    leaf chunkPacingBlockSizeKB {
+                        type httpVideoBlockSizeKBType;
+                        default 1024;
+                        tailf:hidden deprecated;
+                    }
+                    leaf chunkPacingInitBlockSizeKB {
+                        type httpVideoBlockSizeKBType;
+                        default 2048;
+                        tailf:hidden deprecated;
+                    }
+                    leaf chunkPacingPeriodSeconds {
+                        type httpVideoPeriodSecondsType;
+                        default 20;
+                        tailf:hidden deprecated;
+                    }
+                    leaf url {
+                        type string;
+                        mandatory true;
+                    }
+                    leaf urlCaseInsensitive {
+                        type boolean;
+                        default true;
+                    }
+                    leaf mediaType {
+                        type httpMediaTypeType;
+                        default *;
+                    }
+                    leaf mediaTypeCaseInsensitive {
+                        type boolean;
+                        default true;
+                    }
+                    leaf minRateKbps {
+                        type uint32;
+                        default 0;
+                    }
+                    leaf sectorUtilThresh {
+                        type uint8;
+                        default 0;
+                    }
+                    leaf sectorUserShareThresh {
+                        type uint8;
+                        default 0;
+                    }
+                    leaf nodeBUtilThresh {
+                        type uint8;
+                        default 0;
+                    }
+                    leaf nodeBUserShareThresh {
+                        type uint8;
+                        default 0;
+                    }
+                    leaf backhaulUtilThresh {
+                        type uint8;
+                        default 0;
+                    }
+                    leaf backhaulUserShareThresh {
+                        type uint8;
+                        default 0;
+                    }
+                }
+            }
+        }
+        /*  end of pcl  */
+
+        /*  profile  */
+        container profile {
+            list onlineCharging {
+                key name;
+
+                /*  only allow cli changes if scope = node  */
+
+                leaf name {
+                    type foo-system:nameType;
+                }
+                leaf priority {
+                    type uint16;
+                    default 100;
+                }
+                leaf scope {
+                    type foo-system:networkScope;
+                    default node;
+                    tailf:hidden debug;
+                }
+
+                container ocsServer {
+                    leaf active {
+                        type foo-system:nameType;
+                        default none;
+                    }
+                    leaf standby {
+                        type foo-system:nameType;
+                        default none;
+                    }
+                }
+            }
+        }
+        /*  end of profiles  */
+
+        /*  userGroup  */
+        list userGroup {
+            key name;
+
+            /*  only allow cli changes if scope = node  */
+
+            leaf name {
+                type foo-system:nameType;
+            }
+            leaf scope {
+                type foo-system:networkScope;
+                default node;
+                tailf:hidden debug;
+            }
+            leaf isDefault {
+                type boolean;
+                default false;
+            }
+            leaf priority {
+                type uint16;
+                default 100;
+            }
+            leaf action {
+                type userGroupActionType;
+                default none;
+            }
+
+            /*  profile  */
+            container profile {
+                /* Online Charging  */
+                list onlineCharging {
+                    key name;
+                    leaf name {
+                        type leafref {
+                            path "/policy/profile/onlineCharging/name";
+                        }
+                    }
+                }
+            }
+            /*  end of profile  */
+
+            /*  pcl  */
+            container pcl {
+                /*  tcpProxy  */
+                list tcpProxy {
+                    key name;
+
+                    leaf name {
+                        type leafref {
+                            path "/policy/pcl/tcpProxy/name";
+                        }
+                    }
+                }
+
+                /*  httpCaching  */
+                list httpCaching {
+                    key name;
+
+                    leaf name {
+                        type leafref {
+                            path "/policy/pcl/httpCaching/name";
+                        }
+                    }
+                }
+
+                /*  httpBlackList  */
+                list httpBlackList {
+                    key name;
+
+                    leaf name {
+                        type leafref {
+                            path "/policy/pcl/httpBlackList/name";
+                        }
+                    }
+                }
+
+                /*  httpOffload  */
+                list httpOffload {
+                    key name;
+
+                    leaf name {
+                        type leafref {
+                            path "/policy/pcl/httpOffload/name";
+                        }
+                    }
+                }
+
+                /*  httpUrlRewrite  */
+                list httpUrlRewrite {
+                    key name;
+
+                    leaf name {
+                        type leafref {
+                            path "/policy/pcl/httpUrlRewrite/name";
+                        }
+                    }
+                }
+
+                /*  httpCompression  */
+                list httpCompression {
+                    key name;
+
+                    leaf name {
+                        type leafref {
+                            path "/policy/pcl/httpCompression/name";
+                        }
+                    }
+                }
+
+                /*  httpVideoPacing  */
+                list httpVideoPacing {
+                    key name;
+
+                    leaf name {
+                        type leafref {
+                            path "/policy/pcl/httpVideoPacing/name";
+                        }
+                    }
+                }
+
+                /*  dnsProxy  */
+                list dnsProxy {
+                    key name;
+
+                    leaf name {
+                        type leafref {
+                            path "/policy/pcl/dnsProxy/name";
+                        }
+                    }
+                }
+
+                /*  httpTrafficControl  */
+                list httpTrafficControl {
+                    key name;
+
+                    leaf name {
+                        type leafref {
+                            path "/policy/pcl/httpTrafficControl/name";
+                        }
+                    }
+                }
+            }
+
+            /*  ensure only 1 default  */
+            must "count(/policy/userGroup[isDefault='true']/isDefault) <= 1" {
+                error-message "only 1 userGroup may be set as default";
+            }
+        }
+
+        /*  subscriber  */
+        list subscriber {
+            key imsi;
+
+            /*  only allow cli changes if scope = node  */
+
+            leaf imsi {
+                type foo-system:imsiType;
+            }
+            leaf scope {
+                type foo-system:networkScope;
+                default node;
+                tailf:hidden debug;
+            }
+
+            /*  userGroup associations  */
+            list userGroup {
+                key name;
+
+                leaf name {
+                    type leafref {
+                        path "/policy/userGroup/name";
+                    }
+                }
+            }
+        }
+
+        /*  subscriberRange  */
+        list subscriberRange {
+            key "rangeBegin rangeEnd";
+
+            leaf rangeBegin {
+                type foo-system:imsiType;
+            }
+            leaf rangeEnd {
+                type foo-system:imsiType;
+            }
+            leaf scope {
+                type foo-system:networkScope;
+                default node;
+                tailf:hidden debug;
+            }
+
+            /*  userGroup associations  */
+            list userGroup {
+                key name;
+
+                leaf name {
+                    type leafref {
+                        path "/policy/userGroup/name";
+                    }
+                }
+            }
+        }
+
+        /*  offloadNetwork  */
+        list offloadNetwork {
+            key name;
+
+            leaf name {
+                type string;
+            }
+            leaf portRangeLowerBound {
+                type inet:port-number;
+                default 10240;
+            }
+            leaf portRangeUpperBound {
+                type inet:port-number;
+                default 60000;
+            }
+            list naptIp {
+                key ipAddr;
+                tailf:info '"public NAPT IPs specific to this Offload Network."';
+
+                leaf ipAddr {
+                    type inet:ipv4-address;
+                }
+            }
+            list dnsServer {
+                key ipAddr;
+                tailf:info '"DNS server specific to this Offload Network."';
+
+                leaf ipAddr {
+                    type inet:ipv4-address;
+                }
+            }
+        }
+
+        /*  apn  */
+        list apn {
+            key "name MCC MNC";
+
+            /*  only allow cli changes if scope = node  */
+
+            leaf name {
+                type foo-system:wildCardString;
+                tailf:info '"apn name string"';
+            }
+            leaf MCC {
+                type uint16;
+                tailf:info '"Mobile Country Code"';
+            }
+            leaf MNC {
+                type uint16;
+                tailf:info '"Mobile Network Code"';
+            }
+            leaf userGroup {
+                type leafref {
+                    path "/policy/userGroup/name";
+                }
+                mandatory true;
+                tailf:info '"userGroup associated with this APN"';
+            }
+        }
+
+        /*  userEquipment  */
+        list userEquipment {
+            key tac;
+
+            /*  only allow cli changes if scope = node  */
+
+            leaf tac {
+                type foo-system:tacType;
+                tailf:info "6-8 digit Type Approval Code / Type Allocation Code";
+            }
+            leaf scope {
+                type foo-system:networkScope;
+                default node;
+                tailf:hidden debug;
+            }
+            leaf brand {
+                type string;
+                default "";
+            }
+            leaf model {
+                type string;
+                default "";
+            }
+            leaf attrs {
+                type userEquipmentAttrsType;
+                default "";
+            }
+            leaf userGroup {
+                type leafref {
+                    path "/policy/userGroup/name";
+                }
+            }
+        }
+
+        /*  userAgentTacRule configuration  */
+        list userAgentTacRule {
+            key id;
+
+            leaf id {
+                type uint16;
+                tailf:info "unique identifier";
+            }
+            leaf scope {
+                type foo-system:networkScope;
+                default node;
+                tailf:hidden debug;
+            }
+            leaf priority {
+                type uint16;
+                default 100;
+                tailf:info "priority used to create evaluation order";
+            }
+            leaf tac {
+                type foo-system:tacType;
+                mandatory true;
+                tailf:info "6-8 digit Type Approval Code / Type Allocation Code";
+            }
+            leaf userAgent {
+                type string;
+                mandatory true;
+                tailf:info "regular expression for UA mapping";
+            }
+            leaf userAgentCaseInsensitive {
+                type boolean;
+                default true;
+            }
+        }
+    }
+}

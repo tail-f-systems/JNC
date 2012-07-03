@@ -15,7 +15,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.net.InetAddress;
 
-
 /**
  * This class implements the "inetAddressIPV6" datatype from
  * the 'http://tail-f.com/ns/confd/1.0' namespace.
@@ -67,7 +66,6 @@ public class InetAddressIPv6 implements Serializable {
 
     public void check() throws ConfMException {
     }
-
 
     /** Parse hexa-decimal IP string into
      * an array of bytes (16 octets) to represent the
@@ -127,8 +125,6 @@ public class InetAddressIPv6 implements Serializable {
         }
     }
 
-
-
     public String toString() {
         String inaddr = value.toString();
         // on format "hostname/address"
@@ -140,13 +136,10 @@ public class InetAddressIPv6 implements Serializable {
         return inaddr;
     }
 
-
     private char toDigit(int b) {
         if (b>=10) return (char)(b+'A'-10);
         else return (char)(b+'0');
     }
-
-
 
     public boolean equals(Object b) {
         if (b instanceof InetAddressIPv6)
@@ -159,7 +152,6 @@ public class InetAddressIPv6 implements Serializable {
         java.net.InetAddress v2=  v.getValue();
         return v1.equals(v2);
     }
-
 
     /**
      * Assert that the value is 'false'
