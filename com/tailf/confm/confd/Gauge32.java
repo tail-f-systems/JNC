@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -20,19 +20,19 @@ import java.io.Serializable;
  * A Gauge32 is a synonym for "xs:unsignedInt".
  * Represents an unsigned 32-bit integer.
  * They are inherited from the SNMP world for
- * flexibility in modelling. 
+ * flexibility in modelling.
  *
  */
 public class Gauge32 extends com.tailf.confm.xs.UnsignedInt implements Serializable {
-    
-    public Gauge32(java.lang.String value) throws ConfMException {	
-	super(value);
+
+    public Gauge32(java.lang.String value) throws ConfMException {
+        super(value);
         check();
     }
 
-    public Gauge32(long value) throws ConfMException {	
+    public Gauge32(long value) throws ConfMException {
         super(value);
-	check();
+        check();
     }
 
 
@@ -40,7 +40,7 @@ public class Gauge32 extends com.tailf.confm.xs.UnsignedInt implements Serializa
      * Sets the value.
      */
     public void setValue(java.lang.String value) throws ConfMException {
-	super.setValue(value);
+        super.setValue(value);
         check();
     }
 
@@ -48,11 +48,11 @@ public class Gauge32 extends com.tailf.confm.xs.UnsignedInt implements Serializa
      * Sets the value.
      */
     public void setValue(long value) throws ConfMException {
-	super.setValue(value);
+        super.setValue(value);
         check();
     }
 
     private void check() throws ConfMException {
     }
-    
+
 }

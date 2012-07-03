@@ -1,7 +1,7 @@
-/**   
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/**
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
  *
- *  This software is the confidential and proprietary 
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -25,14 +25,14 @@ import com.tailf.inm.*;
  */
 public class XMLParser extends com.tailf.inm.XMLParser {
 
-    /** 
+    /**
      * Constructor.
      * Initializes the parser instance.
      */
     public XMLParser() throws INMException {
-	super();
+        super();
     }
-    
+
 
 
     /**
@@ -40,33 +40,33 @@ public class XMLParser extends com.tailf.inm.XMLParser {
      * element tree.
      */
     public Element readFile(String filename) throws INMException {
-	try {
-	    ConfHandler handler = new ConfHandler();
-	    parser.setContentHandler( handler );
-	    parser.parse(filename);
-	    return (Container) handler.top;
-	} catch (Exception e) {
-	    throw new INMException(
+        try {
+            ConfHandler handler = new ConfHandler();
+            parser.setContentHandler( handler );
+            parser.parse(filename);
+            return (Container) handler.top;
+        } catch (Exception e) {
+            throw new INMException(
                 INMException.PARSER_ERROR,"parse file: "+filename+" error: "+e);
-	}
+        }
     }
 
-    
+
     /**
      * Parses an XML string returning a configuration tree from it.
      * @param is Inputsource (byte stream) where the XML text is read from
      */
     public Element parse(InputSource is) throws INMException {
-	try {
-	    ConfHandler handler = new ConfHandler();
-	    parser.setContentHandler( handler );
-	    parser.parse(is);
-	    return handler.top;
-	} catch (Exception e) {
+        try {
+            ConfHandler handler = new ConfHandler();
+            parser.setContentHandler( handler );
+            parser.parse(is);
+            return handler.top;
+        } catch (Exception e) {
             e.printStackTrace();
-	    throw new INMException(INMException.PARSER_ERROR,"parse error: "+e);
+            throw new INMException(INMException.PARSER_ERROR,"parse error: "+e);
 
-	}
+        }
     }
 
 

@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2009 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2009 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -25,7 +25,7 @@ public class RevisionInfo {
     public static final int R_NODE_ADDED = 8;
     public static final int R_CASE_ADDED = 9;
     public static final int R_STATE_TO_CONFIG = 10;
-    
+
     public int type;           // R_*
     public int    idata;
     public String data;
@@ -35,12 +35,12 @@ public class RevisionInfo {
     public static boolean newerRevisionSupportEnabled = false;
 
     /*
-     * enables revision support for newer data. This means that 
+     * enables revision support for newer data. This means that
      * if the device sends us data where we don't understand the data
      * because the device has a newer revision of the YANG model
-     * than we have, we accept that data anyway. 
+     * than we have, we accept that data anyway.
      * Obviously, that data cannot be represented as proper ConfM objects,
-     * instead we well have all the unknown data represented as 
+     * instead we well have all the unknown data represented as
      * INM Element objects.
      */
 
@@ -73,7 +73,7 @@ public class RevisionInfo {
 
     public RevisionInfo() {
     }
-    
+
     public RevisionInfo(int type, String data, String introduced) {
         this.type=type; this.data=data; this.introduced=introduced;
     }

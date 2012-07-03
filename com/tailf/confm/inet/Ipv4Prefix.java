@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -21,22 +21,22 @@ import java.io.Serializable;
  * Represents an unsigned 64-bit integer.
  */
 public class Ipv4Prefix extends com.tailf.confm.xs.UnsignedLong implements Serializable {
-    
-    public Ipv4Prefix(java.lang.String value) throws ConfMException {	
-	super(value);
+
+    public Ipv4Prefix(java.lang.String value) throws ConfMException {
+        super(value);
         check();
     }
 
-    public Ipv4Prefix(long value) throws ConfMException {	
+    public Ipv4Prefix(long value) throws ConfMException {
         super(value);
-	check();
+        check();
     }
 
     /**
      * Sets the value.
      */
     public void setValue(java.lang.String value) throws ConfMException {
-	super.setValue(value);
+        super.setValue(value);
         check();
     }
 
@@ -44,11 +44,11 @@ public class Ipv4Prefix extends com.tailf.confm.xs.UnsignedLong implements Seria
      * Sets the value.
      */
     public void setValue(long value) throws ConfMException {
-	super.setValue(value);
+        super.setValue(value);
         check();
     }
 
-    
+
     private void check() throws ConfMException {
     }
 

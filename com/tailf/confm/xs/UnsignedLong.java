@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -26,20 +26,20 @@ import java.util.regex.PatternSyntaxException;
  */
 
 public class UnsignedLong implements Serializable {
-    
+
     private BigInteger value;
     public static java.lang.String maxValue = "18446744073709551615";
 
-    public UnsignedLong(java.lang.String value) throws ConfMException {	
+    public UnsignedLong(java.lang.String value) throws ConfMException {
         this.value = new BigInteger(value);
         check();
     }
 
-    public UnsignedLong(long value) throws ConfMException {	
+    public UnsignedLong(long value) throws ConfMException {
         this.value = new BigInteger(value + "");
-	check();
+        check();
     }
-        
+
     /**
      * Sets the value.
      */
@@ -52,12 +52,12 @@ public class UnsignedLong implements Serializable {
      * Sets the value.
      */
     public void setValue(long value) throws ConfMException {
-	this.value = new BigInteger(value + "");
+        this.value = new BigInteger(value + "");
         check();
     }
 
     public void setValue(BigInteger value) throws ConfMException {
-	this.value = value;
+        this.value = value;
         check();
     }
 
@@ -67,10 +67,10 @@ public class UnsignedLong implements Serializable {
     }
 
     public java.lang.String toString() {
-	return value.toString();
+        return value.toString();
     }
 
-    
+
 
     private void check() throws ConfMException {
         if (this.value.compareTo(new BigInteger("0")) < 0) {
@@ -83,19 +83,19 @@ public class UnsignedLong implements Serializable {
 
 
     public boolean equals(long value) {
-	return (this.value.compareTo(
+        return (this.value.compareTo(
                     new BigInteger(value + "")) == 0);
     }
-    
-    
+
+
     public boolean equals(Object value) {
-	if (value instanceof BigInteger) { 
-	    return (((BigInteger)value).compareTo(this.value) == 0);
+        if (value instanceof BigInteger) {
+            return (((BigInteger)value).compareTo(this.value) == 0);
         }
-        else if (value instanceof Long) 
+        else if (value instanceof Long)
             return (this.value.compareTo(
                         new BigInteger(value + "")) == 0);
-        else if (value instanceof Int) 
+        else if (value instanceof Int)
             return (this.value.compareTo(
                         new BigInteger(value + "")) == 0);
         else if ( value instanceof UnsignedLong) {
@@ -107,54 +107,54 @@ public class UnsignedLong implements Serializable {
     }
 
     /** ---------- Restrictions ---------- */
-    
+
     /**
-     * xs:minInclusive defines a minimum value that can be reached.     
+     * xs:minInclusive defines a minimum value that can be reached.
      */
     protected void minInclusive(long restriction)
         throws ConfMException {
         minInclusive(restriction + "");
     }
-    protected void minInclusive(java.lang.String restriction) 
+    protected void minInclusive(java.lang.String restriction)
         throws ConfMException {
         throwException(
             this.value.compareTo(new BigInteger(restriction)) < 0);
-    }    
-    
+    }
+
     /**
-     * xs:minExclusive defines a minimum value that cannot be reached.     
+     * xs:minExclusive defines a minimum value that cannot be reached.
      */
-    protected void minExclusive(long restriction) 
+    protected void minExclusive(long restriction)
         throws ConfMException {
         minExclusive(restriction + "");
     }
-    protected void minExclusive(java.lang.String restriction) 
+    protected void minExclusive(java.lang.String restriction)
         throws ConfMException {
         int cmp = this.value.compareTo(new BigInteger(restriction));
         throwException(cmp == 0 || cmp < 0);
     }
-        
+
     /**
-     * xs:maxExclusive defines a maximum value that cannot be reached.     
+     * xs:maxExclusive defines a maximum value that cannot be reached.
      */
-    protected void maxInclusive(long restriction)  
+    protected void maxInclusive(long restriction)
         throws ConfMException {
         maxInclusive(restriction + "");
     }
-    protected void maxInclusive(java.lang.String restriction) 
+    protected void maxInclusive(java.lang.String restriction)
         throws ConfMException {
         throwException(
             this.value.compareTo(new BigInteger(restriction)) > 0);
-    }    
+    }
 
     /**
-     * xs:maxExclusive defines a minimum value that cannot be reached.     
+     * xs:maxExclusive defines a minimum value that cannot be reached.
      */
-    protected void maxExclusive(long restriction)  
+    protected void maxExclusive(long restriction)
         throws ConfMException {
         maxExclusive(restriction + "");
     }
-    protected void maxExclusive(java.lang.String restriction) 
+    protected void maxExclusive(java.lang.String restriction)
         throws ConfMException {
         int cmp = this.value.compareTo(new BigInteger(restriction));
         throwException(cmp == 0 || cmp > 0);
@@ -166,7 +166,7 @@ public class UnsignedLong implements Serializable {
      * or bytes.
      */
     protected void minLength(int len) throws ConfMException {
-	throwException( toString().length() < len);
+        throwException( toString().length() < len);
     }
 
     /**
@@ -174,13 +174,13 @@ public class UnsignedLong implements Serializable {
      * or bytes.
      */
     protected void maxLength(int len) throws ConfMException {
-	throwException( toString().length() > len);
+        throwException( toString().length() > len);
     }
 
     /**
      * xs:fractionDigits
      */
-    protected void fractionDigits(int digits) 
+    protected void fractionDigits(int digits)
         throws ConfMException {
         // compare against the lexical value representation
         throwException(Decimal.numFractionDigits(toString()) > digits);
@@ -189,12 +189,12 @@ public class UnsignedLong implements Serializable {
     /**
      * xs:totaDigits
      */
-    protected void totalDigits(int digits) 
+    protected void totalDigits(int digits)
         throws ConfMException {
         // compare against the lexical value representation
         throwException(Decimal.numTotalDigits(toString()) > digits);
     }
-    
+
 
     /**
      * xs:pattern
@@ -207,15 +207,15 @@ public class UnsignedLong implements Serializable {
             throwException( true, e );
         }
     }
-    
+
     protected void pattern(java.lang.String[] regexes) throws ConfMException {
         try {
             java.lang.String s = value.toString();
-            
+
             for (int i = 0; i < regexes.length; i++)
                 if (Pattern.matches(regexes[i], s))
                     return;
-            
+
             throwException(true);
         } catch (PatternSyntaxException e) {
             throwException(true, e);
@@ -227,11 +227,11 @@ public class UnsignedLong implements Serializable {
      * Throw an ConfMException otherwise
      */
     protected void throwException(boolean v) throws ConfMException {
-	if (!v) return;
+        if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,this);
     }
     protected void throwException(boolean v, Object o) throws ConfMException {
-	if (!v) return;
+        if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,o);
     }
 

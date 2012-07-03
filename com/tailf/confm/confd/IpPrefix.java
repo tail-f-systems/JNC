@@ -1,6 +1,6 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2010 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
+ *
+ *  Copyright 2010 Tail-F Systems AB. All rights reserved.
  *
  *  This software is the confidential and proprietary information of
  *  Tail-F Systems AB.
@@ -19,11 +19,11 @@ import java.io.Serializable;
  */
 public class IpPrefix implements Serializable {
     private Object value;
-    
+
     /**
      * Constructor
-     */    
-    public IpPrefix(String v) throws ConfMException {	
+     */
+    public IpPrefix(String v) throws ConfMException {
         try {
             value = new Ipv4Prefix(v);
         } catch (Exception e1) {
@@ -31,7 +31,7 @@ public class IpPrefix implements Serializable {
         }
         check();
     }
-    
+
     public IpPrefix(Ipv4Prefix v)  throws ConfMException {
         value = v;
         check();
@@ -40,10 +40,10 @@ public class IpPrefix implements Serializable {
         value = v;
         check();
     }
-    
+
     /**
      * Set a value
-     */    
+     */
     public void setValue(Object v) throws ConfMException {
         if (v instanceof Ipv4Prefix)
             value = v;
@@ -52,21 +52,21 @@ public class IpPrefix implements Serializable {
         else throwException( true, v );
         check();
     }
-    
+
     public void setValue(String v) throws ConfMException {
         try {
             value = new Ipv4Prefix(v);
         } catch (Exception e1) {
             value = new Ipv6Prefix(v);
-	    }
+            }
         check();
     }
-    
+
     public void setValue(Ipv4Prefix v) throws ConfMException {
         value = v;
         check();
     }
-    
+
     public void setValue(Ipv6Prefix v) throws ConfMException {
         value = v;
         check();
@@ -78,11 +78,11 @@ public class IpPrefix implements Serializable {
 
     public void check() throws ConfMException {
     }
-    
+
     public String toString() {
         return value.toString();
     }
-    
+
     public boolean equals(Object b) {
         if (b instanceof IpPrefix)
             return ((IpPrefix)b).equals(this);
@@ -92,8 +92,8 @@ public class IpPrefix implements Serializable {
     public boolean equals(IpPrefix b) {
         return value.equals( b.value );
     }
-    
-    
+
+
     /**
      * Assert that the value is 'false'
      * Throw an ConfMException otherwise

@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -12,24 +12,24 @@
 package com.tailf.inm;
 
 /**
- * Class for 'rpc-error' elements returned in 
+ * Class for 'rpc-error' elements returned in
  * NETCONF 'rpc-reply' messages.
  * <p>
  * The 'rpc-error' includes the following information:
  * <ul>
  * <li> {@link #errorType}
- * <li> {@link #errorTag}  
+ * <li> {@link #errorTag}
  * <li> {@link #errorSeverity}
  * <li> {@link #errorAppTag}
  * <li> {@link #errorPath}
  * <li> {@link #errorMessage}
  * <li> {@link #errorInfo}
- * </ul> 
+ * </ul>
  *
  */
-public class RpcError {    
-    
-    /** The error type defines the conceptual 
+public class RpcError {
+
+    /** The error type defines the conceptual
      * layer that the error occurred.
      * Enumeration.  One of:
      * <ul>
@@ -38,13 +38,13 @@ public class RpcError {
      * <li> protocol
      * <li> application
      * </ul>
-     */    
+     */
      public String errorType;
-    
+
     /**
      * Contains a string identifying the error condition.
      * One of:
-     * <ul>     
+     * <ul>
      * <li>in-use
      * <li>invalid-value
      * <li>too-big
@@ -66,8 +66,8 @@ public class RpcError {
      * <li>partial-operation
      * </ul>
      */
-    public String  errorTag;    
-    
+    public String  errorTag;
+
     /**
      * Contains a string identifying the error severity, as
      * determined by the device.  One of:
@@ -100,7 +100,7 @@ public class RpcError {
      * the XPath expression is interpreted, the set of namespace
      * declarations are those in scope on the rpc-error element,
      * including the default namespace.
-     * 
+     *
      */
     public String errorPath;
 
@@ -108,45 +108,45 @@ public class RpcError {
      * Contains a string suitable for human display that
      * describes the error condition.  This element will not be present
      * if no appropriate message is provided for a particular error
-     * condition. 
-     */    
+     * condition.
+     */
     public String errorMessage;
-    
+
     /**
      * Contains protocol- or data-model-specific error content.
      * This element will not be present if no such error content is
-     * provided for a particular error condition.  
+     * provided for a particular error condition.
      */
     public NodeSet errorInfo;
-    
+
 
     /**
      * Constructor
-     */ 
+     */
     public RpcError(Element data) {
-	// parse out the fields in data
-	this.data = data;
-	try {
-	    Element e = data.getFirst("self::rpc-error/error-type");
-	    if (e!=null) errorType = (String) e.getValue();
-	    e = data.getFirst("self::rpc-error/error-tag");
-	    if (e!=null) errorTag = (String) e.getValue();
-	    e = data.getFirst("self::rpc-error/error-severity");
-	    if (e!=null) errorSeverity = (String) e.getValue();
-	    e = data.getFirst("self::rpc-error/error-info");
-	    if (e!=null) errorInfo = e.getChildren();
-	    e = data.getFirst("self::rpc-error/error-message");
-	    if (e!=null) errorMessage = (String) e.getValue();
-	    e = data.getFirst("self::rpc-error/error-app-tag");
-	    if (e!=null) errorAppTag = (String) e.getValue();
-	    e = data.getFirst("self::rpc-error/error-path");
-	    if (e!=null) errorPath = (String) e.getValue();
-	} catch (INMException e1) {
-	    System.err.println("Error decoding rpc-error element: "
-			       +data.toXMLString() +
-			       "\ngot exception: "+e1);
-	    e1.printStackTrace();
-	}
+        // parse out the fields in data
+        this.data = data;
+        try {
+            Element e = data.getFirst("self::rpc-error/error-type");
+            if (e!=null) errorType = (String) e.getValue();
+            e = data.getFirst("self::rpc-error/error-tag");
+            if (e!=null) errorTag = (String) e.getValue();
+            e = data.getFirst("self::rpc-error/error-severity");
+            if (e!=null) errorSeverity = (String) e.getValue();
+            e = data.getFirst("self::rpc-error/error-info");
+            if (e!=null) errorInfo = e.getChildren();
+            e = data.getFirst("self::rpc-error/error-message");
+            if (e!=null) errorMessage = (String) e.getValue();
+            e = data.getFirst("self::rpc-error/error-app-tag");
+            if (e!=null) errorAppTag = (String) e.getValue();
+            e = data.getFirst("self::rpc-error/error-path");
+            if (e!=null) errorPath = (String) e.getValue();
+        } catch (INMException e1) {
+            System.err.println("Error decoding rpc-error element: "
+                               +data.toXMLString() +
+                               "\ngot exception: "+e1);
+            e1.printStackTrace();
+        }
     }
 
 
@@ -154,12 +154,12 @@ public class RpcError {
      * The rpc-error element tree
      */
     public Element data;
-    
-    
-    /** 
-     *  
+
+
+    /**
+     *
      */
     public String toString() {
-	return data.toXMLString(); 
+        return data.toXMLString();
     }
 }

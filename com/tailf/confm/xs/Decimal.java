@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -20,26 +20,26 @@ import java.io.Serializable;
  */
 public class Decimal implements Serializable {
 
-    private double value;    
-    
-    public Decimal(java.lang.String value) {	
-	value = String.wsCollapse(value);
-	this.value = java.lang.Double.parseDouble(value);
+    private double value;
+
+    public Decimal(java.lang.String value) {
+        value = String.wsCollapse(value);
+        this.value = java.lang.Double.parseDouble(value);
         check();
     }
-    
-    public Decimal(double value) {	
-	this.value = value;
-	check();
+
+    public Decimal(double value) {
+        this.value = value;
+        check();
     }
-    
+
     /**
      * Sets the value.
      */
     public void setValue(java.lang.String value) throws ConfMException {
-	value = String.wsCollapse(value);
-	this.value = java.lang.Double.parseDouble(value);
-	check();
+        value = String.wsCollapse(value);
+        this.value = java.lang.Double.parseDouble(value);
+        check();
     }
 
     /**
@@ -47,14 +47,14 @@ public class Decimal implements Serializable {
      */
     public void setValue(double value) throws ConfMException {
         this.value = value;
-	check();
+        check();
     }
 
     /**
      * Gets the value space.
      */
     public double getValue() {
-	return value;
+        return value;
     }
 
 
@@ -62,53 +62,53 @@ public class Decimal implements Serializable {
     }
 
     public java.lang.String toString() {
-	return new java.lang.Double(value).toString();
+        return new java.lang.Double(value).toString();
     }
 
     public boolean equals(double value) {
-	if (this.value == value) return true;
-	else return false;
+        if (this.value == value) return true;
+        else return false;
     }
 
     public boolean equals(Decimal value) {
-	return value.equals( this.value );
+        return value.equals( this.value );
     }
-    
+
     public boolean equals(Object value) {
-	if (value instanceof Decimal) 
-	    return ((Decimal)value).equals(this.value);
-	return false;
+        if (value instanceof Decimal)
+            return ((Decimal)value).equals(this.value);
+        return false;
     }
 
 
     /** ---------- Restrictions ---------- */
 
     /**
-     * xs:minInclusive defines a minimum value that can be reached.     
+     * xs:minInclusive defines a minimum value that can be reached.
      */
     protected void minInclusive(double restriction) throws ConfMException {
-	throwException(value < restriction);
-    }    
+        throwException(value < restriction);
+    }
 
     /**
-     * xs:minExclusive defines a minimum value that cannot be reached.     
+     * xs:minExclusive defines a minimum value that cannot be reached.
      */
     protected void minExclusive(double restriction) throws ConfMException {
-	throwException(value <= restriction);
-    }
-        
-    /**
-     * xs:maxExclusive defines a maximum value that cannot be reached.     
-     */
-    protected void maxInclusive(double restriction) throws ConfMException {
-	throwException(value > restriction);
+        throwException(value <= restriction);
     }
 
     /**
-     * xs:maxExclusive defines a minimum value that cannot be reached.     
+     * xs:maxExclusive defines a maximum value that cannot be reached.
+     */
+    protected void maxInclusive(double restriction) throws ConfMException {
+        throwException(value > restriction);
+    }
+
+    /**
+     * xs:maxExclusive defines a minimum value that cannot be reached.
      */
     protected void maxExclusive(double restriction) throws ConfMException {
-	throwException(value >= restriction);
+        throwException(value >= restriction);
     }
 
     /**
@@ -116,7 +116,7 @@ public class Decimal implements Serializable {
      * or bytes.
      */
     protected void minLength(int len) throws ConfMException {
-	throwException( toString().length() < len);
+        throwException( toString().length() < len);
     }
 
     /**
@@ -124,13 +124,13 @@ public class Decimal implements Serializable {
      * or bytes.
      */
     protected void maxLength(int len) throws ConfMException {
-	throwException( toString().length() > len);
+        throwException( toString().length() > len);
     }
-    
+
     /**
      * xs:fractionDigits
      */
-    protected void fractionDigits(int digits) 
+    protected void fractionDigits(int digits)
         throws ConfMException {
         throwException(numFractionDigits(toString()) > digits);
     }
@@ -138,7 +138,7 @@ public class Decimal implements Serializable {
     /**
      * xs:totalDigits
      */
-    protected void totalDigits(int digits) 
+    protected void totalDigits(int digits)
         throws ConfMException {
         throwException(numTotalDigits(toString()) > digits);
     }
@@ -147,8 +147,8 @@ public class Decimal implements Serializable {
      * xs:enumeration
      */
     protected boolean enumeration(double value) {
-	if (this.value == value) return true;
-	else return false;
+        if (this.value == value) return true;
+        else return false;
     }
 
     /**
@@ -156,11 +156,11 @@ public class Decimal implements Serializable {
      * Throw an ConfMException otherwise
      */
     protected void throwException(boolean v) throws ConfMException {
-	if (!v) return;
+        if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,this);
     }
 
-    
+
     /** ---------- package private --------- */
 
     /**
@@ -181,7 +181,7 @@ public class Decimal implements Serializable {
             p++;
         }
         int fraction_digits= last_known-cpos;
-        return fraction_digits;        
+        return fraction_digits;
     }
 
 
@@ -206,5 +206,5 @@ public class Decimal implements Serializable {
         totalDigits = totalDigits + last_known - cpos;
         return totalDigits;
     }
-    
+
 }

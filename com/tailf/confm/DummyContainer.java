@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -13,15 +13,15 @@ package com.tailf.confm;
 import java.util.*;
 import com.tailf.inm.*;
 
-class DummyContainer extends Container {    
+class DummyContainer extends Container {
 
     /**
      * Structure information.
      * An array of the children names.
      */
     protected String[] childrenNames() { return new String[0]; }
-    
-    
+
+
     /**
      * Structure information.
      * An array of the names of the key children.
@@ -55,7 +55,7 @@ class DummyContainer extends Container {
      * Constructor for the container
      */
     public DummyContainer(String ns, String name) {
-	super(ns, name);
+        super(ns, name);
         setDefaultPrefix();
     }
 }

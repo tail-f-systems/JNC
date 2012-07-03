@@ -1,6 +1,6 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2010 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
+ *
+ *  Copyright 2010 Tail-F Systems AB. All rights reserved.
  *
  *  This software is the confidential and proprietary information of
  *  Tail-F Systems AB.
@@ -24,17 +24,17 @@ public class Uint16 extends PlainInteger implements Serializable {
         super(value);
         check();
     }
-    
+
     private void check() throws ConfMException {
         minInclusive(0);
         maxInclusive(65535);
     }
-    
-    public Uint16(int value) throws ConfMException {	
+
+    public Uint16(int value) throws ConfMException {
         super(value);
         check();
     }
-    
+
     /**
      * Set a value
      */
@@ -42,7 +42,7 @@ public class Uint16 extends PlainInteger implements Serializable {
         super.setValue(value);
         check();
     }
-    
+
     public void setValue(int value) throws ConfMException {
         super.setValue(value);
         check();

@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -23,18 +23,18 @@ import com.tailf.inm.INMException;
  * the configuration sub-tree data model aware.
  * Classes generated from the ConfM compiler are
  * either Containers, Leafs, or derived data types.
- * 
- * @see Container 
+ *
+ * @see Container
  */
 public class Leaf extends Element {
     public Leaf(String ns, String name) {
-	super(ns, name);
+        super(ns, name);
     }
 
     // cache the Tagpath and the CsNode
     private Tagpath tp  = null;
     private CsNode n = null;
-    protected void encode(Transport out, boolean newline_at_end, 
+    protected void encode(Transport out, boolean newline_at_end,
                           Capabilities capas) throws INMException  {
         if (RevisionInfo.olderRevisionSupportEnabled && capas != null) {
             if (tp == null)
@@ -46,30 +46,30 @@ public class Leaf extends Element {
                 for (int i = 0; i<n.revInfo.length; i++) {
                     RevisionInfo r = n.revInfo[i];
                     if (r.introduced.compareTo(rev) > 0) {
-                        // This node was somehow modified 
+                        // This node was somehow modified
                         switch(r.type) {
-                        case RevisionInfo.R_NODE_ADDED: 
+                        case RevisionInfo.R_NODE_ADDED:
                             System.out.println("NODE_ADDED Skipping " + this);
                             return;
                         case RevisionInfo.R_ENUM_ADDED:
-                            
-                            // Need to check if the added enum is the one we 
+
+                            // Need to check if the added enum is the one we
                             // we wish to send
                             if (r.data.equals(getValue().toString())) {
-                                
+
                                 throw new INMException(
                                     INMException.REVISION_ERROR,
-                                    tp + " bad enum value for rev (" + rev + 
+                                    tp + " bad enum value for rev (" + rev +
                                     ") "  + r.data);
                             }
                             break;
                         case RevisionInfo.R_BITS_ADDED:
-                            
+
                             // Same thing - check for too new bit strings
                             if (r.data.equals(getValue().toString())) {
                                 throw new INMException(
                                     INMException.REVISION_ERROR,
-                                    tp + " bad bits value for rev (" + 
+                                    tp + " bad bits value for rev (" +
                                     rev +") " + r.data);
                             }
                             break;
@@ -79,14 +79,14 @@ public class Leaf extends Element {
                         default:
                             ;
                         }
-                        
+
                     }
                 }
             }
         }
         super.encode(out, newline_at_end, capas);
-    }        
-    
+    }
+
 
     public Leaf  clone() {
         Leaf copy= new Leaf(namespace, name);
@@ -97,7 +97,7 @@ public class Leaf extends Element {
 
 
     /*
-     * returns true if this Leaf  is a key leaf 
+     * returns true if this Leaf  is a key leaf
      */
 
     public boolean isKey() {

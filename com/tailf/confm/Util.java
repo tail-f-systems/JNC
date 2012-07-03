@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2008 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2008 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -21,32 +21,32 @@ import java.net.UnknownHostException;
 public class Util {
 
     public static String makeMask (int n) {
-	int i;
-	
-	n = 32 - n;
-	int iVal = ((1 << n) - 1);
+        int i;
 
-	int[] arr = new int[4];
-	arr[0] = ((iVal >> 24) & 0xff);
-	arr[1] = ((iVal >> 16) & 0xff);
-	arr[2] = ((iVal >> 8)  & 0xff);
-	arr[3] = ((iVal >> 0)  & 0xff);
+        n = 32 - n;
+        int iVal = ((1 << n) - 1);
 
-	for (int j=0; j<4; j++)
-	    arr[j] = (~(arr[j])) & 0xff;
+        int[] arr = new int[4];
+        arr[0] = ((iVal >> 24) & 0xff);
+        arr[1] = ((iVal >> 16) & 0xff);
+        arr[2] = ((iVal >> 8)  & 0xff);
+        arr[3] = ((iVal >> 0)  & 0xff);
 
-	String ret = new String();
-	for (int k=0; k<4; k++) {
-	    ret += arr[k];
-	    if ( k!= 3)
-		ret += ".";
-	}
-	return ret;
+        for (int j=0; j<4; j++)
+            arr[j] = (~(arr[j])) & 0xff;
+
+        String ret = new String();
+        for (int k=0; k<4; k++) {
+            ret += arr[k];
+            if ( k!= 3)
+                ret += ".";
+        }
+        return ret;
     }
 
 
     public static String[] parseTokens(String source, char delimiter) {
-        
+
         int numtoken = 1;
 
         for (int i = 0; i < source.length(); i++) {
@@ -73,7 +73,7 @@ public class Util {
     }
 
 
-    public static InetAddress parseIPv4Address(String host) 
+    public static InetAddress parseIPv4Address(String host)
         throws UnknownHostException {
         if (host == null)
             return null;
@@ -81,7 +81,7 @@ public class Util {
         if ((parts == null) || (parts.length != 4))
             return null;
         byte[] addr = new byte[4];
-        
+
         for (int i = 0; i < 4; i++) {
             int part = 0;
             if ((parts[i].length() == 0) || (parts[i].length() > 3))
@@ -92,7 +92,7 @@ public class Util {
                     return null;
                 part = part * 10 + (c - '0');
             }
-            if (part > 255) 
+            if (part > 255)
                 return null;
             addr[i] = (byte) part;
         }

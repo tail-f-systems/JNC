@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -39,24 +39,24 @@ public class Ipv6Prefix implements Serializable {
 
     /**
      * Constructor
-     */    
-    public Ipv6Prefix(String s) throws ConfMException {	
-	String v= com.tailf.confm.xs.String.wsCollapse(s);
-	try {
-	    int slashAt = v.indexOf('/');
-	    ipaddr = new InetAddressIPv6
-		(v.substring(0,slashAt));
-	    masklen = Integer.parseInt(v.substring(slashAt+1));
-	} catch (Exception e) {
-	    throwException(true, v);
-	}
-	check();
+     */
+    public Ipv6Prefix(String s) throws ConfMException {
+        String v= com.tailf.confm.xs.String.wsCollapse(s);
+        try {
+            int slashAt = v.indexOf('/');
+            ipaddr = new InetAddressIPv6
+                (v.substring(0,slashAt));
+            masklen = Integer.parseInt(v.substring(slashAt+1));
+        } catch (Exception e) {
+            throwException(true, v);
+        }
+        check();
     }
 
     public Ipv6Prefix(InetAddressIPv6 ipaddr,int masklen)  throws ConfMException {
-	this.ipaddr = ipaddr;
-	this.masklen = masklen;
-	check();
+        this.ipaddr = ipaddr;
+        this.masklen = masklen;
+        check();
     }
 
 
@@ -64,22 +64,22 @@ public class Ipv6Prefix implements Serializable {
      * Sets the value.
      */
     public void setValue(String s) throws ConfMException {
-	String v= com.tailf.confm.xs.String.wsCollapse(s);
-	try {
-	    int slashAt = v.indexOf('/');
-	    ipaddr = new InetAddressIPv6
-		(v.substring(0,slashAt));
-	    masklen = Integer.parseInt(v.substring(slashAt+1));
-	} catch (Exception e) {
-	    throwException(true, v);
-	}
-	check();
+        String v= com.tailf.confm.xs.String.wsCollapse(s);
+        try {
+            int slashAt = v.indexOf('/');
+            ipaddr = new InetAddressIPv6
+                (v.substring(0,slashAt));
+            masklen = Integer.parseInt(v.substring(slashAt+1));
+        } catch (Exception e) {
+            throwException(true, v);
+        }
+        check();
     }
-    
+
     public void setValue(InetAddressIPv6 ipaddr, int masklen) throws ConfMException {
-	this.ipaddr = ipaddr;
-	this.masklen = masklen;	
-	check();
+        this.ipaddr = ipaddr;
+        this.masklen = masklen;
+        check();
     }
 
 
@@ -90,15 +90,15 @@ public class Ipv6Prefix implements Serializable {
      * them both are returned.
      */
     public String getValue() {
-	return toString();
+        return toString();
     }
-    
+
     public void check() throws ConfMException {
-	throwException( masklen<0 || masklen>128 );	
+        throwException( masklen<0 || masklen>128 );
     }
-    
+
     public String toString() {
-	return ipaddr.toString()+"/"+masklen;
+        return ipaddr.toString()+"/"+masklen;
     }
 
     public boolean equals(Object b) {
@@ -108,18 +108,18 @@ public class Ipv6Prefix implements Serializable {
     }
 
     public boolean equals(Ipv6Prefix b) {
-	if (masklen == b.masklen) 
-	    return ipaddr.equals(b.ipaddr);
-	return false;
+        if (masklen == b.masklen)
+            return ipaddr.equals(b.ipaddr);
+        return false;
     }
-    
+
 
     /**
      * Assert that the value is 'false'
      * Throw an ConfMException otherwise
      */
     protected void throwException(boolean v) throws ConfMException {
-	if (!v) return;
+        if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,toString());
     }
 
@@ -128,8 +128,8 @@ public class Ipv6Prefix implements Serializable {
      * Throw an ConfMException otherwise
      */
     protected void throwException(boolean v, Object o) throws ConfMException {
-	if (!v) return;
+        if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,o);
     }
-    
+
 }

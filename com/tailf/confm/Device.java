@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -15,14 +15,14 @@ import java.io.*;
 import com.tailf.inm.*;
 
 /**
- * This is a help class to provide features 
+ * This is a help class to provide features
  * for managing a device with NETCONF.
- * The device have a list of users 
+ * The device have a list of users
  * {@link DeviceUser} which contain information
  * about how to connect to the device.
  * <p>
  * Associated to a device we have a list of named sessions, each
- * session is a {@link ConfDSession} session inside an 
+ * session is a {@link ConfDSession} session inside an
  * SSH channel. We can have
  * several sessions to one device. It can for example make sense to
  * have one session open to the configuration db(s) and another session
@@ -46,9 +46,9 @@ import com.tailf.inm.*;
  * Then it is convenient to let all manager code add Elements to the
  * session specifig config tree. The tree can be accessed through
  * the getConfig(String) method.
- * </p> 
+ * </p>
  *
- * <p> 
+ * <p>
  * This class also provides basic backlog funtionality.
  * If the device configuration is changed and the
  * device is currently down for some reason, a backlog
@@ -57,7 +57,7 @@ import com.tailf.inm.*;
  * </p>
  */
 
-public class Device 
+public class Device
     implements Serializable {
 
 
@@ -68,7 +68,7 @@ public class Device
         ConfDSession session;
 
         SessionConnData(String n, SSHSession t, ConfDSession s) {
-            this.sessionName = n; 
+            this.sessionName = n;
             this.session=s;
             this.sshSession = t;
         }
@@ -80,7 +80,7 @@ public class Device
         Element configTree;
 
         SessionTree(String n) {
-            this.sessionName = n; 
+            this.sessionName = n;
             this.configTree = null;
         }
     }
@@ -89,7 +89,7 @@ public class Device
     /**
      * The device should have a name.
      * If nothing else choose the IP address as name.
-     * 
+     *
      */
     public String name;
 
@@ -98,16 +98,16 @@ public class Device
      *
      */
     protected transient SSHConnection con = null;
-    
-    
+
+
     /**
      * The NETCONF sessions (channels) for this device.
      */
-    protected transient ArrayList connSessions; 
+    protected transient ArrayList connSessions;
     // list of SessionConnData
-    protected transient ArrayList trees;        
+    protected transient ArrayList trees;
     // list of SessionTree
-    
+
 
 
     /**
@@ -118,16 +118,16 @@ public class Device
      *
      */
     protected ArrayList backlog;
-    
+
 
     /**
-     * A list of users. 
+     * A list of users.
      *
      */
     protected ArrayList users;         // list of DeviceUser
-    
-    
-    String mgmt_ip;                 // ip address as string 
+
+
+    String mgmt_ip;                 // ip address as string
     int mgmt_port;
     int defaultReadTimeout = 0;
 
@@ -139,13 +139,13 @@ public class Device
      */
     public Device(String name, DeviceUser user,
                   String mgmt_ip,int mgmt_port) {
-        
-	this.name = name;
+
+        this.name = name;
         users = new ArrayList();
         users.add(user);
-	this.mgmt_ip = mgmt_ip;
-	this.mgmt_port = mgmt_port;
-	backlog = new ArrayList();
+        this.mgmt_ip = mgmt_ip;
+        this.mgmt_port = mgmt_port;
+        backlog = new ArrayList();
         connSessions = new ArrayList();
         trees = new ArrayList();
     }
@@ -153,18 +153,18 @@ public class Device
     /**
      * Constructor for the Device with on initial user.
      * We need at least one DeviceUser in order to be able to
-     * connect. Thus if this constructor is used to create the 
+     * connect. Thus if this constructor is used to create the
      * Device we must use addUser() priot to connecting.
      *
      */
 
     public Device(String name,String mgmt_ip,int mgmt_port) {
-        
-	this.name = name;
+
+        this.name = name;
         users = new ArrayList();
-	this.mgmt_ip = mgmt_ip;
-	this.mgmt_port = mgmt_port;
-	backlog = new ArrayList();
+        this.mgmt_ip = mgmt_ip;
+        this.mgmt_port = mgmt_port;
+        backlog = new ArrayList();
         connSessions = new ArrayList();
         trees = new ArrayList();
     }
@@ -172,13 +172,13 @@ public class Device
 
 
     /**
-     * If Device is stored on disk as a serialized object, we need to 
+     * If Device is stored on disk as a serialized object, we need to
      * init the transient variables after we read a Device from disk.
      *
      */
-    
+
     public void initTransients() {
-	backlog = new ArrayList();
+        backlog = new ArrayList();
         connSessions = new ArrayList();
         trees = new ArrayList();
     }
@@ -214,21 +214,21 @@ public class Device
      * This feature is a convenience feature. It makes sense to perform
      * a series of changes towards a device and accumulate the changes
      * in a single tree. A configuration tree is associated to a named
-     * session/ssh channel. 
+     * session/ssh channel.
      *
      * If a session is closed, we may still have accumulated config
      * data associated to the session. This method retieves this data
      * although the ssh socket to the server may be dead.
      * @param sessionName symbolic Name of the session
      *
-     */    
+     */
     public Element getConfig(String sessionName) {
         SessionTree t = getTreeData(sessionName);
         return t.configTree;
     }
 
     /**
-     * Sets the readTimeout associated to a named session 
+     * Sets the readTimeout associated to a named session
      * @param sessionName symbolic Name of the session
      * @param readTimeout timeout in milliseconds
      */
@@ -239,29 +239,29 @@ public class Device
         p.sshSession.setReadTimeout(readTimeout);
     }
 
- 
+
     /**
-     * Gets the readTimeout associated to a named session 
+     * Gets the readTimeout associated to a named session
      * @param sessionName symbolic Name of the session
-     * @return timeout in milliseconds 
+     * @return timeout in milliseconds
      */
 
     public long getReadTimeout(String sessionName) {
         SessionConnData p = getConnData(sessionName);
         return p.sshSession.getReadTimeout();
     }
-    
 
-    /** 
+
+    /**
      * Check if the named session have a saved configuration
      * tree.
      * @param sessionName symbolic Name of the session
      */
 
     public boolean hasConfig(String sessionName) {
-	SessionTree t = getTreeData(sessionName);
-	if (t.configTree != null) return true;
-	return false;
+        SessionTree t = getTreeData(sessionName);
+        if (t.configTree != null) return true;
+        return false;
     }
 
 
@@ -282,14 +282,14 @@ public class Device
      */
 
     public boolean hasBacklog() {
-	return (backlog.size() > 0);
+        return (backlog.size() > 0);
     }
 
 
     /**
      * Whenever new  ConfDSession objects are created through newSession()
      * set this timeout value (milliseconds) as the readTimeout
-     * value 
+     * value
      */
 
     public void setDefaultReadTimeout(int defaultReadTimeout) {
@@ -308,11 +308,11 @@ public class Device
 
     public void closeSession(String sessionName) {
         SessionConnData data = removeConnData(sessionName);
-	if (data.session != null) {
-	    try {
-		//data.session.closeSession();
+        if (data.session != null) {
+            try {
+                //data.session.closeSession();
                 data.sshSession.close();
-	    }
+            }
             catch (Exception e) {}
         }
         clearConfig(sessionName);
@@ -325,42 +325,42 @@ public class Device
      */
 
     public void close() {
-	for (int i=0; i<connSessions.size(); i++) {
-	    SessionConnData d = (SessionConnData)connSessions.get(i);
+        for (int i=0; i<connSessions.size(); i++) {
+            SessionConnData d = (SessionConnData)connSessions.get(i);
                 try {
                     d.session.closeSession();
                 }
                 catch (Exception e) {
                 }
-	}
-	connSessions = new ArrayList();
-	for (int i=0; i<trees.size(); i++) {
-	    SessionTree t = (SessionTree)trees.get(i);
-	    t.configTree = null;
-	}
-	// we keep the named config trees
-	if (con != null) {
-	    con.close();
-	    con = null;
-	}
+        }
+        connSessions = new ArrayList();
+        for (int i=0; i<trees.size(); i++) {
+            SessionTree t = (SessionTree)trees.get(i);
+            t.configTree = null;
+        }
+        // we keep the named config trees
+        if (con != null) {
+            con.close();
+            con = null;
+        }
     }
 
-            
-        
+
+
     /**
      * Checks if this device have any sessions.
      *
      */
     public boolean hasSession(String name) {
-	return (getSession(name)  != null);
+        return (getSession(name)  != null);
     }
-    
+
 
 
     /**
      * Returns a named ConfDSession for this NETCONF enabled device.
      * The ConfDSession implements (through it's subclass NetconfSession)
-     * the getTransport() method. Thus we can get to the underlying 
+     * the getTransport() method. Thus we can get to the underlying
      * ganymed Session object as:
      * <pre>
      * Session s = ((SSHSession)d.getSession("cfg").getTransport()).
@@ -388,11 +388,11 @@ public class Device
         if (data == null) return null;
         return data.sshSession;
     }
-        
+
 
     /**
      * This method finds the {@link DeviceUser} associated to the localUser
-     * user name and SSH connects to the device, this method must be 
+     * user name and SSH connects to the device, this method must be
      * called prior to establishing any sessions (channels)
      */
     public void connect(String localUser) throws IOException, INMException {
@@ -406,8 +406,8 @@ public class Device
      * only applies to the actual connect.
      * @param localUser The name of a local (for the EMS) user
      */
-        
-    public void connect(String localUser, int connectTimeout) 
+
+    public void connect(String localUser, int connectTimeout)
         throws IOException, INMException {
 
         DeviceUser u = null;
@@ -419,15 +419,15 @@ public class Device
             }
         }
         if (u == null)
-            throw new INMException(INMException.AUTH_FAILED, 
+            throw new INMException(INMException.AUTH_FAILED,
                                    "No such user: " + localUser);
-        
+
 
         XMLParser parser = new com.tailf.confm.XMLParser();
         con = new SSHConnection(mgmt_ip, mgmt_port, connectTimeout);
         auth(u);
         return;
-    } 
+    }
 
 
 
@@ -445,7 +445,7 @@ public class Device
     public void newSessionConfigTree(String sessionName) {
         if (getTreeData(sessionName)  == null)
             trees.add(new SessionTree(sessionName));
-    }	
+    }
 
     /**
      * Creates a new named NETCONF session. Each named session
@@ -453,29 +453,29 @@ public class Device
      * @param sessionName symbolic Name of the session
      *
      */
-    public void newSession(String sessionName) 
+    public void newSession(String sessionName)
         throws INMException, IOException, ConfMException {
         newSession(null, sessionName);
     }
 
     /**
-     * Creates a new named NETCONF session      
-     * We must not have an existing session with the same name. 
+     * Creates a new named NETCONF session
+     * We must not have an existing session with the same name.
      * Thus when we reconnect a Device, we must first call
      * closeSession(sessionName);
      * @param sub IO subscriber for trace messages.
      * @param sessionName symbolic Name of the session
      */
-    public void newSession(IOSubscriber sub, String sessionName) 
+    public void newSession(IOSubscriber sub, String sessionName)
         throws INMException, IOException, ConfMException {
         SessionConnData data = getConnData(sessionName);
-	// always create the configTree
-	newSessionConfigTree(sessionName);
+        // always create the configTree
+        newSessionConfigTree(sessionName);
 
         // Check that we don't already have a session with
         // that name
         if (data != null)
-            throw new ConfMException(ConfMException.BAD_SESSION_NAME, 
+            throw new ConfMException(ConfMException.BAD_SESSION_NAME,
                                      sessionName);
 
         XMLParser parser = new com.tailf.confm.XMLParser();
@@ -486,10 +486,10 @@ public class Device
         SessionConnData d = new SessionConnData(sessionName,sshSession,session);
         connSessions.add(d);
 
-        if (backlog.size() > 0)   
+        if (backlog.size() > 0)
             runBacklog(sessionName);
         return;
-    } 
+    }
 
 
     /**
@@ -497,7 +497,7 @@ public class Device
      * @param e Config tree to be saved.
      */
     public void addBackLog(Element e) {
-	backlog.add(e);
+        backlog.add(e);
     }
 
 
@@ -505,39 +505,39 @@ public class Device
      * Return the backlog.
      */
     public Element[] getBacklog() {
-	if (backlog!=null && backlog.size()>0) {
-	    Element[] a = new Element[ backlog.size() ];
-	    return (Element[]) backlog.toArray( a );
-	}
-	return null;
+        if (backlog!=null && backlog.size()>0) {
+            Element[] a = new Element[ backlog.size() ];
+            return (Element[]) backlog.toArray( a );
+        }
+        return null;
     }
 
-    
-    
+
+
     /**
-     * Run the backlog. 
+     * Run the backlog.
      * A backlog is typically saved when a configuration change
-     * is made (for several devices) and the device is down. 
-     * The backlog saves the 
+     * is made (for several devices) and the device is down.
+     * The backlog saves the
      * configuration update so that it can be re-sent later.
      * This method runs the saved backlog. It is automatically run
      * whenever we succeeed in creating a new sesssion.
      * @param sessionName symbolic Name of the session
      *
      */
-    public void  runBacklog(String sessionName)  
+    public void  runBacklog(String sessionName)
         throws IOException, INMException {
-	System.out.println("Running backlog ");
+        System.out.println("Running backlog ");
         SessionConnData data = getConnData(sessionName);
-        if (data == null) 
-            throw new ConfMException(ConfMException.BAD_SESSION_NAME, 
+        if (data == null)
+            throw new ConfMException(ConfMException.BAD_SESSION_NAME,
                                      sessionName);
-	for (int i=0; i<backlog.size(); i++) {
-	    Element e = (Element)backlog.get(i);
-	    System.out.println("Bacloh "+ e.toXMLString());
+        for (int i=0; i<backlog.size(); i++) {
+            Element e = (Element)backlog.get(i);
+            System.out.println("Bacloh "+ e.toXMLString());
             data.session.editConfig(e);
             backlog.remove(i);
-        } 
+        }
     }
 
 
@@ -547,13 +547,13 @@ public class Device
      *
      */
     public String toString() {
-	
-	String s = "Device: " + name + " " + mgmt_ip + ":" + mgmt_port +"\n";
+
+        String s = "Device: " + name + " " + mgmt_ip + ":" + mgmt_port +"\n";
         for (int i=0; i<connSessions.size(); i++) {
             SessionConnData p = (SessionConnData)connSessions.get(i);
             s+= ("   session: " + p.sessionName);
         }
-	return s;
+        return s;
     }
 
 
@@ -565,7 +565,7 @@ public class Device
         }
         return null;
     }
-    
+
 
     private SessionTree getTreeData(String sessionName) {
         for (int i=0; i<trees.size(); i++) {
@@ -575,8 +575,8 @@ public class Device
         }
         return null;
     }
-    
-    
+
+
 
     private SessionConnData removeConnData(String sessionName) {
         for (int i=0; i<connSessions.size(); i++) {
@@ -589,18 +589,18 @@ public class Device
         return null;
     }
 
-    
 
-    private void auth(DeviceUser currentUser) 
+
+    private void auth(DeviceUser currentUser)
         throws IOException, INMException {
-        if (currentUser.password != null) 
-            con.authenticateWithPassword(currentUser.remoteUser, 
+        if (currentUser.password != null)
+            con.authenticateWithPassword(currentUser.remoteUser,
                                          currentUser.password);
-        else if (currentUser.pemPrivateKey != null) 
-            con.authenticateWithPublicKey(currentUser.remoteUser, 
+        else if (currentUser.pemPrivateKey != null)
+            con.authenticateWithPublicKey(currentUser.remoteUser,
                                           currentUser.pemPrivateKey,
                                           currentUser.keyPassPhrase);
-        else if (currentUser.pemFile != null) 
+        else if (currentUser.pemFile != null)
             con.authenticateWithPublicKeyFile(currentUser.remoteUser,
                                               currentUser.pemFile,
                                               currentUser.keyPassPhrase);

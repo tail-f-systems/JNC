@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -26,7 +26,7 @@ import com.tailf.inm.*;
  * @see IOSubscriber
  */
 public class DefaultIOSubscriber extends IOSubscriber {
-    
+
     String devName;
 
     /**
@@ -34,21 +34,21 @@ public class DefaultIOSubscriber extends IOSubscriber {
      * @param devName The name of the device.
      */
     public DefaultIOSubscriber(String devName) {
-	super( false ); // rawmode = false
+        super( false ); // rawmode = false
         this.devName = devName;
     }
-    
+
     /**
      * Constructor.
      * @param devName The name of the device.
-     * @param rawmode If true 'raw' text will appear instead of 
+     * @param rawmode If true 'raw' text will appear instead of
      * pretty formatted XML.
      */
     public DefaultIOSubscriber(String devName,boolean rawmode) {
-	super(rawmode);
+        super(rawmode);
         this.devName = devName;
     }
-    
+
 
     /**
      * Will get called as soon as we have input
@@ -71,4 +71,4 @@ public class DefaultIOSubscriber extends IOSubscriber {
     }
 }
 
-    
+

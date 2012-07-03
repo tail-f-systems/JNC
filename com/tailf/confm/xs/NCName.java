@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -20,36 +20,36 @@ import java.io.Serializable;
  * Derivate from "xs:Name".
  */
 public class NCName extends Name implements Serializable {
-    
-    public NCName(java.lang.String value) throws ConfMException {	
+
+    public NCName(java.lang.String value) throws ConfMException {
         super(value);
-	check();
+        check();
     }
-    
+
     /**
      * Sets the value.
      */
     public void setValue(java.lang.String value) throws ConfMException {
-	super.setValue(value);
-        check();	
+        super.setValue(value);
+        check();
     }
-    
-    private void check() throws ConfMException {        
+
+    private void check() throws ConfMException {
         // noColons allowed
         noColonsAllowed( getValue() );
     }
-    
+
     /**
      * Restriction that says that no colons are allowed.
      *
      **/
-    private void noColonsAllowed(java.lang.String value) 
-	throws ConfMException {
-	byte[] s= value.getBytes();
-	for (int i=0;i<s.length;i++) {
-	    if ( s[i]==':' )
-		throwException( true );
-	}
+    private void noColonsAllowed(java.lang.String value)
+        throws ConfMException {
+        byte[] s= value.getBytes();
+        for (int i=0;i<s.length;i++) {
+            if ( s[i]==':' )
+                throwException( true );
+        }
     }
 
 }

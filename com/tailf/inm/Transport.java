@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -31,7 +31,7 @@ public interface Transport {
      * Tell whether this transport is ready to be read.
      */
     public boolean ready() throws IOException;
-    
+
     /**
      * Reads "one" reply from the transport input stream.
      */
@@ -58,7 +58,7 @@ public interface Transport {
      * additional line break.
      */
     public void println(String s);
-    
+
     /**
      * Signals that the final chunk of data has be printed to the output
      * transport stream.
@@ -66,7 +66,7 @@ public interface Transport {
      * This method furthermore flushes the transport output stream buffer.
      */
     public void flush();
-    
+
     /**
      * Closes the Transport session/connection.
      */

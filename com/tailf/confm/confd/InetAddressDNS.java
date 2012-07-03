@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -19,35 +19,35 @@ import java.io.Serializable;
  *
  */
 public class InetAddressDNS implements Serializable {
-    private String value;    
-    
-    public InetAddressDNS(String value) throws ConfMException {	
-	value = com.tailf.confm.xs.String.wsCollapse(value);
-	this.value = value;
-	check();
+    private String value;
+
+    public InetAddressDNS(String value) throws ConfMException {
+        value = com.tailf.confm.xs.String.wsCollapse(value);
+        this.value = value;
+        check();
     }
 
     /**
      * Sets the value.
      */
     public void setValue(String value) throws ConfMException {
-	value = com.tailf.confm.xs.String.wsCollapse(value);
-	this.value = value;
+        value = com.tailf.confm.xs.String.wsCollapse(value);
+        this.value = value;
         check();
     }
 
     /**
      * Return the value.
-     */  
+     */
     public String getValue() {
-	return value;
+        return value;
     }
 
     private void check() throws ConfMException {
     }
 
     public String toString() {
-	return value;
+        return value;
     }
 
     public boolean equals(Object b) {

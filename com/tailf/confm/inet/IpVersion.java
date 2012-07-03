@@ -1,6 +1,6 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2010 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
+ *
+ *  Copyright 2010 Tail-F Systems AB. All rights reserved.
  *
  *  This software is the confidential and proprietary information of
  *  Tail-F Systems AB.
@@ -21,16 +21,16 @@ enum IpVersionValue { unknown, ipv4, ipv6 }
  */
 public class IpVersion implements Serializable {
     private IpVersionValue value;
-    
+
     /**
      * Constructor
      */
-    public IpVersion(String stringValue) throws ConfMException {	
+    public IpVersion(String stringValue) throws ConfMException {
         value = parseValue(stringValue);
     }
 
     private IpVersionValue parseValue(java.lang.String stringValue)
-      throws ConfMException {	
+      throws ConfMException {
         if (stringValue.equals("unknown"))
             return IpVersionValue.unknown;
         else if (stringValue.equals("ipv4"))
@@ -42,14 +42,14 @@ public class IpVersion implements Serializable {
 
         return null;
     }
-    
+
     private void check() {
     }
-    
+
     public IpVersion(IpVersionValue value) {
         this.value = value;
     }
-    
+
     /**
      * Set a value
      */
@@ -60,14 +60,14 @@ public class IpVersion implements Serializable {
     public void setValue(IpVersionValue value) {
         this.value = value;
     }
-    
+
     /**
      * Get a value
      */
     public IpVersionValue getValue() {
         return value;
     }
-    
+
     /**
      * Convert to a string value
      */
@@ -78,9 +78,9 @@ public class IpVersion implements Serializable {
     /**
      * Check for equality
      */
-    
+
     public boolean equals(Object object) {
-        if (object instanceof IpVersionValue) { 
+        if (object instanceof IpVersionValue) {
             return ((IpVersionValue)object).equals(this.value);
         }
         return false;
@@ -92,7 +92,7 @@ public class IpVersion implements Serializable {
         else
             return false;
     }
-    
+
     /**
      * Internal utilities
      */
@@ -101,7 +101,7 @@ public class IpVersion implements Serializable {
             return;
         throw new ConfMException(ConfMException.BAD_VALUE, this);
     }
-    
+
     protected void throwException(boolean ok, Object object)
       throws ConfMException {
         if (!ok)

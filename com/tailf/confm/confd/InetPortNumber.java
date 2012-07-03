@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -19,24 +19,24 @@ import java.io.Serializable;
  * the 'http://tail-f.com/ns/confd/1.0' namespace.
  *
  */
-public class InetPortNumber 
+public class InetPortNumber
     extends com.tailf.confm.xs.UnsignedShort implements Serializable {
-    
-    public InetPortNumber(String value) throws ConfMException {	
-	super(value);
-	check();
+
+    public InetPortNumber(String value) throws ConfMException {
+        super(value);
+        check();
     }
-    
+
     public InetPortNumber(int value) throws ConfMException {
-	super(value);
-	check();
+        super(value);
+        check();
     }
 
     /**
      * Sets the value.
      */
     public void setValue(String value) throws ConfMException {
-	super.setValue(value);
+        super.setValue(value);
         check();
     }
 
@@ -44,10 +44,10 @@ public class InetPortNumber
      * Sets the value.
      */
     public void setValue(int value) throws ConfMException {
-	super.setValue(value);
+        super.setValue(value);
         check();
     }
-    
+
     public void check() throws ConfMException {
     }
 

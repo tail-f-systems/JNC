@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -24,8 +24,8 @@ public class CsTree {
     private static int size = 0;
 
     /*
-     * This static methid is used by the 
-     * generated code to populate a new hashtable for a 
+     * This static methid is used by the
+     * generated code to populate a new hashtable for a
      * module
      */
 
@@ -50,7 +50,7 @@ public class CsTree {
     }
 
     /*
-     * Return an array of all loaded namespaces 
+     * Return an array of all loaded namespaces
      */
 
     public static String[] getLoadedNamespaces() {

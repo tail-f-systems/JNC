@@ -1,6 +1,6 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2010 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
+ *
+ *  Copyright 2010 Tail-F Systems AB. All rights reserved.
  *
  *  This software is the confidential and proprietary information of
  *  Tail-F Systems AB.
@@ -19,27 +19,27 @@ import java.net.InetAddress;
  * 'urn:ietf:params:xml:ns:yang:inet-types' namespace.
  */
 public class Ipv4Address implements Serializable {
-    private java.net.InetAddress value;    
-    
+    private java.net.InetAddress value;
+
     /**
      * Constructor
      */
-    public Ipv4Address(String stringValue) throws ConfMException {	
+    public Ipv4Address(String stringValue) throws ConfMException {
         value = parseValue(stringValue);
         check();
     }
-    
-    private java.net.InetAddress parseValue(String stringValue) 
+
+    private java.net.InetAddress parseValue(String stringValue)
       throws ConfMException {
         stringValue = com.tailf.confm.xs.String.wsCollapse(stringValue);
         byte[] b = stringValue.getBytes();
         byte[] v = new byte[4];
-        throwException(b.length == 0, stringValue); 
+        throwException(b.length == 0, stringValue);
         int i = 0;
         // 1
         throwException(b[i] < '0' || b[i] > '9', stringValue);
         int tmp = b[i++]-'0';
-        while (i < b.length && b[i] >= '0' && b[i] <= '9') 
+        while (i < b.length && b[i] >= '0' && b[i] <= '9')
             tmp = tmp*10+b[i++]-'0';
         throwException( tmp > 255, stringValue);
         v[0] = (byte)tmp;
@@ -47,7 +47,7 @@ public class Ipv4Address implements Serializable {
         // 2
         throwException(b[i] < '0' || b[i] > '9', stringValue);
         tmp = b[i++]-'0';
-        while (i < b.length && b[i] >= '0' && b[i] <= '9') 
+        while (i < b.length && b[i] >= '0' && b[i] <= '9')
             tmp = tmp*10+b[i++]-'0';
         throwException(tmp > 255, stringValue);
         v[1] = (byte)tmp;
@@ -55,7 +55,7 @@ public class Ipv4Address implements Serializable {
         // 3
         throwException(b[i] < '0' || b[i] > '9', stringValue);
         tmp = b[i++]-'0';
-        while (i < b.length && b[i] >= '0' && b[i] <= '9') 
+        while (i < b.length && b[i] >= '0' && b[i] <= '9')
             tmp = tmp*10+b[i++]-'0';
         throwException(tmp > 255, stringValue);
         v[2] = (byte)tmp;
@@ -63,7 +63,7 @@ public class Ipv4Address implements Serializable {
         // 4
         throwException(b[i] < '0' || b[i] > '9', stringValue);
         tmp = b[i++]-'0';
-        while (i < b.length && b[i] >= '0' && b[i] <= '9') 
+        while (i < b.length && b[i] >= '0' && b[i] <= '9')
             tmp = tmp*10+b[i++]-'0';
         throwException(tmp > 255, stringValue);
         v[3] = (byte)tmp;
@@ -79,12 +79,12 @@ public class Ipv4Address implements Serializable {
 
     private void check() throws ConfMException {
     }
-    
-    public Ipv4Address(java.net.InetAddress value) throws ConfMException {	
+
+    public Ipv4Address(java.net.InetAddress value) throws ConfMException {
         this.value = value;
         check();
     }
-    
+
     /**
      * Set a value
      */
@@ -92,19 +92,19 @@ public class Ipv4Address implements Serializable {
         value = parseValue(stringValue);
         check();
     }
-    
+
     public void setValue(java.net.InetAddress value) throws ConfMException {
         this.value = value;
         check();
     }
-    
+
     /**
      * Get a value
      */
     public java.net.InetAddress getValue() {
         return value;
     }
-    
+
     /**
      * Convert to a string value
      */
@@ -115,11 +115,11 @@ public class Ipv4Address implements Serializable {
         int i = 0;
         while (i < b.length && b[i] != '/')
             i++;
-        if (i < b.length) 
-            return inaddr.substring(i+1); 
+        if (i < b.length)
+            return inaddr.substring(i+1);
         return inaddr;
     }
-    
+
     /**
      * Check for equality
      */
@@ -128,22 +128,22 @@ public class Ipv4Address implements Serializable {
             return ((Ipv4Address)value).equals(this);
         return false;
     }
-    
+
     public boolean equals(Ipv4Address value) {
         java.net.InetAddress v1 = this.value;
         java.net.InetAddress v2 = value.getValue();
         return v1.equals(v2);
     }
-    
+
     /**
      * Internal utilities
-     */    
+     */
     protected void throwException(boolean ok) throws ConfMException {
         if (!ok)
             return;
         throw new ConfMException(ConfMException.BAD_VALUE, this);
     }
-    
+
     protected void throwException(boolean ok, Object object)
       throws ConfMException {
         if (!ok)

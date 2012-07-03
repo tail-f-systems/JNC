@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -19,7 +19,7 @@ import java.util.GregorianCalendar;
  * This class implements the "xs:time" datatype from
  * the 'http://www.w3.org/2001/XMLSchema' namespace.
  *
- * This represents a "recurring" point in time. 
+ * This represents a "recurring" point in time.
  *
  */
 public class Time implements Serializable {
@@ -28,7 +28,7 @@ public class Time implements Serializable {
     private int min;
     private int secs;
     private int secs_fraction;  // in milliseconds
-    private int secs_fraction_digits;    
+    private int secs_fraction_digits;
     private boolean timezoned= false;
     private boolean tz_neg = false;
     private int tz_hh;
@@ -37,14 +37,14 @@ public class Time implements Serializable {
     /**
      *
      *
-     */ 
+     */
     public Time() {
     }
 
 
     /**
      * Constructor for xs:time from a String in the format
-     * "hh:mm:ss". 
+     * "hh:mm:ss".
      * For example:
      * "21:32:52",
      * "21:32:52+02:00",
@@ -52,52 +52,52 @@ public class Time implements Serializable {
      * "21:32:52.12679",
      *
      */
-    public Time(java.lang.String value) throws ConfMException {	
-	value = String.wsCollapse(value);
-	parseValue(value);
-	check();
+    public Time(java.lang.String value) throws ConfMException {
+        value = String.wsCollapse(value);
+        parseValue(value);
+        check();
     }
-    
+
     /**
      * Sets the value.
      */
     public void setValue(java.lang.String value) throws ConfMException {
-	value = String.wsCollapse(value);
-	parseValue(value);
-        check();	
+        value = String.wsCollapse(value);
+        parseValue(value);
+        check();
     }
 
     /**
      * Gets the value.
      */
     public java.lang.String getValue() {
-	return toString();
+        return toString();
     }
-   
-    
+
+
     private void check() throws ConfMException {
-	throwException( hour > 23 );
-	throwException( hour < 0 );
-	throwException( min > 59 );
-	throwException( min < 0 );
-	throwException( secs >= 60 );
-	throwException( secs < 0 );
+        throwException( hour > 23 );
+        throwException( hour < 0 );
+        throwException( min > 59 );
+        throwException( min < 0 );
+        throwException( secs >= 60 );
+        throwException( secs < 0 );
     }
-    
-	
+
+
     public java.lang.String toString() {
-	java.lang.String s = new java.lang.String();
-	s = Date.two_digits(hour) + ":" +
-	    Date.two_digits(min) + ":" + 
-	    Date.two_digits(secs);
-	if (secs_fraction >0 && secs_fraction_digits>0) {
-	    java.lang.String fr = new java.lang.Integer(secs_fraction).toString();
-	    fr = fr.substring(0,secs_fraction_digits);
-	    s = s + "." + fr;
-	}
-	if (timezoned)
-	    s = s + Date.timezone_toString(tz_neg,tz_mm,tz_hh);
-	return s;
+        java.lang.String s = new java.lang.String();
+        s = Date.two_digits(hour) + ":" +
+            Date.two_digits(min) + ":" +
+            Date.two_digits(secs);
+        if (secs_fraction >0 && secs_fraction_digits>0) {
+            java.lang.String fr = new java.lang.Integer(secs_fraction).toString();
+            fr = fr.substring(0,secs_fraction_digits);
+            s = s + "." + fr;
+        }
+        if (timezoned)
+            s = s + Date.timezone_toString(tz_neg,tz_mm,tz_hh);
+        return s;
     }
 
 
@@ -107,10 +107,10 @@ public class Time implements Serializable {
      */
     public boolean equals(Time value) {
         Calendar v1 = getCalendar();
-        Calendar v2 = value.getCalendar();        
+        Calendar v2 = value.getCalendar();
         //System.out.println("v1= "+ v1.getTimeInMillis());
-        //System.out.println("v2= "+ v2.getTimeInMillis());        
-        if (v1.getTimeInMillis() == v2.getTimeInMillis()) 
+        //System.out.println("v2= "+ v2.getTimeInMillis());
+        if (v1.getTimeInMillis() == v2.getTimeInMillis())
             return true;
         return false;
     }
@@ -119,27 +119,27 @@ public class Time implements Serializable {
     /**
      * Checks if the value space of two Time objects
      * are equal.
-     */    
+     */
     public boolean equals(Object value) {
-	if (value instanceof Time) 
-	    return ((Time)value).equals(this);
-	return false;
+        if (value instanceof Time)
+            return ((Time)value).equals(this);
+        return false;
     }
 
     /**
-     * 
+     *
      */
     public int compareTo(Time value) {
-	return toString().compareTo( value.toString());
+        return toString().compareTo( value.toString());
     }
 
 
     /**
-     * Returns a Calendar object from the Time.     
-     * 
-     */    
+     * Returns a Calendar object from the Time.
+     *
+     */
     public Calendar getCalendar() {
-	Calendar c = new GregorianCalendar();
+        Calendar c = new GregorianCalendar();
         c.clear();
         c.set( Calendar.HOUR, hour);
         c.set( Calendar.MINUTE, min);
@@ -147,9 +147,9 @@ public class Time implements Serializable {
         // System.out.println("secs_fraction= "+secs_fraction);
         c.set( Calendar.MILLISECOND, secs_fraction);
         if (timezoned) {
-            int zone_offset = tz_hh * 60 * 60 * 1000 + 
+            int zone_offset = tz_hh * 60 * 60 * 1000 +
                 tz_mm * 60 * 1000;
-            if (tz_neg) zone_offset = - zone_offset;           
+            if (tz_neg) zone_offset = - zone_offset;
             c.set( Calendar.ZONE_OFFSET, zone_offset);
         }
         return c;
@@ -163,14 +163,14 @@ public class Time implements Serializable {
     public java.util.Date getTime() {
         return getCalendar().getTime();
     }
-    
+
 
     /**
      * Help method to parse and set the value.
-     */    
-    private void parseValue(java.lang.String value) 
-	throws ConfMException {
-	byte[] b= value.getBytes();
+     */
+    private void parseValue(java.lang.String value)
+        throws ConfMException {
+        byte[] b= value.getBytes();
         try {
             int i =0 ;
             hour= Date.parseDigit( b[i++] );
@@ -183,10 +183,10 @@ public class Time implements Serializable {
             secs= secs*10 + Date.parseDigit(b[i++]);
             secs_fraction_digits=0;
             secs_fraction = 0;
-            if ( i<b.length && b[i]=='.') { 
+            if ( i<b.length && b[i]=='.') {
                 i++;
                 int value_pos = 100; // millisecs
-                while( i<b.length && b[i]>='0' && b[i]<='9' 
+                while( i<b.length && b[i]>='0' && b[i]<='9'
                        && secs_fraction_digits<3) {
                     secs_fraction_digits++;
                     secs_fraction= secs_fraction + value_pos * ( b[i++] - '0');
@@ -194,8 +194,8 @@ public class Time implements Serializable {
                 }
                 // ignore extra numbers in the fraction part
                 while (i<b.length && b[i]>='0' && b[i]<='9') i++;
-                // 
-                throwException( secs_fraction_digits==0, value );    
+                //
+                throwException( secs_fraction_digits==0, value );
             }
             timezoned= false;
             tz_neg= false;
@@ -208,19 +208,19 @@ public class Time implements Serializable {
                     i++;
                     throwException( i != b.length, value );
                 }
-                else if (b[i]=='+' || b[i]=='-') { 
+                else if (b[i]=='+' || b[i]=='-') {
                     if (b[i]=='-') tz_neg= true;
-                    i++; 		
+                    i++;
                     tz_hh = Date.parseDigit( b[i++] );
                     tz_hh = tz_hh*10 + Date.parseDigit(b[i++]);
-                    throwException( b[i++]!=':', value );		
+                    throwException( b[i++]!=':', value );
                     tz_mm= Date.parseDigit( b[i++]);
                     tz_mm= tz_mm*10 + Date.parseDigit(  b[i++]);
-                    throwException( i != b.length, value );		
+                    throwException( i != b.length, value );
                 }
                 else throwException( true, value );
             }
-	} catch  (ArrayIndexOutOfBoundsException e) {
+        } catch  (ArrayIndexOutOfBoundsException e) {
             throwException(true, value);
         }
     }
@@ -230,47 +230,47 @@ public class Time implements Serializable {
     /** ---------- Restrictions ---------- */
 
     /**
-     * xs:minInclusive defines a minimum value that can be reached.     
+     * xs:minInclusive defines a minimum value that can be reached.
      */
     protected void minInclusive(Time restriction) throws ConfMException {
-	throwException( compareTo(restriction) < 0 );
-    }    
-    
-    /**
-     * xs:minExclusive defines a minimum value that cannot be reached.     
-     */
-    protected void minExclusive(Time restriction) throws ConfMException {
-	throwException( compareTo(restriction) <= 0 );
-    }
-        
-    /**
-     * xs:maxExclusive defines a maximum value that cannot be reached.     
-     */
-    protected void maxInclusive(Time restriction) throws ConfMException {
-	throwException( compareTo(restriction) >0 );
+        throwException( compareTo(restriction) < 0 );
     }
 
     /**
-     * xs:maxExclusive defines a minimum value that cannot be reached.     
+     * xs:minExclusive defines a minimum value that cannot be reached.
+     */
+    protected void minExclusive(Time restriction) throws ConfMException {
+        throwException( compareTo(restriction) <= 0 );
+    }
+
+    /**
+     * xs:maxExclusive defines a maximum value that cannot be reached.
+     */
+    protected void maxInclusive(Time restriction) throws ConfMException {
+        throwException( compareTo(restriction) >0 );
+    }
+
+    /**
+     * xs:maxExclusive defines a minimum value that cannot be reached.
      */
     protected void maxExclusive(Time restriction) throws ConfMException {
-	throwException( compareTo(restriction) >= 0);
+        throwException( compareTo(restriction) >= 0);
     }
-    
+
     /**
      * xs:enumeration
      */
     protected boolean enumeration(java.lang.String value) {
-	if ( toString().equals(value)) return true;
-	else return false;
+        if ( toString().equals(value)) return true;
+        else return false;
     }
-    
+
     /**
      * Assert that the value is 'false'
      * Throw an ConfMException otherwise
      */
     protected void throwException(boolean v) throws ConfMException {
-	if (!v) return;
+        if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,this);
     }
 
@@ -280,7 +280,7 @@ public class Time implements Serializable {
      * Throw an ConfMException otherwise
      */
     protected void throwException(boolean v, Object value) throws ConfMException {
-	if (!v) return;
+        if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,value);
     }
 

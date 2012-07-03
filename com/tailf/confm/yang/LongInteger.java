@@ -1,6 +1,6 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2010 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
+ *
+ *  Copyright 2010 Tail-F Systems AB. All rights reserved.
  *
  *  This software is the confidential and proprietary information of
  *  Tail-F Systems AB.
@@ -21,29 +21,29 @@ import java.util.regex.PatternSyntaxException;
  * namespace, e.g. int64.
  */
 abstract class LongInteger implements Serializable {
-    private long value;    
-    
+    private long value;
+
     /**
      * Constructor
      */
-    public LongInteger(java.lang.String stringValue) {	
+    public LongInteger(java.lang.String stringValue) {
         value = parseValue(stringValue);
         check();
     }
-    
+
     private long parseValue(java.lang.String stringValue) {
         stringValue = com.tailf.confm.xs.String.wsCollapse(stringValue);
         return Long.parseLong(stringValue);
     }
-    
+
     private void check() {
     }
-    
-    public LongInteger(long value) {	
+
+    public LongInteger(long value) {
         this.value = value;
         check();
     }
-    
+
     /**
      * Set a value
      */
@@ -51,57 +51,57 @@ abstract class LongInteger implements Serializable {
         value = parseValue(stringValue);
         check();
     }
-    
+
     public void setValue(long value) throws ConfMException {
         this.value = value;
         check();
     }
-    
+
     /**
      * Get a value
      */
     public long getValue() {
         return value;
     }
-    
+
     /**
      * Convert to a string value
-     */    
+     */
     public java.lang.String toString() {
         return new Long(value).toString();
     }
-    
+
     /**
      * Check for equality
      */
     public boolean equals(Object object) {
-        if (object instanceof Integer) { 
+        if (object instanceof Integer) {
             return ((Integer)object).equals(this.value);
         }
         return false;
     }
-    
+
     public boolean equals(long value) {
         if (this.value == value)
             return true;
         else
             return false;
     }
-    
+
     /**
      * xs:minInclusive defines a minimum value that can be reached
      */
     protected void minInclusive(long value) throws ConfMException {
         throwException(this.value < value);
     }
-    
+
     /**
      * xs:minExclusive defines a minimum value that cannot be reached
      */
     protected void minExclusive(long value) throws ConfMException {
         throwException(this.value <= value);
     }
-    
+
     /**
      * xs:maxExclusive defines a maximum value that cannot be reached
      */
@@ -115,7 +115,7 @@ abstract class LongInteger implements Serializable {
     protected void maxExclusive(long value) throws ConfMException {
         throwException(this.value >= value);
     }
-    
+
     /**
      * xs:minLength defines a minimum length measured in number of
      * characters or bytes
@@ -131,7 +131,7 @@ abstract class LongInteger implements Serializable {
     protected void maxLength(int n) throws ConfMException {
         throwException(toString().length() > n);
     }
-    
+
     /**
      * xs:fractionDigits
      */
@@ -151,7 +151,7 @@ abstract class LongInteger implements Serializable {
             com.tailf.confm.xs.Decimal.numTotalDigits(toString()) > digits);
     }
     */
-    
+
     /**
      * xs:enumeration
      */
@@ -161,7 +161,7 @@ abstract class LongInteger implements Serializable {
         else
             return false;
     }
-    
+
     /**
      * xs:pattern
      */
@@ -173,7 +173,7 @@ abstract class LongInteger implements Serializable {
             throwException(true, e);
         }
     }
-    
+
     protected void pattern(java.lang.String[] regexes) throws ConfMException {
         try {
             java.lang.String s = new Long(value).toString();
@@ -185,7 +185,7 @@ abstract class LongInteger implements Serializable {
             throwException(true, e);
         }
     }
-    
+
     /**
      * Internal utilities
      */
@@ -194,7 +194,7 @@ abstract class LongInteger implements Serializable {
             return;
         throw new ConfMException(ConfMException.BAD_VALUE, this);
     }
-    
+
     protected void throwException(boolean ok, Object object)
       throws ConfMException {
         if (!ok)

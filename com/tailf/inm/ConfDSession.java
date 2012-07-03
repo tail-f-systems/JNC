@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -14,12 +14,12 @@ package com.tailf.inm;
 import java.util.ArrayList;
 import java.io.IOException;
 
- 
+
 /**
  * An extended NETCONF session class,
  * with capabilities that ConfD supports.
  * <p>
- * ConfD supports the following optional, non-standard 
+ * ConfD supports the following optional, non-standard
  * capabilities:
  * <ul>
  * <li>actions
@@ -27,17 +27,17 @@ import java.io.IOException;
  * <li>with-defaults
  * </ul>
  *
- * The <code>:with-defaults</code> capability introduces an 
+ * The <code>:with-defaults</code> capability introduces an
  * attribute 'with-defaults'
  * which can be used in the 'rpc' element when the
  * operation is 'get', 'get-config', or 'copy-config', to
  * control if default values are returned by the NETCONF
  * agent or not.  If 'with-defaults' is "true", default
  * values are included.  If 'with-defaults' is "false",
- * default values are not included.  
+ * default values are not included.
  * <p>
- * The <code>:action</code> capability introduces one new rpc method which 
- * is used to invoke actions (methods) defined in the data model. 
+ * The <code>:action</code> capability introduces one new rpc method which
+ * is used to invoke actions (methods) defined in the data model.
  * When an action is invoked, the instance on which the action is invoked is
  * explicitly identified by an hierarchy of configuration or state
  * data.
@@ -108,37 +108,37 @@ public class ConfDSession extends NetconfSession {
 
 
 
-    
-    /**
-     * Constructor. Creates a new session object 
-     * using the given transport object.
-     *
-     * @see SSHSession
-     *
-     * @param transport Transport object 
-     */
-    public ConfDSession( Transport transport ) 
-	throws INMException, IOException  {
-	super();
-	setTransport(transport);
-        mkSession();
-    }
-
 
     /**
-     * Constructor. Creates a new session object 
+     * Constructor. Creates a new session object
      * using the given transport object.
      *
      * @see SSHSession
      *
      * @param transport Transport object
-     * @param parse XML parser object 
+     */
+    public ConfDSession( Transport transport )
+        throws INMException, IOException  {
+        super();
+        setTransport(transport);
+        mkSession();
+    }
+
+
+    /**
+     * Constructor. Creates a new session object
+     * using the given transport object.
+     *
+     * @see SSHSession
+     *
+     * @param transport Transport object
+     * @param parse XML parser object
      */
 
-    public ConfDSession( Transport transport, XMLParser parser) 
-	throws INMException, IOException  {
-	super();
-	setTransport(transport);
+    public ConfDSession( Transport transport, XMLParser parser)
+        throws INMException, IOException  {
+        super();
+        setTransport(transport);
         this.parser = parser;
         mkSession();
     }
@@ -147,46 +147,46 @@ public class ConfDSession extends NetconfSession {
 
 
     private void mkSession() throws INMException, IOException {
-	setCapability(Capabilities.WITH_DEFAULTS_CAPABILITY);
-	setCapability(Capabilities.ACTIONS_CAPABILITY);
-	setCapability(Capabilities.TRANSACTIONS_CAPABILITY);
-	hello();
+        setCapability(Capabilities.WITH_DEFAULTS_CAPABILITY);
+        setCapability(Capabilities.ACTIONS_CAPABILITY);
+        setCapability(Capabilities.TRANSACTIONS_CAPABILITY);
+        hello();
 
-	/** set defaultPrefixes for 
-	 *  NS_ACTIONS
-	 *  NS_TRANSACTIONS
-	 */
-	if (Element.defaultPrefixes==null) 
-	    Element.defaultPrefixes = new PrefixMap();
-	Element.defaultPrefixes.set( 
+        /** set defaultPrefixes for
+         *  NS_ACTIONS
+         *  NS_TRANSACTIONS
+         */
+        if (Element.defaultPrefixes==null)
+            Element.defaultPrefixes = new PrefixMap();
+        Element.defaultPrefixes.set(
             new Prefix("nca",Capabilities.NS_ACTIONS));
-	Element.defaultPrefixes.set( 
+        Element.defaultPrefixes.set(
             new Prefix("nctr",Capabilities.NS_TRANSACTIONS));
     }
-    
-    
-    
+
+
+
 
     /**
      * Set the 'with-defaults' to 'true' or 'false'.
      * This capability is valid for <code>get</code>,
      * <code>get-config</code>, and <code>copy-config</code>,
      * to control if defualt values are returned by the NETCONF
-     * agent or not. If this value is 'true', default values are 
-     * included. If this value is 'false', default valus are not 
+     * agent or not. If this value is 'true', default values are
+     * included. If this value is 'false', default valus are not
      * included.
      * @param value Value for with-defaults.
      */
     public void setWithDefaults(boolean value) throws INMException {
-        if (! capabilities.hasWithDefaults()) 
-	    throw new INMException(
+        if (! capabilities.hasWithDefaults())
+            throw new INMException(
                 INMException.SESSION_ERROR,
                 "server does not support the :with-defaults capability");
-	withDefaultsAttr = new Attribute(Capabilities.WITH_DEFAULTS_CAPABILITY,
+        withDefaultsAttr = new Attribute(Capabilities.WITH_DEFAULTS_CAPABILITY,
                                          "with-defaults",
                                          new Boolean(value).toString());
     }
-    
+
 
     /**
      * Action capability.
@@ -197,10 +197,10 @@ public class ConfDSession extends NetconfSession {
      * @param data element tree with action-data
      */
     public Element action(Element data) throws INMException, IOException {
-	trace("action: "+data.toXMLString());
-	encode_action(out,data);
-	out.flush();
-	return recv_rpc_reply();
+        trace("action: "+data.toXMLString());
+        encode_action(out,data);
+        out.flush();
+        return recv_rpc_reply();
     }
 
 
@@ -209,20 +209,20 @@ public class ConfDSession extends NetconfSession {
      * There can be a single ongoing transaction at any time.
      * <p>
      * When a transaction has been started, the client can send any
-     * NETCONF operation, but any <code>edit-config</code> operation 
-     * sent from the client must speify the same <code>target</code> 
-     * as the <code>start-transaction</code>. 
-     * If the server receives and <code>edit-config</code> with another 
-     * <code>target</code>, an error must be returned with an 
+     * NETCONF operation, but any <code>edit-config</code> operation
+     * sent from the client must speify the same <code>target</code>
+     * as the <code>start-transaction</code>.
+     * If the server receives and <code>edit-config</code> with another
+     * <code>target</code>, an error must be returned with an
      * <code>error-tag</code> set to "invalid-value".
      * <p>
-     * The modifications sent in the <code>edit-config</code> 
+     * The modifications sent in the <code>edit-config</code>
      * operations are not immediately applied to the configuration datastore.
-     * Instead they are kept in the transaction state of the server.  
-     * The transaction state is only applied when a <code>commit-transaction</code> 
+     * Instead they are kept in the transaction state of the server.
+     * The transaction state is only applied when a <code>commit-transaction</code>
      * is received.
      * <p>
-     * The client sends a <code>prepare-transaction</code> when all 
+     * The client sends a <code>prepare-transaction</code> when all
      * modifications have been sent.
      *
      * @param datastore The datastore. One of {@link #RUNNING}, {@link #CANDIDATE}, {@link #STARTUP}
@@ -232,10 +232,10 @@ public class ConfDSession extends NetconfSession {
      * @see #abortTransaction()
      */
     public void startTransaction(int datastore) throws INMException, IOException {
-	trace("startTransaction: "+datastoreToString(datastore));
-	encode_startTransaction(out,encode_datastore(datastore));
-	out.flush();
-	recv_rpc_reply_ok();	
+        trace("startTransaction: "+datastoreToString(datastore));
+        encode_startTransaction(out,encode_datastore(datastore));
+        out.flush();
+        recv_rpc_reply_ok();
     }
 
 
@@ -247,16 +247,16 @@ public class ConfDSession extends NetconfSession {
      * <p>
      * After a successful <code>prepare-transaction</code>, the next transaction
      * related rpc operation must be <code>commit-transaction</code> or
-     * <code>abort-transaction</code>.  
+     * <code>abort-transaction</code>.
      * Note that an <code>edit-config</code> cannot be sent
      * before the transaction is either committed or aborted.
      * <p>
      * Care must be taken by the server to make sure that if
-     * <code>prepare-transaction</code> succeeds then the 
+     * <code>prepare-transaction</code> succeeds then the
      * <code>commit-transaction</code>
      * should not fail, since this might result in an inconsistent
-     * distributed state.  Thus, <code>prepare-transaction</code> 
-     * should allocate any resources needed to make sure the 
+     * distributed state.  Thus, <code>prepare-transaction</code>
+     * should allocate any resources needed to make sure the
      * <code>commit-transaction</code> will succeed.
      *
      *
@@ -265,10 +265,10 @@ public class ConfDSession extends NetconfSession {
      * @see #abortTransaction()
      */
     public void prepareTransaction() throws INMException, IOException {
-	trace("prepareTransaction");
-	encode_prepareTransaction(out);
-	out.flush();
-	recv_rpc_reply_ok();
+        trace("prepareTransaction");
+        encode_prepareTransaction(out);
+        out.flush();
+        recv_rpc_reply_ok();
     }
 
 
@@ -277,22 +277,22 @@ public class ConfDSession extends NetconfSession {
      * Applies the changes made in the transaction to the configuration
      * datatore.  The transaction is closed after a
      * <code>commit-transaction</code>.
-     * 
+     *
      * @see #startTransaction(int)
      * @see #prepareTransaction()
      * @see #abortTransaction()
      */
     public void commitTransaction() throws INMException, IOException {
-	trace("commitTransaction");
-	encode_commitTransaction(out);
-	out.flush();
-	recv_rpc_reply_ok();
+        trace("commitTransaction");
+        encode_commitTransaction(out);
+        out.flush();
+        recv_rpc_reply_ok();
     }
 
 
     /**
      * Aborts the ongoing transaction, and all pending changes are
-     * discarded.  <code>abort-transaction</code> 
+     * discarded.  <code>abort-transaction</code>
      * can be given at any time during an ongoing transaction.
      *
      *
@@ -301,10 +301,10 @@ public class ConfDSession extends NetconfSession {
      * @see #commitTransaction()
      */
     public void abortTransaction() throws INMException, IOException {
-	trace("abortTransaction");
-	encode_abortTransaction(out);
-	out.flush();
-	recv_rpc_reply_ok();	
+        trace("abortTransaction");
+        encode_abortTransaction(out);
+        out.flush();
+        recv_rpc_reply_ok();
     }
 
 
@@ -313,18 +313,18 @@ public class ConfDSession extends NetconfSession {
      */
 
     Element recv_rpc_reply() throws INMException, IOException {
-	StringBuffer reply = in.readOne();
-	trace("reply= "+ reply);
-	Element t= parser.parse( reply.toString() );
-	Element ok= t.getFirst("self::rpc-reply/ok");
-	if (ok!=null) return ok;
-	Element data= t.getFirst("self::rpc-reply/data");
-	if (data!=null) return data;
-	/* rpc-error */
-	throw new INMException(INMException.RPC_REPLY_ERROR,t);
+        StringBuffer reply = in.readOne();
+        trace("reply= "+ reply);
+        Element t= parser.parse( reply.toString() );
+        Element ok= t.getFirst("self::rpc-reply/ok");
+        if (ok!=null) return ok;
+        Element data= t.getFirst("self::rpc-reply/data");
+        if (data!=null) return data;
+        /* rpc-error */
+        throw new INMException(INMException.RPC_REPLY_ERROR,t);
     }
-    
-    
+
+
     /** ------------------------------------------------------------
      *  Encoding
      */
@@ -344,23 +344,23 @@ public class ConfDSession extends NetconfSession {
      *   </data>
      *  </action>
      * </rpc>
-     */    
+     */
     void encode_action(Transport out,Element data) throws INMException {
-	String prefix= Element.defaultPrefixes.nsToPrefix(
+        String prefix= Element.defaultPrefixes.nsToPrefix(
             Capabilities.NS_ACTIONS);
-	String act = mk_prefix_colon(prefix);
-	String xmlnsAttr = mk_xmlns_attr(prefix,Capabilities.NS_ACTIONS);
-	encode_rpc_begin(out);
-	out.println("<"+act+"action "+xmlnsAttr+">");
-	out.print("<"+act+"data>");
-	data.encode( out );
-	out.println("</"+act+"data>");
-	out.println("</"+act+"action>");
-	encode_rpc_end(out);	
+        String act = mk_prefix_colon(prefix);
+        String xmlnsAttr = mk_xmlns_attr(prefix,Capabilities.NS_ACTIONS);
+        encode_rpc_begin(out);
+        out.println("<"+act+"action "+xmlnsAttr+">");
+        out.print("<"+act+"data>");
+        data.encode( out );
+        out.println("</"+act+"data>");
+        out.println("</"+act+"action>");
+        encode_rpc_end(out);
     }
 
 
-    /** 
+    /**
      * Example:
      * <rpc message-id="101"
      *   xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -370,20 +370,20 @@ public class ConfDSession extends NetconfSession {
      * </rpc>
      */
     void encode_startTransaction(Transport out,String target) {
-	String prefix= Element.defaultPrefixes.nsToPrefix(
+        String prefix= Element.defaultPrefixes.nsToPrefix(
             Capabilities.NS_TRANSACTIONS);
-	String tr = mk_prefix_colon(prefix);
-	String xmlnsAttr = mk_xmlns_attr(prefix,Capabilities.NS_TRANSACTIONS);
-	
-	encode_rpc_begin(out);
-	out.println("<"+tr+"start-transaction "+xmlnsAttr+">");
-	out.print("<"+tr+"target>"); 
-	out.print( target ); 
-	out.println("</"+tr+"target>");
-	out.println("</"+tr+"start-transaction>");
-	encode_rpc_end(out);		
+        String tr = mk_prefix_colon(prefix);
+        String xmlnsAttr = mk_xmlns_attr(prefix,Capabilities.NS_TRANSACTIONS);
+
+        encode_rpc_begin(out);
+        out.println("<"+tr+"start-transaction "+xmlnsAttr+">");
+        out.print("<"+tr+"target>");
+        out.print( target );
+        out.println("</"+tr+"target>");
+        out.println("</"+tr+"start-transaction>");
+        encode_rpc_end(out);
     }
-    
+
 
     /**
      * Example:
@@ -394,14 +394,14 @@ public class ConfDSession extends NetconfSession {
      * </rpc>
      */
     void encode_prepareTransaction(Transport out) {
-	String prefix= Element.defaultPrefixes.nsToPrefix(
+        String prefix= Element.defaultPrefixes.nsToPrefix(
             Capabilities.NS_TRANSACTIONS);
-	String tr = mk_prefix_colon(prefix);
-	String xmlnsAttr = mk_xmlns_attr(prefix,Capabilities.NS_TRANSACTIONS);
+        String tr = mk_prefix_colon(prefix);
+        String xmlnsAttr = mk_xmlns_attr(prefix,Capabilities.NS_TRANSACTIONS);
 
-	encode_rpc_begin(out);
-	out.println("<"+tr+"prepare-transaction "+xmlnsAttr+"/>");
-	encode_rpc_end(out);		
+        encode_rpc_begin(out);
+        out.println("<"+tr+"prepare-transaction "+xmlnsAttr+"/>");
+        encode_rpc_end(out);
     }
 
 
@@ -414,17 +414,17 @@ public class ConfDSession extends NetconfSession {
      *
      */
     void encode_commitTransaction(Transport out) {
-	String prefix= Element.defaultPrefixes.nsToPrefix(
+        String prefix= Element.defaultPrefixes.nsToPrefix(
             Capabilities.NS_TRANSACTIONS);
-	String tr = mk_prefix_colon(prefix);
-	String xmlnsAttr = mk_xmlns_attr(prefix,Capabilities.NS_TRANSACTIONS);
+        String tr = mk_prefix_colon(prefix);
+        String xmlnsAttr = mk_xmlns_attr(prefix,Capabilities.NS_TRANSACTIONS);
 
-	encode_rpc_begin(out);
-	out.println("<"+tr+"commit-transaction "+xmlnsAttr+"/>");
-	encode_rpc_end(out);		    
+        encode_rpc_begin(out);
+        out.println("<"+tr+"commit-transaction "+xmlnsAttr+"/>");
+        encode_rpc_end(out);
     }
 
-    
+
     /**
      * <rpc message-id="104"
      *  xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -433,18 +433,18 @@ public class ConfDSession extends NetconfSession {
      * </rpc>
      */
     void encode_abortTransaction(Transport out) {
-	String prefix= Element.defaultPrefixes.nsToPrefix(
+        String prefix= Element.defaultPrefixes.nsToPrefix(
             Capabilities.NS_TRANSACTIONS);
-	String tr = mk_prefix_colon(prefix);
-	String xmlnsAttr = mk_xmlns_attr(prefix,Capabilities.NS_TRANSACTIONS);
+        String tr = mk_prefix_colon(prefix);
+        String xmlnsAttr = mk_xmlns_attr(prefix,Capabilities.NS_TRANSACTIONS);
 
-	encode_rpc_begin(out);
-	out.println("<"+tr+"abort-transaction "+xmlnsAttr+"/>");
-	encode_rpc_end(out);		    
+        encode_rpc_begin(out);
+        out.println("<"+tr+"abort-transaction "+xmlnsAttr+"/>");
+        encode_rpc_end(out);
     }
-    
 
-    
+
+
     /** ------------------------------------------------------------
      *  help functions
      */
@@ -454,9 +454,9 @@ public class ConfDSession extends NetconfSession {
      * Printout trace if 'debug'-flag is enabled.
      */
     private static void trace(String s) {
-	if (Element.debugLevel>=Element.DEBUG_LEVEL_SESSION) 
-	    System.err.println("*ConfDSession: "+s);
+        if (Element.debugLevel>=Element.DEBUG_LEVEL_SESSION)
+            System.err.println("*ConfDSession: "+s);
     }
-    
+
 }
 

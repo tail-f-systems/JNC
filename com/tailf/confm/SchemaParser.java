@@ -1,7 +1,7 @@
-/**   
- *  Copyright 2010 Tail-F Systems AB. All rights reserved. 
+/**
+ *  Copyright 2010 Tail-F Systems AB. All rights reserved.
  *
- *  This software is the confidential and proprietary 
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -40,17 +40,17 @@ import com.tailf.inm.*;
  *     </rev>
  *   </node>
  * <schema>
- * 
+ *
  * into a hashtable with {@link CsNode} elements.
  *
  */
 public class SchemaParser {
     protected XMLReader parser;
-    
+
     public SchemaParser() throws INMException {
         try {
             String javaVersion = System.getProperty("java.version");
-            
+
             if (javaVersion.startsWith("1.4"))
                 parser =
                     XMLReaderFactory.createXMLReader(
@@ -63,19 +63,19 @@ public class SchemaParser {
                                    "failed to initialize parser: "+e);
         }
     }
-    
+
     private class SchemaHandler extends DefaultHandler {
         protected Hashtable h;
         protected CsNode node;
         protected RevisionInfo ri;
         protected ArrayList riArrayList;
-        protected String value = null;		
-        
+        protected String value = null;
+
         SchemaHandler(Hashtable h2) {
             super();
             h = h2;
         }
-        
+
         public void startElement(String uri, String localName,
                                  String qName, Attributes attributes)
           throws SAXException {
@@ -93,18 +93,18 @@ public class SchemaParser {
             else
                 value = new String();
         }
-        
+
         public void endElement(String uri, String localName, String qName) {
             if (localName.equals("node")) {
                 h.put(node.tagpath, node);
             } else if (localName.equals("tagpath")) {
                 String[] splittedTagpath = value.split("/");
-                
+
                 if (splittedTagpath.length == 0)
                     node.tagpath = new Tagpath(0);
                 else {
-                    node.tagpath = new Tagpath(splittedTagpath.length-1);                
-                    
+                    node.tagpath = new Tagpath(splittedTagpath.length-1);
+
                     for (int i = 1; i < splittedTagpath.length; i++)
                         node.tagpath.p[i-1] = new String(splittedTagpath[i]);
                 }
@@ -112,11 +112,11 @@ public class SchemaParser {
                 node.namespace = new String(value);
             } else if (localName.equals("primitive_type")) {
                 node.primitive_type = Integer.parseInt(value);
-    	    } else if (localName.equals("min_occurs")) {
+            } else if (localName.equals("min_occurs")) {
                 node.min_occurs = Integer.parseInt(value);
-    	    } else if (localName.equals("max_occurs")) {
+            } else if (localName.equals("max_occurs")) {
                 node.max_occurs = Integer.parseInt(value);
-    	    } else if (localName.equals("children")) {
+            } else if (localName.equals("children")) {
                 String[] child = value.split(" ");
                 if (child.length == 0)
                     node.children = null;
@@ -127,34 +127,34 @@ public class SchemaParser {
                 }
             } else if (localName.equals("flags")) {
                 node.flags = Integer.parseInt(value);
-    	    } else if (localName.equals("desc")) {
+            } else if (localName.equals("desc")) {
                 node.desc = new String(value);
-    	    } else if (localName.equals("type")) {
+            } else if (localName.equals("type")) {
                 ri.type = Integer.parseInt(value);
-    	    } else if (localName.equals("idata")) {
+            } else if (localName.equals("idata")) {
                 ri.idata = Integer.parseInt(value);
-    	    } else if (localName.equals("data")) {
+            } else if (localName.equals("data")) {
                 ri.data = new String(value);
-    	    } else if (localName.equals("introduced")) {
+            } else if (localName.equals("introduced")) {
                 ri.introduced = new String(value);
-    	    } else if (localName.equals("info")) {
+            } else if (localName.equals("info")) {
                 riArrayList.add(ri);
-    	    } else if (localName.equals("rev")) {
+            } else if (localName.equals("rev")) {
                 RevisionInfo[] riArray =
                     (RevisionInfo[])(riArrayList.toArray(new RevisionInfo[riArrayList.size()]));
                 node.revInfo = riArray;
             }
-            
+
             value = null;
         }
-        
+
         public void characters(char[] ch, int start, int length) {
             if (value == null)
                 return;
             value += new String(ch, start, length);
         }
     }
-    
+
     /**
      * Read in an XML file and parse it and return a hashtable
      * with CsNode objects.

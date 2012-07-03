@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -20,24 +20,24 @@ import java.io.Serializable;
  * Derivate from "xs:token".
  */
 public class NMTOKEN extends Token implements Serializable {
-    
-    public NMTOKEN(java.lang.String value) throws ConfMException {	
+
+    public NMTOKEN(java.lang.String value) throws ConfMException {
         super(value);
-	check();
+        check();
     }
-        
+
     /**
      * Sets the value.
      */
     public void setValue(java.lang.String value) throws ConfMException {
-	super.setValue(value);
-        check();	
+        super.setValue(value);
+        check();
     }
-    
-    private void check() throws ConfMException {        
-	// no spaces or commas allowed
-	noSpacesOrCommasAllowed( getValue() );
+
+    private void check() throws ConfMException {
+        // no spaces or commas allowed
+        noSpacesOrCommasAllowed( getValue() );
     }
-    
+
 
 }

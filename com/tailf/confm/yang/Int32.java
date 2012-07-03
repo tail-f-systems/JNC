@@ -1,6 +1,6 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2010 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
+ *
+ *  Copyright 2010 Tail-F Systems AB. All rights reserved.
  *
  *  This software is the confidential and proprietary information of
  *  Tail-F Systems AB.
@@ -23,8 +23,8 @@ public class Int32 extends PlainInteger implements Serializable {
     public Int32(java.lang.String value) throws ConfMException {
         super(value);
     }
-    
-    public Int32(int value) throws ConfMException {	
+
+    public Int32(int value) throws ConfMException {
         super(value);
     }
 }

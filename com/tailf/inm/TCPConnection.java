@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -27,7 +27,7 @@ import java.io.PrintWriter;
  * <p>
  * <b>Note:</b> TCP is not a standardized way to connect to a NETCONF
  * device. It will only work when connecting to a ConfD agent and
- * should only be used for testing. Use {@link SSHConnection} and 
+ * should only be used for testing. Use {@link SSHConnection} and
  * {@link SSHSession} instead.
  * <p>
  * Example:
@@ -44,19 +44,19 @@ public class TCPConnection {
     private String host;
     private int port;
 
-    // package private 
+    // package private
     boolean hasSession = false;
     Socket socket;
-    BufferedReader in = null;        
+    BufferedReader in = null;
     PrintWriter out = null;
 
-    
+
      /**
      * Creates a new TCP connection object.
      * Connects towards a ConfD NETCONF agent and
      * authenticates.
      * <p>
-     * This only works towards ConfD agent since 
+     * This only works towards ConfD agent since
      * NETCONF/TCP not is a standard transport mechanism.
      * <p>
      * It is provided to be symmetrical to the {@link SSHConnection} class,
@@ -64,35 +64,35 @@ public class TCPConnection {
      * <p>
      * Initial authentication string towards ConfD looks like:
      * <code>[Username;127.0.0.1;tcp;UID;GID;SUPLGIDS;DIR;GROUPS;]</code>
-     */ 
+     */
     public TCPConnection(String host, int port, String username, String uid,
                          String gid, String suplgids, String dir,
-                         String groups) 
-	throws IOException, UnknownHostException, INMException {
+                         String groups)
+        throws IOException, UnknownHostException, INMException {
         this(host,port);
-        authenticate(username,uid,gid,suplgids,dir,groups);        
+        authenticate(username,uid,gid,suplgids,dir,groups);
     }
-    
+
 
     /**
      * Creates a new TCP connection object.
-     * The connection need to be authenticated before it can 
+     * The connection need to be authenticated before it can
      * be used. See {@link authenticate(String,String,String,String,String,String) authenticate}
-     */ 
-    public TCPConnection(String host, int port) 
-	throws IOException, UnknownHostException, INMException {
-	trace("created");
+     */
+    public TCPConnection(String host, int port)
+        throws IOException, UnknownHostException, INMException {
+        trace("created");
         this.host = host;
         this.port = port;
-   	socket = new Socket(host, port);
-	// initStreams
-	InputStream is = socket.getInputStream();
-	OutputStream os= socket.getOutputStream();
+        socket = new Socket(host, port);
+        // initStreams
+        InputStream is = socket.getInputStream();
+        OutputStream os= socket.getOutputStream();
         in = new BufferedReader(new InputStreamReader(is));
-	out = new PrintWriter(os, false);
+        out = new PrintWriter(os, false);
     }
 
-    
+
     /**
      * Authenticate towards the ConfD NETCONF Agent.
      * <p>
@@ -106,17 +106,17 @@ public class TCPConnection {
      * @param suplgids
      * @param dir
      * @param groups
-     */ 
+     */
     public void authenticate(String username, String uid,
                 String gid, String suplgids, String dir,
                 String groups) {
-	if (host.equals("localhost")) host = "127.0.0.1";
+        if (host.equals("localhost")) host = "127.0.0.1";
         String header= "["+username+";"+host+";tcp;"+uid+";"+gid+";"+
-	    suplgids+";"+dir+";"+groups+";]";
+            suplgids+";"+dir+";"+groups+";]";
         out.println(header);
     }
-    
-    
+
+
     /**
      * Closes the TCP connection.
      */
@@ -124,13 +124,13 @@ public class TCPConnection {
         trace("close()");
         socket.close();
     }
-    
+
 
     /**
      * Printout trace if 'debug'-flag is enabled.
      */
     private static void trace(String s) {
-	if (Element.debugLevel>=Element.DEBUG_LEVEL_TRANSPORT) 
-	    System.err.println("*TCPConnection: "+s);
+        if (Element.debugLevel>=Element.DEBUG_LEVEL_TRANSPORT)
+            System.err.println("*TCPConnection: "+s);
     }
 }

@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2009 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2009 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -22,27 +22,27 @@ import java.io.Serializable;
  */
 public class MD5DigestString implements Serializable {
     private String value;
-    
-    public MD5DigestString(String value) throws ConfMException {		
-	value = com.tailf.confm.xs.String.wsCollapse(value);
-	this.value = parseValue(value);
+
+    public MD5DigestString(String value) throws ConfMException {
+        value = com.tailf.confm.xs.String.wsCollapse(value);
+        this.value = parseValue(value);
         check();
     }
-    
+
     /**
      * Sets the value
      */
     public void setValue(String value) throws ConfMException {
-	value = com.tailf.confm.xs.String.wsCollapse(value);
-	this.value = parseValue(value);
+        value = com.tailf.confm.xs.String.wsCollapse(value);
+        this.value = parseValue(value);
         check();
     }
-    
+
     /**
      * Returns the value
      */
     public String getValue() {
-	return toString();
+        return toString();
     }
 
     /**
@@ -50,33 +50,33 @@ public class MD5DigestString implements Serializable {
      */
     private void check() throws ConfMException {
     }
-    
+
     /**
      * Parses a MD5DigestString String
-     */ 
+     */
     private String parseValue(String value) {
         return value;
     }
-    
+
     /**
      *
      */
     public String toString() {
         return value;
     }
-    
+
     /**
      * Compares two MD5DigestStrings for equality
      */
     public boolean equals(MD5DigestString x) {
-	return value.equals(x);
+        return value.equals(x);
     }
-    
+
     /**
      * Compares two MD5DigestStrings for equality
      */
     public boolean equals(Object x) {
-	if (x instanceof MD5DigestString) 
+        if (x instanceof MD5DigestString)
             return value.equals((MD5DigestString)x);
         else
             return false;

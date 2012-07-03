@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -19,25 +19,25 @@ import java.io.Serializable;
  *
  * Derivate from "xs:NCName".
  * There must be no duplicates of ID in the document.
- * 
+ *
  *
  */
 public class ID extends NCName implements Serializable {
-    
-    public ID(java.lang.String value) throws ConfMException {	
+
+    public ID(java.lang.String value) throws ConfMException {
         super(value);
-	check();
+        check();
     }
-    
+
     /**
      * Sets the value.
      */
     public void setValue(java.lang.String value) throws ConfMException {
-	super.setValue(value);
-        check();	
+        super.setValue(value);
+        check();
     }
-    
-    private void check() throws ConfMException {        
+
+    private void check() throws ConfMException {
     }
-    
+
 }

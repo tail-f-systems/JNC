@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -20,26 +20,26 @@ import java.io.Serializable;
  * A Counter64 is a synonym for "xs:unsignedLong".
  * Represents an unsigned 64-bit integer.
  * They are inherited from the SNMP world for
- * flexibility in modelling. 
+ * flexibility in modelling.
  *
  */
 public class Counter64 extends com.tailf.confm.xs.UnsignedLong implements Serializable {
-    
-    public Counter64(java.lang.String value) throws ConfMException {	
-	super(value);
+
+    public Counter64(java.lang.String value) throws ConfMException {
+        super(value);
         check();
     }
 
-    public Counter64(long value) throws ConfMException {	
+    public Counter64(long value) throws ConfMException {
         super(value);
-	check();
+        check();
     }
 
     /**
      * Sets the value.
      */
     public void setValue(java.lang.String value) throws ConfMException {
-	super.setValue(value);
+        super.setValue(value);
         check();
     }
 
@@ -47,11 +47,11 @@ public class Counter64 extends com.tailf.confm.xs.UnsignedLong implements Serial
      * Sets the value.
      */
     public void setValue(long value) throws ConfMException {
-	super.setValue(value);
+        super.setValue(value);
         check();
     }
 
-    
+
     private void check() throws ConfMException {
     }
 

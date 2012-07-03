@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -47,7 +47,7 @@ public class SSHConnection {
      * which is 830
      * @param host Host or IP address to connect to
      */
-     
+
     public SSHConnection(String host) throws IOException, INMException {
         this(host, 830, 0);
     }
@@ -72,7 +72,7 @@ public class SSHConnection {
      */
     public SSHConnection(String host, int port, int connectTimeout) throws IOException, INMException {
 
-	connection = new Connection(host, port);
+        connection = new Connection(host, port);
         connection.connect(null, connectTimeout, 0);
     }
 
@@ -83,31 +83,31 @@ public class SSHConnection {
      * @param port Port number to connect to.
      * @param connectTimeout Connection timeout timer.
      * Connect the underlying TCP socket to the server with the given timeout
-     * value (non-negative, in milliseconds). Zero means no timeout. 
+     * value (non-negative, in milliseconds). Zero means no timeout.
      * @param kexTimeout Key exchange timeout timer.
-     * Timeout for complete connection establishment 
-     * (non-negative, in milliseconds). Zero means no timeout. 
-     * The timeout counts until the first key-exchange round has finished. 
+     * Timeout for complete connection establishment
+     * (non-negative, in milliseconds). Zero means no timeout.
+     * The timeout counts until the first key-exchange round has finished.
      * @throws IOException
-     * In case of a timeout (either connectTimeout or kexTimeout) 
+     * In case of a timeout (either connectTimeout or kexTimeout)
      * a SocketTimeoutException is thrown.
      * <p>
      * An exception may also be thrown if the connection was already successfully
      * connected (no matter if the connection broke in the mean time) and you invoke
      * <code>connect()</code> again without having called {@link #close()} first.
      */
-    public SSHConnection(String host, int port, int connectTimeout, int kexTimeout) 
+    public SSHConnection(String host, int port, int connectTimeout, int kexTimeout)
         throws IOException, INMException {
-	connection = new Connection(host, port);
-	connection.connect(null,connectTimeout,kexTimeout);
+        connection = new Connection(host, port);
+        connection.connect(null,connectTimeout,kexTimeout);
     }
-    
+
 
     /**
      * @return the underlying Ganymed connection object
      * This is required if wish to use the addConnectionMonitor()
      * method in the ganymed Connection class.
-     * 
+     *
      */
 
      Connection getConnection() {
@@ -116,7 +116,7 @@ public class SSHConnection {
 
 
     /**
-     * This is required if wish to have access to the ganymed connection object 
+     * This is required if wish to have access to the ganymed connection object
      * outside of this package.
      * @return the underlying Ganymed connection object
      */
@@ -128,28 +128,28 @@ public class SSHConnection {
 
     /**
      * Authenticate with  regular username pass.
-     * 
+     *
      * @param user User name.
      * @param password Password.
      *
      **/
-    public void authenticateWithPassword(String user, String password) 
+    public void authenticateWithPassword(String user, String password)
         throws IOException, INMException {
-	if (!connection.authenticateWithPassword(user, password))
-	    throw new INMException(INMException.AUTH_FAILED);
+        if (!connection.authenticateWithPassword(user, password))
+            throw new INMException(INMException.AUTH_FAILED);
     }
 
 
-    /** 
+    /**
      * Authenticate with the name of a file containing the private key
      * See ganymed docs for full explanation, use null  for password
      * if the key doesn't have a passphrase.
-     * 
+     *
      * @param user User name.
      * @param pemFile Fila name.
      * @param password Password.
      **/
-    public void authenticateWithPublicKeyFile(String user, File pemFile, 
+    public void authenticateWithPublicKeyFile(String user, File pemFile,
                                               String password)
         throws IOException, INMException {
         try {
@@ -166,7 +166,7 @@ public class SSHConnection {
     }
 
 
-    /** 
+    /**
      * Authenticate with a private key.
      * See ganymed docs for full explanation, use null  for password
      * if the key doesn't have a passphrase.
@@ -175,7 +175,7 @@ public class SSHConnection {
      * @param pemPrivateKey Private key.
      * @param pass Passphrase.
      **/
-    public void authenticateWithPublicKey(String user, char[] 
+    public void authenticateWithPublicKey(String user, char[]
                                           pemPrivateKey, String pass)
         throws IOException, INMException {
         if (!connection.authenticateWithPublicKey(user, pemPrivateKey, pass)){

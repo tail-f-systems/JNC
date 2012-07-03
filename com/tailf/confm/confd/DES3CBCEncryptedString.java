@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2009 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2009 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -22,27 +22,27 @@ import java.io.Serializable;
  */
 public class DES3CBCEncryptedString implements Serializable {
     private String value;
-    
-    public DES3CBCEncryptedString(String value) throws ConfMException {		
-	value = com.tailf.confm.xs.String.wsCollapse(value);
-	this.value = parseValue(value);
+
+    public DES3CBCEncryptedString(String value) throws ConfMException {
+        value = com.tailf.confm.xs.String.wsCollapse(value);
+        this.value = parseValue(value);
         check();
     }
-    
+
     /**
      * Sets the value
      */
     public void setValue(String value) throws ConfMException {
-	value = com.tailf.confm.xs.String.wsCollapse(value);
-	this.value = parseValue(value);
+        value = com.tailf.confm.xs.String.wsCollapse(value);
+        this.value = parseValue(value);
         check();
     }
-    
+
     /**
      * Returns the value
      */
     public String getValue() {
-	return toString();
+        return toString();
     }
 
     /**
@@ -50,33 +50,33 @@ public class DES3CBCEncryptedString implements Serializable {
      */
     private void check() throws ConfMException {
     }
-    
+
     /**
      * Parses a DES3CBCEncryptedString String
-     */ 
+     */
     private String parseValue(String value) {
         return value;
     }
-    
+
     /**
      *
      */
     public String toString() {
         return value;
     }
-    
+
     /**
      * Compares two DES3CBCEncryptedStrings for equality
      */
     public boolean equals(DES3CBCEncryptedString x) {
-	return value.equals(x);
+        return value.equals(x);
     }
-    
+
     /**
      * Compares two DES3CBCEncryptedStrings for equality
      */
     public boolean equals(Object x) {
-	if (x instanceof DES3CBCEncryptedString) 
+        if (x instanceof DES3CBCEncryptedString)
             return value.equals((DES3CBCEncryptedString)x);
         else
             return false;

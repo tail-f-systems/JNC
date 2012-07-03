@@ -1,7 +1,7 @@
-/**   
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/**
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
  *
- *  This software is the confidential and proprietary 
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -30,9 +30,9 @@ import com.tailf.inm.*;
  * by calling these hooks.
  */
 class ConfHandler extends DefaultHandler {
-	
+
     // pointer to current element (node)
-    public Element current;	
+    public Element current;
     public Element top;
     public PrefixMap prefixes = null;
     boolean leaf= false;
@@ -51,11 +51,11 @@ class ConfHandler extends DefaultHandler {
         }
 
         try {
-            Element parent = current;	    
+            Element parent = current;
             Element child = null;
 
             child = Container.createInstance(this,parent,uri,localName);
-            if (top == null) 
+            if (top == null)
                 top = child;
 
             if (child == null && unknownLevel == 1) {
@@ -75,7 +75,7 @@ class ConfHandler extends DefaultHandler {
                 return;
             }
             child.prefixes = prefixes;
-            prefixes = null;	    
+            prefixes = null;
             addOtherAttributes(attributes, child);
             current = child; // step down
         } catch (INMException e) {
@@ -107,12 +107,12 @@ class ConfHandler extends DefaultHandler {
             String attrName= attributes.getLocalName(i);
             // String attrType= attributes.getType(i);
             String attrUri = attributes.getURI(i);
-            String attrValue = attributes.getValue(i);		
+            String attrValue = attributes.getValue(i);
             Attribute attr = new Attribute(attrUri,attrName,attrValue);
             child.addAttr(attr);
         }
     }
-    
+
 
     private void unknownEndElement(String uri, String localName, String qName) {
         // check that we don't have mixed content
@@ -124,7 +124,7 @@ class ConfHandler extends DefaultHandler {
         current =  current.getParent();
     }
 
-    public void endElement(String uri, String localName, String qName) 
+    public void endElement(String uri, String localName, String qName)
         throws SAXException {
         if (unknownLevel > 0) {
             unknownEndElement(uri, localName, qName);
@@ -135,24 +135,24 @@ class ConfHandler extends DefaultHandler {
         try {
             if (leaf) {
                 // If it's a Leaf - we need to set value properly using
-                // the setLeafValue method which will check 
+                // the setLeafValue method which will check
                 // restrictions
                 ((Container)current).setLeafValue(leafNs,leafName,
                                                   leafValue);
             } else {
                 // check that we don't have mixed content
-		//                System.out.println("XXXXXXXXXXXX" + current);
+                //                System.out.println("XXXXXXXXXXXX" + current);
                 if (current.hasChildren() && current.value !=null) {
                     // MIXED content not allowed
                     current.value = null;
-                } 
+                }
             }
         } catch (INMException e) {
             e.printStackTrace();
             throw new SAXException( e.toString() );
         }
-        // step up	
-        if (!leaf) 
+        // step up
+        if (!leaf)
             current =  current.getParent();
         else leaf= false;
     }
@@ -163,7 +163,7 @@ class ConfHandler extends DefaultHandler {
     }
 
 
-    public void characters(char[] ch, int start, int length) { 
+    public void characters(char[] ch, int start, int length) {
         if (unknownLevel > 0) {
             unknownCharacters(ch, start, length);
             return;
@@ -172,11 +172,11 @@ class ConfHandler extends DefaultHandler {
         if (leaf) {
             leafValue = leafValue + new String(ch,start,length);
         } else {
-            if (current.value==null) current.value = new String();	    
+            if (current.value==null) current.value = new String();
             current.value= current.value + new String(ch,start,length);
         }
     }
-	
+
     public void startPrefixMapping(String prefix, String uri) {
         if (prefixes==null) prefixes = new PrefixMap();
         prefixes.add( new Prefix(prefix,uri) );

@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -25,54 +25,54 @@ import java.io.Serializable;
  * </ul>
  */
 public class InetAddressIP implements Serializable {
-    
-    private Object value;    
+
+    private Object value;
 
     /**
      * Constructor
      */
-    public InetAddressIP(String v) throws ConfMException {	
-	try {value = new InetAddressIPv4(v);
-	} catch (Exception e) {
-	    value = new InetAddressIPv6(v);
-	}
-	check();
+    public InetAddressIP(String v) throws ConfMException {
+        try {value = new InetAddressIPv4(v);
+        } catch (Exception e) {
+            value = new InetAddressIPv6(v);
+        }
+        check();
     }
-    
+
     public InetAddressIP(InetAddressIPv4 v)  throws ConfMException {
-	value = v;
-	check();
+        value = v;
+        check();
     }
     public InetAddressIP(InetAddressIPv6 v)  throws ConfMException {
-	value = v;
-	check();
+        value = v;
+        check();
     }
-    
+
     /**
      * Sets the value.
      */
     public void setValue(String v) throws ConfMException {
-	try {value = new InetAddressIPv4(v);
-	} catch (Exception e) {
-	    value = new InetAddressIPv6(v);
-	}
-	check();
+        try {value = new InetAddressIPv4(v);
+        } catch (Exception e) {
+            value = new InetAddressIPv6(v);
+        }
+        check();
     }
-    
+
     public void setValue(InetAddressIPv4 v)  throws ConfMException {
-	value = v;
-	check();
+        value = v;
+        check();
     }
     public void setValue(InetAddressIPv6 v)  throws ConfMException {
-	value = v;
-	check();
+        value = v;
+        check();
     }
 
     public void setValue(Object v) throws ConfMException {
-	if (v instanceof InetAddressIPv4) value = v;
-	else if (v instanceof InetAddressIPv6) value = v;
-	else throwException( true, v );
-	check();
+        if (v instanceof InetAddressIPv4) value = v;
+        else if (v instanceof InetAddressIPv6) value = v;
+        else throwException( true, v );
+        check();
     }
 
 
@@ -83,21 +83,21 @@ public class InetAddressIP implements Serializable {
      * <li>inetAddressIPv4
      * <li>inetAddressIPv6
      * <li>inetAddressDNS
-     * </ul>     
+     * </ul>
      */
     public Object getValue() {
-	return value;
+        return value;
     }
-    
 
-    private void check() throws ConfMException {	
+
+    private void check() throws ConfMException {
     }
 
     /**
      *
      */
     public String toString() {
-	return value.toString();
+        return value.toString();
     }
 
     public boolean equals(Object b) {
@@ -105,7 +105,7 @@ public class InetAddressIP implements Serializable {
             return ((InetAddressIP)b).equals(this);
         return false;
     }
-    
+
     public boolean equals(InetAddressIP b) {
         return value.equals( b.value );
     }
@@ -116,8 +116,8 @@ public class InetAddressIP implements Serializable {
      * Throw an ConfMException otherwise
      */
     protected void throwException(boolean v, Object o) throws ConfMException {
-	if (!v) return;
+        if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,o);
     }
-    
+
 }

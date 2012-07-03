@@ -1,6 +1,6 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2010 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
+ *
+ *  Copyright 2010 Tail-F Systems AB. All rights reserved.
  *
  *  This software is the confidential and proprietary information of
  *  Tail-F Systems AB.
@@ -30,8 +30,8 @@ import java.net.InetAddress;
  * The above addresses are valid and equivalent.
  */
 public class Ipv6Address implements Serializable {
-    private java.net.InetAddress value;    
-    
+    private java.net.InetAddress value;
+
     /**
      * Constructor
      */
@@ -52,9 +52,9 @@ public class Ipv6Address implements Serializable {
             for (int x = 0; x < 4; x++) {
                 if (b[i] >= '0' && b[i] <= '9')
                     tmp = tmp*16+b[i++]-'0';
-                else if (b[i] >= 'A' && b[i] <= 'F') 
+                else if (b[i] >= 'A' && b[i] <= 'F')
                     tmp = tmp*16+b[i++]-'A'+10;
-                else if (b[i] >= 'a' && b[i] <= 'f') 
+                else if (b[i] >= 'a' && b[i] <= 'f')
                     tmp = tmp*16+b[i++]-'a'+10;
             }
             list.add(new Integer(tmp));
@@ -66,7 +66,7 @@ public class Ipv6Address implements Serializable {
                     doubleColon = true;
                     list.add(new String("::"));
                     i++;
-                } 
+                }
             }
         }
         int j=0;
@@ -76,11 +76,11 @@ public class Ipv6Address implements Serializable {
             if (t instanceof Integer) {
                 int tmp =((Integer)t).intValue();
                 v[j++] = (byte)((tmp>>8)&0xff );
-                v[j++] = (byte)(tmp&0xff );		
+                v[j++] = (byte)(tmp&0xff );
             } else { // '::' - jump forward
                 j = (8-list.size()+i+1)*2;
             }
-        }	
+        }
         try {
             return java.net.InetAddress.getByAddress(v);
         } catch (Exception e) {
@@ -88,35 +88,35 @@ public class Ipv6Address implements Serializable {
             return null;
         }
     }
-    
+
     public void check() throws ConfMException {
     }
-    
+
     public Ipv6Address(java.net.InetAddress value) throws ConfMException {
         this.value = value;
         check();
     }
-    
+
     /**
      * Set a value
      */
-    public void setValue(String stringValue) throws ConfMException {	
+    public void setValue(String stringValue) throws ConfMException {
         value = parseValue(stringValue);
         check();
     }
-    
-    public void setValue(java.net.InetAddress value) throws ConfMException {	
+
+    public void setValue(java.net.InetAddress value) throws ConfMException {
         this.value = value;
         check();
     }
-    
+
     /**
      * Get a value
      */
     public java.net.InetAddress getValue() {
         return value;
     }
-    
+
     /**
      * Convert to a string value
      */
@@ -127,17 +127,17 @@ public class Ipv6Address implements Serializable {
         int i = 0;
         while (i < b.length && b[i] != '/')
             i++;
-        if (i < b.length) 
-            return inaddr.substring(i+1); 
+        if (i < b.length)
+            return inaddr.substring(i+1);
         return inaddr;
     }
-    
+
     private char toDigit(int b) {
         if (b >= 10)
             return (char)(b+'A'-10);
         else
             return (char)(b+'0');
-    }	 
+    }
 
     /**
      * Check for equality
@@ -147,22 +147,22 @@ public class Ipv6Address implements Serializable {
             return ((Ipv6Address)object).equals(this);
         return false;
     }
-    
+
     public boolean equals(Ipv6Address value) {
         java.net.InetAddress v1 = this.value;
         java.net.InetAddress v2 = value.getValue();
         return v1.equals(v2);
     }
-    
+
     /**
      * Internal utilities
-     */    
+     */
     protected void throwException(boolean ok) throws ConfMException {
         if (!ok)
             return;
         throw new ConfMException(ConfMException.BAD_VALUE, this);
     }
-    
+
     protected void throwException(boolean ok, Object object)
       throws ConfMException {
         if (!ok)

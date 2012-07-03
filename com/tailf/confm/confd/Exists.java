@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -14,28 +14,28 @@ import com.tailf.confm.*;
 import java.io.Serializable;
 
 /**
- * This class implements an existance element. 
+ * This class implements an existance element.
  *
  */
 public class Exists implements Serializable {
 
-    public Exists() throws ConfMException {	
+    public Exists() throws ConfMException {
     }
-    
+
     public java.lang.String toString() {
-	return "";
+        return "";
     }
-    
+
     public boolean equals(Exists value) {
-	if (value != null) return true;
-	else return false;
+        if (value != null) return true;
+        else return false;
     }
 
     public boolean equals(Object value) {
         if (value == null) return false;
-	if (value instanceof Exists) 
+        if (value instanceof Exists)
             return true;
-	return false;
+        return false;
     }
 
 }

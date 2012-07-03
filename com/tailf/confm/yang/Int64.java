@@ -1,6 +1,6 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2010 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
+ *
+ *  Copyright 2010 Tail-F Systems AB. All rights reserved.
  *
  *  This software is the confidential and proprietary information of
  *  Tail-F Systems AB.
@@ -23,8 +23,8 @@ public class Int64 extends LongInteger implements Serializable {
     public Int64(java.lang.String value) throws ConfMException {
         super(value);
     }
-    
-    public Int64(long value) throws ConfMException {	
+
+    public Int64(long value) throws ConfMException {
         super(value);
     }
 }

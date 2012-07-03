@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -21,28 +21,28 @@ import java.io.Serializable;
  *
  */
 public class Base64Binary implements Serializable {
-    
+
     private byte[] value;
 
-    public Base64Binary(java.lang.String value) throws ConfMException {	
-	value = String.wsCollapse(value);
+    public Base64Binary(java.lang.String value) throws ConfMException {
+        value = String.wsCollapse(value);
         this.value = Base64Coder.encodeString(value).getBytes();
         check();
     }
-    
-    public Base64Binary(byte[] value) throws ConfMException {	
-	this.value = value;
-	check();
+
+    public Base64Binary(byte[] value) throws ConfMException {
+        this.value = value;
+        check();
     }
-    
-    
+
+
     /**
      * Sets the value.
      */
     public void setValue(java.lang.String value) throws ConfMException {
-	value = String.wsCollapse(value);
+        value = String.wsCollapse(value);
         this.value = Base64Coder.encodeString(value).getBytes();
-	check();
+        check();
     }
 
     /**
@@ -50,46 +50,46 @@ public class Base64Binary implements Serializable {
      */
     public void setValue(byte[] value) throws ConfMException {
         this.value = value;
-	check();
+        check();
     }
 
     /**
      * Returns the value space.
      */
     public byte[] getValue() {
-	return value;
+        return value;
     }
-    
-    
+
+
     /**
      * Check the value.
      * Put restrictions on the value here.
      */
     private void check() throws ConfMException {
     }
-    
-    
+
+
 
     public java.lang.String toString() {
         return Base64Coder.decodeString(new java.lang.String(value));
     }
-    
+
 
 
     /** ---------- Restrictions ---------- */
-    
+
     /**
      * xs:whiteSpace replace
      */
     public void wsReplace() {
-	value = String.wsReplace(new java.lang.String(value)).getBytes();
+        value = String.wsReplace(new java.lang.String(value)).getBytes();
     }
-    
+
     /**
      * xs:whiteSpace collapse
      */
     public void wsCollapse() {
-	value = String.wsCollapse(new java.lang.String(value)).getBytes();
+        value = String.wsCollapse(new java.lang.String(value)).getBytes();
     }
 
 }

@@ -1,8 +1,8 @@
-/*    -*- Java -*- 
- * 
- *  Copyright 2007 Tail-F Systems AB. All rights reserved. 
+/*    -*- Java -*-
  *
- *  This software is the confidential and proprietary 
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *
+ *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
  *
  *  $Id$
@@ -22,31 +22,31 @@ import java.io.Serializable;
  */
 public class UnsignedShort extends Int implements Serializable {
 
-    private int value;    
-    
-    public UnsignedShort(java.lang.String value) throws ConfMException {	
-	super(value);
+    private int value;
+
+    public UnsignedShort(java.lang.String value) throws ConfMException {
+        super(value);
         check();
     }
 
-    public UnsignedShort(int value) throws ConfMException {	
+    public UnsignedShort(int value) throws ConfMException {
         super(value);
-	check();
+        check();
     }
 
     /**
      * Sets the value.
      */
     public void setValue(java.lang.String value) throws ConfMException {
-	super.setValue(value);
+        super.setValue(value);
         check();
     }
-    
+
     /**
      * Sets the value.
      */
     public void setValue(int value) throws ConfMException {
-	super.setValue(value);
+        super.setValue(value);
         check();
     }
 
