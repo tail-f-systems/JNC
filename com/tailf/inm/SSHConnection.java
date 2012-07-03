@@ -11,7 +11,6 @@
 
 package com.tailf.inm;
 
-
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
@@ -102,7 +101,6 @@ public class SSHConnection {
         connection.connect(null,connectTimeout,kexTimeout);
     }
 
-
     /**
      * @return the underlying Ganymed connection object
      * This is required if wish to use the addConnectionMonitor()
@@ -114,7 +112,6 @@ public class SSHConnection {
          return connection;
      }
 
-
     /**
      * This is required if wish to have access to the ganymed connection object
      * outside of this package.
@@ -124,7 +121,6 @@ public class SSHConnection {
      public Connection getGanymedConnection() {
          return connection;
      }
-
 
     /**
      * Authenticate with  regular username pass.
@@ -138,7 +134,6 @@ public class SSHConnection {
         if (!connection.authenticateWithPassword(user, password))
             throw new INMException(INMException.AUTH_FAILED);
     }
-
 
     /**
      * Authenticate with the name of a file containing the private key
@@ -164,7 +159,6 @@ public class SSHConnection {
             throw new INMException(INMException.AUTH_FAILED);
         }
     }
-
 
     /**
      * Authenticate with a private key.

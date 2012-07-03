@@ -60,7 +60,6 @@ public class Long implements Serializable {
         return value;
     }
 
-
     private void check() {
         // no need to check range since java long
         // does not fit other numbers than the below.
@@ -87,7 +86,6 @@ public class Long implements Serializable {
         }
         return false;
     }
-
 
     /** ---------- Restrictions ---------- */
 
@@ -181,6 +179,5 @@ public class Long implements Serializable {
         if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,o);
     }
-
 
 }

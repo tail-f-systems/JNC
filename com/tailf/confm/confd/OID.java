@@ -54,7 +54,6 @@ public class OID implements Serializable {
         check();
     }
 
-
     /**
      * Returns the value space.
      */
@@ -64,7 +63,6 @@ public class OID implements Serializable {
 
     private void check() {
     }
-
 
     /**
      * Parse integer list
@@ -96,7 +94,6 @@ public class OID implements Serializable {
         return v;
     }
 
-
     public java.lang.String toString() {
         String s = new String();
         boolean dot= false;
@@ -107,7 +104,6 @@ public class OID implements Serializable {
         }
         return s;
     }
-
 
     public boolean equals(OID v) {
         int[] v1= value;
@@ -123,8 +119,6 @@ public class OID implements Serializable {
             return equals( (OID)value);
         return false;
     }
-
-
 
     /** ---------- Restrictions ---------- */
 

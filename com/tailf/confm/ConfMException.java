@@ -41,7 +41,6 @@ public class ConfMException extends INMException {
     public static final int NOT_CONTAINER = -1031;
     public static final int BAD_SESSION_NAME = -1032;
 
-
     public String toString() {
         switch (errorCode) {
         case ELEMENT_ALREADY_IN_USE:

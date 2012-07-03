@@ -32,7 +32,6 @@ public class NonPositiveInteger extends Integer implements Serializable {
         check();
     }
 
-
     /**
      * Sets the value.
      */

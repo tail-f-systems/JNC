@@ -44,7 +44,6 @@ public class DateTime implements Serializable {
     public DateTime() {
     }
 
-
     /**
      * Constructor for xs:dateTime from a String in the format
      * "CCYY-MM-DDThh:mm:ss".
@@ -76,7 +75,6 @@ public class DateTime implements Serializable {
     public java.lang.String getValue() {
         return toString();
     }
-
 
     private void check() throws ConfMException {
         throwException( month>12 );
@@ -112,7 +110,6 @@ public class DateTime implements Serializable {
         return s;
     }
 
-
     /**
      * Checks if the value space of two DateTime objects
      * are equal.
@@ -126,7 +123,6 @@ public class DateTime implements Serializable {
             return true;
         return false;
     }
-
 
     /**
      * Checks if the value space of two DateTime objects
@@ -144,7 +140,6 @@ public class DateTime implements Serializable {
     public int compareTo(DateTime value) {
         return toString().compareTo( value.toString());
     }
-
 
     /**
      * Returns a Calendar object from the DateTime.
@@ -165,7 +160,6 @@ public class DateTime implements Serializable {
         return c;
     }
 
-
     /**
      * Returns the current time, for this DateTime object.
      *
@@ -173,7 +167,6 @@ public class DateTime implements Serializable {
     public java.util.Date getTime() {
         return getCalendar().getTime();
     }
-
 
     /**
      * Help method to parse and set the value.
@@ -248,7 +241,6 @@ public class DateTime implements Serializable {
         }
     }
 
-
     /** ---------- Restrictions ---------- */
 
     /**
@@ -296,7 +288,6 @@ public class DateTime implements Serializable {
         throw new ConfMException(ConfMException.BAD_VALUE,this);
     }
 
-
     /**
      * Assert that the value is 'false'
      * Throw an ConfMException otherwise
@@ -305,6 +296,5 @@ public class DateTime implements Serializable {
         if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,value);
     }
-
 
 }

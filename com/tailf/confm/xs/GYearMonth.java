@@ -45,7 +45,6 @@ public class GYearMonth implements Serializable {
     public GYearMonth() {
     }
 
-
     /**
      * Constructor for xs:date from a String in the format
      * "CCYY-MM-DD".
@@ -78,12 +77,10 @@ public class GYearMonth implements Serializable {
         return toString();
     }
 
-
     private void check() throws ConfMException {
         throwException( month>12 );
         throwException( month<1 );
     }
-
 
     public java.lang.String toString() {
         java.lang.String s = new java.lang.String();
@@ -94,7 +91,6 @@ public class GYearMonth implements Serializable {
             s = s + Date.timezone_toString(tz_neg,tz_hh,tz_mm);
         return s;
     }
-
 
     /**
      * Checks if the value space of two GYearMonth objects
@@ -109,7 +105,6 @@ public class GYearMonth implements Serializable {
             return true;
         return false;
     }
-
 
     /**
      * Checks if the value space of two GYearMonth objects
@@ -127,7 +122,6 @@ public class GYearMonth implements Serializable {
     public int compareTo(GYearMonth value) {
         return toString().compareTo( value.toString());
     }
-
 
     /**
      * Returns a Calendar object from the GYearMonth.
@@ -147,7 +141,6 @@ public class GYearMonth implements Serializable {
         return c;
     }
 
-
     /**
      * Returns the current time, for this GYearMonth object.
      *
@@ -155,8 +148,6 @@ public class GYearMonth implements Serializable {
     public java.util.Date getTime() {
         return getCalendar().getTime();
     }
-
-
 
     /**
      * Help method to parse and set the value.
@@ -202,7 +193,6 @@ public class GYearMonth implements Serializable {
             throwException( true, value );
         }
     }
-
 
     /** ---------- Restrictions ---------- */
 
@@ -259,6 +249,5 @@ public class GYearMonth implements Serializable {
         if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,value);
     }
-
 
 }

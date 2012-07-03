@@ -82,7 +82,6 @@ public class HexList implements Serializable {
         check();
     }
 
-
     /**
      * Returns the value space.
      */
@@ -90,10 +89,8 @@ public class HexList implements Serializable {
         return value;
     }
 
-
     private void check() {
     }
-
 
     /**
      * convert integer to bytes.
@@ -143,7 +140,6 @@ public class HexList implements Serializable {
         return v;
     }
 
-
     private byte parseDigit(byte v,java.lang.String s)
         throws ConfMException {
         if (v>='a' && v<='f') return (byte) (v - 'a' + 10);
@@ -152,7 +148,6 @@ public class HexList implements Serializable {
         throwException( true, s );
         return 0;
     }
-
 
     public java.lang.String toString() {
         java.lang.String s = new java.lang.String();
@@ -171,7 +166,6 @@ public class HexList implements Serializable {
         else return (char)(b+'0');
     }
 
-
     public boolean equals(HexList v) {
         byte[] v1 = value;
         byte[] v2=  v.getValue();
@@ -187,8 +181,6 @@ public class HexList implements Serializable {
         return false;
     }
 
-
-
     /** ---------- Restrictions ---------- */
 
     /**
@@ -198,7 +190,6 @@ public class HexList implements Serializable {
     protected void length(int len) throws ConfMException {
         throwException( value.length != len);
     }
-
 
     /**
      * xs:minLength defines a minimum length measured in number of characters
@@ -275,6 +266,5 @@ public class HexList implements Serializable {
         if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,o);
     }
-
 
 }

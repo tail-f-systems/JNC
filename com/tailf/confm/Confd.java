@@ -62,7 +62,6 @@ public class Confd {
         }
     }
 
-
     /**
      * This class implements the "inetAddressIP" datatype.
      */
@@ -82,7 +81,6 @@ public class Confd {
             super(value);
         }
     }
-
 
     /**
      * This class implements the "inetAddressDNS" datatype.
@@ -136,7 +134,6 @@ public class Confd {
             super(value);
         }
     }
-
 
     /**
      * This class implements the "size" datatype.
@@ -201,7 +198,6 @@ public class Confd {
         }
     }
 
-
     /**
      * This class implements the "HexList" datatype.
      *
@@ -223,7 +219,6 @@ public class Confd {
         }
     }
 
-
     /**
      * This class implements the "OID" datatype.
      *
@@ -239,7 +234,6 @@ public class Confd {
         }
     }
 
-
     /**
      * This class implements the "OctetList" datatype.
      *
@@ -254,7 +248,6 @@ public class Confd {
             super(value);
         }
     }
-
 
     /**
      * This class implements the "ipv4Prefix" datatype.
@@ -272,7 +265,6 @@ public class Confd {
             super(ipaddr,masklen);
         }
     }
-
 
     /**
      * This class implements the "ipv6Prefix" datatype.

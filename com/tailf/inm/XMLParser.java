@@ -14,8 +14,6 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 import java.util.Hashtable;
 
-
-
 /**
  * A simple SAX parser, for parsing NETCONF messages,
  * into a simple {@link Element} tree.
@@ -25,7 +23,6 @@ public class XMLParser {
 
     /** the parser implementation */
     protected XMLReader parser;
-
 
     /**
      * Constructor.
@@ -111,7 +108,6 @@ public class XMLParser {
         }
     }
 
-
     /**
      * Read in an XML file and parse it and return an
      * element tree.
@@ -128,7 +124,6 @@ public class XMLParser {
             throw new INMException(INMException.PARSER_ERROR,"parse file: "+filename+" error: "+e);
         }
     }
-
 
     /**
      * Parses an XML string returning an element tree from it.
@@ -147,7 +142,6 @@ public class XMLParser {
         }
     }
 
-
     /**
      * Parses an XML String, returning a Element tree
      * representing the XML structure.
@@ -158,8 +152,6 @@ public class XMLParser {
         InputSource is= new InputSource(istream);
         return parse(is);
     }
-
-
 
     /**
      * trace

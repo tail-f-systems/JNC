@@ -33,8 +33,6 @@ public class XMLParser extends com.tailf.inm.XMLParser {
         super();
     }
 
-
-
     /**
      * Read in an XML file and parse it and return an
      * element tree.
@@ -50,7 +48,6 @@ public class XMLParser extends com.tailf.inm.XMLParser {
                 INMException.PARSER_ERROR,"parse file: "+filename+" error: "+e);
         }
     }
-
 
     /**
      * Parses an XML string returning a configuration tree from it.
@@ -68,6 +65,5 @@ public class XMLParser extends com.tailf.inm.XMLParser {
 
         }
     }
-
 
 }

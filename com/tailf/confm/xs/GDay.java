@@ -37,7 +37,6 @@ public class GDay implements Serializable {
     public GDay() {
     }
 
-
     /**
      * Constructor for "xs:gDay" from a String in the format
      * "---DD".
@@ -74,7 +73,6 @@ public class GDay implements Serializable {
         throwException( day<1 );
     }
 
-
     public java.lang.String toString() {
         java.lang.String s = new java.lang.String();
         s = s + "---" +  Date.two_digits(day);
@@ -82,7 +80,6 @@ public class GDay implements Serializable {
             s= s + Date.timezone_toString(tz_neg,tz_hh,tz_mm);
         return s;
     }
-
 
     /**
      * Checks if the value space of two GDay objects
@@ -97,7 +94,6 @@ public class GDay implements Serializable {
             return true;
         return false;
     }
-
 
     /**
      * Checks if the value space of two GDay objects
@@ -116,7 +112,6 @@ public class GDay implements Serializable {
         return toString().compareTo( value.toString());
     }
 
-
     /**
      * Returns a Calendar object from the GDay.
      *
@@ -134,7 +129,6 @@ public class GDay implements Serializable {
         return c;
     }
 
-
     /**
      * Returns the current time, for this GDay object.
      *
@@ -142,8 +136,6 @@ public class GDay implements Serializable {
     public java.util.Date getTime() {
         return getCalendar().getTime();
     }
-
-
 
     /**
      * Help method to parse and set the value.
@@ -184,8 +176,6 @@ public class GDay implements Serializable {
             throwException(true, value);
         }
     }
-
-
 
     /** ---------- Restrictions ---------- */
 
@@ -234,7 +224,6 @@ public class GDay implements Serializable {
         throw new ConfMException(ConfMException.BAD_VALUE,this);
     }
 
-
     /**
      * Assert that the value is 'false'
      * Throw an ConfMException otherwise
@@ -243,6 +232,5 @@ public class GDay implements Serializable {
         if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,value);
     }
-
 
 }

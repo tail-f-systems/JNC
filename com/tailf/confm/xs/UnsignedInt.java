@@ -32,7 +32,6 @@ public class UnsignedInt extends Integer implements Serializable {
         check();
     }
 
-
     /**
      * Sets the value.
      */
@@ -48,7 +47,6 @@ public class UnsignedInt extends Integer implements Serializable {
         super.setValue(value);
         check();
     }
-
 
     private void check() throws ConfMException {
         minInclusive(0);

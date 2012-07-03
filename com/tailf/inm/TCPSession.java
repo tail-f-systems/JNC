@@ -77,7 +77,6 @@ public class TCPSession implements Transport {
         // hello will be done by NetconfSession
     }
 
-
     /**
      * Creates a new TCP session object.
      * This only works towards ConfD agent since
@@ -100,14 +99,12 @@ public class TCPSession implements Transport {
         // hello will be done by NetconfSession
     }
 
-
     /**
      * Tell whether this transport is ready to be read.
      */
     public boolean ready() throws IOException {
         return in.ready();
     }
-
 
     /**
      * Reads in "one" reply from the TCP transport input stream.
@@ -153,7 +150,6 @@ public class TCPSession implements Transport {
         }
     }
 
-
     private void subInputChar(StringWriter wr, int ch) {
         wr.write(ch);
         for (int i=0;i<ioSubscribers.size(); i++) {
@@ -165,7 +161,6 @@ public class TCPSession implements Transport {
         for (int i=0; i<s.length(); i++)
             subInputChar(wr, s.charAt(i));
     }
-
 
     /**
      * Prints an integer (as text) to the output stream.
@@ -179,7 +174,6 @@ public class TCPSession implements Transport {
         out.print(iVal);
     }
 
-
     /**
      * Prints text to the output stream.
      * @param s Text to send to the stream.
@@ -191,7 +185,6 @@ public class TCPSession implements Transport {
         }
         out.print(s);
     }
-
 
     /**
      * Prints an integer (as text) to the output stream.
@@ -206,7 +199,6 @@ public class TCPSession implements Transport {
         out.println(iVal);
     }
 
-
     /**
      * Print text to the output stream.
      * A newline char is appended to end of the output stream.
@@ -219,7 +211,6 @@ public class TCPSession implements Transport {
         }
         out.println(s);
     }
-
 
     /**
      * Add an IO Subscriber for this transport.
@@ -245,8 +236,6 @@ public class TCPSession implements Transport {
         }
     }
 
-
-
     /**
      * Signals that the final chunk of data has be printed to the output
      * transport stream. This method furthermore flushes the transport
@@ -265,7 +254,6 @@ public class TCPSession implements Transport {
         }
     }
 
-
     /**
      * Closes the TCP session/connection.
      */
@@ -276,7 +264,6 @@ public class TCPSession implements Transport {
         } catch (Exception e) {
         }
     }
-
 
     /** ------------------------------------------------------------
      *  help functions

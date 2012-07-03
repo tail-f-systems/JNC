@@ -72,14 +72,12 @@ public abstract class Union implements Serializable {
         return value;
     }
 
-
     /**
      * check the the value is one of the union types.
      */
     private void check() throws ConfMException {
         // TODO
     }
-
 
     /**
      * Help method to parse the value from a string.

@@ -67,7 +67,6 @@ public class QName implements Serializable {
         return false;
     }
 
-
     private void parseValue(java.lang.String value)
         throws ConfMException {
         value = String.wsReplace(value);
@@ -95,10 +94,7 @@ public class QName implements Serializable {
             throwException( b[i++]==':', value );
     }
 
-
-
     /** ---------- Restrictions ---------- */
-
 
     /**
      * Assert that the value is 'false'
@@ -108,7 +104,6 @@ public class QName implements Serializable {
         if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,this);
     }
-
 
     /**
      * Assert that the value is 'false'

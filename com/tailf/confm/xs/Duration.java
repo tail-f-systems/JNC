@@ -137,7 +137,6 @@ public class Duration implements Serializable {
             throwException( true, value );
     }
 
-
     /**
      * Formats the duration into a String.
      *
@@ -169,7 +168,6 @@ public class Duration implements Serializable {
         return s;
     }
 
-
     /**
      * Compares two Durations for equality.
      */
@@ -185,16 +183,13 @@ public class Duration implements Serializable {
         else return false;
     }
 
-
     public boolean equals(Object value) {
         if (value instanceof Duration)
             return ((Duration)value).equals(this);
         return false;
     }
 
-
     /** ---------- Restrictions ---------- */
-
 
     /**
      * Assert that the value is 'false'
@@ -221,6 +216,5 @@ public class Duration implements Serializable {
         if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,value);
     }
-
 
 }

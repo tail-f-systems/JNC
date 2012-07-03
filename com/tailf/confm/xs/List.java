@@ -71,12 +71,10 @@ public abstract class List implements Serializable {
         return values;
     }
 
-
     private void check() {
         // check that itemType is correct first?
         // TODO
     }
-
 
     public java.lang.String toString() {
         java.lang.String s = new java.lang.String();
@@ -88,7 +86,6 @@ public abstract class List implements Serializable {
         }
         return s;
     }
-
 
     public boolean equals(Object value) {
         if (value instanceof List) {

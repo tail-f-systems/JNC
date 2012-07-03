@@ -34,7 +34,6 @@ public class Language extends Token implements Serializable {
         check();
     }
 
-
     /**
      * From RFC 1766:
      *
@@ -62,7 +61,6 @@ public class Language extends Token implements Serializable {
         }
     }
 
-
     /**
      * Overrride equals to not check upper or lower cases.
      *
@@ -85,6 +83,5 @@ public class Language extends Token implements Serializable {
         }
         return false;
     }
-
 
 }

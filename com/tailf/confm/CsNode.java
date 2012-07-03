@@ -37,8 +37,6 @@ public class CsNode {
     public String desc;
     public RevisionInfo[] revInfo;
 
-
-
     public static int CS_NODE_IS_DYN    =  (1 << 0);
     public static int CS_NODE_IS_WRITE  =  (1 << 1);
     public static int CS_NODE_IS_CDB    =  (1 << 2);
@@ -47,8 +45,6 @@ public class CsNode {
     public static int CS_NODE_IS_RESULT =  (1 << 5);
     public static int CS_NODE_IS_NOTIF  =  (1 << 6);
     public static int CS_NODE_IS_CASE   =  (1 << 7);
-
-
 
     // Same names and values that we use in the
     // confd device side C libraries
@@ -88,10 +84,6 @@ public class CsNode {
     public static int C_IPV4PREFIX = 40; // (confd:ipv4Prefix)
     public static int C_IPV6PREFIX = 41; // (confd:ipv6Prefix)
 
-
-
-
-
     public CsNode() {
     }
 
@@ -108,6 +100,5 @@ public class CsNode {
     public static CsNode get(Element e) {
         return CsTree.lookup(e.namespace, e.tagpath());
     }
-
 
 }

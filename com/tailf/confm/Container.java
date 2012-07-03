@@ -186,7 +186,6 @@ public abstract class Container extends Element {
         }
     }
 
-
     /**
      * setLeafValue is a data model aware method to
      * set the leaf value of the specified leaf of
@@ -246,7 +245,6 @@ public abstract class Container extends Element {
             }
         }
 
-
         catch (Exception invErr) {
             // type error
             throw new ConfMException(ConfMException.BAD_VALUE,
@@ -254,7 +252,6 @@ public abstract class Container extends Element {
                                      ": "+invErr.getCause().toString());
         }
     }
-
 
     static class Package {
         String pkg;
@@ -265,13 +262,11 @@ public abstract class Container extends Element {
         }
     }
 
-
     /**
      * Static list of packages.
      *
      */
     static ArrayList packages =  new ArrayList();
-
 
     /**
      * Locate package from Namespace.
@@ -310,7 +305,6 @@ public abstract class Container extends Element {
         }
     }
 
-
     /**
      */
     private static String normalize(String s) {
@@ -341,11 +335,7 @@ public abstract class Container extends Element {
         return s.substring(0, 1).toUpperCase()+s.substring(1);
     }
 
-
-
     // ------------------------------------------------------------
-
-
 
     protected void setLeafValue(String ns, String path, Object value,
                                 String[] childrenNames)
@@ -421,7 +411,6 @@ public abstract class Container extends Element {
             nodes.first().markDelete();
     }
 
-
     /**
      *
      */
@@ -433,8 +422,6 @@ public abstract class Container extends Element {
         else
             return (Container)nodes.first();
     }
-
-
 
     /**
      * Given two (YANG) list entries - compare
@@ -458,8 +445,6 @@ public abstract class Container extends Element {
         }
         return true;
     }
-
-
 
     /**
      * Compare the contents of this container
@@ -520,8 +505,6 @@ public abstract class Container extends Element {
         return 0;
     }
 
-
-
     /**
      * Compare the contents of this container
      * toward another container.
@@ -542,7 +525,6 @@ public abstract class Container extends Element {
             return compare( (Container)b);
         return super.compare(b);
     }
-
 
     /**
      * Return the 'diff' between two trees.
@@ -650,14 +632,6 @@ public abstract class Container extends Element {
         }
     }
 
-
-
-
-
-
-
-
-
     /**
      * Checks if two configurations are equal,
      * or if a sync is needed.
@@ -666,7 +640,6 @@ public abstract class Container extends Element {
     public boolean checkSync(Container b)  {
         return checkSync(this,b);
     }
-
 
     /**
      * Checks if two configurations are equal,
@@ -684,7 +657,6 @@ public abstract class Container extends Element {
 
         return Container.checkSync(aDummy, bDummy);
     }
-
 
     /**
      * Checks if two configurations are equal,
@@ -755,7 +727,6 @@ public abstract class Container extends Element {
         return true;
     }
 
-
     /**
      * Will return a subtree for syncing a subtree A with all the
      * necessary operations to make it look like the target tree B.
@@ -789,7 +760,6 @@ public abstract class Container extends Element {
 
         Container.inspect(a,b,uniqueA,uniqueB,changedA,changedB);
 
-
         Element result = null;
         for(int i=0;i<uniqueA.size();i++) {
             Element x= uniqueA.getElement(i);
@@ -806,11 +776,8 @@ public abstract class Container extends Element {
             result = x.merge(result, OP_REPLACE);
         }
 
-
         return (Container) result;
     }
-
-
 
     /**
      * Will return a list of subtrees for syncing a subtree A with all the
@@ -833,8 +800,6 @@ public abstract class Container extends Element {
         return result.getChildren();
     }
 
-
-
     /**
      * Will return a subtree for syncing a subtree A with all the
      * necessary operations to make it look like the target tree B.
@@ -843,7 +808,6 @@ public abstract class Container extends Element {
      * @return Return subtree with operations to transmute subtree A
      * into subtree B.
      */
-
 
     public static Container syncMerge(Container a, Container b) {
         Container copy = (Container)b.clone();
@@ -855,7 +819,6 @@ public abstract class Container extends Element {
         }
         return copy;
     }
-
 
     // Which NETCONF do we need to produce in order to go
     // from a to b
@@ -900,7 +863,6 @@ public abstract class Container extends Element {
                 diffs += d;
                 if (d == 0) {
 
-
                     // both children are identical - remove
                     // from b as well
                     toDel.add(bChild);
@@ -922,7 +884,6 @@ public abstract class Container extends Element {
                 continue;
             }
 
-
             if (aChild instanceof Leaf) {
                 if (aChild.equals(bChild)) {
                     // identical leaves remove from b
@@ -937,7 +898,6 @@ public abstract class Container extends Element {
         // Now all remaining elements in a - need to be
         // marked as delete, and also subsequently moved
         // to b
-
 
         for (i =0; achildren != null && i<achildren.size(); i++) {
             Element x = (Element)achildren.get(i);
@@ -999,7 +959,6 @@ public abstract class Container extends Element {
         return null;
     }
 
-
     private static Element findDeleteChildContainer(Container e, NodeSet s) {
         String [] keys = e.keyNames();
         for (int i =0; i<s.size(); i++) {
@@ -1035,13 +994,6 @@ public abstract class Container extends Element {
         return null;
     }
 
-
-
-
-
-
-
-
     /**
      * Will return a list of subtrees for syncing a subtree A with all the
      * necessary operations to make it look like the target tree B.
@@ -1063,8 +1015,6 @@ public abstract class Container extends Element {
         return result.getChildren();
     }
 
-
-
     /**
      * Clones a container.
      * Only key children are cloned, the other children
@@ -1073,7 +1023,6 @@ public abstract class Container extends Element {
      *
      */
     protected abstract Element cloneShallow();
-
 
     /**
      * Clones the contents of this container into a target copy.
@@ -1088,7 +1037,6 @@ public abstract class Container extends Element {
         cloneAttrs(copy);
         return copy;
     }
-
 
     /**
      * Clones the content of this container into a target copy.
@@ -1151,8 +1099,6 @@ public abstract class Container extends Element {
         XMLParser p = new com.tailf.confm.XMLParser();
         return p.readFile(filename);
     }
-
-
 
     // cache the Tagpath and the CsNode
     private Tagpath tp  = null;
@@ -1231,6 +1177,5 @@ public abstract class Container extends Element {
         }
         return true;
     }
-
 
 }

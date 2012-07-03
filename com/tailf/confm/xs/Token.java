@@ -33,11 +33,9 @@ public class Token extends NormalizedString implements Serializable {
         check();
     }
 
-
     private void check() throws ConfMException {
         wsCollapse();
     }
-
 
     /**
      * Restriction that says that the String must
@@ -53,7 +51,5 @@ public class Token extends NormalizedString implements Serializable {
                 throwException( true );
         }
     }
-
-
 
 }

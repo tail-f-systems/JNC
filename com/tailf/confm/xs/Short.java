@@ -61,7 +61,6 @@ public class Short implements Serializable {
         return value;
     }
 
-
     public Short(int value) throws ConfMException {
         throwException(value > java.lang.Short.MAX_VALUE);
         throwException(value < java.lang.Short.MIN_VALUE);
@@ -90,7 +89,6 @@ public class Short implements Serializable {
             return ((Short)value).equals(this.value);
         return false;
     }
-
 
     /** ---------- Restrictions ---------- */
 

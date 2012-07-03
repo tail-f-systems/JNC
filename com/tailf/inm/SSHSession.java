@@ -11,7 +11,6 @@
 
 package com.tailf.inm;
 
-
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
@@ -52,7 +51,6 @@ public class SSHSession implements Transport {
     private ArrayList ioSubscribers;
     protected long readTimeout = 0;  // millisecs
 
-
     /**
      * Constructor for SSH session object. This method creates a
      * a new SSh channel on top of an existing connection.
@@ -87,7 +85,6 @@ public class SSHSession implements Transport {
         // hello will be done by NetconfSession
     }
 
-
     /**
      * Return the underlying ssh connection object
      */
@@ -117,8 +114,6 @@ public class SSHSession implements Transport {
         this.readTimeout = readTimeout;
     }
 
-
-
     /**
      * Tell whether this transport is ready to be read.
      * @return true if there is something to read, false otherwise.
@@ -142,8 +137,6 @@ public class SSHSession implements Transport {
         return true;
     }
 
-
-
     /**
      * given a live SSHSession, check if the server side has
      * closed it's end of the ssh socket
@@ -162,7 +155,6 @@ public class SSHSession implements Transport {
         }
         return true;
     }
-
 
     /**
      * If we have readTimeout set, and an outstanding operation was
@@ -187,9 +179,6 @@ public class SSHSession implements Transport {
                 return ret;
             }
     }
-
-
-
 
     /**
      * Reads in "one" reply from the SSH transport input stream.
@@ -263,7 +252,6 @@ public class SSHSession implements Transport {
             subInputChar(wr, s.charAt(i));
     }
 
-
     /**
      * Prints an integer (as text) to the output stream.
      * @param iVal Text to send to the stream.
@@ -313,7 +301,6 @@ public class SSHSession implements Transport {
         }
         out.println(s);
     }
-
 
     /**
      * Add an IO Subscriber for this transport.
@@ -377,11 +364,9 @@ public class SSHSession implements Transport {
      * </pre>
      */
 
-
     public Session getSession() {
         return session;
     }
-
 
     /**
      * Closes the SSH channnel

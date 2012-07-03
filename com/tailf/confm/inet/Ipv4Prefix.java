@@ -48,9 +48,7 @@ public class Ipv4Prefix extends com.tailf.confm.xs.UnsignedLong implements Seria
         check();
     }
 
-
     private void check() throws ConfMException {
     }
-
 
 }

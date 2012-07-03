@@ -50,7 +50,6 @@ public class TCPConnection {
     BufferedReader in = null;
     PrintWriter out = null;
 
-
      /**
      * Creates a new TCP connection object.
      * Connects towards a ConfD NETCONF agent and
@@ -73,7 +72,6 @@ public class TCPConnection {
         authenticate(username,uid,gid,suplgids,dir,groups);
     }
 
-
     /**
      * Creates a new TCP connection object.
      * The connection need to be authenticated before it can
@@ -91,7 +89,6 @@ public class TCPConnection {
         in = new BufferedReader(new InputStreamReader(is));
         out = new PrintWriter(os, false);
     }
-
 
     /**
      * Authenticate towards the ConfD NETCONF Agent.
@@ -116,7 +113,6 @@ public class TCPConnection {
         out.println(header);
     }
 
-
     /**
      * Closes the TCP connection.
      */
@@ -124,7 +120,6 @@ public class TCPConnection {
         trace("close()");
         socket.close();
     }
-
 
     /**
      * Printout trace if 'debug'-flag is enabled.

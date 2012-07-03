@@ -67,11 +67,9 @@ public class Size implements Serializable {
         return value;
     }
 
-
     private void check() throws ConfMException {
         throwException( value < 0 );
     }
-
 
     /**
      * Parse a Size String into a long value.
@@ -111,7 +109,6 @@ public class Size implements Serializable {
         return ack;
     }
 
-
     /**
      *
      */
@@ -143,7 +140,6 @@ public class Size implements Serializable {
         return s;
     }
 
-
     /**
      * Compares two Sizes for equality.
      */
@@ -161,7 +157,6 @@ public class Size implements Serializable {
         return false;
     }
 
-
     /** ---------- Restrictions ---------- */
 
     /**
@@ -172,7 +167,6 @@ public class Size implements Serializable {
         if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,this);
     }
-
 
     /**
      * Assert that the value is 'false'

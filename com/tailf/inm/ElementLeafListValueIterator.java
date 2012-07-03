@@ -70,7 +70,6 @@ public class ElementLeafListValueIterator implements Iterator {
         return false;
     }
 
-
     /**
      * Return next child or null.
      *

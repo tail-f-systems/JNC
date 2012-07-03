@@ -42,7 +42,6 @@ public class Name extends Token implements Serializable {
         noSpacesOrCommasAllowed( value );
     }
 
-
     /**
      * Restriction that says that the Name should
      * start with a letter or ":" colon or "-" dash.

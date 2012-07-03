@@ -39,5 +39,4 @@ public class NMTOKEN extends Token implements Serializable {
         noSpacesOrCommasAllowed( getValue() );
     }
 
-
 }

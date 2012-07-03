@@ -66,9 +66,6 @@ public class String implements Serializable {
         return false;
     }
 
-
-
-
     /** ---------- Restrictions ---------- */
 
     /**
@@ -163,12 +160,7 @@ public class String implements Serializable {
         throw new ConfMException(ConfMException.BAD_VALUE,o);
     }
 
-
-
-
-
     /** ---------- package private --------- */
-
 
     /**
      * xs:whiteSpace replace.

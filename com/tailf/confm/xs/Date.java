@@ -120,7 +120,6 @@ public class Date implements Serializable {
         return toString().compareTo( value.toString());
     }
 
-
     /**
      * Returns a Calendar object from the Date.
      *
@@ -138,7 +137,6 @@ public class Date implements Serializable {
         return c;
     }
 
-
     /**
      * Returns the current time, for this Date object.
      *
@@ -146,8 +144,6 @@ public class Date implements Serializable {
     public java.util.Date getTime() {
         return getCalendar().getTime();
     }
-
-
 
     /**
      * Help method to parse and set the value.
@@ -195,8 +191,6 @@ public class Date implements Serializable {
             throwException( true, value );
         }
     }
-
-
 
     /** ---------- Restrictions ---------- */
 
@@ -254,8 +248,6 @@ public class Date implements Serializable {
         throw new ConfMException(ConfMException.BAD_VALUE,value);
     }
 
-
-
     /** ---------- package private static stuff ----------
      * Used from many of the date and time classes.
      *
@@ -282,7 +274,6 @@ public class Date implements Serializable {
         return tz;
     }
 
-
     static java.lang.String four_digits(int n) {
         java.lang.String s= java.lang.Integer.toString(n);
         while( s.length() < 4) s= "0"+s;
@@ -294,6 +285,5 @@ public class Date implements Serializable {
         while( s.length() < 2) s= "0"+s;
         return s;
     }
-
 
 }

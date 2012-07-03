@@ -57,7 +57,6 @@ public class CsTree {
         return nsnames;
     }
 
-
     /*
      * Find the CsNode for  e specific schema entry
      * returns null if not found

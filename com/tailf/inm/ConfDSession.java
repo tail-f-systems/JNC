@@ -14,7 +14,6 @@ package com.tailf.inm;
 import java.util.ArrayList;
 import java.io.IOException;
 
-
 /**
  * An extended NETCONF session class,
  * with capabilities that ConfD supports.
@@ -106,9 +105,6 @@ import java.io.IOException;
 
 public class ConfDSession extends NetconfSession {
 
-
-
-
     /**
      * Constructor. Creates a new session object
      * using the given transport object.
@@ -123,7 +119,6 @@ public class ConfDSession extends NetconfSession {
         setTransport(transport);
         mkSession();
     }
-
 
     /**
      * Constructor. Creates a new session object
@@ -143,9 +138,6 @@ public class ConfDSession extends NetconfSession {
         mkSession();
     }
 
-
-
-
     private void mkSession() throws INMException, IOException {
         setCapability(Capabilities.WITH_DEFAULTS_CAPABILITY);
         setCapability(Capabilities.ACTIONS_CAPABILITY);
@@ -163,9 +155,6 @@ public class ConfDSession extends NetconfSession {
         Element.defaultPrefixes.set(
             new Prefix("nctr",Capabilities.NS_TRANSACTIONS));
     }
-
-
-
 
     /**
      * Set the 'with-defaults' to 'true' or 'false'.
@@ -187,7 +176,6 @@ public class ConfDSession extends NetconfSession {
                                          new Boolean(value).toString());
     }
 
-
     /**
      * Action capability.
      * An action that does not return any result value, replies
@@ -202,7 +190,6 @@ public class ConfDSession extends NetconfSession {
         out.flush();
         return recv_rpc_reply();
     }
-
 
     /**
      * Starts a transaction towards a configuration datastore.
@@ -238,7 +225,6 @@ public class ConfDSession extends NetconfSession {
         recv_rpc_reply_ok();
     }
 
-
     /**
      * Prepares the transaction state for commit.  The server may reject
      * the prepare request for any reason, for example due to lack of
@@ -271,8 +257,6 @@ public class ConfDSession extends NetconfSession {
         recv_rpc_reply_ok();
     }
 
-
-
     /**
      * Applies the changes made in the transaction to the configuration
      * datatore.  The transaction is closed after a
@@ -288,7 +272,6 @@ public class ConfDSession extends NetconfSession {
         out.flush();
         recv_rpc_reply_ok();
     }
-
 
     /**
      * Aborts the ongoing transaction, and all pending changes are
@@ -307,7 +290,6 @@ public class ConfDSession extends NetconfSession {
         recv_rpc_reply_ok();
     }
 
-
     /** ------------------------------------------------------------
      *  Receive from session
      */
@@ -323,7 +305,6 @@ public class ConfDSession extends NetconfSession {
         /* rpc-error */
         throw new INMException(INMException.RPC_REPLY_ERROR,t);
     }
-
 
     /** ------------------------------------------------------------
      *  Encoding
@@ -359,7 +340,6 @@ public class ConfDSession extends NetconfSession {
         encode_rpc_end(out);
     }
 
-
     /**
      * Example:
      * <rpc message-id="101"
@@ -384,7 +364,6 @@ public class ConfDSession extends NetconfSession {
         encode_rpc_end(out);
     }
 
-
     /**
      * Example:
      * <rpc message-id="103"
@@ -403,7 +382,6 @@ public class ConfDSession extends NetconfSession {
         out.println("<"+tr+"prepare-transaction "+xmlnsAttr+"/>");
         encode_rpc_end(out);
     }
-
 
     /**
      * <rpc message-id="104"
@@ -424,7 +402,6 @@ public class ConfDSession extends NetconfSession {
         encode_rpc_end(out);
     }
 
-
     /**
      * <rpc message-id="104"
      *  xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
@@ -443,12 +420,9 @@ public class ConfDSession extends NetconfSession {
         encode_rpc_end(out);
     }
 
-
-
     /** ------------------------------------------------------------
      *  help functions
      */
-
 
     /**
      * Printout trace if 'debug'-flag is enabled.

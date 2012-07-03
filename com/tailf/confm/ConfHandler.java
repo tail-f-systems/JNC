@@ -100,7 +100,6 @@ class ConfHandler extends DefaultHandler {
         current = child; // step down
     }
 
-
     private void addOtherAttributes(Attributes attributes, Element child) {
         // add other attributes
         for (int i=0;i<attributes.getLength();i++) {
@@ -112,7 +111,6 @@ class ConfHandler extends DefaultHandler {
             child.addAttr(attr);
         }
     }
-
 
     private void unknownEndElement(String uri, String localName, String qName) {
         // check that we don't have mixed content
@@ -161,7 +159,6 @@ class ConfHandler extends DefaultHandler {
         if (current.value==null) current.value= new String();
         current.value = current.value + new String(ch,start,length);
     }
-
 
     public void characters(char[] ch, int start, int length) {
         if (unknownLevel > 0) {

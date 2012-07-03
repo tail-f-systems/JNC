@@ -75,7 +75,6 @@ public class InetAddressIP implements Serializable {
         check();
     }
 
-
     /**
      * Return the value.
      * One of:
@@ -88,7 +87,6 @@ public class InetAddressIP implements Serializable {
     public Object getValue() {
         return value;
     }
-
 
     private void check() throws ConfMException {
     }
@@ -109,7 +107,6 @@ public class InetAddressIP implements Serializable {
     public boolean equals(InetAddressIP b) {
         return value.equals( b.value );
     }
-
 
     /**
      * Assert that the value is 'false'

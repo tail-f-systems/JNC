@@ -30,12 +30,10 @@ public class Prefix extends Attribute implements Serializable {
      */
     static final String XMLNS_NAMESPACE = "http://www.w3.org/2000/xmlns/";
 
-
     /**
      * qualified name if printed as an xmlns attribute
      * 'xmlns:prefixname' */
     String qName;
-
 
     /**
      * Constructs a new Prefix object which represents a prefix mapping.
@@ -60,14 +58,12 @@ public class Prefix extends Attribute implements Serializable {
         return qName+"=\""+value+"\"";
     }
 
-
     /**
      * Returns a string representation of this Attribute object.
      */
     public String toString() {
         return new String("Prefix{\""+name+"\", \""+value+"\"}");
     }
-
 
     /**
     * Encodes to XML and send it to the provided stream.
@@ -81,7 +77,6 @@ public class Prefix extends Attribute implements Serializable {
         out.print("\"");
     }
 
-
     /** ------------------------------------------------------------
      *  help functions
      */
@@ -93,7 +88,6 @@ public class Prefix extends Attribute implements Serializable {
         if (Element.debugLevel>=Element.DEBUG_LEVEL_PREFIX)
             System.err.println("*Prefix: "+s);
     }
-
 
 }
 

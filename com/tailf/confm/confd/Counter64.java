@@ -51,9 +51,7 @@ public class Counter64 extends com.tailf.confm.xs.UnsignedLong implements Serial
         check();
     }
 
-
     private void check() throws ConfMException {
     }
-
 
 }

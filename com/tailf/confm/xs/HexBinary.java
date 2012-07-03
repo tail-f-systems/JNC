@@ -71,7 +71,6 @@ public class HexBinary implements Serializable {
         check();
     }
 
-
     /**
      * Sets the value.
      */
@@ -80,7 +79,6 @@ public class HexBinary implements Serializable {
         check();
     }
 
-
     /**
      * Returns the value space.
      */
@@ -88,10 +86,8 @@ public class HexBinary implements Serializable {
         return value;
     }
 
-
     private void check() {
     }
-
 
     /**
      * convert integer to bytes.
@@ -132,7 +128,6 @@ public class HexBinary implements Serializable {
         return r;
     }
 
-
     private int parseDigit(byte v, java.lang.String s)
         throws ConfMException {
         if (v>='a' && v<='f') return v - 'a' + 10;
@@ -141,7 +136,6 @@ public class HexBinary implements Serializable {
         throwException( true, s );
         return 0;
     }
-
 
     public java.lang.String toString() {
         java.lang.String s = new java.lang.String();
@@ -158,7 +152,6 @@ public class HexBinary implements Serializable {
         else return (char)(b+'0');
     }
 
-
     public boolean equals(HexBinary v) {
         byte[] v1 = value;
         byte[] v2=  v.getValue();
@@ -173,8 +166,6 @@ public class HexBinary implements Serializable {
             return equals( (HexBinary)value);
         return false;
     }
-
-
 
     /** ---------- Restrictions ---------- */
 
@@ -226,6 +217,5 @@ public class HexBinary implements Serializable {
         if (!v) return;
         throw new ConfMException(ConfMException.BAD_VALUE,o);
     }
-
 
 }
