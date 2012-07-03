@@ -674,39 +674,36 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
             clone(name, map(str.capitalize, key.arg.split(' ')), shallow=True)
     elif stmt.keyword == 'typedef':
         type_stmt = stmt.search_one('type')
+        # If supertype is derived, make sure a class for it is generated
         if type_stmt.i_typedef:
             if type_stmt.i_typedef.arg not in defined_types:
                 typedef_path = get_package(type_stmt.i_typedef, ctx)
                 generate_class(type_stmt.i_typedef, typedef_path, src,
                     typedef_path.replace('.', '/') + '/', ns, prefix_name, ctx)
+        # Extract types to use in constructors, etc.
         super_type = get_types(type_stmt, ctx)[0]
         mods = ' extends ' + super_type
         base_type = get_base_type(stmt)
         primitive = get_types(base_type, ctx)[1]
         constructors = typedef_constructor(stmt)
+        spec = ', using a string value'
+        arg = 'String ' + stmt.arg + 'Value'
+        body = 'super.setValue(' + stmt.arg + '''Value);
+        check();'''
+        # XXX Intentionally overwrite access_methods
+        access_methods = set_value(stmt, spec1=spec, argument=arg, body=body)
+        """ stmt     -- The statement to set the value for
+            spec1    -- Text to insert before parameter listing
+            spec2    -- parameter description
+            argument -- Full argument listing of method
+            body     -- The code to be put in the method body"""
         if primitive != 'String':
             constructors += typedef_constructor(stmt, primitive)
-        '''
-    /**
-     * Constructor for Bogus3 object from a string.
-     * @param value Value to construct the Bogus3 from.
-     */
-    public Bogus3(String value) 
-        throws ConfMException {
-        super(value);
-        check();
-    }
-
-    /**
-     * Sets the value using a string value.
-     * @param value The value to set.
-     */
-    public void setValue(String value) 
-        throws ConfMException {
-        super.setValue(value);
-        check();
-    }
-
+            spec = ', using ' + primitive + ' value'
+            arg = primitive + ' ' + stmt.arg + 'Value'
+            access_methods += set_value(stmt, spec1=spec, argument=arg, 
+                body=body)
+        access_methods += '''
     /**
      * Checks all restrictions (if any).
      */
@@ -796,12 +793,12 @@ def generate_child(sub, package, src, path, ns, prefix_name, ctx):
                 access_methods += access_methods_comment(sub, optional)
                 # TODO ensure that the leaf is truly optional
             access_methods += get_value(sub, ret_type=type_str1) + \
-                set_value(sub, prefix=prefix_name, arg_type=type_str1) + \
-                set_value(sub, prefix='', arg_type='String',
+                set_leaf_value(sub, prefix=prefix_name, arg_type=type_str1) + \
+                set_leaf_value(sub, prefix='', arg_type='String',
                     confm_type=type_str1)
             if type_str2 != 'String':
-                access_methods += set_value(sub, prefix='', arg_type=type_str2,
-                    confm_type=type_str1)
+                access_methods += set_leaf_value(sub, prefix='',
+                    arg_type=type_str2, confm_type=type_str1)
             if optional:
                 access_methods += unset_value(sub)
             access_methods += add_value(sub, prefix_name)
@@ -813,11 +810,12 @@ def generate_child(sub, package, src, path, ns, prefix_name, ctx):
         elif sub.keyword == 'leaf-list':
             access_methods += access_methods_comment(sub, optional=False) + \
                 child_iterator(sub) + \
-                set_value(sub, prefix=prefix_name, arg_type=type_str1) + \
-                set_value(sub, prefix='', arg_type='String', confm_type=type_str1)
-            if type_str2 != 'String':
-                access_methods += set_value(sub, prefix='', arg_type=type_str2,
+                set_leaf_value(sub, prefix=prefix_name, arg_type=type_str1) + \
+                set_leaf_value(sub, prefix='', arg_type='String',
                     confm_type=type_str1)
+            if type_str2 != 'String':
+                access_methods += set_leaf_value(sub, prefix='',
+                    arg_type=type_str2, confm_type=type_str1)
             access_methods += delete_stmt(sub,
                     args=[(type_str1, sub.arg + 'Value')], keys=False) + \
                 delete_stmt(sub, args=[(type_str1, sub.arg + 'Value')],
@@ -1283,29 +1281,33 @@ def get_value(stmt, ret_type='com.tailf.confm.xs.String'):
 '''
 
 
-def set_value(stmt, prefix='', arg_type='', confm_type=''):
-    """set<Identifier>Value method generator.
+def set_leaf_value(stmt, prefix='', arg_type='', confm_type=''):
+    """set<Identifier>Value method generator, specifically for leafs.
 
     stmt       -- Typically a leaf statement
-    prefix     -- Namespace prefix of module, empty if the setLeafValue method
-                  is not to be used in the method
+    prefix     -- Namespace prefix of module, empty if the setLeafValue or
+                  setLeafListValue methods are not to be used in the method
     arg_type   -- Type of method parameter, empty if parameter free
     confm_type -- Type to use internally, empty if the setIdValue method is not
                   to be used in the method
 
     """
-    # XXX This function is hard to read, should refactor
     name = stmt.arg.capitalize()
     spec1 = spec2 = ''
     MAX_COLS = 80 - len('     * Sets the value for child ' + stmt.keyword + \
         ' "' + stmt.arg + '",.')  # Space left to margin
+    # Add different comments depending on argument type
     if arg_type == 'String':
         spec1 = ', using a string value'
         spec2 = 'string representation of the '
-    elif arg_type == 'long':
+    elif arg_type == '':
+        pass
+    else:
         spec1 = ', using the java primitive value'
+    # Do linebreak if neccessary
     if len(spec1) > MAX_COLS:
         spec1 = ',\n     * ' + spec1[2:]
+    # Register namespace if prefix is not empty, else use generated set-method
     if prefix:
         if stmt.keyword == 'leaf-list':
             body = 'setLeafListValue('
@@ -1318,17 +1320,35 @@ def set_value(stmt, prefix='', arg_type='', confm_type=''):
     else:
         body = 'set' + name + 'Value(new ' + confm_type + '(' + stmt.arg + \
             'Value));'
+    # Prepare method argument listing
     argument = arg_type + ' ' + stmt.arg + 'Value'
     if arg_type == '':
+        # Special case of no argument
         argument = ''
         body = 'set' + name + 'Value(new ' + name + '());'
+    return set_value(stmt, name, spec1, spec2, argument, body)
+
+
+def set_value(stmt, nameID='', spec1='', spec2='', argument='', body=''):
+    """set<Identifier>Value method generator.
+
+    stmt     -- The statement to set the value for
+    nameID   -- Identifier in method name
+    spec1    -- Text to insert before parameter listing
+    spec2    -- parameter description
+    argument -- Full argument listing of method
+    body     -- The code to be put in the method body
+
+    """
+    if argument:
+        spec1 += '''.
+     * @param ''' + stmt.arg + 'Value The ' + spec2 + 'value to set'
     return '''
     /**
      * Sets the value for child ''' + stmt.keyword + ' "' + stmt.arg + '"' + \
         spec1 + '''.
-     * @param ''' + stmt.arg + 'Value The ' + spec2 + '''value to set.
      */
-    public void set''' + name + 'Value(' + argument + ''')
+    public void set''' + nameID + 'Value(' + argument + ''')
         throws INMException {
         ''' + body + '''
     }
