@@ -613,7 +613,7 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
 
     """
     (filename, name) = extract_names(stmt.arg)
-    access_methods = constructors = cloners = support_methods = ''
+    access_methods = constructors = cloners = support_methods = names = ''
     fields = []
     mods = ' extends Container'
     i_children_exists = (hasattr(stmt, 'i_children') 
@@ -641,7 +641,7 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
             return res
         expanded_i_children = expand(stmt.i_children)
     for sub in stmt.substmts:
-        # TODO Avoid quadratic time duplication check
+        # TODO Avoid quadratic time duplication check (maybe use a set)
         if sub not in expanded_i_children:
             tmp_access_methods, tmp_fields = generate_child(sub, package,
                 src, path, ns, prefix_name, ctx)
@@ -651,6 +651,8 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
         print 'Generating Java class "' + filename + '"...'
     if filter(is_container, stmt.substmts):  # TODO Verify correctness of cond.
         support_methods = support_add(fields)
+    if stmt.keyword != 'typedef':
+        names = key_names(stmt) + children_names(stmt)
     if stmt.keyword == 'container':
         constructors = constructor(stmt, ctx, set_prefix=top_level,
             root=prefix_name)
@@ -710,7 +712,7 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
     public void check()
         throws ConfMException {
     }
-        '''
+'''  # FIXME Move to function and add regexp body
         # print 'typedef ' + stmt.arg
         # print 'package: ' + package + ', filename: ' + filename
         defined_types.append(stmt.arg)
@@ -720,8 +722,7 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
             # TODO Hashtable not used in generated code
             'This class represents a "' + path + stmt.arg +
             '" element\n * from the namespace ' + ns,
-            constructors + cloners + key_names(stmt) +
-            children_names(stmt) + access_methods + support_methods,
+            constructors + cloners + names + access_methods + support_methods,
             source=src,
             modifiers=mods
         ),
