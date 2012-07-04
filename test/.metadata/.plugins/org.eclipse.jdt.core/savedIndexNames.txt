@@ -1,8 +1,0 @@
-INDEX VERSION 1.126+/home/emil/Dropbox/tail-f/confd/lib/pyang/test/.metadata/.plugins/org.eclipse.jdt.core
-1701375861.index
-1202546949.index
-2471759118.index
-3066014066.index
-3319368673.index
-4274406874.index
-3686710985.index
