@@ -1,0 +1,24 @@
+Make sure current directory is 1-minimal:
+$ pwd
+> [...]/test/1-minimal
+
+Generate java classes using JPyang:
+$ pyang -p yang -f jpyang -d src/gen yang/minimal.yang
+> 
+
+A single java class representing the module root and a schema file should be
+generated, containing:
+<schema>
+    <node>
+        <tagpath>/</tagpath>
+        <namespace>http://example.com/ns/minimal/1.0</namespace>
+        <primitive_type>2</primitive_type>
+        <min_occurs>1</min_occurs>
+        <max_occurs>1</max_occurs>
+        <children></children>
+        <flags>2</flags>
+        <desc></desc>
+    </node>
+</schema>
+
+Create an eclipse project and run the testRun method in test/app/MainTest.java

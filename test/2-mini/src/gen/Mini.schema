@@ -1,0 +1,48 @@
+<schema>
+    <node>
+        <tagpath>/</tagpath>
+        <namespace>http://example.com/ns/mini/1.0</namespace>
+        <primitive_type></primitive_type>
+        <min_occurs>1</min_occurs>
+        <max_occurs>1</max_occurs>
+        <children>http://example.com/ns/mini/1.0 mini my-type c no-key l</children>
+        <flags></flags>
+        <desc></desc>
+    </node><node>
+        <tagpath>/c/</tagpath>
+        <namespace>http://example.com/ns/mini/1.0</namespace>
+        <primitive_type></primitive_type>
+        <min_occurs>0</min_occurs>
+        <max_occurs>1</max_occurs>
+        <children></children>
+        <flags></flags>
+        <desc></desc>
+    </node><node>
+        <tagpath>/no-key/</tagpath>
+        <namespace>http://example.com/ns/mini/1.0</namespace>
+        <primitive_type></primitive_type>
+        <min_occurs>0</min_occurs>
+        <max_occurs>1</max_occurs>
+        <children>ll</children>
+        <flags></flags>
+        <desc></desc>
+    </node><node>
+        <tagpath>/l/</tagpath>
+        <namespace>http://example.com/ns/mini/1.0</namespace>
+        <primitive_type></primitive_type>
+        <min_occurs>0</min_occurs>
+        <max_occurs>-1</max_occurs>
+        <children>k k</children>
+        <flags></flags>
+        <desc></desc>
+    </node><node>
+        <tagpath>/l/k/</tagpath>
+        <namespace>http://example.com/ns/mini/1.0</namespace>
+        <primitive_type></primitive_type>
+        <min_occurs>1</min_occurs>
+        <max_occurs>1</max_occurs>
+        <children>string</children>
+        <flags></flags>
+        <desc></desc>
+    </node>
+</schema>
