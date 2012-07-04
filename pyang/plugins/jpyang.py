@@ -478,6 +478,11 @@ def in_schema(stmt):
         stmt.keyword == 'leaf')
 
 
+def strip_first(s):
+    """Returns s but with chars up to and including '.' or '/' removed"""
+    return '.'.join(s.replace('/', '.').split('.')[1:])
+
+
 def indent(lines, level=1):
     """Returns a string consisting of all strings in lines concatenated,
     each string prepended by a level*4 number of spaces and appended with
@@ -913,7 +918,7 @@ def java_class(filename, package, imports, description, body, version='1.0',
  * @author    Auto Generated
  */'''
     # package and import statement goes here
-    header += '\n\npackage ' + package.replace('/', '.') + ';\n'
+    header += '\n\npackage ' + strip_first(package) + ';\n'
     if len(imports) > 0:
         header += '\n'
     for im in imports:
@@ -1694,4 +1699,4 @@ using a compatible YANG model.
     'target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">' + \
     'RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>\n' + \
     ' * @see <a target="_top" href="http://www.tail-f.com">Tail-f ' + \
-    'Systems</a>\n */\npackage ' + package + ';')
+    'Systems</a>\n */\npackage ' + strip_first(package) + ';')

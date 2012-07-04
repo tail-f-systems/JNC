@@ -1,9 +1,19 @@
 package app;
 
+import com.tailf.inm.INMException;
+
+import gen.Minimal;
+
 public class Main {
 	
-	public int multiply(int x, int y) {
-		return x * y;
+	public int run() {
+		try {
+			Minimal.enable();
+		} catch (INMException e) {
+			System.err.println("Schema file not found.");
+			return -1;
+		}
+		return 0;
 	}
 
 	/**
@@ -11,7 +21,7 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		Main main = new Main();
-		System.out.println(main.multiply(3, 2));
+		System.out.println(main.run());
 	}
 
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<workbench progressCount="34" version="2.0">
+<workbench progressCount="20" version="2.0">
 <workbenchAdvisor/>
 <window height="768" maximized="true" width="1024" x="65" y="24">
 <fastViewData fastViewLocation="1024">
@@ -25,6 +25,7 @@
 <coolItem id="group.nav" itemType="typeGroupMarker"/>
 <coolItem id="org.eclipse.ui.workbench.navigate" itemType="typeToolBarContribution" x="184" y="30"/>
 <coolItem id="group.editor" itemType="typeGroupMarker"/>
+<coolItem id="org.eclipse.jdt.ui.ClassFileEditor" itemType="typePlaceholder" x="-1" y="-1"/>
 <coolItem id="group.help" itemType="typeGroupMarker"/>
 <coolItem id="org.eclipse.ui.workbench.help" itemType="typeToolBarContribution" x="-1" y="-1"/>
 </coolbarLayout>
@@ -37,6 +38,8 @@
 <part id="0"/>
 <part id="1"/>
 <part id="2"/>
+<part id="3"/>
+<part id="4"/>
 </presentation>
 </folder>
 </info>
@@ -49,9 +52,17 @@
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/1-minimal/src/gen/Main.java"/>
 <editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="85" selectionTopPixel="0"/>
 </editor>
-<editor activePart="true" focus="true" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="MainTest.java" partName="MainTest.java" path="/home/emil/Dropbox/tail-f/confd/lib/pyang/test/1-minimal/test/gen/MainTest.java" title="MainTest.java" tooltip="1-minimal/test/gen/MainTest.java" workbook="DefaultEditorWorkbook">
+<editor id="org.eclipse.jdt.ui.CompilationUnitEditor" name="MainTest.java" partName="MainTest.java" path="/home/emil/Dropbox/tail-f/confd/lib/pyang/test/1-minimal/test/gen/MainTest.java" title="MainTest.java" tooltip="1-minimal/test/gen/MainTest.java" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/1-minimal/test/gen/MainTest.java"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="223" selectionTopPixel="0"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="241" selectionTopPixel="0"/>
+</editor>
+<editor activePart="true" focus="true" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="Minimal.java" partName="Minimal.java" path="/home/emil/Dropbox/tail-f/confd/lib/pyang/test/1-minimal/src/gen/Minimal.java" title="Minimal.java" tooltip="1-minimal/src/gen/Minimal.java" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/1-minimal/src/gen/Minimal.java"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1340" selectionTopPixel="305"/>
+</editor>
+<editor id="org.eclipse.jdt.ui.CompilationUnitEditor" name="package-info.java" partName="package-info.java" path="/home/emil/Dropbox/tail-f/confd/lib/pyang/test/1-minimal/src/gen/package-info.java" title="package-info.java" tooltip="1-minimal/src/gen/package-info.java" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/1-minimal/src/gen/package-info.java"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1133" selectionTopPixel="0"/>
 </editor>
 </editors>
 <views>
@@ -61,11 +72,9 @@
 <view id="org.eclipse.rse.ui.view.scratchpad.SystemScratchpadViewPart" partName="Remote Scratchpad"/>
 <view id="org.eclipse.rse.ui.view.systemView" partName="Remote Systems">
 <viewState horizontalPosition="0" linkWithEditor="f" release="2.0.0" showFilterPools="f" verticalPosition="0">
-<expanded>
-<element path="Conn///Emil-Ubuntu-Tail-f.Local"/>
+<expanded>&#x0A;<element path="Conn///Emil-Ubuntu-Tail-f.Local"/>
 </expanded>
-<selection>
-<element path="Subs///Emil-Ubuntu-Tail-f.Local///local.shells=Local Shells"/>
+<selection>&#x0A;<element path="Subs///Emil-Ubuntu-Tail-f.Local///local.shells=Local Shells"/>
 </selection>
 </viewState>
 </view>
@@ -102,6 +111,10 @@
 </view>
 <view id="org.eclipse.ui.views.ProblemView" partName="Problems">
 <viewState PRIMARY_SORT_FIELD="org.eclipse.ui.ide.severityAndDescriptionField" categoryGroup="org.eclipse.ui.ide.severity" markerContentGenerator="org.eclipse.ui.ide.problemsGenerator" partName="Problems">
+<expanded>
+<category IMemento.internal.id="Warnings"/>
+<category IMemento.internal.id="Errors"/>
+</expanded>
 <columnWidths org.eclipse.ui.ide.locationField="105" org.eclipse.ui.ide.markerType="105" org.eclipse.ui.ide.pathField="140" org.eclipse.ui.ide.resourceField="105" org.eclipse.ui.ide.severityAndDescriptionField="350"/>
 <visible IMemento.internal.id="org.eclipse.ui.ide.severityAndDescriptionField"/>
 <visible IMemento.internal.id="org.eclipse.ui.ide.resourceField"/>
@@ -296,52 +309,36 @@
 <view id="org.eclipse.ui.views.PropertySheet"/>
 <view id="org.eclipse.rse.ui.view.scratchpad.SystemScratchpadViewPart"/>
 <fastViewBars/>
-<layout>
-<mainWindow>
-<info folder="true" part="org.eclipse.rse.ui.view.NavFolder">
-<folder activePageID="org.eclipse.rse.ui.view.systemView" appearance="2" expanded="2">
-<page content="org.eclipse.rse.ui.view.systemView" label="Remote Systems"/>
+<layout>&#x0A;<mainWindow>&#x0A;<info folder="true" part="org.eclipse.rse.ui.view.NavFolder">&#x0A;<folder activePageID="org.eclipse.rse.ui.view.systemView" appearance="2" expanded="2">&#x0A;<page content="org.eclipse.rse.ui.view.systemView" label="Remote Systems"/>
 <page content="org.eclipse.rse.ui.view.teamView" label="Team"/>
-<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
-<part id="0"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">&#x0A;<part id="0"/>
 <part id="1"/>
 </presentation>
 </folder>
 </info>
-<info folder="true" part="stickyFolderRight" ratio="0.74983627" ratioLeft="1145" ratioRight="382" relationship="2" relative="org.eclipse.rse.ui.view.NavFolder">
-<folder appearance="2" expanded="2">
-<page content="org.eclipse.help.ui.HelpView" label="LabelNotFound"/>
+<info folder="true" part="stickyFolderRight" ratio="0.74983627" ratioLeft="1145" ratioRight="382" relationship="2" relative="org.eclipse.rse.ui.view.NavFolder">&#x0A;<folder appearance="2" expanded="2">&#x0A;<page content="org.eclipse.help.ui.HelpView" label="LabelNotFound"/>
 <page content="org.eclipse.ui.internal.introview" label="LabelNotFound"/>
 <page content="org.eclipse.ui.cheatsheets.views.CheatSheetView" label="LabelNotFound"/>
 </folder>
 </info>
 <info part="org.eclipse.ui.editorss" ratio="0.24950884" ratioLeft="381" ratioRight="1146" relationship="2" relative="org.eclipse.rse.ui.view.NavFolder"/>
-<info folder="true" part="org.eclipse.rse.ui.view.MiscFolder" ratio="0.5997426" ratioLeft="466" ratioRight="311" relationship="4" relative="org.eclipse.ui.editorss">
-<folder activePageID="org.eclipse.rse.shells.ui.view.commandsView" appearance="2" expanded="2">
-<page content="org.eclipse.rse.ui.view.systemTableView" label="Remote System Details"/>
+<info folder="true" part="org.eclipse.rse.ui.view.MiscFolder" ratio="0.5997426" ratioLeft="466" ratioRight="311" relationship="4" relative="org.eclipse.ui.editorss">&#x0A;<folder activePageID="org.eclipse.rse.shells.ui.view.commandsView" appearance="2" expanded="2">&#x0A;<page content="org.eclipse.rse.ui.view.systemTableView" label="Remote System Details"/>
 <page content="org.eclipse.ui.views.TaskList" label="Tasks"/>
 <page content="org.eclipse.rse.shells.ui.view.commandsView" label="Remote Shell"/>
-<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
-<part id="0"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">&#x0A;<part id="0"/>
 <part id="1"/>
 <part id="2"/>
 </presentation>
 </folder>
 </info>
-<info folder="true" part="org.eclipse.rse.ui.view.OutlineFolder" ratio="0.7993019" ratioLeft="916" ratioRight="230" relationship="2" relative="org.eclipse.ui.editorss">
-<folder activePageID="org.eclipse.ui.views.ContentOutline" appearance="2" expanded="2">
-<page content="org.eclipse.ui.views.ContentOutline" label="Outline"/>
-<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
-<part id="0"/>
+<info folder="true" part="org.eclipse.rse.ui.view.OutlineFolder" ratio="0.7993019" ratioLeft="916" ratioRight="230" relationship="2" relative="org.eclipse.ui.editorss">&#x0A;<folder activePageID="org.eclipse.ui.views.ContentOutline" appearance="2" expanded="2">&#x0A;<page content="org.eclipse.ui.views.ContentOutline" label="Outline"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">&#x0A;<part id="0"/>
 </presentation>
 </folder>
 </info>
-<info folder="true" part="org.eclipse.rse.ui.view.PropertiesFolder" ratio="0.74903476" ratioLeft="582" ratioRight="195" relationship="4" relative="org.eclipse.rse.ui.view.NavFolder">
-<folder activePageID="org.eclipse.ui.views.PropertySheet" appearance="2" expanded="2">
-<page content="org.eclipse.ui.views.PropertySheet" label="Properties"/>
+<info folder="true" part="org.eclipse.rse.ui.view.PropertiesFolder" ratio="0.74903476" ratioLeft="582" ratioRight="195" relationship="4" relative="org.eclipse.rse.ui.view.NavFolder">&#x0A;<folder activePageID="org.eclipse.ui.views.PropertySheet" appearance="2" expanded="2">&#x0A;<page content="org.eclipse.ui.views.PropertySheet" label="Properties"/>
 <page content="org.eclipse.rse.ui.view.scratchpad.SystemScratchpadViewPart" label="Remote Scratchpad"/>
-<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
-<part id="0"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">&#x0A;<part id="0"/>
 <part id="1"/>
 </presentation>
 </folder>
@@ -393,51 +390,35 @@
 <view id="org.eclipse.ui.views.TaskList"/>
 <view id="org.eclipse.ptp.etfw.tau.perfdmf.views.PerfDMFView"/>
 <fastViewBars/>
-<layout>
-<mainWindow>
-<info folder="true" part="topLeft">
-<folder activePageID="org.eclipse.ui.navigator.ProjectExplorer" appearance="2" expanded="2">
-<page content="org.eclipse.ui.navigator.ProjectExplorer" label="Project Explorer"/>
+<layout>&#x0A;<mainWindow>&#x0A;<info folder="true" part="topLeft">&#x0A;<folder activePageID="org.eclipse.ui.navigator.ProjectExplorer" appearance="2" expanded="2">&#x0A;<page content="org.eclipse.ui.navigator.ProjectExplorer" label="Project Explorer"/>
 <page content="org.eclipse.ui.views.BookmarkView" label="LabelNotFound"/>
 <page content="org.eclipse.ui.views.ResourceNavigator" label="LabelNotFound"/>
 <page content="org.eclipse.team.ccvs.ui.RepositoriesView" label="LabelNotFound"/>
-<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
-<part id="0"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">&#x0A;<part id="0"/>
 </presentation>
 </folder>
 </info>
-<info folder="true" part="stickyFolderRight" ratio="0.74983627" ratioLeft="1145" ratioRight="382" relationship="2" relative="topLeft">
-<folder appearance="2" expanded="2">
-<page content="org.eclipse.help.ui.HelpView" label="LabelNotFound"/>
+<info folder="true" part="stickyFolderRight" ratio="0.74983627" ratioLeft="1145" ratioRight="382" relationship="2" relative="topLeft">&#x0A;<folder appearance="2" expanded="2">&#x0A;<page content="org.eclipse.help.ui.HelpView" label="LabelNotFound"/>
 <page content="org.eclipse.ui.internal.introview" label="LabelNotFound"/>
 <page content="org.eclipse.ui.cheatsheets.views.CheatSheetView" label="LabelNotFound"/>
 </folder>
 </info>
 <info part="org.eclipse.gef.ui.palette_view" ratio="0.2599869" ratioLeft="397" ratioRight="1130" relationship="2" relative="topLeft"/>
-<info folder="true" part="bottomRight" ratio="0.65938306" ratioLeft="513" ratioRight="265" relationship="4" relative="org.eclipse.gef.ui.palette_view">
-<folder activePageID="org.eclipse.ui.views.TaskList" appearance="2" expanded="2">
-<page content="org.eclipse.ui.views.TaskList" label="Tasks"/>
+<info folder="true" part="bottomRight" ratio="0.65938306" ratioLeft="513" ratioRight="265" relationship="4" relative="org.eclipse.gef.ui.palette_view">&#x0A;<folder activePageID="org.eclipse.ui.views.TaskList" appearance="2" expanded="2">&#x0A;<page content="org.eclipse.ui.views.TaskList" label="Tasks"/>
 <page content="org.eclipse.team.ui.GenericHistoryView" label="LabelNotFound"/>
-<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
-<part id="0"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">&#x0A;<part id="0"/>
 </presentation>
 </folder>
 </info>
-<info folder="true" part="org.eclipse.ui.internal.ViewStack@de5f11" ratio="0.5" ratioLeft="565" ratioRight="565" relationship="2" relative="bottomRight">
-<folder activePageID="org.eclipse.ptp.etfw.tau.perfdmf.views.PerfDMFView" appearance="2" expanded="2">
-<page content="org.eclipse.ptp.etfw.tau.perfdmf.views.PerfDMFView" label="Performance Data Manager"/>
-<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
-<part id="0"/>
+<info folder="true" part="org.eclipse.ui.internal.ViewStack@de5f11" ratio="0.5" ratioLeft="565" ratioRight="565" relationship="2" relative="bottomRight">&#x0A;<folder activePageID="org.eclipse.ptp.etfw.tau.perfdmf.views.PerfDMFView" appearance="2" expanded="2">&#x0A;<page content="org.eclipse.ptp.etfw.tau.perfdmf.views.PerfDMFView" label="Performance Data Manager"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">&#x0A;<part id="0"/>
 </presentation>
 </folder>
 </info>
 <info part="org.eclipse.ui.editorss" ratio="0.15929204" ratioLeft="180" ratioRight="950" relationship="2" relative="org.eclipse.gef.ui.palette_view"/>
-<info folder="true" part="bottomLeft" ratio="0.5" ratioLeft="389" ratioRight="389" relationship="4" relative="topLeft">
-<folder activePageID="org.eclipse.ui.views.ContentOutline" appearance="2" expanded="2">
-<page content="org.eclipse.ui.views.ContentOutline" label="Outline"/>
+<info folder="true" part="bottomLeft" ratio="0.5" ratioLeft="389" ratioRight="389" relationship="4" relative="topLeft">&#x0A;<folder activePageID="org.eclipse.ui.views.ContentOutline" appearance="2" expanded="2">&#x0A;<page content="org.eclipse.ui.views.ContentOutline" label="Outline"/>
 <page content="org.eclipse.ant.ui.views.AntView" label="LabelNotFound"/>
-<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
-<part id="0"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">&#x0A;<part id="0"/>
 </presentation>
 </folder>
 </info>
@@ -451,6 +432,10 @@
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.ui.DefaultTextEditor" path="/1-minimal/yang/minimal.yang"/>
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" path="/1-minimal/src/gen/Main.java"/>
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" path="/1-minimal/test/gen/MainTest.java"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" path="/1-minimal/src/app/Minimal.java"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" path="/1-minimal/src/gen/Minimal.java"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" path="/1-minimal/src/gen/package-info.java"/>
+<editor factoryID="org.eclipse.jdt.ui.ClassFileEditorInputFactory" id="org.eclipse.jdt.ui.ClassFileEditor" org.eclipse.jdt.ui.ClassFileIdentifier="=1-minimal/\/home\/emil\/Dropbox\/tail-f\/confd\/lib\/pyang\/INM.jar&lt;com.tailf.inm(INMException.class"/>
 </editors>
 <item historyLabel="minimal.yang" index="0">
 <position info="not_deleted" x="85" y="0"/>
@@ -470,8 +455,44 @@
 <item historyLabel="Main.java" index="1">
 <position info="not_deleted" x="85" y="0"/>
 </item>
-<item active="true" historyLabel="MainTest.java" index="2">
+<item historyLabel="MainTest.java" index="2">
 <position info="not_deleted" x="216" y="0"/>
+</item>
+<item historyLabel="Minimal.java" index="3">
+<position info="not_deleted" x="497" y="0"/>
+</item>
+<item historyLabel="MainTest.java" index="2">
+<position info="not_deleted" x="241" y="0"/>
+</item>
+<item historyLabel="Minimal.java" index="4">
+<position info="not_deleted" x="202" y="0"/>
+</item>
+<item historyLabel="package-info.java" index="5">
+<position info="not_deleted" x="0" y="0"/>
+</item>
+<item historyLabel="package-info.java" index="5">
+<position info="not_deleted" x="1133" y="0"/>
+</item>
+<item historyLabel="Minimal.java" index="4">
+<position info="not_deleted" x="202" y="0"/>
+</item>
+<item historyLabel="Minimal.java" index="4">
+<position/>
+</item>
+<item historyLabel="Minimal.java" index="4">
+<position/>
+</item>
+<item historyLabel="INMException.class" index="6">
+<position/>
+</item>
+<item historyLabel="Minimal.java" index="4">
+<position/>
+</item>
+<item historyLabel="INMException.class" index="6">
+<position/>
+</item>
+<item active="true" historyLabel="Minimal.java" index="4">
+<position/>
 </item>
 </navigationHistory>
 <input factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/" type="8"/>
@@ -490,6 +511,21 @@
 </trimLayout>
 </window>
 <mruList>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.ui.systemExternalEditor" name="INM.jar" tooltip="1-minimal/INM.jar">
+<persistable path="/1-minimal/INM.jar"/>
+</file>
+<file factoryID="org.eclipse.jdt.ui.ClassFileEditorInputFactory" id="org.eclipse.jdt.ui.ClassFileEditor" name="INMException.class" tooltip="com.tailf.inm.INMException">
+<persistable org.eclipse.jdt.ui.ClassFileIdentifier="=1-minimal/\/home\/emil\/Dropbox\/tail-f\/confd\/lib\/pyang\/INM.jar&lt;com.tailf.inm(INMException.class"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="package-info.java" tooltip="1-minimal/src/gen/package-info.java">
+<persistable path="/1-minimal/src/gen/package-info.java"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="Minimal.java" tooltip="1-minimal/src/gen/Minimal.java">
+<persistable path="/1-minimal/src/gen/Minimal.java"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="Minimal.java" tooltip="1-minimal/src/app/Minimal.java">
+<persistable path="/1-minimal/src/app/Minimal.java"/>
+</file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="MainTest.java" tooltip="1-minimal/test/gen/MainTest.java">
 <persistable path="/1-minimal/test/gen/MainTest.java"/>
 </file>

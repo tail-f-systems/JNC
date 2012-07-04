@@ -19,4 +19,4 @@
  * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>
  * @see <a target="_top" href="http://www.tail-f.com">Tail-f Systems</a>
  */
-package src.gen;
+package gen;

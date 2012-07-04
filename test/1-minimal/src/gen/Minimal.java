@@ -5,7 +5,7 @@
  * of pyang. Origin: module "minimal", revision: "unknown".
  */
 
-package src.gen;
+package gen;
 
 import com.tailf.confm.*;
 import com.tailf.inm.*;
@@ -39,9 +39,7 @@ public class Minimal {
      * CsNode entries for all tagpaths
      */
     public static void registerSchema() throws INMException {
-        StackTraceElement[] sTrace = (new Exception()).getStackTrace();
-        ClassLoader loader = sTrace[0].getClass().getClassLoader();
-        java.net.URL schemaUrl = loader.getSystemResource("Minimal.schema");
+        java.net.URL schemaUrl = ClassLoader.getSystemResource("Minimal.schema");
         SchemaParser parser = new SchemaParser();
         Hashtable h = CsTree.create(NAMESPACE);
         if (schemaUrl == null)
