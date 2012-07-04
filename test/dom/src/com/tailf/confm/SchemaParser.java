@@ -18,13 +18,27 @@ import com.tailf.inm.*;
 /**
  * A simple SAX parser, for parsing ConfD schema files with the following
  * syntax:
- * 
- * <schema> <node> <tagapth>string</tagpath> <namespace>string</namespace>
- * <primitive_type>string</primitive_type> <min_occurs>int</min_occurs>
- * <max_occurs>int</max_occurs> <children>space-separated strings</children>
- * <flags>integer</flags> <desc>string</desc> <rev> <info> <type>7</type>
- * <idata>4711</idata> <data>foo</data> <introduced>2007-10-11</introduced>
- * </info> </rev> </node> <schema>
+ *
+ * <schema> 
+ *     <node>
+ *         <tagpath>string</tagpath>
+ *         <namespace>string</namespace>
+ *         <primitive_type>string</primitive_type>
+ *         <min_occurs>int</min_occurs>
+ *         <max_occurs>int</max_occurs>
+ *         <children>space-separated strings</children>
+ *         <flags>integer</flags>
+ *         <desc>string</desc>
+ *         <rev>
+ *             <info>
+ *                 <type>7</type>
+ *                 <idata>4711</idata>
+ *                 <data>foo</data>
+ *                 <introduced>2007-10-11</introduced>
+ *             </info>
+ *         </rev>
+ *     </node>
+ * <schema>
  * 
  * into a hashtable with {@link CsNode} elements.
  * 
@@ -37,8 +51,8 @@ public class SchemaParser {
             String javaVersion = System.getProperty("java.version");
 
             if (javaVersion.startsWith("1.4"))
-                parser = XMLReaderFactory
-                        .createXMLReader("org.apache.crimson.parser.XMLReaderImpl");
+                parser = XMLReaderFactory.createXMLReader(
+                        "org.apache.crimson.parser.XMLReaderImpl");
             else
                 parser = XMLReaderFactory.createXMLReader();
         } catch (Exception e) {

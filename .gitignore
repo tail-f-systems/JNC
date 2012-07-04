@@ -8,3 +8,4 @@ confm-1.9.3
 *.class
 *.classpath
 *.project
+*.settings
