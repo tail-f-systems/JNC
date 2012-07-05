@@ -42,6 +42,16 @@ public class Main {
         }
     }
     
+    Element updateConfig(Element config) throws IOException,INMException {
+        return updateConfig(dev, config);
+    }
+
+    Element updateConfig(Device d, Element config) throws IOException,INMException {
+        d.getSession("cfg").editConfig(config);
+        // Inspect the updated RUNNING configuration
+        return getConfig(d);
+    }
+    
     private Element getConfig(Device d) throws IOException, INMException{
         Mini.enable();
         ConfDSession session = d.getSession("cfg");
@@ -51,31 +61,38 @@ public class Main {
         return h;
     }
     
-    public void getConfig() throws IOException,INMException{
-        Mini.enable();
-        System.out.println(getConfig(dev).toXMLString());
+    public Element getConfig() throws IOException,INMException{
+        return getConfig(dev);
     }
-	
-	public int run() {
-		try {
-			Mini.enable();
-		} catch (INMException e) {
-			System.err.println("Schema file not found.");
-			return -1;
-		}
-		return 0;
-	}
+    
+    public int run() {
+        try {
+            Mini.enable();
+        } catch (INMException e) {
+            System.err.println("Schema file not found.");
+            return -1;
+        }
+        return 0;
+    }
 
-	/**
-	 * @param args Ignored
-	 * @throws INMException 
-	 * @throws IOException 
-	 */
-	public static void main(String[] args) throws IOException, INMException {
-		Main main = new Main();
-		System.out.println(main.run());
-		main.init();
-		main.getConfig();
-	}
+    /**
+     * @param args Ignored
+     * @throws INMException 
+     * @throws IOException 
+     */
+    public static void main(String[] args) throws IOException, INMException {
+        Main main = new Main();
+        main.init();
+        Element config = main.getConfig();
+        
+        gen.L l = (gen.L)config;
+        System.out.println("Initial   config:\n" + l.toXMLString());
+        
+        gen.L k = (gen.L)l.clone();
+        k.addK();
+        
+        Element config2 = main.updateConfig(k);
+        System.out.println("Resulting config:\n" + config2.toXMLString());
+    }
 
 }

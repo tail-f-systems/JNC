@@ -72,6 +72,60 @@ public abstract class Container extends Element {
     public Container(String ns, String name) {
         super(ns, name);
     }
+    
+    /**
+     * 
+     * @param elem 
+     * @return Dot-separated path to top-level container, or empty string.
+     */
+    private static String getPackage(Element elem) {
+    	if (elem == null) {
+    		return "";
+    	}
+    	if (elem instanceof Container) {
+    		Container c = (Container)elem;
+    		if (c.parent instanceof Container) {
+	    		String pkg = getPackage(c.parent);
+	    		if (pkg != "") {
+	    			pkg += ".";
+	    		}
+	    		return pkg+c.name;
+    		}
+			// don't add name of top-level container to package
+    	}
+    	return "";
+    }
+    
+    /**
+     * 
+     * 
+     * @param parent of YANG statement counterpart, null if none
+     * @param name (non-normalized) name of class to be instantiated
+     * @return An instance of class name, as a child of parent
+     * @throws ClassNotFoundException
+     *                
+     * @throws InstantiationException
+     *             if the referenced class represents an abstract class, an
+     *             interface, an array class, a primitive type, or void; or if
+     *             the class has no nullary constructor; or if the instantiation
+     *             fails for some other reason.
+     * @throws IllegalAccessException
+     *             if the class or its nullary constructor is not accessible.
+     */
+    private static Element instantiate(Element parent, String name)
+            throws ClassNotFoundException, InstantiationException,
+            IllegalAccessException {
+        String className = "";
+        if (parent == null) {
+        	className = "gen.";
+        } else {
+        	className = "gen."+getPackage(parent); // FIXME might be incorrect
+        }
+        className += normalize(name);
+        // String className = pkg + "." + normalize(name);
+        Class rootClass = Class.forName(className);
+        return (Element) rootClass.newInstance();
+    }
 
     /**
      * Static createInstance this is a data model "aware" method to create a
@@ -92,9 +146,7 @@ public abstract class Container extends Element {
                 return new Element(ns, name); // not aware
 
             try {
-                String className = pkg + "." + normalize(name);
-                Class rootClass = Class.forName(className);
-                return (Element) rootClass.newInstance();
+                return instantiate(null, name);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 throw new ConfMException(ConfMException.ELEMENT_MISSING,
@@ -152,9 +204,7 @@ public abstract class Container extends Element {
                      // the NETCONF rpc data and start to create
                      // ConfM objects instead
                 try {
-                    String className = pkg + "." + normalize(name);
-                    Class rootClass = Class.forName(className);
-                    Element child = (Element) rootClass.newInstance();
+                    Element child = instantiate(parent, name);
                     parent.addChild(child);
                     return child;
                 } catch (ClassNotFoundException e) {
@@ -253,8 +303,6 @@ public abstract class Container extends Element {
             return null;
         for (int i = 0; i < packages.size(); i++) {
             Package p = (Package) packages.get(i);
-            System.out.println(p.ns);
-            System.out.println(ns);
             if (p.ns.equals(ns))
                 return p.pkg;
         }
