@@ -527,7 +527,7 @@ def schema_node(stmt, tagpath, ns, ctx):
     res.append('<tagpath>' + tagpath + '</tagpath>')  # or stmt.full_path()
     # ... but it is marked for removal (and it would be less efficient)
     res.append('<namespace>' + ns + '</namespace>')
-    res.append('<primitive_type></primitive_type>')
+    res.append('<primitive_type>0</primitive_type>')
 
     min_occurs = '0'
     max_occurs = '-1'
@@ -557,7 +557,7 @@ def schema_node(stmt, tagpath, ns, ctx):
         children += ch.arg + ' '
     res.append('<children>' + children[:-1] + '</children>')
 
-    res.append('<flags></flags>')
+    res.append('<flags>0</flags>')
     res.append('<desc></desc>')
     return res
 

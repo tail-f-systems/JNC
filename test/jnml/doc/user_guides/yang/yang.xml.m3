@@ -1,1 +1,0 @@
-../../../../doc/user_guides/yang/yang.xml.m3
