@@ -253,6 +253,8 @@ public abstract class Container extends Element {
             return null;
         for (int i = 0; i < packages.size(); i++) {
             Package p = (Package) packages.get(i);
+            System.out.println(p.ns);
+            System.out.println(ns);
             if (p.ns.equals(ns))
                 return p.pkg;
         }

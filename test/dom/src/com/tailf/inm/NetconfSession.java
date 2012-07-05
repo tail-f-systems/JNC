@@ -1466,9 +1466,8 @@ public class NetconfSession {
 
     NodeSet recv_call_rpc_reply(Element e, int mid) throws INMException,
             IOException {
-        com.tailf.inm.XMLParser parser = new com.tailf.inm.XMLParser(); // Why
-                                                                        // new
-                                                                        // parser?
+        com.tailf.inm.XMLParser parser = new com.tailf.inm.XMLParser(); 
+        // XXX Why new parser?
         return recv_rpc_reply("", parser, Integer.toString(mid));
     }
 

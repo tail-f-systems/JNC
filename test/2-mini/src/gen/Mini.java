@@ -20,7 +20,7 @@ import java.util.Hashtable;
  */
 public class Mini {
 
-    public static final String NAMESPACE = "http://exampleCom/ns/mini/10";
+    public static final String NAMESPACE = "http://example.com/ns/mini/1.0";
 
     public static final String PREFIX = "mini";
     

@@ -46,7 +46,7 @@ public class Main {
         Mini.enable();
         ConfDSession session = d.getSession("cfg");
         NodeSet reply = session.getConfig(NetconfSession.RUNNING);
-        printNodeSet(reply);
+        // printNodeSet(reply);
         Element h = (Element)reply.first();
         return h;
     }
