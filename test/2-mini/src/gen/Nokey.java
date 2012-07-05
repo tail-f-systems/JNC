@@ -81,7 +81,7 @@ public class Nokey extends Container {
      * Sets the value for child leaf-list "ll", using the java primitive value.
      * @param llValue The value to set.
      */
-    public void setLlValue(src.gen.My-type llValue)
+    public void setLlValue(gen.Mytype llValue)
         throws INMException {
         setLeafListValue(Mini.NAMESPACE,
             "ll",
@@ -95,23 +95,14 @@ public class Nokey extends Container {
      */
     public void setLlValue(String llValue)
         throws INMException {
-        setLlValue(new src.gen.My-type(llValue));
-    }
-
-    /**
-     * Sets the value for child leaf-list "ll", using the java primitive value.
-     * @param llValue The value to set.
-     */
-    public void setLlValue(my-type llValue)
-        throws INMException {
-        setLlValue(new src.gen.My-type(llValue));
+        setLlValue(new gen.Mytype(llValue));
     }
 
     /**
      * Deletes leaf-list entry "ll
      * @param llValue Child to be removed."
      */
-    public void deleteLl(src.gen.My-type llValue)
+    public void deleteLl(gen.Mytype llValue)
         throws INMException {
         String path = "ll[name='" + llValue + "']";
         delete(path);
@@ -144,7 +135,7 @@ public class Nokey extends Container {
      * Marks the "ll" leaf-list with operation "replace".
      * @param llValue The value to mark.
      */
-    public void markLlReplace(src.gen.My-type llValue)
+    public void markLlReplace(gen.Mytype llValue)
         throws INMException {
         markLeafReplace("ll[name='" + llValue+"']");
     }
@@ -162,7 +153,7 @@ public class Nokey extends Container {
      * Marks the "ll" leaf-list with operation "merge".
      * @param llValue The value to mark.
      */
-    public void markLlMerge(src.gen.My-type llValue)
+    public void markLlMerge(gen.Mytype llValue)
         throws INMException {
         markLeafMerge("ll[name='" + llValue+"']");
     }
@@ -180,7 +171,7 @@ public class Nokey extends Container {
      * Marks the "ll" leaf-list with operation "create".
      * @param llValue The value to mark.
      */
-    public void markLlCreate(src.gen.My-type llValue)
+    public void markLlCreate(gen.Mytype llValue)
         throws INMException {
         markLeafCreate("ll[name='" + llValue+"']");
     }
@@ -198,7 +189,7 @@ public class Nokey extends Container {
      * Marks the "ll" leaf-list with operation "delete".
      * @param llValue The value to mark.
      */
-    public void markLlDelete(src.gen.My-type llValue)
+    public void markLlDelete(gen.Mytype llValue)
         throws INMException {
         markLeafDelete("ll[name='" + llValue+"']");
     }
