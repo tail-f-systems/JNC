@@ -1,0 +1,10 @@
+# Created by: admin
+# Date: 2012-07-05 18:31:37
+# Via: netconf
+# Type: delta
+# Label: 
+# Comment: 
+# No: 10000
+
+delete:
+l "";

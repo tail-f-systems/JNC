@@ -1,0 +1,114 @@
+<INFO> 5-Jul-2012::15:09:10.566 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::15:09:10.667 emil-VirtualBox confd[12060]: audit user: admin/9 assigned to groups: admin
+<INFO> 5-Jul-2012::15:09:11.062 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::15:10:52.191 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::15:10:52.288 emil-VirtualBox confd[12060]: audit user: admin/10 assigned to groups: admin
+<INFO> 5-Jul-2012::15:10:52.792 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::15:36:09.464 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::15:36:09.514 emil-VirtualBox confd[12060]: audit user: admin/11 assigned to groups: admin
+<INFO> 5-Jul-2012::15:36:10.611 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::15:42:34.882 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::15:42:34.952 emil-VirtualBox confd[12060]: audit user: admin/12 assigned to groups: admin
+<INFO> 5-Jul-2012::15:42:35.558 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::15:45:17.106 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::15:45:17.298 emil-VirtualBox confd[12060]: audit user: admin/13 assigned to groups: admin
+<INFO> 5-Jul-2012::15:45:17.821 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::15:45:24.410 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::15:45:24.472 emil-VirtualBox confd[12060]: audit user: admin/14 assigned to groups: admin
+<INFO> 5-Jul-2012::15:45:24.914 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::15:45:48.530 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::15:45:48.608 emil-VirtualBox confd[12060]: audit user: admin/15 assigned to groups: admin
+<INFO> 5-Jul-2012::15:45:49.034 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::16:01:22.115 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::16:01:22.157 emil-VirtualBox confd[12060]: audit user: admin/16 assigned to groups: admin
+<INFO> 5-Jul-2012::16:06:44.951 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::16:07:03.913 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::16:07:04.183 emil-VirtualBox confd[12060]: audit user: admin/17 assigned to groups: admin
+<INFO> 5-Jul-2012::16:07:43.636 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::16:07:45.915 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::16:07:45.926 emil-VirtualBox confd[12060]: audit user: admin/18 assigned to groups: admin
+<INFO> 5-Jul-2012::16:07:46.326 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::16:08:44.222 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::16:08:44.293 emil-VirtualBox confd[12060]: audit user: admin/19 assigned to groups: admin
+<INFO> 5-Jul-2012::16:08:44.755 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::16:08:55.659 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::16:08:55.727 emil-VirtualBox confd[12060]: audit user: admin/20 assigned to groups: admin
+<INFO> 5-Jul-2012::16:10:02.723 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::16:16:57.610 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::16:16:57.729 emil-VirtualBox confd[12060]: audit user: admin/21 assigned to groups: admin
+<INFO> 5-Jul-2012::16:16:58.994 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::16:17:20.048 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::16:17:20.149 emil-VirtualBox confd[12060]: audit user: admin/22 assigned to groups: admin
+<INFO> 5-Jul-2012::16:17:20.618 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::16:17:37.894 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::16:17:37.951 emil-VirtualBox confd[12060]: audit user: admin/23 assigned to groups: admin
+<INFO> 5-Jul-2012::16:21:59.715 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::16:22:09.724 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::16:22:09.815 emil-VirtualBox confd[12060]: audit user: admin/24 assigned to groups: admin
+<INFO> 5-Jul-2012::16:37:07.710 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::16:37:53.980 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::16:37:54.009 emil-VirtualBox confd[12060]: audit user: admin/25 assigned to groups: admin
+<INFO> 5-Jul-2012::16:37:55.291 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::16:40:41.255 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::16:40:41.370 emil-VirtualBox confd[12060]: audit user: admin/26 assigned to groups: admin
+<INFO> 5-Jul-2012::16:42:39.751 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::16:42:46.313 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::16:42:46.378 emil-VirtualBox confd[12060]: audit user: admin/27 assigned to groups: admin
+<INFO> 5-Jul-2012::16:58:58.865 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::16:59:07.349 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::16:59:07.521 emil-VirtualBox confd[12060]: audit user: admin/28 assigned to groups: admin
+<INFO> 5-Jul-2012::17:00:07.252 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::17:00:11.102 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::17:00:11.149 emil-VirtualBox confd[12060]: audit user: admin/29 assigned to groups: admin
+<INFO> 5-Jul-2012::17:00:11.665 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::17:05:41.223 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::17:05:41.257 emil-VirtualBox confd[12060]: audit user: admin/30 assigned to groups: admin
+<INFO> 5-Jul-2012::17:06:19.964 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::17:06:24.654 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::17:06:24.701 emil-VirtualBox confd[12060]: audit user: admin/31 assigned to groups: admin
+<INFO> 5-Jul-2012::17:10:50.434 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::17:10:55.912 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::17:10:55.974 emil-VirtualBox confd[12060]: audit user: admin/32 assigned to groups: admin
+<INFO> 5-Jul-2012::17:11:08.204 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::17:11:45.400 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::17:11:45.491 emil-VirtualBox confd[12060]: audit user: admin/33 assigned to groups: admin
+<INFO> 5-Jul-2012::17:11:50.943 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::17:13:05.115 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::17:13:05.140 emil-VirtualBox confd[12060]: audit user: admin/34 assigned to groups: admin
+<INFO> 5-Jul-2012::17:13:05.537 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::17:14:30.078 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::17:14:30.131 emil-VirtualBox confd[12060]: audit user: admin/35 assigned to groups: admin
+<INFO> 5-Jul-2012::17:14:30.670 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::17:14:38.426 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::17:14:38.445 emil-VirtualBox confd[12060]: audit user: admin/36 assigned to groups: admin
+<INFO> 5-Jul-2012::17:14:38.850 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::17:15:43.322 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::17:15:43.381 emil-VirtualBox confd[12060]: audit user: admin/37 assigned to groups: admin
+<INFO> 5-Jul-2012::17:15:43.823 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::17:17:15.802 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::17:17:15.856 emil-VirtualBox confd[12060]: audit user: admin/38 assigned to groups: admin
+<INFO> 5-Jul-2012::17:17:16.295 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::17:18:15.634 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::17:18:15.678 emil-VirtualBox confd[12060]: audit user: admin/39 assigned to groups: admin
+<INFO> 5-Jul-2012::17:18:16.134 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::18:15:54.764 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::18:15:54.873 emil-VirtualBox confd[12060]: audit user: admin/40 assigned to groups: admin
+<INFO> 5-Jul-2012::18:15:55.801 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::18:16:30.631 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::18:16:30.657 emil-VirtualBox confd[12060]: audit user: admin/41 assigned to groups: admin
+<INFO> 5-Jul-2012::18:16:31.253 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::18:22:18.508 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::18:22:18.624 emil-VirtualBox confd[12060]: audit user: admin/42 assigned to groups: admin
+<INFO> 5-Jul-2012::18:22:19.238 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::18:29:38.988 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::18:29:39.054 emil-VirtualBox confd[12060]: audit user: admin/43 assigned to groups: admin
+<INFO> 5-Jul-2012::18:29:40.023 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::18:31:37.037 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::18:31:37.048 emil-VirtualBox confd[12060]: audit user: admin/44 assigned to groups: admin
+<INFO> 5-Jul-2012::18:31:37.937 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::18:34:02.868 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::18:34:02.961 emil-VirtualBox confd[12060]: audit user: admin/45 assigned to groups: admin
+<INFO> 5-Jul-2012::18:34:03.520 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user
+<INFO> 5-Jul-2012::18:34:24.094 emil-VirtualBox confd[12060]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
+<INFO> 5-Jul-2012::18:34:24.135 emil-VirtualBox confd[12060]: audit user: admin/46 assigned to groups: admin
+<INFO> 5-Jul-2012::18:34:24.752 emil-VirtualBox confd[12060]: audit user: admin/0 Logged out ssh <local> user

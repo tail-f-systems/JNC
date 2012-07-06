@@ -1,0 +1,15 @@
+<DEBUG> 5-Jul-2012::15:09:00.087 emil-VirtualBox confd[12060]: - Loading file ./mini.fxs
+<DEBUG> 5-Jul-2012::15:09:00.090 emil-VirtualBox confd[12060]: - Loading file /home/emil/Dropbox/tail-f/confd/etc/confd/ietf-netconf-monitoring.fxs
+<DEBUG> 5-Jul-2012::15:09:00.092 emil-VirtualBox confd[12060]: - Loading file /home/emil/Dropbox/tail-f/confd/etc/confd/tailf-common-monitoring.fxs
+<DEBUG> 5-Jul-2012::15:09:00.093 emil-VirtualBox confd[12060]: - Loading file /home/emil/Dropbox/tail-f/confd/etc/confd/ietf-yang-types.fxs
+<DEBUG> 5-Jul-2012::15:09:00.095 emil-VirtualBox confd[12060]: - Loading file /home/emil/Dropbox/tail-f/confd/etc/confd/tailf-netconf-monitoring.fxs
+<DEBUG> 5-Jul-2012::15:09:00.096 emil-VirtualBox confd[12060]: - Loading file /home/emil/Dropbox/tail-f/confd/etc/confd/ietf-inet-types.fxs
+<DEBUG> 5-Jul-2012::15:09:00.097 emil-VirtualBox confd[12060]: - Loading file /home/emil/Dropbox/tail-f/confd/etc/confd/aaa_cdb.fxs
+<DEBUG> 5-Jul-2012::15:09:00.099 emil-VirtualBox confd[12060]: - Loading file /home/emil/Dropbox/tail-f/confd/etc/confd/tailf-confd-monitoring.fxs
+<DEBUG> 5-Jul-2012::15:09:00.150 emil-VirtualBox confd[12060]: - Loading file /home/emil/Dropbox/tail-f/confd/etc/confd/confd.ccl
+<INFO> 5-Jul-2012::15:09:00.214 emil-VirtualBox confd[12060]: - Starting to listen for Internal IPC on 127.0.0.1:4565
+<INFO> 5-Jul-2012::15:09:00.381 emil-VirtualBox confd[12060]: - CDB load: processing file: ./confd-cdb/aaa_init.xml
+<INFO> 5-Jul-2012::15:09:00.405 emil-VirtualBox confd[12060]: - CDB load: processing file: ./confd-cdb/mini.xml
+<INFO> 5-Jul-2012::15:09:00.463 emil-VirtualBox confd[12060]: - Starting to listen for NETCONF SSH on 0.0.0.0:2022
+<INFO> 5-Jul-2012::15:09:00.493 emil-VirtualBox confd[12060]: - Starting to listen for CLI SSH on 0.0.0.0:2024
+<INFO> 5-Jul-2012::15:09:00.495 emil-VirtualBox confd[12060]: - ConfD started vsn: 4.0
