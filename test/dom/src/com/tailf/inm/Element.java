@@ -585,6 +585,7 @@ public class Element implements Serializable {
         while (true)
             if (pos == children.size())
                 break;
+            // FIXME String comparisons here use '==' instead of '.compareTo'
             else if (children.getElement(pos).name == childrenNames[i])
                 ++pos;
             else if (child.name == childrenNames[i])

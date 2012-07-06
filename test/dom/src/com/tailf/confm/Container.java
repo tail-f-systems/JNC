@@ -371,7 +371,7 @@ public abstract class Container extends Element {
             String[] childrenNames) throws INMException {
         NodeSet nodes = get(path);
 
-        if (nodes.size() == 0) {
+        if (nodes.isEmpty()) {
             Leaf leaf = new Leaf(ns, path);
             leaf.setValue(value);
             insertChild(leaf, childrenNames);

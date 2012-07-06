@@ -13,6 +13,10 @@ public class Main {
     private Device dev;
     private DeviceUser duser;
     
+    public Main() {
+        this.init();
+    }
+    
     private void init() {
         String emsUserName = "bobby";
         duser = new DeviceUser(emsUserName, "admin", "admin");
@@ -30,38 +34,23 @@ public class Main {
         }
     }
     
-    private static void printNodeSet(NodeSet nset) {
-        ListIterator<Element> iter = nset.listIterator();
-        while (iter.hasNext()) {
-            Element e = iter.next();
-            System.out.println(e);
-            System.out.println(e.getValue());
-            if (e.hasChildren()) {
-                printNodeSet(e.getChildren());
-            }
-        }
-    }
-    
-    Element updateConfig(Element config) throws IOException,INMException {
-        return updateConfig(dev, config);
+    NodeSet editConfig(Element config) throws IOException,INMException {
+        return editConfig(dev, config);
     }
 
-    Element updateConfig(Device d, Element config) throws IOException,INMException {
+    private NodeSet editConfig(Device d, Element config) throws IOException,INMException {
         d.getSession("cfg").editConfig(config);
         // Inspect the updated RUNNING configuration
         return getConfig(d);
     }
     
-    private Element getConfig(Device d) throws IOException, INMException{
-        Mini.enable();
+    private NodeSet getConfig(Device d) throws IOException, INMException {
         ConfDSession session = d.getSession("cfg");
         NodeSet reply = session.getConfig(NetconfSession.RUNNING);
-        // printNodeSet(reply);
-        Element h = (Element)reply.first();
-        return h;
+        return reply;
     }
     
-    public Element getConfig() throws IOException,INMException{
+    public NodeSet getConfig() throws IOException,INMException{
         return getConfig(dev);
     }
     
@@ -82,17 +71,23 @@ public class Main {
      */
     public static void main(String[] args) throws IOException, INMException {
         Main main = new Main();
+        Mini.enable();
         main.init();
-        Element config = main.getConfig();
+        gen.L l = (gen.L)main.getConfig().first();
+        System.out.println("Initial config:\n" + l.toXMLString());
         
-        gen.L l = (gen.L)config;
-        System.out.println("Initial   config:\n" + l.toXMLString());
+        // gen.L k = (gen.L)l.clone();
+        // System.out.println(l.getKValue());
+        l.setKValue("test2");
+        // System.out.println(l.getKValue());
         
-        gen.L k = (gen.L)l.clone();
-        k.addK();
-        
-        Element config2 = main.updateConfig(k);
+        Element config2 = main.editConfig(l).first();
         System.out.println("Resulting config:\n" + config2.toXMLString());
+        
+        l.setKValue("test");
+        
+        Element config3 = main.editConfig(l).first();
+        System.out.println("Changed back to original config:\n" + config3.toXMLString());
     }
 
 }
