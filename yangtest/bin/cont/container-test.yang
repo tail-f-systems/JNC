@@ -1,0 +1,25 @@
+module container-test {
+
+  namespace "http://test.com/ns/cont/1.0";
+  prefix cont;
+
+  organization
+   "Tail-f Systems AB";
+
+  contact
+   "Emil Wall <mailto:emil@tail-f.com>";
+
+  description 
+   "This module contains a single top-level container c with two leaves d (an
+    uint32) and s (a string).";
+
+  container c {
+    leaf d {
+      type uint32;
+    }
+    leaf s {
+      type string;
+    }
+  }
+
+}
