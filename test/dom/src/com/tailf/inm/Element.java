@@ -528,7 +528,7 @@ public class Element implements Serializable {
      *            Child element to be inserted
      */
     public int insertChild(Element child) throws INMException {
-        if (child.parent != null)
+        if (child.parent != null || child == this)
             throw new INMException(INMException.ELEMENT_ALREADY_IN_USE, this);
 
         if (children == null)
