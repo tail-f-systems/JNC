@@ -51,13 +51,31 @@ public abstract class Client {
         }
     }
     
+    /**
+     * Gets the running configuration of d
+     * @param d A connected confm device
+     * @return the current running configuration of d
+     * @throws IOException If an I/O error occurs
+     * @throws INMException if d is not connected
+     */
     public static NodeSet getConfig(Device d) throws IOException, INMException {
         ConfDSession session = d.getSession("cfg");
         NodeSet reply = session.getConfig(NetconfSession.RUNNING);
         return reply;
     }
 
-    public static NodeSet editConfig(Device d, Element config) throws IOException,INMException {
+    /**
+     * Updates the running configuration of d
+     * 
+     * @param d A connected confm device
+     * @param config A configuration tree to update the running configuration with
+     * @return The new running configuration
+     * @throws IOException If an I/O error occurs
+     * @throws INMException If configuration contains invalid data, the device
+     *           lacks a connection, etc.
+     */
+    public static NodeSet editConfig(Device d, Element config)
+            throws IOException, INMException {
         d.getSession("cfg").editConfig(config);
         // Inspect the updated RUNNING configuration
         return getConfig(d);
