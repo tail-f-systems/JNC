@@ -48,21 +48,6 @@ public class ClientTest {
         assertTrue("More than one configuration", config.size() > 1);
     }
 
-    private static boolean hasChildValue(Element elem, String name,
-            String childID, String value) {
-        boolean res = false;
-        if (elem.name.compareTo(name) == 0) {
-            NodeSet set = elem.getChildren(childID);
-            Iterator iter = set.iterator();
-            while(iter.hasNext()) {
-                Element c1 = (Element)iter.next();
-                String childValue = (String) c1.getValue();
-                res |= childValue.compareTo(value) == 0;
-            }
-        }
-        return res;
-    }
-
     @Test
     public void testEditConfig() throws IOException, INMException {
         NodeSet oldConfig = client.getConfig();
@@ -74,12 +59,12 @@ public class ClientTest {
         String chValue = (String) child.value;
         assertTrue("Value of child is 'test'", chValue.compareTo("test") == 0);
         
-        Set<String> valueSetBefore = c.getValuesAsSet("self::c/s");
+        Set<String> valueSetBefore = c.getValuesAsSet("child::s");
         assertFalse("Child not inserted", valueSetBefore.contains("test"));
         
         c.insertChild(child);
         
-        Set<String> valueSetAfter = c.getValuesAsSet("self::c/s");
+        Set<String> valueSetAfter = c.getValuesAsSet("child::s");
         assertTrue("Child inserted", valueSetAfter.contains("test"));
         assertTrue("Number of values increased by one",
                 valueSetBefore.size() + 1 == valueSetAfter.size());
@@ -91,8 +76,8 @@ public class ClientTest {
             Element elem2 = (Element) iter2.next();
             assertTrue("Roughly equal", elem1.compare(elem2) >= 0);
             assertTrue("Exactly equal", elem1.compare(elem2) == 0);
-            sTest1 |= hasChildValue(elem1, "c", "s", "test");
-            sTest2 |= hasChildValue(elem2, "c", "s", "test");
+            sTest1 |= elem1.getValuesAsSet("child::s").contains("test");
+            sTest2 |= elem2.getValuesAsSet("child::s").contains("test");
         }
         assertTrue("Value of s in newConfig is 'test'", sTest1);
         assertFalse("Value of s in oldConfig is not 'test'", sTest2);
