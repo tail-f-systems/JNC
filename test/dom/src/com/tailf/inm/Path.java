@@ -176,6 +176,7 @@ public class Path {
                     result.addAll(nodeTest(new NodeSet(node)));
                     break;
                 }
+                // FIXME: What about AXIS_ROOT and other cases?
             }
             return result;
         }
