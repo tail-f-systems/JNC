@@ -1,5 +1,0 @@
-* Update Path.create to (optionally) generate schema aware object
-  trees instead of Element object trees. See ...
-* Ola: Diffa jnml-1.0 nml kod med de itrunk. Rimliga ändringar?
-* Hur läsa tag namn konflikter i genererade schema aware klasser.
-* notification support.

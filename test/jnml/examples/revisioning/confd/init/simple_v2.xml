@@ -1,7 +1,0 @@
-<config xmlns="http://acme.example.com/simple">
-  <mode>speed-stepping</mode>
-  <host-metrics>100</host-metrics>
-  <login>
-    <message>Kill your darlings...</message>
-  </login>
-</config>

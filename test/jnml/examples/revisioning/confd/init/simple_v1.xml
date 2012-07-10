@@ -1,4 +1,0 @@
-<config xmlns="http://acme.example.com/simple">
-  <mode>on</mode>
-  <host-metrics>10</host-metrics>
-</config>
