@@ -13,6 +13,18 @@ anyxml
 augment
     anyxml
     case
+        anyxml
+        choice
+        container
+        description
+        if-feature
+        leaf
+        leaf-list
+        list
+        reference
+        status
+        uses
+        when
     choice
     container
     description
@@ -29,18 +41,7 @@ augment
 choice
     anyxml
     case
-        anyxml
-        choice
-        container
-        description
-        if-feature
-        leaf
-        leaf-list
-        list
-        reference
-        status
-        uses
-        when
+        -
     config
     container
     default
@@ -65,6 +66,7 @@ container
     leaf-list
     list
     must
+        -
     presence
     reference
     status
@@ -126,9 +128,18 @@ leaf
     if-feature
     mandatory
     must
+        -
     reference
     status
     type
+        bit
+        enum
+        length
+        path
+        pattern
+        range
+        require-instance
+        type
     when
 leaf-list
     config
@@ -137,10 +148,12 @@ leaf-list
     max-elements
     min-elements
     must
+        -
     ordered-by
     reference
     status
     type
+        -
     units
     when
 list
@@ -158,6 +171,7 @@ list
     max-elements
     min-elements
     must
+        -
     ordered-by
     presence
     reference
@@ -220,14 +234,7 @@ typedef
     reference
     status
     type
-        bit
-        enum
-        length
-        path
-        pattern
-        range
-        require-instance
-        type
+        -
     units
 uses
     augment
