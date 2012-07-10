@@ -12,7 +12,7 @@ import com.tailf.inm.*;
 import java.util.Hashtable;
 
 /**
- * The root class for namespace http://testCom/ns/cont/10 (accessible from 
+ * The root class for namespace http://test.com/ns/cont/1.0 (accessible from 
  * Cont.NAMESPACE) with prefix "cont" (Cont.PREFIX).
  *
  * @version    1.0 2012-7-10
@@ -20,7 +20,7 @@ import java.util.Hashtable;
  */
 public class Cont {
 
-    public static final String NAMESPACE = "http://testCom/ns/cont/10";
+    public static final String NAMESPACE = "http://test.com/ns/cont/1.0";
 
     public static final String PREFIX = "cont";
     
@@ -45,7 +45,7 @@ public class Cont {
         SchemaParser parser = new SchemaParser();
         Hashtable h = CsTree.create(NAMESPACE);
         if (schemaUrl == null)
-            parser.readFile("src/cont/Cont.schema", h);
+            parser.readFile("Cont.schema", h);
         else
             parser.readFile(schemaUrl, h);
     }

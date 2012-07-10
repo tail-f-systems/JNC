@@ -13,7 +13,7 @@ import java.util.Hashtable;
 
 /**
  * This class represents a "c" element
- * from the namespace http://testCom/ns/cont/10
+ * from the namespace http://test.com/ns/cont/1.0
  *
  * @version    1.0 2012-7-10
  * @author    Auto Generated

@@ -53,4 +53,4 @@ start:  stop
 
 ######################################################################
 stop:
-	$(CONFD) --stop || true
+	$(CONFD) --stop 2> /dev/null || true
