@@ -1,0 +1,42 @@
+<schema>
+    <node>
+        <tagpath>/c/s</tagpath>
+        <namespace>http://test.com/ns/cont/1.0</namespace>
+        <primitive_type>5</primitive_type>
+        <min_occurs>0</min_occurs>
+        <max_occurs>1</max_occurs>
+        <children></children>
+        <flags>6</flags>
+        <desc></desc>
+    </node>
+    <node>
+        <tagpath>/c</tagpath>
+        <namespace>http://test.com/ns/cont/1.0</namespace>
+        <primitive_type>2</primitive_type>
+        <min_occurs>1</min_occurs>
+        <max_occurs>1</max_occurs>
+        <children>d s</children>
+        <flags>262</flags>
+        <desc></desc>
+    </node>
+    <node>
+        <tagpath>/c/d</tagpath>
+        <namespace>http://test.com/ns/cont/1.0</namespace>
+        <primitive_type>12</primitive_type>
+        <min_occurs>0</min_occurs>
+        <max_occurs>1</max_occurs>
+        <children></children>
+        <flags>6</flags>
+        <desc></desc>
+    </node>
+    <node>
+        <tagpath>/</tagpath>
+        <namespace>http://test.com/ns/cont/1.0</namespace>
+        <primitive_type>2</primitive_type>
+        <min_occurs>1</min_occurs>
+        <max_occurs>1</max_occurs>
+        <children>c</children>
+        <flags>2</flags>
+        <desc></desc>
+    </node>
+</schema>
