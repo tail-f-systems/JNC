@@ -51,7 +51,9 @@ public class ClientTest {
     @Test
     public void testEditConfig() throws IOException, INMException {
         NodeSet oldConfig = client.getConfig();
-        boolean sTest1 = false, sTest2 = false;
+        String assertMsg = "Initially, oldConfig has a single value of s";
+        assertTrue(assertMsg, oldConfig.get("child::s").size() == 1);
+        
         Element c = (Element) oldConfig.getFirst("self::c").clone();
         Element child = new Element(c.namespace, "s");
         assertTrue("Value of child is null", child.value == null);
@@ -71,16 +73,28 @@ public class ClientTest {
         
         NodeSet newConfig = client.editConfig(c);
         Iterator iter1 = newConfig.iterator(), iter2 = oldConfig.iterator();
+        boolean sTest1 = false, sTest2 = false, sSeven1 = false, sSeven2 = false;
         while (iter1.hasNext()) {
             Element elem1 = (Element) iter1.next();
             Element elem2 = (Element) iter2.next();
-            assertTrue("Roughly equal", elem1.compare(elem2) >= 0);
-            assertTrue("Exactly equal", elem1.compare(elem2) == 0);
-            sTest1 |= elem1.getValuesAsSet("child::s").contains("test");
-            sTest2 |= elem2.getValuesAsSet("child::s").contains("test");
+            assertTrue("Same name, ns and value", elem1.compare(elem2) == 0);
+            Set<String> set1 = elem1.getValuesAsSet("child::s");
+            Set<String> set2 = elem2.getValuesAsSet("child::s");
+            sTest1 |= set1.contains("test");
+            sTest2 |= set2.contains("test");
+            sSeven1 |= set1.contains("Seven");
+            sSeven2 |= set2.contains("Seven");
+            boolean sameState = iter1.hasNext() == iter2.hasNext();
+            assertTrue("Iterators finish at same time", sameState);
         }
         assertTrue("Value of s in newConfig is 'test'", sTest1);
+        assertFalse("Value of s in newConfig is not 'Seven'", sSeven1);
         assertFalse("Value of s in oldConfig is not 'test'", sTest2);
+        assertTrue("Value of s in oldConfig is 'Seven'", sSeven2);
+        assertMsg = "At termination, oldConfig also has a single value of s";
+        assertTrue(assertMsg, oldConfig.get("child::s").size() == 1);
+        assertMsg = "At termination, newConfig also has a single value of s";
+        assertTrue(assertMsg, newConfig.get("child::s").size() == 1);
     }
 
 }
