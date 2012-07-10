@@ -45,7 +45,7 @@ public class Cont {
         SchemaParser parser = new SchemaParser();
         Hashtable h = CsTree.create(NAMESPACE);
         if (schemaUrl == null)
-            parser.readFile("Cont.schema", h);
+            parser.readFile("src/cont/Cont.schema", h);
         else
             parser.readFile(schemaUrl, h);
     }

@@ -23,6 +23,10 @@ public class Client {
     public NodeSet editConfig(Element config) throws IOException, INMException {
         return util.Client.editConfig(dev, config);
     }
+    
+    public void enableCont() throws INMException {
+        Cont.enable();
+    }
 
     public static void main(String[] args) throws IOException, INMException {
         Client client = new Client();

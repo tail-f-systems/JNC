@@ -36,6 +36,11 @@ public class ClientTest {
     }
 
     @Test
+    public void testEnableCont() throws IOException, INMException {
+        client.enableCont();
+    }
+
+    @Test
     public void testMain() throws IOException, INMException {
         Client.main(null);
     }
