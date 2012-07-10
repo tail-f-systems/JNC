@@ -2,6 +2,7 @@ package util;
 
 import static org.junit.Assert.*;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -17,10 +18,12 @@ public class AbstractClientTest {
     
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        util.Environment env = new util.Environment();
-        boolean success = util.ConfD.startConfD("src/cont", env);
-        assertTrue("Failed to launch ConfD.\nDid you set the CONFD_DIR env "
-                + "variable correctly?", success);
+        util.TestUtils.startConfD("src/cont");
+    }
+
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception {
+        util.TestUtils.makeStopClean("src/cont");
     }
 
     @Test

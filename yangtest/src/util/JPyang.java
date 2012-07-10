@@ -11,7 +11,6 @@ public class JPyang {
                 "-p", outDir,
                 "-f", "jpyang",
                 "-d", outDir,
-                "--jpyang-no-schema",
                 outDir+"/"+yangFile};
         ProcessBuilder builder = new ProcessBuilder(arguments);
         // builder.directory(confdDir);

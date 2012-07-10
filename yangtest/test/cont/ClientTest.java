@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -24,10 +25,12 @@ public class ClientTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        util.Environment env = new util.Environment();
-        boolean success = util.ConfD.startConfD("src/cont", env);
-        assertTrue("Failed to launch ConfD.\nDid you set the CONFD_DIR env "
-                + "variable correctly?", success);
+        util.TestUtils.startConfD("src/cont");
+    }
+
+    @AfterClass
+    public static void tearDownAfterClass() throws Exception {
+        util.TestUtils.makeStopClean("src/cont");
     }
 
     @Before

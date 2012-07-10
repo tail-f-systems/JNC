@@ -46,7 +46,7 @@ public class ConfD {
     }
     
     /**
-     * Spawns a make process that (re)starts confd.
+     * Meant to be used to run an external makefile
      * 
      * @param confdLocation Location of makefile to start confd with
      * @return true on success
@@ -55,20 +55,68 @@ public class ConfD {
      * @throws IOException
      *          if unable to read from process input streams
      */
-    public static boolean startConfD(String confdLocation, Environment env)
-            throws InterruptedException, IOException {
-        File confdDir = new File(confdLocation);
-        String[] args = {"make", "clean", "all", "start"};
+    private static boolean run(String resourceLocation, Environment env,
+            String[] args) throws IOException, InterruptedException {
+        File dir = new File(resourceLocation);
         ProcessBuilder builder = new ProcessBuilder(args);
-        builder.directory(confdDir);
+        builder.directory(dir);
         builder.environment().put("CONFD_DIR", env.getVariable("CONFD_DIR"));
         Process p = builder.start();
         String errmsg = "ConfD error: unable to run makefile";
         boolean err = flush(p.getErrorStream(), errmsg);
-        System.out.print("Confd started: ");
+        System.out.print("End of makefile output: ");
         flush(p.getInputStream(), null);
         p.waitFor();
         return err;
+    }
+    
+    /**
+     * Spawns a make process that (re)starts confd.
+     * 
+     * @param confdLocation Location of makefile to start confd with
+     * @param env An environment to fetch CONFD_DIR from
+     * @return true on success
+     * @throws InterruptedException
+     *          if unable to start make process
+     * @throws IOException
+     *          if unable to read from process input streams
+     */
+    public static boolean startConfD(String confdLocation, Environment env)
+            throws InterruptedException, IOException {
+        String[] args = {"make", "clean", "all", "start"};
+        return run(confdLocation, env, args);
+    }
+    
+    /**
+     * Spawns a make process that runs a makefile clean command
+     * 
+     * @param makefileLocation Location of makefile
+     * @param env An environment to fetch CONFD_DIR from
+     * @return true on success
+     * @throws InterruptedException
+     *          if unable to start make process
+     * @throws IOException
+     *          if unable to read from process input streams
+     */
+    public static boolean makeClean(String makefileLocation, Environment env)
+            throws InterruptedException, IOException {
+        return run(makefileLocation, env, new String[] {"make", "clean"});
+    }
+    
+    /**
+     * Spawns a make process that runs a makefile stop command
+     * 
+     * @param makefileLocation Location of makefile
+     * @param env An environment to fetch CONFD_DIR from
+     * @return true on success
+     * @throws InterruptedException
+     *          if unable to start make process
+     * @throws IOException
+     *          if unable to read from process input streams
+     */
+    public static boolean makeStop(String makefileLocation, Environment env)
+            throws InterruptedException, IOException {
+        return run(makefileLocation, env, new String[] {"make", "stop"});
     }
     
 }
