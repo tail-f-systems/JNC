@@ -1,9 +1,0 @@
-<INFO> 9-Jul-2012::15:03:24.930 Emil-Ubuntu-Tail-f confd[27811]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
-<INFO> 9-Jul-2012::15:03:24.950 Emil-Ubuntu-Tail-f confd[27811]: audit user: admin/9 assigned to groups: admin
-<INFO> 9-Jul-2012::15:03:25.087 Emil-Ubuntu-Tail-f confd[27811]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
-<INFO> 9-Jul-2012::15:03:25.089 Emil-Ubuntu-Tail-f confd[27811]: audit user: admin/10 assigned to groups: admin
-<INFO> 9-Jul-2012::15:03:25.192 Emil-Ubuntu-Tail-f confd[27811]: audit user: admin/0 logged in over ssh from 127.0.0.1 with authmeth:password
-<INFO> 9-Jul-2012::15:03:25.194 Emil-Ubuntu-Tail-f confd[27811]: audit user: admin/11 assigned to groups: admin
-<INFO> 9-Jul-2012::15:03:25.540 Emil-Ubuntu-Tail-f confd[27811]: audit user: admin/0 Logged out ssh <local> user
-<INFO> 9-Jul-2012::15:03:25.540 Emil-Ubuntu-Tail-f confd[27811]: audit user: admin/0 Logged out ssh <local> user
-<INFO> 9-Jul-2012::15:03:25.540 Emil-Ubuntu-Tail-f confd[27811]: audit user: admin/0 Logged out ssh <local> user

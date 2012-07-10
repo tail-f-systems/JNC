@@ -1,9 +1,0 @@
-<INFO> 9-Jul-2012::15:03:24.938 Emil-Ubuntu-Tail-f confd[27811]: netconf id=9 new ssh session for user "admin" from 127.0.0.1
-<INFO> 9-Jul-2012::15:03:25.089 Emil-Ubuntu-Tail-f confd[27811]: netconf id=10 new ssh session for user "admin" from 127.0.0.1
-<INFO> 9-Jul-2012::15:03:25.193 Emil-Ubuntu-Tail-f confd[27811]: netconf id=11 new ssh session for user "admin" from 127.0.0.1
-<INFO> 9-Jul-2012::15:03:25.201 Emil-Ubuntu-Tail-f confd[27811]: netconf id=11 got rpc: {urn:ietf:params:xml:ns:netconf:base:1.0}get-config attrs: nc:message-id="1"
-<INFO> 9-Jul-2012::15:03:25.204 Emil-Ubuntu-Tail-f confd[27811]: netconf id=11 get-config source=running attrs: nc:message-id="1"
-<INFO> 9-Jul-2012::15:03:25.207 Emil-Ubuntu-Tail-f confd[27811]: netconf id=11 sending rpc-reply, attrs: nc:message-id="1"
-<INFO> 9-Jul-2012::15:03:25.540 Emil-Ubuntu-Tail-f confd[27811]: netconf id=9 ssh transport closed
-<INFO> 9-Jul-2012::15:03:25.541 Emil-Ubuntu-Tail-f confd[27811]: netconf id=11 ssh transport closed
-<INFO> 9-Jul-2012::15:03:25.541 Emil-Ubuntu-Tail-f confd[27811]: netconf id=10 ssh transport closed
