@@ -68,6 +68,12 @@ defined_types = ['empty', 'int8', 'int16', 'int32', 'int64', 'uint8', 'uint16',
 
 outputted_warnings = []
 """A list of warning message IDs that are used to avoid duplicate warnings"""
+
+
+immutable_stmts = {'type', 'typedef', 'namespace', 'prefix', 'organization',
+    'contact', 'description', 'range'}
+"""A set of statement keywords that should not have their arguments modified"""
+# TODO add more keywords to immutable_stmts
 # TODO Might be more efficient to use dicts instead of set and list for these
 
 
@@ -165,7 +171,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                 if not ctx.opts.no_schema:
                     # Generate external schema
                     ns = module.search_one('namespace').arg
-                    name = module.search_one('prefix').arg.capitalize()
+                    name = capitalizeFirst(module.search_one('prefix').arg)
                     write_file(d,  # XXX This might ruin directory structure
                         name + '.schema',
                         '<schema>\n' + indent( \
@@ -306,6 +312,11 @@ def pairwise(iterable):
     yield (item, None)
 
 
+def capitalizeFirst(string):
+    """Returns string with its first character capitalized (if any)"""
+    return string[:1].capitalize() + string[1:]
+
+
 def camelize(string):
     """Removes hyphens and dots and replaces following character (if any) with
     its upper-case counterpart. Does not remove a trailing hyphen or dot.
@@ -315,7 +326,7 @@ def camelize(string):
     iterator = pairwise(string)
     for character, next in iterator:
         if next and character in '-.':
-            camelized_str += next.capitalize()
+            camelized_str += capitalizeFirst(next)
             iterator.next()
         else:
             camelized_str += character
@@ -327,9 +338,8 @@ def make_valid_identifier(stmt):
     keyword. Replaces hyphens and dots with an underscore character.
 
     """
-    if 'type' not in stmt.keyword:
-        if stmt.keyword is not 'range':
-            stmt.arg = camelize(stmt.arg)
+    if stmt.keyword not in immutable_stmts:
+        stmt.arg = camelize(stmt.arg)
         if stmt.arg in java_reserved_words:
             stmt.arg = 'J' + stmt.arg
     return stmt
@@ -410,7 +420,7 @@ def get_types(yang_type, ctx):
             package = get_package(typedef, ctx)
             confm = package + '.'
             primitive = yang_type.arg
-    return confm + primitive.capitalize(), primitive + alt
+    return confm + capitalizeFirst(primitive), primitive + alt
 
 
 def get_base_type(stmt):
@@ -455,8 +465,7 @@ def extract_names(arg):
     arg -- Any string, really
 
     """
-    #capitalized = arg[:1].capitalize()+arg[1:]
-    capitalized = arg.capitalize()
+    capitalized = capitalizeFirst(arg)
     return (capitalized + '.java', capitalized)
 
 
@@ -554,7 +563,8 @@ def schema_node(stmt, tagpath, ns, ctx):
 
     children = ''
     for ch in stmt.substmts:
-        children += ch.arg + ' '
+        if ch.keyword in ('container', 'list', 'leaf', 'leaf-list'):
+            children += ch.arg + ' '
     res.append('<children>' + children[:-1] + '</children>')
 
     res.append('<flags>0</flags>')
@@ -676,9 +686,9 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
             constructors += constructor(stmt, ctx, root=prefix_name,
                 set_prefix=top_level, mode=3, args=primitive_keys, throws='''
         throws INMException''')
-        cloners = clone(name, map(str.capitalize, key.arg.split(' ')),
+        cloners = clone(name, map(capitalizeFirst, key.arg.split(' ')),
             shallow=False) + \
-            clone(name, map(str.capitalize, key.arg.split(' ')), shallow=True)
+            clone(name, map(capitalizeFirst, key.arg.split(' ')), shallow=True)
     elif stmt.keyword == 'typedef':
         type_stmt = stmt.search_one('type')
         # If supertype is derived, make sure a class for it is generated
@@ -856,8 +866,8 @@ def generate_package_info(d, stmt, ctx):
     for directory in dirs:
         for sub in stmt.substmts:
             # XXX refactor
-            if camelize(sub.arg.capitalize()) == camelize( \
-                    directory.capitalize().replace('.',
+            if camelize(capitalizeFirst(sub.arg)) == camelize( \
+                    capitalizeFirst(directory).replace('.',
                     '?')).replace('?', '.'):
                 generate_package_info(d + '/' + directory, sub, ctx)
 
@@ -953,7 +963,7 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
                    and spaces for indentation.
 
     """
-    name = stmt.arg.capitalize()
+    name = capitalizeFirst(stmt.arg)
     setters = docstring = inserts = arguments = ''
     MAX_COLS = 80 - len('    public ' + name + '(')
     if root == '':
@@ -1227,7 +1237,7 @@ def child_field(stmt):
     /**
      * Field for child ''' + stmt.keyword + ' "' + stmt.arg + '''".
      */
-    public ''' + stmt.arg.capitalize() + ' ' + stmt.arg + ''' = null;
+    public ''' + capitalizeFirst(stmt.arg) + ' ' + stmt.arg + ''' = null;
 '''
 
 
@@ -1240,7 +1250,7 @@ def get_stmt(stmt, keys, string=False):
     string -- if set to True, keys are specified as Strings in method
 
     """
-    name = stmt.arg.capitalize()
+    name = capitalizeFirst(stmt.arg)
     spec = arguments = xpath = ''
     if string:
         spec = '\n     * The keys are specified as Strings'
@@ -1274,7 +1284,7 @@ def get_value(stmt, ret_type='com.tailf.confm.xs.String'):
     ret_type -- The type of the return value of the generated method
 
     """
-    name = stmt.arg.capitalize()
+    name = capitalizeFirst(stmt.arg)
     return '''
     /**
      * Return the value for child ''' + stmt.keyword + ' "' + stmt.arg + '''".
@@ -1298,7 +1308,7 @@ def set_leaf_value(stmt, prefix='', arg_type='', confm_type=''):
                   to be used in the method
 
     """
-    name = stmt.arg.capitalize()
+    name = capitalizeFirst(stmt.arg)
     spec1 = spec2 = ''
     MAX_COLS = 80 - len('     * Sets the value for child ' + stmt.keyword + \
         ' "' + stmt.arg + '",.')  # Space left to margin
@@ -1367,7 +1377,7 @@ def unset_value(stmt):
     /**
      * Unsets the value for child ''' + stmt.keyword + ' "' + stmt.arg + '''".
      */
-    public void unset''' + stmt.arg.capitalize() + '''Value()
+    public void unset''' + capitalizeFirst(stmt.arg) + '''Value()
         throws INMException {
         delete("''' + stmt.arg + '''");
     }
@@ -1387,7 +1397,7 @@ def add_value(stmt, prefix):
     if stmt.keyword == 'leaf-list':
         name = 'Empty'
         value_type = 'List'
-    name += stmt.arg.capitalize()
+    name += capitalizeFirst(stmt.arg)
     return '''
     /**
      * This method is used for creating a subtree filter.
@@ -1429,10 +1439,10 @@ def mark(stmt, op, arg_type='String'):
      * Marks the "''' + stmt.arg + '" ' + stmt.keyword + \
         ' with operation "' + spec + '''.
      */
-    public void mark''' + stmt.arg.capitalize() + op.capitalize() + '(' + \
-        argument + ''')
+    public void mark''' + capitalizeFirst(stmt.arg) + capitalizeFirst(op) + \
+        '(' + argument + ''')
         throws INMException {
-        markLeaf''' + op.capitalize() + '("' + path + '''");
+        markLeaf''' + capitalizeFirst(op) + '("' + path + '''");
     }
 '''
 
@@ -1481,7 +1491,7 @@ def add_stmt(stmt, args=[], field=False, string=False):
               in a class representing a YANG container element.
 
     """
-    name = stmt.arg.capitalize()
+    name = capitalizeFirst(stmt.arg)
     spec2 = spec3 = ''
     if len(args) == 1 and args[0][0] == stmt.arg:
         spec1 = '.\n     * @param ' + args[0][1] + \
@@ -1565,7 +1575,7 @@ def delete_stmt(stmt, args=[], string=False, keys=True):
     /**
      * Deletes ''' + stmt.keyword + ' entry "' + stmt.arg + spec1 + '''"
      */
-    public void delete''' + stmt.arg.capitalize() + '(' + arguments[:-2] + ''')
+    public void delete''' + capitalizeFirst(stmt.arg) + '(' + arguments[:-2] + ''')
         throws INMException {
         ''' + spec2 + 'String path = "' + stmt.arg + spec3 + '''";
         delete(path);
@@ -1581,8 +1591,8 @@ def support_add(fields=[]):
     """
     assignments = ''
     for i in range(len(fields) - 1, -1, -1):
-        assignments += 'if ($child instanceof ' + fields[i].capitalize() + \
-            ') ' + fields[i] + ' = (' + fields[i].capitalize() + ')$child;'
+        assignments += 'if ($child instanceof ' + capitalizeFirst(fields[i]) + \
+            ') ' + fields[i] + ' = (' + capitalizeFirst(fields[i]) + ')$child;'
         if i > 0:
             assignments += '\n        else '
     return '''
