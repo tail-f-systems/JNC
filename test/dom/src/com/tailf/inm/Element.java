@@ -10,8 +10,12 @@
 
 package com.tailf.inm;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.lang.StringBuffer;
 import java.io.*;
 
@@ -931,6 +935,22 @@ public class Element implements Serializable {
             return values;
         } else
             return null;
+    }
+    
+    /**
+     * Returns the value(s) of nodes in a given path expression.
+     * <p>
+     * See {@link Path} for more information about path expressions.
+     * 
+     * @param pathStr
+     *            Path string to find nodes
+     * @return A set with the values of the element nodes found by the
+     *         expression (or <code>null</code>)
+     */
+    public Set<String> getValuesAsSet(String pathStr) throws INMException {
+        Object[] valuesBefore = this.getValues(pathStr);
+        List<String> valueList = Arrays.asList((String[])valuesBefore);
+        return new HashSet<String>(valueList);
     }
 
     /**
