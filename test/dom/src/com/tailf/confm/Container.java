@@ -143,8 +143,7 @@ public abstract class Container extends Element {
         String pkg = hasPackage(ns);
         if (parent == null) {
             // ROOT
-            if (pkg == null)
-                return new Element(ns, name); // not aware
+            if (pkg == null) return new Element(ns, name); // not aware
 
             try {
                 return instantiate(null, name);
@@ -297,12 +296,10 @@ public abstract class Container extends Element {
      * @return Package name, if namespace is data model aware
      */
     public static String hasPackage(String ns) {
-        if (packages == null)
-            return null;
+        if (packages == null) return null;
         for (int i = 0; i < packages.size(); i++) {
             Package p = (Package) packages.get(i);
-            if (p.ns.equals(ns))
-                return p.pkg;
+            if (p.ns.equals(ns)) return p.pkg;
         }
         return null;
     }
@@ -311,8 +308,7 @@ public abstract class Container extends Element {
      * Assiciate a JAVA package with a namespace.
      */
     public static void setPackage(String ns, String pkg) {
-        if (packages == null)
-            packages = new ArrayList();
+        if (packages == null) packages = new ArrayList();
         removePackage(ns);
         packages.add(new Package(ns, pkg));
     }
@@ -321,8 +317,7 @@ public abstract class Container extends Element {
      * Remove a package from the list of Packages
      */
     public static void removePackage(String ns) {
-        if (packages == null)
-            return;
+        if (packages == null) return;
         for (int i = 0; i < packages.size(); i++) {
             Package p = (Package) packages.get(i);
             if (p.ns.equals(ns)) {
@@ -335,31 +330,27 @@ public abstract class Container extends Element {
     /**
      */
     private static String normalize(String s) {
-        if (isReserved(s))
-            s = "j" + s;
-
+        if (isReserved(s)) s = "j" + s;
         int pos;
-
-        while ((pos = s.indexOf('-')) != -1)
+        while ((pos = s.indexOf('-')) != -1) {
             s = s.substring(0, pos) + capitalize(s.substring(pos + 1));
+        }
         return capitalize(s);
     }
 
     /**
      */
     private static boolean isReserved(String s) {
-        for (int i = 0; i < reservedWords.length; i++)
-            if (reservedWords[i].equals(s))
-                return true;
-
+        for (int i = 0; i < reservedWords.length; i++) {
+            if (reservedWords[i].equals(s)) return true;
+        }
         return false;
     }
 
     /**
      */
     private static String capitalize(String s) {
-        if (s.length() == 0)
-            return s;
+        if (s.length() == 0) return s;
         return s.substring(0, 1).toUpperCase() + s.substring(1);
     }
 
@@ -394,40 +385,36 @@ public abstract class Container extends Element {
     protected void markLeafReplace(String path) throws INMException {
         NodeSet nodes = get(path);
 
-        if (nodes.isEmpty())
+        if (nodes.isEmpty()) {
             throw new ConfMException(ConfMException.ELEMENT_MISSING,
                     getPath(path));
-        else
-            nodes.first().markReplace();
+        } else nodes.first().markReplace();
     }
 
     protected void markLeafMerge(String path) throws INMException {
         NodeSet nodes = get(path);
-        if (nodes.isEmpty())
+        if (nodes.isEmpty()) {
             throw new ConfMException(ConfMException.ELEMENT_MISSING,
                     getPath(path));
-        else
-            nodes.first().markMerge();
+        } else nodes.first().markMerge();
     }
 
     protected void markLeafCreate(String path) throws INMException {
         NodeSet nodes = get(path);
 
-        if (nodes.isEmpty())
+        if (nodes.isEmpty()) {
             throw new ConfMException(ConfMException.ELEMENT_MISSING,
                     getPath(path));
-        else
-            nodes.first().markCreate();
+        } else nodes.first().markCreate();
     }
 
     protected void markLeafDelete(String path) throws INMException {
         NodeSet nodes = get(path);
 
-        if (nodes.isEmpty())
+        if (nodes.isEmpty()) {
             throw new ConfMException(ConfMException.ELEMENT_MISSING,
                     getPath(path));
-        else
-            nodes.first().markDelete();
+        } else nodes.first().markDelete();
     }
 
     /**
@@ -435,11 +422,10 @@ public abstract class Container extends Element {
      */
     protected Container getListContainer(String path) throws INMException {
         NodeSet nodes = get(path);
-        if (nodes.isEmpty())
+        if (nodes.isEmpty()) {
             throw new ConfMException(ConfMException.ELEMENT_MISSING,
                     getPath(path));
-        else
-            return (Container) nodes.first();
+        } else return (Container) nodes.first();
     }
 
     /**
@@ -450,17 +436,13 @@ public abstract class Container extends Element {
     public boolean keyCompare(Container b) {
 
         // check that namespace and name and value are the same.
-        if (!equals(b))
-            return false;
+        if (!equals(b)) return false;
         String[] keys = keyNames();
-        if (keys == null)
-            // not a list entry
-            return false;
+        if (keys == null) return false;  // not a list entry
         for (int i = 0; i < keys.length; i++) {
             Element x = (Element) getChild(keys[i]);
             Element bx = (Element) b.getChild(keys[i]);
-            if (!x.equals(bx))
-                return false;
+            if (!x.equals(bx)) return false;
         }
         return true;
     }
@@ -480,45 +462,38 @@ public abstract class Container extends Element {
      *            Container to compare against.
      */
     public int compare(Container b) {
-
         // check that namespace and name and value are the same.
-        if (!equals(b))
-            return -1;
+        if (!this.equals(b)) return -1;
 
         String[] keys = keyNames();
-
         int i = 0;
-        if (keys != null)
-            for (i = 0; i < keys.length; i++) {
+        if (keys != null) {
+            for (; i < keys.length; i++) {
                 Element x = (Element) getChild(keys[i]);
                 Element bx = (Element) b.getChild(keys[i]);
-                if (!x.equals(bx))
-                    return -1;
+                if (!x.equals(bx)) return -1;
             }
+        }
         String[] names = childrenNames();
-        /*
-         * continue from 'i', since we believe that the keys are the first in
-         * the childrenNames list.
-         */
-
+        
+        // Continue from 'i', assuming keys are first in childrenNames
         for (; i < names.length; i++) {
             NodeSet nsA = getChildren(names[i]);
             NodeSet nsB = b.getChildren(names[i]);
 
             int hits = 0;
-            for (int ii = 0; ii < nsA.size(); ii++) {
-                Element cA = (Element) nsA.get(ii);
+            for (int j = 0; j < nsA.size(); j++) {
+                Element cA = (Element) nsA.get(j);
                 // Now does this elem exist in nsB
-                for (int j = 0; j < nsB.size(); j++) {
-                    Element cB = (Element) nsB.get(j);
+                for (int k = 0; k < nsB.size(); k++) {
+                    Element cB = (Element) nsB.get(k);
                     if (cA.equals(cB)) {
                         hits++;
                         break;
                     }
                 }
             }
-            if ((nsA.size() != nsB.size()) || nsA.size() != hits)
-                return 1;
+            if (nsA.size() != nsB.size() || nsA.size() != hits) return 1;
         }
         return 0;
     }
@@ -655,67 +630,12 @@ public abstract class Container extends Element {
      * @return 'true' if both trees are equal. 'false' otherwise.
      */
     public static boolean checkSync(Container a, Container b) {
-
-        int res = a.compare(b);
-        if (res == 0) {
-            // Containers are equal, go through the children.
-            // Algoritm: for each child in 'a' children
-            // compare against each child in b children.
-
-            // 1.prepare: put the b children in bList.
-            NodeSet bList = new NodeSet();
-            if (b.children != null)
-                for (int i = 0; i < b.children.size(); i++)
-                    bList.add(b.children.getElement(i));
-
-            // 2. for each child in a check against child in b.
-            if (a.children != null)
-                for (int i = 0; i < a.children.size(); i++) {
-                    Element aChild = a.children.getElement(i);
-                    // find it in b
-                    int j = 0;
-                    boolean bFound = false;
-                    int bRes = 0;
-                    Element bChild = null;
-                    while (j < bList.size() && bFound == false) {
-                        bChild = bList.getElement(j);
-                        bRes = aChild.compare(bChild);
-                        if (bRes >= 0)
-                            bFound = true;
-                        else
-                            j++;
-                    }
-                    // remove it, if found
-                    if (bFound) {
-                        bList.remove(j);
-                        if (bRes == 1) { // different content
-                            return false;
-                        } else { // res == 0 , they are equal
-                            if (aChild instanceof Container) {
-                                // inspect recursively
-                                if (!checkSync((Container) aChild,
-                                        (Container) bChild))
-                                    return false;
-                            } else {
-                                // skip if Leafs. They are equal
-                            }
-                        }
-                    } else { // not found
-                        return false;
-                    }
-                }
-            // 3. Any remaining in bList ?
-            if (bList.size() > 0)
-                return false;
-
-        } else if (res == -1) {
-            // A and B are completely different
-            return false;
-        } else if (res == 1) {
-            // A and B is same but data is updated
-            return false;
-        }
-        return true;
+        NodeSet uniqueA = new NodeSet(), uniqueB = new NodeSet();
+        NodeSet changedA = new NodeSet(), changedB = new NodeSet();
+        Container.getDiff(a, b, uniqueA, uniqueB, changedA, changedB);
+        boolean noUniques = uniqueA.isEmpty() && uniqueB.isEmpty();
+        boolean noChanges = changedA.isEmpty() && changedB.isEmpty();
+        return noUniques && noChanges;
     }
 
     /**
@@ -771,12 +691,11 @@ public abstract class Container extends Element {
     }
 
     /**
-     * Will return a list of subtrees for syncing a subtree A with all the
-     * necessary operations to make it look like the target tree B. This variant
-     * uses the NETCONF merge operation
+     * Returns a list of subtrees for syncing a subtree A with all the
+     * necessary operations to make it look like the target tree B. This
+     * variant uses the NETCONF merge operation.
      * 
-     * @return Return subtrees with operations to transmute subtree A into
-     *         subtree B.
+     * @return Subtrees with operations to transmute subtree A into subtree B.
      */
 
     public static NodeSet syncMerge(NodeSet a, NodeSet b) throws INMException {
@@ -797,8 +716,7 @@ public abstract class Container extends Element {
      * operations to make it look like the target tree B. This version of sync
      * will produce a NETCONF tree with NETCONF merge operations.
      * 
-     * @return Return subtree with operations to transmute subtree A into
-     *         subtree B.
+     * @return Subtree with operations to transmute subtree A into subtree B.
      */
 
     public static Container syncMerge(Container a, Container b) {
@@ -812,9 +730,11 @@ public abstract class Container extends Element {
         return copy;
     }
 
-    // Which NETCONF do we need to produce in order to go
-    // from a to b
-    // returns number of difss
+    /**
+     * Which NETCONF do we need to produce in order to go from a to b? 
+     * 
+     * @return number of diffs
+     */
     private static int csync2(Container a, Container b, boolean listEntry,
             NodeSet toDel) {
         NodeSet bchildren = b.getChildren();
@@ -902,8 +822,7 @@ public abstract class Container extends Element {
                 x.markDelete();
             }
 
-            // If it's a list entry - remove all children
-            // but the keys
+            // If it's a list entry - remove all children but the keys
             // If it's a container, remove all children
             else if (x instanceof Container) {
                 diffs++;
