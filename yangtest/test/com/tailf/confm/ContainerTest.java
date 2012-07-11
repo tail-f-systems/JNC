@@ -117,6 +117,23 @@ public class ContainerTest {
         Container.getDiff(b1, b2, uniqueA, uniqueB, changedA, changedB);
         assertFalse("b1 has no unique children", uniqueA.isEmpty());
         assertTrue("b2 has no unique children", uniqueB.isEmpty());
+        clearNodeSets();
+        
+        // Add same leaf to b2 and confirm that leaf1 and leaf2 are 'changed'
+        b2.addChild(leaf2);
+        Container.getDiff(b1, b2, uniqueA, uniqueB, changedA, changedB);
+        assertTrue("b1 has no unique children", uniqueA.isEmpty());
+        assertTrue("b2 has no unique children", uniqueB.isEmpty());
+        assertFalse("No changed leaves in A", changedA.isEmpty());
+        assertFalse("No changed leaves in B", changedB.isEmpty());
+        assertEquals("leaf changed in A", leaf1, changedA.first());
+        assertEquals("leaf changed in B", leaf2, changedB.first());
+        clearNodeSets();
+        
+        // Change value of leaf2 and confirm that trees are identical
+        b2.setValue("child::leaf", "leaf");
+        Container.getDiff(b1, b2, uniqueA, uniqueB, changedA, changedB);
+        assertTrue(nodeSetsAreEmpty());
     }
 
 }
