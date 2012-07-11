@@ -722,7 +722,7 @@ public abstract class Container extends Element {
     public static Container syncMerge(Container a, Container b) {
         Container copy = (Container) b.clone();
         NodeSet toDel = new NodeSet();
-        Container.csync2((Container) a.clone(), copy, false, toDel);
+        Container.csync2((Container) a.clone(), copy, toDel);
         for (int i = 0; i < toDel.size(); i++) {
             Element e = (Element) toDel.get(i);
             e.getParent().deleteChild(e);
@@ -733,84 +733,52 @@ public abstract class Container extends Element {
     /**
      * Which NETCONF do we need to produce in order to go from a to b? 
      * 
-     * @return number of diffs
+     * @param a Subtree to sync
+     * @param b Copy of subtree to mimic
+     * @param toDel A list with leaves that should be removed from 'b'
+     * @return Number of diffs
      */
-    private static int csync2(Container a, Container b, boolean listEntry,
-            NodeSet toDel) {
-        NodeSet bchildren = b.getChildren();
-        NodeSet achildren = a.getChildren();
-        int i;
+    private static int csync2(Container a, Container b, NodeSet toDel) {
         int diffs = 0;
-        int d;
-        for (i = 0; bchildren != null && i < bchildren.size(); i++) {
-            Element bChild = (Element) bchildren.get(i);
-            if (listEntry) {
+        for (int i = 0; b.children != null && i < b.children.size(); i++) {
+            Element bChild = (Element) b.children.get(i);
+            if (a.keyNames() != null && bChild instanceof Leaf) {
                 // inside list entries we ignore keys
-                if ((bChild instanceof Leaf)) {
-                    Leaf leaf = (Leaf) bChild;
-                    if (leaf.isKey())
-                        continue;
-                }
+                if (((Leaf) bChild).isKey()) continue;
             }
 
             Element aChild = null;
-
-            if (achildren != null)
-                aChild = Container.findDeleteChild(bChild, achildren);
-
+            if (a.children != null) {
+                aChild = Container.findDeleteChild(bChild, a.children);
+            }
             if (aChild == null) {
                 // It's a new child that needs to be merged
                 diffs++;
                 continue;
             }
 
-            // It was found - and it was also deleted from a
-
-            if ((aChild instanceof Container)
-                    && (((Container) aChild).keyNames() == null)) {
-                // regular containers
-                d = Container.csync2((Container) aChild, (Container) bChild,
-                        false, toDel);
-                diffs += d;
-                if (d == 0) {
-
-                    // both children are identical - remove
-                    // from b as well
-                    toDel.add(bChild);
-                }
-                continue;
-            }
+            // It was found - and it was also deleted from 'a'
             if (aChild instanceof Container) {
-                // It's a list entry - and the keys
-                // in aChild and bChild are equal
-                d = Container.csync2((Container) aChild, (Container) bChild,
-                        true, toDel);
+                int d = Container.csync2((Container) aChild, (Container) bChild, toDel);
                 diffs += d;
                 if (d == 0) {
-                    // both children are identical - remove
-                    // from b as well
+                    // both children are identical - remove from b as well
                     toDel.add(bChild);
                 }
-
                 continue;
-            }
-
-            if (aChild instanceof Leaf) {
+            } else if (aChild instanceof Leaf) {
                 if (aChild.equals(bChild)) {
-                    // identical leaves remove from b
-                    // no need to send it
+                    // remove identical leaves from b - no need to send them
                     toDel.add(bChild);
                 } else {
                     diffs++;
                 }
             }
         }
-        // Now all remaining elements in a - need to be
-        // marked as delete, and also subsequently moved
-        // to b
-
-        for (i = 0; achildren != null && i < achildren.size(); i++) {
-            Element x = (Element) achildren.get(i);
+        
+        // Mark remaining elements in 'a' for deletion and move them to 'b'
+        for (int i = 0; a.children != null && i < a.children.size(); i++) {
+            Element x = (Element) a.children.get(i);
             if (x instanceof Leaf) {
                 Leaf leaf = (Leaf) x;
                 if (leaf.isKey()) {
@@ -822,8 +790,7 @@ public abstract class Container extends Element {
                 x.markDelete();
             }
 
-            // If it's a list entry - remove all children but the keys
-            // If it's a container, remove all children
+            // Remove all children except keys (if any)
             else if (x instanceof Container) {
                 diffs++;
                 Container c = (Container) x;
@@ -836,23 +803,17 @@ public abstract class Container extends Element {
     }
 
     private static Element findDeleteChild(Element e, NodeSet s) {
-        if (s == null)
-            return null;
-        if (e instanceof Leaf)
+        if (s == null) return null;
+        if (e instanceof Leaf) {
             return findDeleteChildLeaf((Leaf) e, s);
-        else if (e instanceof Container)
+        } else if (e instanceof Container) {
             return findDeleteChildContainer((Container) e, s);
-        else {
+        } else {
             // It's the case where we receive Elements
             // instead of Container/Leaf because the device
             // has a newer revision than us. This code can
             // never be made to work perfect.
             return findDeleteChildElement(e, s);
-            /*
-             * // this should never occur - throw error String str =
-             * e.toXMLString(); throw new
-             * ConfMException(ConfMException.NOT_CONFM_OBJECT,str);
-             */
         }
     }
 
@@ -871,9 +832,8 @@ public abstract class Container extends Element {
         String[] keys = e.keyNames();
         for (int i = 0; i < s.size(); i++) {
             Element x = (Element) s.get(i);
-            if (x instanceof Leaf)
-                continue;
-            Container c = (Container) x;
+            if (x instanceof Leaf) continue;
+            Container c = (Container) x;  // XXX Assuming Container if not Leaf
             if (keys == null) {
                 // plain container
                 if (e.equals(x)) {
