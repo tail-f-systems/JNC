@@ -48,7 +48,7 @@ public abstract class Container extends Element {
      */
     private static final long serialVersionUID = -8039032425967560491L;
 
-    private static String reservedWords[] = { "abstract", "boolean", "break",
+    private static final String reservedWords[] = { "abstract", "boolean", "break",
             "byte", "case", "catch", "char", "class", "const", "continue",
             "default", "do", "double", "else", "extends", "final", "finally",
             "float", "for", "goto", "if", "implements", "import", "instanceof",
@@ -166,13 +166,10 @@ public abstract class Container extends Element {
                 return child;
             }
             if (parent instanceof Container) {
-                // aware
-
-                try { // A Container
-                      // System.out.println(parent.name+"."+methodName+"()");
+                // aware, a Container
+                try {
                     String methodName = "add" + normalize(name);
                     Class[] types = new Class[] {};
-                    // System.out.println(parent.name+"."+methodName+"()");
                     Method addContainer = parent.getClass().getMethod(
                             methodName, types);
                     Object[] args = {};
@@ -187,7 +184,7 @@ public abstract class Container extends Element {
                         return null;
                     }
                     // It's an unknown container or child
-                    // FIXME - check capas
+                    // FIXME - check capabilities
                     if (!RevisionInfo.newerRevisionSupportEnabled) {
                         throw new ConfMException(
                                 ConfMException.ELEMENT_MISSING,
@@ -245,7 +242,7 @@ public abstract class Container extends Element {
                         getPath(name) + ": Unexpected element");
             }
             NodeSet nodes = get(name);
-            if (nodes.size() == 0) {
+            if (nodes.isEmpty()) {
                 Element leaf = new Element(ns, name);
                 leaf.setValue(value);
                 insertLast(leaf);
@@ -261,7 +258,7 @@ public abstract class Container extends Element {
             }
 
             NodeSet nodes = get(name);
-            if (nodes.size() == 0) {
+            if (nodes.isEmpty()) {
                 Element leaf = new Element(ns, name);
                 leaf.setValue(value);
                 insertLast(leaf);
@@ -391,13 +388,13 @@ public abstract class Container extends Element {
 
     protected boolean isLeafDefault(String path) throws INMException {
         NodeSet nodes = get(path);
-        return (nodes.size() == 0);
+        return (nodes.isEmpty());
     }
 
     protected void markLeafReplace(String path) throws INMException {
         NodeSet nodes = get(path);
 
-        if (nodes.size() == 0)
+        if (nodes.isEmpty())
             throw new ConfMException(ConfMException.ELEMENT_MISSING,
                     getPath(path));
         else
@@ -406,7 +403,7 @@ public abstract class Container extends Element {
 
     protected void markLeafMerge(String path) throws INMException {
         NodeSet nodes = get(path);
-        if (nodes.size() == 0)
+        if (nodes.isEmpty())
             throw new ConfMException(ConfMException.ELEMENT_MISSING,
                     getPath(path));
         else
@@ -416,7 +413,7 @@ public abstract class Container extends Element {
     protected void markLeafCreate(String path) throws INMException {
         NodeSet nodes = get(path);
 
-        if (nodes.size() == 0)
+        if (nodes.isEmpty())
             throw new ConfMException(ConfMException.ELEMENT_MISSING,
                     getPath(path));
         else
@@ -426,7 +423,7 @@ public abstract class Container extends Element {
     protected void markLeafDelete(String path) throws INMException {
         NodeSet nodes = get(path);
 
-        if (nodes.size() == 0)
+        if (nodes.isEmpty())
             throw new ConfMException(ConfMException.ELEMENT_MISSING,
                     getPath(path));
         else
@@ -438,7 +435,7 @@ public abstract class Container extends Element {
      */
     protected Container getListContainer(String path) throws INMException {
         NodeSet nodes = get(path);
-        if (nodes.size() == 0)
+        if (nodes.isEmpty())
             throw new ConfMException(ConfMException.ELEMENT_MISSING,
                     getPath(path));
         else
@@ -547,111 +544,82 @@ public abstract class Container extends Element {
     }
 
     /**
-     * Return the 'diff' between two trees. Three empty NodeSets should be
-     * provided and nodes that differ in the compare method are put in one of
-     * the three resulting nodesets.
+     * Produces the 'diff' between two trees. Nodes that differ in the compare
+     * method are added to one of the four provided node sets.
      * <ul>
-     * <li>
-     * Elements that are unique to node tree A will be put in the uniqueA
-     * nodeset.
-     * <li>
-     * Elements that are unique to node tree B will be put in the uniqueB
-     * NodeSet.
-     * <li>
-     * Dynamic elements that differ, but have the same keys are put in the third
-     * nodeset 'changed'.
+     *   <li>
+     *     Elements unique to node tree A are put in uniqueA.
+     *   <li>
+     *     Elements unique to node tree B are put in uniqueB.
+     *   <li>
+     *     Dynamic elements that differ, but have the same keys, are put in the
+     *     third nodeset 'changed'.
      * </ul>
-     * if the two trees are identical the three returned nodesets will be empty.
+     * If the two trees are identical the three returned nodesets will be empty.
      * <p>
      * Attributes are not included in the inspection. Only container structures
      * and leaf-values are checked.
      * <p>
      * Note that both subtrees must have a common starting point Container in
      * order to compare them.
-     * <p>
      * 
-     * @param a
-     *            Subtree A (Container)
-     * @param b
-     *            Subtree B (Container)
-     * @param uniqueA
-     *            Resulting nodeset for elements that are unique to A.
-     * @param uniqueB
-     *            Resulting nodeset for elements that are unique to B.
-     * @param changedA
-     *            Resulting nodeset for changed elements. A version in this
-     *            nodeset.
-     * @param changedB
-     *            Resulting nodeset for changed elements. B version in this
-     *            nodeset.
-     * @param the
-     *            result nodeset that we wish to merge
+     * @param a Subtree A (Container)
+     * @param b Subtree B (Container)
+     * @param uniqueA Place for elements that are unique to A.
+     * @param uniqueB Place for elements that are unique to B.
+     * @param changedA Place for elements changed in A.
+     * @param changedB Place for elements changed in B.
      */
-
-    public static void inspect(Container a, Container b, NodeSet uniqueA,
+    public static void getDiff(Container a, Container b, NodeSet uniqueA,
             NodeSet uniqueB, NodeSet changedA, NodeSet changedB) {
-        int res = a.compare(b);
-        if (res >= 0) {
+        if (a.compare(b) >= 0) {
             // Containers are equal, go through the children.
-            // Algoritm: for each child in 'a' children
-            // compare against each child in b children.
-
-            // 1.prepare: put the b children in bList.
             NodeSet bList = new NodeSet();
-            if (b.children != null)
-                for (int i = 0; i < b.children.size(); i++)
-                    bList.add(b.children.getElement(i));
-
-            // 2. for each child in a check against child in b.
-            if (a.children != null)
-                for (int i = 0; i < a.children.size(); i++) {
-                    Element aChild = a.children.getElement(i);
-                    // find it in b
-                    int j = 0;
-                    boolean bFound = false;
-                    int bRes = 0;
-                    Element bChild = null;
-                    while (j < bList.size() && bFound == false) {
-                        bChild = bList.getElement(j);
-                        bRes = aChild.compare(bChild);
-                        if (bRes >= 0)
-                            bFound = true;
-                        else
-                            j++;
-                    }
-                    // remove it, if found
-                    if (bFound) {
-                        bList.remove(j);
-                        if (bRes == 1) { // different content
-                            changedA.add(aChild);
-                            changedB.add(bChild);
-                        } else { // bRes == 0 , they are equal
-                            if (aChild instanceof Container)
-                                // inspect recursively
-                                Container.inspect((Container) aChild,
-                                        (Container) bChild, uniqueA, uniqueB,
-                                        changedA, changedB);
-                            else {
-                                // skip if Leafs. They are equal
-                            }
-                        }
-                    } else { // not found
-                        uniqueA.add(aChild);
-                    }
-                }
-            // 3. For the remaining in bList add them to uniqueB
-            for (int i = 0; i < bList.size(); i++) {
-                Element bChild = bList.getElement(i);
-                uniqueB.add(bChild);
+            if (a.children == null || b.children == null) {
+                if(b.children != null)
+                    uniqueB.addAll(b.children);
+                else if(a.children != null)
+                    uniqueA.addAll(a.children);
+                return;
             }
-        } else if (res == -1) {
-            // A and B are completely different
+            bList.addAll(b.children);
+            
+            // For each child in a, compare with children in b.
+            for (int i = 0; i < a.children.size(); i++) {
+                Element aChild = a.children.getElement(i);
+                Element bChild = null;
+                int bRes = -1;
+                int j;
+                for (j = 0; j < bList.size(); j++) {
+                    bChild = bList.getElement(j);
+                    bRes = aChild.compare(bChild);
+                    if (bRes >= 0)
+                        break;
+                }
+                if (bRes >= 0) {
+                    // child at position j in bList compares equal, remove it.
+                    bList.remove(j);
+                    if (bRes == 1) { // different content
+                        changedA.add(aChild);
+                        changedB.add(bChild);
+                    } else if (aChild instanceof Container) {
+                        // bRes == 0 so they are equal, but their children
+                        // might not be, so we recurse
+                        Container.getDiff((Container) aChild,
+                                (Container) bChild, uniqueA, uniqueB, changedA,
+                                changedB);
+                    }
+                    // Skip if equal and not Container
+                } else { // not found
+                    uniqueA.add(aChild);
+                }
+            }
+            // Add any remaining nodes in bList to uniqueB
+            uniqueB.addAll(bList);
+        } else {
+            // a.compare(b) == -1: A and B are completely different
             uniqueA.add(a);
             uniqueB.add(b);
-        } else if (res == 1) {
-            // A and B is same but data is updated
-            changedA.add(a);
-            changedB.add(b);
         }
     }
 
@@ -781,7 +749,7 @@ public abstract class Container extends Element {
         NodeSet changedA = new NodeSet();
         NodeSet changedB = new NodeSet();
 
-        Container.inspect(a, b, uniqueA, uniqueB, changedA, changedB);
+        Container.getDiff(a, b, uniqueA, uniqueB, changedA, changedB);
 
         Element result = null;
         for (int i = 0; i < uniqueA.size(); i++) {
