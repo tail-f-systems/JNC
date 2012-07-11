@@ -80,10 +80,7 @@ public abstract class Container extends Element {
      * @return Dot-separated path to top-level container, or empty string.
      */
     private static String getPackage(Element elem) {
-    	if (elem == null) {
-    		return "";
-    	}
-    	if (elem instanceof Container) {
+    	if (elem != null && elem instanceof Container) {
     		Container c = (Container)elem;
     		if (c.parent instanceof Container) {
 	    		String pkg = getPackage(c.parent);
@@ -98,13 +95,13 @@ public abstract class Container extends Element {
     }
     
     /**
-     * 
+     * Creates an instance of 
      * 
      * @param parent of YANG statement counterpart, null if none
      * @param name (non-normalized) name of class to be instantiated
      * @return An instance of class name, as a child of parent
      * @throws ClassNotFoundException
-     *                
+     *             If normalize(name) does not yield a valid class name
      * @throws InstantiationException
      *             if the referenced class represents an abstract class, an
      *             interface, an array class, a primitive type, or void; or if
@@ -116,11 +113,9 @@ public abstract class Container extends Element {
     private static Element instantiate(Element parent, String name)
             throws ClassNotFoundException, InstantiationException,
             IllegalAccessException {
-        String className = "";
-        if (parent == null) {
-        	className = "gen.";
-        } else {
-        	className = "gen."+getPackage(parent); // FIXME might be incorrect
+        String className = "gen."; // FIXME: allow for other package names
+        if (parent != null) {
+        	className += getPackage(parent);
         }
         className += normalize(name);
         // String className = pkg + "." + normalize(name);
@@ -129,17 +124,12 @@ public abstract class Container extends Element {
     }
 
     /**
-     * Static createInstance this is a data model "aware" method to create a
-     * container instance below a parent node.
-     * 
-     * It is made package private to not allow creation outside package.
+     * Data model aware method, creates a container instance child.
      * 
      * @return The created element or null if no container was created.
-     * 
      */
     static Element createInstance(ConfHandler parser, Element parent,
             String ns, String name) throws ConfMException {
-
         String pkg = hasPackage(ns);
         if (parent == null) {
             // ROOT
@@ -174,7 +164,6 @@ public abstract class Container extends Element {
                     Object[] args = {};
                     Element child = (Element) addContainer.invoke(parent, args);
                     return child;
-
                 } catch (NoSuchMethodException e) {
                     Container c = (Container) parent;
                     if (c.isChild(name)) {
@@ -191,7 +180,6 @@ public abstract class Container extends Element {
                     }
                     parser.unknownLevel = 1;
                     return null;
-
                 } catch (Exception e2) {
                     throw new ConfMException(ConfMException.ELEMENT_MISSING,
                             parent.getPath(name) + ": Unexpected element");
@@ -213,9 +201,7 @@ public abstract class Container extends Element {
                     throw new ConfMException(ConfMException.ELEMENT_MISSING,
                             parent.getPath(name) + ": Unexpected element");
                 }
-
             }
-
         }
     }
 
