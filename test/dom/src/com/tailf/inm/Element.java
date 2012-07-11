@@ -12,7 +12,6 @@ package com.tailf.inm;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -47,6 +46,7 @@ import java.io.*;
  * 
  **/
 
+// @SuppressWarnings({ "rawtypes", "serial", "unchecked" })
 public class Element implements Serializable {
 
     /**
@@ -1774,8 +1774,6 @@ public class Element implements Serializable {
 
     protected void encode(Transport out, boolean newline_at_end,
             Capabilities capas) throws INMException {
-        String tagpath[] = null;
-
         String qName = qualifiedName();
         out.print("<");
         out.print(qName);

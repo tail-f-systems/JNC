@@ -40,6 +40,7 @@ import java.lang.Class;
  * </ul>
  * 
  */
+// @SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class Container extends Element {
 
     /**
@@ -150,11 +151,11 @@ public abstract class Container extends Element {
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 throw new ConfMException(ConfMException.ELEMENT_MISSING,
-                        parent.getPath(name) + ": Unexpected element");
+                        name + ": Unexpected element");
             } catch (Exception e2) {
                 e2.printStackTrace();
                 throw new ConfMException(ConfMException.ELEMENT_MISSING,
-                        parent.getPath(name) + ": Unexpected element");
+                        name + ": Unexpected element");
             }
         } else {
             // CHILD
@@ -383,20 +384,14 @@ public abstract class Container extends Element {
 
     protected void setLeafListValue(String ns, String path, Object value,
             String[] childrenNames) throws INMException {
-        NodeSet nodes = get(path);
         Leaf leaf = new Leaf(ns, path);
         leaf.setValue(value);
         insertChild(leaf, childrenNames);
     }
 
     protected boolean isLeafDefault(String path) throws INMException {
-
         NodeSet nodes = get(path);
-
-        if (nodes.size() == 0)
-            return true;
-        else
-            return false;
+        return (nodes.size() == 0);
     }
 
     protected void markLeafReplace(String path) throws INMException {
@@ -945,7 +940,6 @@ public abstract class Container extends Element {
             else if (x instanceof Container) {
                 diffs++;
                 Container c = (Container) x;
-                String[] keys = c.keyNames();
                 Container n = (Container) c.cloneShallow();
                 b.addChild(n);
                 n.markDelete();
@@ -1135,8 +1129,7 @@ public abstract class Container extends Element {
                             }
                             break;
                         case RevisionInfo.R_MIN_ELEM_LOWERED:
-                            int min = r.idata;
-                            // naah we can't do anything here
+                            // Do nothing
                             break;
                         case RevisionInfo.R_NODE_ADDED:
                             // System.out.println("Dropping "+this.toXMLString());
@@ -1158,30 +1151,6 @@ public abstract class Container extends Element {
                 return true;
         }
         return false;
-    }
-
-    // Debug method to check that there are no Elements
-    // inside a Container
-    static public boolean isNotElem(Container c) {
-        NodeSet s = c.getChildren();
-        if (s == null)
-            return true;
-        for (int i = 0; i < s.size(); i++) {
-            Element e = (Element) s.get(i);
-            if (e instanceof Leaf)
-                return true;
-            else if (e instanceof Container) {
-                Container cc = (Container) e;
-                if (!Container.isNotElem(cc)) {
-                    System.out.println("Element " + e.toXMLString());
-                    return false;
-                }
-            } else {
-                System.out.println("Element " + e.toXMLString());
-                return false;
-            }
-        }
-        return true;
     }
 
 }
