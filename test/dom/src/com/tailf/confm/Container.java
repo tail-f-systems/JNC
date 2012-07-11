@@ -1076,34 +1076,18 @@ public abstract class Container extends Element {
     protected Container cloneContent(Container copy) {
         // copy children, except keys which are already copied
         if (children != null) {
-            String[] childrenNames = childrenNames();
             String[] keyNames = keyNames();
+            int i = 0;
             if (keyNames != null) {
-                int i = keyNames.length;
-                // this is better. even correct.
-                for (; i < children.size(); i++) {
-                    Element child = children.getElement(i);
-                    Element child_copy = (Element) child.clone();
-                    copy.addChild(child_copy);
-                }
-                /*
-                 * for (;i< childrenNames.length;i++) { String childName =
-                 * childrenNames[i]; Element child = getChild(childName); if
-                 * (child!=null) { Element child_copy= (Element) child.clone();
-                 * copy.addChild( child_copy ); } }
-                 */
-            } else {
-                // copy all instead.
-                if (children != null)
-                    for (int i = 0; i < children.size(); i++) {
-                        Element child = children.getElement(i);
-                        Element child_copy = (Element) child.clone();
-                        copy.addChild(child_copy);
-                    }
+                // Skip the keys by starting the loop from here
+                i = keyNames.length;
+            }
+            for (; i < children.size(); i++) {
+                Element child = children.getElement(i);
+                Element child_copy = (Element) child.clone();
+                copy.addChild(child_copy);
             }
         }
-
-        // clone attrs and value
         cloneAttrs(copy);
         cloneValue(copy);
         return copy;
