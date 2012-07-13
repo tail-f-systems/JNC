@@ -162,6 +162,7 @@ class JPyangPlugin(plugin.PyangPlugin):
         for module in modules:
             if module.keyword == 'module':
                 if not ctx.opts.no_schema:
+
                     # Generate external schema
                     ns = module.search_one('namespace').arg
                     name = capitalizeFirst(module.search_one('prefix').arg)
@@ -177,6 +178,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                         ctx)
                     if ctx.opts.debug or ctx.opts.verbose:
                         print 'Schema generation COMPLETE.'
+
                 # Generate Java classes
                 module = make_valid_identifiers(module)
                 src = 'module "' + module.arg + '", revision: "' + \
@@ -188,6 +190,7 @@ class JPyangPlugin(plugin.PyangPlugin):
             else:
                 print_warning(msg='Ignoring schema tree rooted at "' + \
                     module.keyword + ' ' + module.arg + '" - not a module')
+
         # Generate javadoc
         for module in modules:
             if module.keyword == 'module':
@@ -367,6 +370,7 @@ def get_types(yang_type, ctx):
     elif yang_type in ('binary', 'instance-identifier', 'empty'):
         primitive, alt = alt, primitive
         if yang_type.arg == 'binary':
+
             # confm = confm[:-3] + 'Confd.OctetList'  # Possible alternative...
             confm += 'Base64Binary'
         elif yang_type.arg == 'instance-identifier':
@@ -398,11 +402,11 @@ def get_types(yang_type, ctx):
         # TODO Maybe this should be com.tailf.confm.confd.Decimal64
     elif yang_type.arg == 'boolean':
         primitive = 'boolean'
-    # elif yang_type.arg == 'enumeration':  # Handled by else clause
-    # elif yang_type.arg == 'bits':  # Handled by else clause
-    # TODO add support for built-in datatypes bits, empty, identityref,
-    # instance-identifier, leafref and union
-    # TODO enumeration and derived datatypes?
+#    elif yang_type.arg == 'enumeration':  # Handled by else clause
+#    elif yang_type.arg == 'bits':  # Handled by else clause
+#    TODO add support for built-in datatypes bits, empty, identityref,
+#    instance-identifier, leafref and union
+#    TODO enumeration and derived datatypes?
     else:
         try:
             typedef = yang_type.i_typedef
@@ -448,6 +452,7 @@ def extract_keys(stmt, ctx):
         primitive_keys.append((primitive, arg))
         only_strings *= primitive_keys[-1][0] == 'String'
         # XXX 'b *= a' is syntactically equivalent to b = b and a
+
     return key, only_strings, confm_keys, primitive_keys
 
 
@@ -526,8 +531,7 @@ def schema_node(stmt, tagpath, ns, ctx):
     if ctx.opts.verbose:
         print 'Generating schema node "' + tagpath + '"...'
     res = []
-    res.append('<tagpath>' + tagpath + '</tagpath>')  # or stmt.full_path()
-    # ... but it is marked for removal (and it would be less efficient)
+    res.append('<tagpath>' + tagpath + '</tagpath>')
     res.append('<namespace>' + ns + '</namespace>')
     res.append('<primitive_type>0</primitive_type>')
 
@@ -619,8 +623,8 @@ class ClassGenerator(object):
         (filename, name) = extract_names(prefix.arg)
         for stmt in self.module.substmts:
             if stmt.keyword in ['container', 'list']:  # TODO other top-level stmts
-                self.generate_class(stmt, self.package, self.src, '', ns_arg, name,
-                    top_level=True, ctx=self.ctx)
+                self.generate_class(stmt, self.package, '', ns_arg, name,
+                    top_level=True)
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + filename + '"...'
         write_file(self.package, filename,
@@ -629,27 +633,22 @@ class ClassGenerator(object):
                 'The root class for namespace ' + ns_arg + \
                 ' (accessible from \n * ' + name + '.NAMESPACE) with prefix "' + \
                 prefix.arg + '" (' + name + '.PREFIX).',
-                class_fields(ns_arg, prefix.arg) +
-                enable(name) + register_schema(name),
-                source=self.src
-            ),
+                class_fields(ns_arg, prefix.arg) + enable(name) + register_schema(name),
+                source=self.src),
             [self.module],
             self.ctx)
 
-    def generate_class(self, stmt, package, src, path, ns, prefix_name, ctx,
+    def generate_class(self, stmt, package, path, ns, prefix_name,
             top_level=False):
         """Generates a Java class hierarchy providing an interface to a YANG module
 
         stmt        -- A data model subtree
         package     -- Name of Java package, also used as path to where files
                        should be written
-        src         -- The .yang file from which the module was parsed, or the
-                       module name and revision if filename is unknown
         path        -- The XPath of stmt in the original module
         ns          -- The XML namespace of the module
         prefix_name -- The module prefix
         top_level   -- Whether or not this is a top-level statement
-        ctx         -- Context used to fetch option parameters
 
         """
         (filename, name) = extract_names(stmt.arg)
@@ -659,12 +658,13 @@ class ClassGenerator(object):
         i_children_exists = (hasattr(stmt, 'i_children')
             and stmt.i_children != None
             and stmt.i_children != [])
+
         # TODO preserve correct order in generated class
         expanded_i_children = []
         if i_children_exists:
             for ch in stmt.i_children:
                 tmp_access_methods, tmp_fields = self.generate_child(ch,
-                    package, src, path, ns, prefix_name, ctx)
+                    package, self.src, path, ns, prefix_name, self.ctx)
                 access_methods += tmp_access_methods
                 fields.extend(tmp_fields)
 
@@ -681,35 +681,37 @@ class ClassGenerator(object):
                     res.extend(expand(sub_children))
                 return res
             expanded_i_children = expand(stmt.i_children)
+
+        # TODO Avoid quadratic time duplication check (maybe use a set)
         for sub in stmt.substmts:
-            # TODO Avoid quadratic time duplication check (maybe use a set)
             if sub not in expanded_i_children:
                 tmp_access_methods, tmp_fields = self.generate_child(sub, package,
-                    src, path, ns, prefix_name, ctx)
+                    self.src, path, ns, prefix_name, self.ctx)
                 access_methods += tmp_access_methods
                 fields.extend(tmp_fields)
-        if ctx.opts.verbose:
+
+        if self.ctx.opts.verbose:
             print 'Generating Java class "' + filename + '"...'
         if filter(is_container, stmt.substmts):  # TODO Verify correctness of cond.
             support_methods = support_add(fields)
         if stmt.keyword != 'typedef':
             names = key_names(stmt) + children_names(stmt)
         if stmt.keyword == 'container':
-            constructors = constructor(stmt, ctx, set_prefix=top_level,
+            constructors = constructor(stmt, self.ctx, set_prefix=top_level,
                 root=prefix_name)
             cloners = clone(name, shallow=False) + clone(name, shallow=True)
         elif stmt.keyword == 'list':
-            key, only_strings, confm_keys, primitive_keys = extract_keys(stmt, ctx)
-            constructors = constructor(stmt, ctx, root=prefix_name,
+            key, only_strings, confm_keys, primitive_keys = extract_keys(stmt, self.ctx)
+            constructors = constructor(stmt, self.ctx, root=prefix_name,
                 set_prefix=top_level, throws="\n        throws INMException") + \
-            constructor(stmt, ctx, root=prefix_name, set_prefix=top_level,
+            constructor(stmt, self.ctx, root=prefix_name, set_prefix=top_level,
                 mode=1, args=confm_keys, throws='''
             throws INMException''') + \
-            constructor(stmt, ctx, root=prefix_name, set_prefix=top_level,
+            constructor(stmt, self.ctx, root=prefix_name, set_prefix=top_level,
                 mode=2, args=primitive_keys, throws='''
             throws INMException''')
             if not only_strings:
-                constructors += constructor(stmt, ctx, root=prefix_name,
+                constructors += constructor(stmt, self.ctx, root=prefix_name,
                     set_prefix=top_level, mode=3, args=primitive_keys, throws='''
             throws INMException''')
             cloners = clone(name, map(capitalizeFirst, key.arg.split(' ')),
@@ -717,22 +719,25 @@ class ClassGenerator(object):
                 clone(name, map(capitalizeFirst, key.arg.split(' ')), shallow=True)
         elif stmt.keyword == 'typedef':
             type_stmt = stmt.search_one('type')
+
             # If supertype is derived, make sure a class for it is generated
             if type_stmt.i_typedef:
                 if self.yang_types.defined(type_stmt.i_typedef.arg):
-                    typedef_path = get_package(type_stmt.i_typedef, ctx)
-                    self.generate_class(type_stmt.i_typedef, typedef_path, src,
-                        typedef_path.replace('.', '/') + '/', ns, prefix_name, ctx)
+                    typedef_path = get_package(type_stmt.i_typedef, self.ctx)
+                    self.generate_class(type_stmt.i_typedef, typedef_path,
+                        typedef_path.replace('.', '/') + '/', ns, prefix_name)
+
             # Extract types to use in constructors, etc.
-            super_type = get_types(type_stmt, ctx)[0]
+            super_type = get_types(type_stmt, self.ctx)[0]
             mods = ' extends ' + super_type
             base_type = get_base_type(stmt)
-            primitive = get_types(base_type, ctx)[1]
+            primitive = get_types(base_type, self.ctx)[1]
             constructors = typedef_constructor(stmt)
             spec = ', using a string value'
             arg = 'String ' + stmt.arg + 'Value'
             body = 'super.setValue(' + stmt.arg + '''Value);
             check();'''
+
             # XXX Intentionally overwrite access_methods
             access_methods = set_value(stmt, spec1=spec, argument=arg, body=body)
             """ stmt     -- The statement to set the value for
@@ -754,23 +759,24 @@ class ClassGenerator(object):
         throws ConfMException {
     }
 '''  # FIXME Move to function and add regexp body
-            # print 'typedef ' + stmt.arg
-            # print 'package: ' + package + ', filename: ' + filename
+#            print 'typedef ' + stmt.arg
+#            print 'package: ' + package + ', filename: ' + filename
             self.yang_types.add(stmt.arg)
         write_file(package, filename,
             java_class(filename, package,
                 ['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
                 # TODO Hashtable not used in generated code
+                
                 'This class represents a "' + path + stmt.arg +
                 '" element\n * from the namespace ' + ns,
                 constructors + cloners + names + access_methods + support_methods,
-                source=src,
+                source=self.src,
                 modifiers=mods
             ),
             [stmt],
-            ctx)
+            self.ctx)
 
-    def generate_child(self, sub, package, src, path, ns, prefix_name, ctx):
+    def generate_child(self, sub, package, path, ns, prefix_name):
         """Returns a tuple of two strings representing java methods and fields
         corresponding to access methods to the sub statement. Uses mutual recursion
         with generate_class.
@@ -778,21 +784,18 @@ class ClassGenerator(object):
         sub         -- A data model subtree statement. Its parent most not be None.
         package     -- Name of Java package, also used as path to where files
                        should be written
-        src         -- The .yang file from which the module was parsed, or the
-                       module name and revision if filename is unknown
         path        -- The XPath of stmt in the original module
         ns          -- The XML namespace of the module
         prefix_name -- The module prefix
-        ctx         -- Context used to fetch option parameters
 
         """
         access_methods = ''
         fields = []
         if sub.keyword in ['list', 'container']:
-            self.generate_class(sub, package + '.' + sub.parent.arg, src,
-                path + sub.parent.arg + '/', ns, prefix_name, ctx)
+            self.generate_class(sub, package + '.' + sub.parent.arg,
+                path + sub.parent.arg + '/', ns, prefix_name)
             if sub.keyword == 'list':
-                key, _, confm_keys, _ = extract_keys(sub, ctx)
+                key, _, confm_keys, _ = extract_keys(sub, self.ctx)
                 access_methods += access_methods_comment(sub) + \
                 get_stmt(sub, confm_keys) + \
                 get_stmt(sub, confm_keys, string=True) + \
@@ -815,24 +818,24 @@ class ClassGenerator(object):
             type_stmt = sub.search_one('type')
             if type_stmt.i_typedef:
                 if self.yang_types.defined(type_stmt.i_typedef.arg):
-                    typedef_path = get_package(type_stmt.i_typedef, ctx)
-                    self.generate_class(type_stmt.i_typedef,
-                        typedef_path, src,
-                        typedef_path.replace('.', '/') + '/', ns,
-                        prefix_name, ctx)
-            type_str1, type_str2 = get_types(type_stmt, ctx)
+                    typedef_path = get_package(type_stmt.i_typedef, self.ctx)
+                    self.generate_class(type_stmt.i_typedef, typedef_path,
+                        typedef_path.replace('.', '/') + '/', ns, prefix_name)
+            type_str1, type_str2 = get_types(type_stmt, self.ctx)
             if sub.keyword == 'leaf':
                 key = sub.parent.search_one('key')
                 if key is not None and sub.arg in key.arg.split(' '):
                     temp = statements.Statement(None, None, None, 'key',
                         arg=sub.arg)  # TODO Copy sub instead?
                     optional = False
+                    
                     # Pass temp to avoid multiple keys
                     access_methods += access_methods_comment(temp, optional)
                 else:
                     optional = True
-                    access_methods += access_methods_comment(sub, optional)
                     # TODO ensure that the leaf is truly optional
+                    
+                    access_methods += access_methods_comment(sub, optional)
                 access_methods += get_value(sub, ret_type=type_str1) + \
                     set_leaf_value(sub, prefix=prefix_name, arg_type=type_str1) + \
                     set_leaf_value(sub, prefix='', arg_type='String',
@@ -870,12 +873,12 @@ class ClassGenerator(object):
                     mark(sub, 'create', arg_type='String') + \
                     mark(sub, 'delete', arg_type=type_str1) + \
                     mark(sub, 'delete', arg_type='String')
-    #    elif sub.keyword == 'type':
-    #        print 'type ' + sub.arg + ':'
-    #        for ch in sub.substmts:
-    #            print '  ' + ch.keyword + ' ' + ch.arg
-    #    else:
-    #        pass  # print '(' + sub.keyword + ' ' + sub.arg + ')'
+#            elif sub.keyword == 'type':
+#                print 'type ' + sub.arg + ':'
+#                for ch in sub.substmts:
+#                    print '  ' + ch.keyword + ' ' + ch.arg
+#            else:
+#                pass  # print '(' + sub.keyword + ' ' + sub.arg + ')'
         return access_methods, fields
 
 
@@ -1018,6 +1021,7 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
                 values.append(decl + arg_name + 'Value)')
         for (arg_type, arg_name), value in zip(args, values):
             # TODO http://en.wikipedia.org/wiki/Loop_unswitching
+
             inserts += '''
         // Set key element: ''' + arg_name + '''
         Leaf ''' + arg_name + ' = new Leaf(' + root + '.NAMESPACE, "' + \
@@ -1136,6 +1140,7 @@ def key_names(stmt):
         res = 'return null'
     else:
         res = 'return new String[] {\n'
+
         # Add keys to res, one key per line, indented by 12 spaces
         for key_str in keys:
             for key in key_str.arg.split(' '):
@@ -1337,6 +1342,7 @@ def set_leaf_value(stmt, prefix='', arg_type='', confm_type=''):
     spec1 = spec2 = ''
     MAX_COLS = 80 - len('     * Sets the value for child ' + stmt.keyword + \
         ' "' + stmt.arg + '",.')  # Space left to margin
+
     # Add different comments depending on argument type
     if arg_type == 'String':
         spec1 = ', using a string value'
@@ -1345,9 +1351,11 @@ def set_leaf_value(stmt, prefix='', arg_type='', confm_type=''):
         pass
     else:
         spec1 = ', using the java primitive value'
+
     # Do linebreak if neccessary
     if len(spec1) > MAX_COLS:
         spec1 = ',\n     * ' + spec1[2:]
+
     # Register namespace if prefix is not empty, else use generated set-method
     if prefix:
         if stmt.keyword == 'leaf-list':
@@ -1361,10 +1369,12 @@ def set_leaf_value(stmt, prefix='', arg_type='', confm_type=''):
     else:
         body = 'set' + name + 'Value(new ' + confm_type + '(' + stmt.arg + \
             'Value));'
+
     # Prepare method argument listing
     argument = arg_type + ' ' + stmt.arg + 'Value'
     if arg_type == '':
         # Special case of no argument
+
         argument = ''
         body = 'set' + name + 'Value(new ' + name + '());'
     return set_value(stmt, name, spec1, spec2, argument, body)
@@ -1581,6 +1591,7 @@ def delete_stmt(stmt, args=[], string=False, keys=True):
             spec1 += '\n     * The value is specified as a String'
         for (arg_type, arg_name) in args:
             # TODO http://en.wikipedia.org/wiki/Loop_unswitching
+
             if string:
                 arguments += 'String ' + arg_name + ', '
             else:
