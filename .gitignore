@@ -9,3 +9,4 @@ confm-1.9.3
 *.classpath
 *.project
 *.settings
+*.pydevproject
