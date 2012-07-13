@@ -640,8 +640,6 @@ class ClassGenerator(object):
         """Generates a Java class hierarchy providing an interface to a YANG module
 
         stmt        -- A data model subtree
-        package     -- Name of Java package, also used as path to where files
-                       should be written
         path        -- The XPath of stmt in the original module
         ns          -- The XML namespace of the module
         prefix_name -- The module prefix
@@ -660,8 +658,7 @@ class ClassGenerator(object):
         expanded_i_children = []
         if i_children_exists:
             for ch in stmt.i_children:
-                tmp_access_methods, tmp_fields = self.generate_child(ch,
-                    self.package, path, ns, prefix_name)
+                tmp_access_methods, tmp_fields = self.generate_child(ch, path, ns, prefix_name)
                 access_methods += tmp_access_methods
                 fields.extend(tmp_fields)
 
@@ -682,8 +679,7 @@ class ClassGenerator(object):
         # TODO Avoid quadratic time duplication check (maybe use a set)
         for sub in stmt.substmts:
             if sub not in expanded_i_children:
-                tmp_access_methods, tmp_fields = self.generate_child(sub,
-                    self.package, path, ns, prefix_name)
+                tmp_access_methods, tmp_fields = self.generate_child(sub, path, ns, prefix_name)
                 access_methods += tmp_access_methods
                 fields.extend(tmp_fields)
 
@@ -775,14 +771,12 @@ class ClassGenerator(object):
             [stmt],
             self.ctx)
 
-    def generate_child(self, sub, package, path, ns, prefix_name):
+    def generate_child(self, sub, path, ns, prefix_name):
         """Returns a tuple of two strings representing java methods and fields
         corresponding to access methods to the sub statement. Uses mutual recursion
         with generate_class.
 
         sub         -- A data model subtree statement. Its parent most not be None.
-        package     -- Name of Java package, also used as path to where files
-                       should be written
         path        -- The XPath of stmt in the original module
         ns          -- The XML namespace of the module
         prefix_name -- The module prefix
