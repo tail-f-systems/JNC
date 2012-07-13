@@ -116,7 +116,7 @@ class JPyangPlugin(plugin.PyangPlugin):
             ]
         g = optparser.add_option_group('JPyang output specific options')
         g.add_options(optlist)
-        (self.o, args) = optparser.parse_args()
+        self.o = optparser.parse_args()[0]
 
     def setup_ctx(self, ctx):
         """Called after ctx has been set up in main module. Checks if the
@@ -148,7 +148,7 @@ class JPyangPlugin(plugin.PyangPlugin):
         fd      -- File descriptor ignored.
 
         """
-        for (epos, etag, eargs) in ctx.errors:
+        for (epos, etag) in ctx.errors[:1]:
             if (error.is_error(error.err_level(etag)) and
                 etag in ('MODULE_NOT_FOUND', 'MODULE_NOT_FOUND_REV')):
                 self.fatal("%s contains errors" % epos.top.arg)
@@ -301,9 +301,9 @@ def pairwise(iterable):
     """Returns an iterator that includes the next item also"""
     iterator = iter(iterable)
     item = iterator.next()  # throws StopIteration if empty.
-    for next in iterator:
-        yield (item, next)
-        item = next
+    for next_item in iterator:
+        yield (item, next_item)
+        item = next_item
     yield (item, None)
 
 
@@ -319,9 +319,9 @@ def camelize(string):
     """
     camelized_str = ''
     iterator = pairwise(string)
-    for character, next in iterator:
-        if next and character in '-.':
-            camelized_str += capitalizeFirst(next)
+    for character, next_character in iterator:
+        if next_character and character in '-.':
+            camelized_str += capitalizeFirst(next_character)
             iterator.next()
         else:
             camelized_str += character
@@ -922,7 +922,7 @@ def generate_javadoc(stmts, java_files, ctx):
     """
     hierarchy = []
     for stmt in stmts:
-        (filename, name) = extract_names(stmt.arg)
+        filename = extract_names(stmt.arg)[0]
         if filename in java_files:
             java_files.remove(filename)
             hierarchy.append(filename)
