@@ -1,0 +1,4 @@
+<interface xmlns="http://test.com/ns/naming-test/1.0">
+  <abstract-default>true</abstract-default>
+  <Capital>"Sthlm"</Capital>
+</interface>

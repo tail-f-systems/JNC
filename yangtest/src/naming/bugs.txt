@@ -1,0 +1,8 @@
+* Dashes not removed from java class names
+* Generated type references are not normalized
+* No type classes are generated
+* Converted class names are converted also in class comments (would be nice if
+Jinterface was called interface when referring to the yang module)
+* Module name is normalized in comments at beginning of file, but prefix is not.
+Should be the other way around.
+* Children names are normalized (perhaps this is ok?)

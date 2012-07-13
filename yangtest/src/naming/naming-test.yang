@@ -1,0 +1,34 @@
+module naming-test {
+
+  namespace "http://test.com/ns/naming-test/1.0";
+  prefix naming-test;
+
+  organization
+   "Tail-f Systems AB";
+
+  contact
+   "Emil Wall <mailto:emil@tail-f.com>";
+
+  description 
+   "This module is for testing that dashes and java reserved words are handled
+    correctly by JPyang. It also tests some inheritage/derived types 
+    properties.";
+    
+  typedef camelString {
+    type string;
+  }
+
+  typedef city-string {
+    type camelString;
+  }
+
+  container interface {
+    leaf abstract-default {
+      type boolean;
+    }
+    leaf Capital {
+      type city-string;
+    }
+  }
+
+}
