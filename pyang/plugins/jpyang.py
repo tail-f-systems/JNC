@@ -33,9 +33,8 @@ from __future__ import with_statement  # Not required from Python 2.6 and
 # ... onwards, but kept for the sake of backwards compatibility
 
 import optparse  # TODO Deprecated in python 2.7, should use argparse instead
-# ... See http://stackoverflow.com/questions/3217673/why-use-argparse-rather-
-# ... than-optparse and http://docs.python.org/dev/library
-# ... /argparse.html#upgrading-optparse-code
+# ... See http://stackoverflow.com/questions/3217673/why-use-argparse-rather-than-optparse
+# ... and http://docs.python.org/dev/library/argparse.html#upgrading-optparse-code
 import os
 import errno
 import sys
@@ -577,7 +576,7 @@ class YangType(object):
             'uint8', 'uint16', 'uint32', 'uint64', 'binary', 'bits', 'boolean',
             'decimal64', 'enumeration', 'identityref', 'instance-identifier',
             'leafref', 'string', 'union']
-        """List of built in types and types represented by a generated class"""
+        """List of types represented by a confm.xs or generated class"""
 
     def defined(self, yang_type):
         """Returns true if yang_type is defined, else false"""
@@ -664,7 +663,7 @@ class ClassGenerator(object):
         if i_children_exists:
             for ch in stmt.i_children:
                 tmp_access_methods, tmp_fields = self.generate_child(ch,
-                    package, self.src, path, ns, prefix_name, self.ctx)
+                    package, path, ns, prefix_name)
                 access_methods += tmp_access_methods
                 fields.extend(tmp_fields)
 
@@ -686,7 +685,7 @@ class ClassGenerator(object):
         for sub in stmt.substmts:
             if sub not in expanded_i_children:
                 tmp_access_methods, tmp_fields = self.generate_child(sub, package,
-                    self.src, path, ns, prefix_name, self.ctx)
+                    path, ns, prefix_name)
                 access_methods += tmp_access_methods
                 fields.extend(tmp_fields)
 
