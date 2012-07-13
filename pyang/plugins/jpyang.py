@@ -59,13 +59,6 @@ java_reserved_words = {'abstract', 'assert', 'boolean', 'break', 'byte',
 """A set of identifiers that are reserved in Java"""
 
 
-defined_types = ['empty', 'int8', 'int16', 'int32', 'int64', 'uint8', 'uint16',
-    'uint32', 'uint64', 'binary', 'bits', 'boolean', 'decimal64',
-    'enumeration', 'identityref', 'instance-identifier', 'leafref', 'string', 
-    'union']
-"""A list of types that are built in or for which a generated class exists"""
-
-
 outputted_warnings = []
 """A list of warning message IDs that are used to avoid duplicate warnings"""
 
@@ -135,7 +128,7 @@ class JPyangPlugin(plugin.PyangPlugin):
 
         """
         if ctx.opts.jpyang_help:
-            print_help()
+            self.print_help()
             sys.exit(0)
         if ctx.opts.format in ['java', 'jpyang'] and not ctx.opts.directory:
             ctx.opts.directory = 'gen'
@@ -188,7 +181,8 @@ class JPyangPlugin(plugin.PyangPlugin):
                 module = make_valid_identifiers(module)
                 src = 'module "' + module.arg + '", revision: "' + \
                     util.get_latest_revision(module) + '".'
-                generate_classes(module, directory, src, ctx)
+                generator = ClassGenerator(module, directory, src, ctx)
+                generator.generate_classes()
                 if ctx.opts.debug or ctx.opts.verbose:
                     print 'Java classes generation COMPLETE.'
             else:
@@ -218,10 +212,9 @@ class JPyangPlugin(plugin.PyangPlugin):
         """Raise an EmitError"""
         raise error.EmitError(self, exitCode)
 
-
-def print_help():
-    """Prints a description of what JPyang is and how to use it"""
-    print '''
+    def print_help(self):
+        """Prints a description of what JPyang is and how to use it"""
+        print '''
 The JPyang/Java output format can be used to generate a Java class hierarchy
 from a single yang data model. Each module, container, list, etc. is
 represented by a .java file which can be used to retrieve and/or edit
@@ -572,155 +565,188 @@ def schema_node(stmt, tagpath, ns, ctx):
     return res
 
 
-def generate_classes(module, package, src, ctx):
-    """Generates a Java class hierarchy providing an interface to a YANG module
+class YangType(object):
+    """Provides an interface to maintain a list of defined yang types"""
 
-    module    -- A data model tree, parsed from a YANG model
-    package   -- Name of Java package, also used as path to where files should
-                 be written
-    src       -- The .yang file from which the module was parsed, or the module
-                 name and revision if filename is unknown
-    ctx       -- Context used to fetch option parameters
+    def __init__(self):
+        self.defined_types = ['empty', 'int8', 'int16', 'int32', 'int64',
+            'uint8', 'uint16', 'uint32', 'uint64', 'binary', 'bits', 'boolean',
+            'decimal64', 'enumeration', 'identityref', 'instance-identifier',
+            'leafref', 'string', 'union']
+        """List of built in types and types represented by a generated class"""
 
-    """
-    if module.keyword == 'module':
-        ns_arg = module.search_one('namespace').arg
-        prefix = module.search_one('prefix')
-    elif module.keyword == 'submodule':
-        parent_module = module.search_one('belongs-to')
-        prefix = parent_module.search_one('prefix')
-        ns_arg = '<unknown/prefix: ' + prefix.arg + '>'
-    (filename, name) = extract_names(prefix.arg)
-    for stmt in module.substmts:
-        if stmt.keyword in ['container', 'list']:  # TODO other top-level stmts
-            generate_class(stmt, package, src, '', ns_arg, name,
-                top_level=True, ctx=ctx)
-    if ctx.opts.verbose:
-        print 'Generating Java class "' + filename + '"...'
-    write_file(package, filename,
-        java_class(filename, package,
-            ['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
-            'The root class for namespace ' + ns_arg + \
-            ' (accessible from \n * ' + name + '.NAMESPACE) with prefix "' + \
-            prefix.arg + '" (' + name + '.PREFIX).',
-            class_fields(ns_arg, prefix.arg) +
-            enable(name) + register_schema(name),
-            source=src
-        ),
-        [module],
-        ctx)
+    def defined(self, yang_type):
+        """Returns true if yang_type is defined, else false"""
+        return (yang_type in self.defined_types)
+
+    def add(self, yang_type):
+        """Gives yang_type "defined" status in this instance of YangType"""
+        self.defined_types.append(yang_type)
 
 
-def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
-        top_level=False):
-    """Generates a Java class hierarchy providing an interface to a YANG module
+class ClassGenerator(object):
+    """Used to generate java classes from a yang module"""
 
-    stmt        -- A data model subtree
-    package     -- Name of Java package, also used as path to where files
-                   should be written
-    src         -- The .yang file from which the module was parsed, or the
-                   module name and revision if filename is unknown
-    path        -- The XPath of stmt in the original module
-    ns          -- The XML namespace of the module
-    prefix_name -- The module prefix
-    top_level   -- Whether or not this is a top-level statement
-    ctx         -- Context used to fetch option parameters
+    def __init__(self, module, package, src, ctx):
+        """Constructor.
 
-    """
-    (filename, name) = extract_names(stmt.arg)
-    access_methods = constructors = cloners = support_methods = names = ''
-    fields = []
-    mods = ' extends Container'
-    i_children_exists = (hasattr(stmt, 'i_children') 
-        and stmt.i_children != None 
-        and stmt.i_children != [])
-    # TODO preserve correct order in generated class
-    expanded_i_children = []
-    if i_children_exists:
-        for ch in stmt.i_children:
-            tmp_access_methods, tmp_fields = generate_child(ch,
-                package, src, path, ns, prefix_name, ctx)
-            access_methods += tmp_access_methods
-            fields.extend(tmp_fields)
-        def expand(children):
-            res = []
-            res.extend(children)
-            for ch in children:
-                sub_children = []
-                try:
-                    sub_children.extend(ch.i_children)
-                except AttributeError:
-                    pass
-                sub_children.extend(ch.substmts)
-                res.extend(expand(sub_children))
-            return res
-        expanded_i_children = expand(stmt.i_children)
-    for sub in stmt.substmts:
-        # TODO Avoid quadratic time duplication check (maybe use a set)
-        if sub not in expanded_i_children:
-            tmp_access_methods, tmp_fields = generate_child(sub, package,
-                src, path, ns, prefix_name, ctx)
-            access_methods += tmp_access_methods
-            fields.extend(tmp_fields)
-    if ctx.opts.verbose:
-        print 'Generating Java class "' + filename + '"...'
-    if filter(is_container, stmt.substmts):  # TODO Verify correctness of cond.
-        support_methods = support_add(fields)
-    if stmt.keyword != 'typedef':
-        names = key_names(stmt) + children_names(stmt)
-    if stmt.keyword == 'container':
-        constructors = constructor(stmt, ctx, set_prefix=top_level,
-            root=prefix_name)
-        cloners = clone(name, shallow=False) + clone(name, shallow=True)
-    elif stmt.keyword == 'list':
-        key, only_strings, confm_keys, primitive_keys = extract_keys(stmt, ctx)
-        constructors = constructor(stmt, ctx, root=prefix_name,
-            set_prefix=top_level, throws="\n        throws INMException") + \
-        constructor(stmt, ctx, root=prefix_name, set_prefix=top_level,
-            mode=1, args=confm_keys, throws='''
-        throws INMException''') + \
-        constructor(stmt, ctx, root=prefix_name, set_prefix=top_level,
-            mode=2, args=primitive_keys, throws='''
-        throws INMException''')
-        if not only_strings:
-            constructors += constructor(stmt, ctx, root=prefix_name,
-                set_prefix=top_level, mode=3, args=primitive_keys, throws='''
-        throws INMException''')
-        cloners = clone(name, map(capitalizeFirst, key.arg.split(' ')),
-            shallow=False) + \
-            clone(name, map(capitalizeFirst, key.arg.split(' ')), shallow=True)
-    elif stmt.keyword == 'typedef':
-        type_stmt = stmt.search_one('type')
-        # If supertype is derived, make sure a class for it is generated
-        if type_stmt.i_typedef:
-            if type_stmt.i_typedef.arg not in defined_types:
-                typedef_path = get_package(type_stmt.i_typedef, ctx)
-                generate_class(type_stmt.i_typedef, typedef_path, src,
-                    typedef_path.replace('.', '/') + '/', ns, prefix_name, ctx)
-        # Extract types to use in constructors, etc.
-        super_type = get_types(type_stmt, ctx)[0]
-        mods = ' extends ' + super_type
-        base_type = get_base_type(stmt)
-        primitive = get_types(base_type, ctx)[1]
-        constructors = typedef_constructor(stmt)
-        spec = ', using a string value'
-        arg = 'String ' + stmt.arg + 'Value'
-        body = 'super.setValue(' + stmt.arg + '''Value);
-        check();'''
-        # XXX Intentionally overwrite access_methods
-        access_methods = set_value(stmt, spec1=spec, argument=arg, body=body)
-        """ stmt     -- The statement to set the value for
-            spec1    -- Text to insert before parameter listing
-            spec2    -- parameter description
-            argument -- Full argument listing of method
-            body     -- The code to be put in the method body"""
-        if primitive != 'String':
-            constructors += typedef_constructor(stmt, primitive)
-            spec = ', using ' + primitive + ' value'
-            arg = primitive + ' ' + stmt.arg + 'Value'
-            access_methods += set_value(stmt, spec1=spec, argument=arg, 
-                body=body)
-        access_methods += '''
+        module    -- A data model tree, parsed from a YANG model
+        package   -- Name of Java package, also used as path to where files
+                     should be written
+        src       -- Filename of parsed yang module, or the module name and
+                     revision if filename is unknown
+        ctx       -- Context used to fetch option parameters
+
+        """
+        self.module = module
+        self.package = package
+        self.src = src
+        self.ctx = ctx
+        self.yang_types = YangType()
+
+    def generate_classes(self):
+        """Generates a Java class hierarchy allowing for netconf communication
+        using libraries such as confm and inm.
+
+        """
+        if self.module.keyword == 'module':
+            ns_arg = self.module.search_one('namespace').arg
+            prefix = self.module.search_one('prefix')
+        elif self.module.keyword == 'submodule':
+            parent_module = self.module.search_one('belongs-to')
+            prefix = parent_module.search_one('prefix')
+            ns_arg = '<unknown/prefix: ' + prefix.arg + '>'
+        (filename, name) = extract_names(prefix.arg)
+        for stmt in self.module.substmts:
+            if stmt.keyword in ['container', 'list']:  # TODO other top-level stmts
+                self.generate_class(stmt, self.package, self.src, '', ns_arg, name,
+                    top_level=True, ctx=self.ctx)
+        if self.ctx.opts.verbose:
+            print 'Generating Java class "' + filename + '"...'
+        write_file(self.package, filename,
+            java_class(filename, self.package,
+                ['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
+                'The root class for namespace ' + ns_arg + \
+                ' (accessible from \n * ' + name + '.NAMESPACE) with prefix "' + \
+                prefix.arg + '" (' + name + '.PREFIX).',
+                class_fields(ns_arg, prefix.arg) +
+                enable(name) + register_schema(name),
+                source=self.src
+            ),
+            [self.module],
+            self.ctx)
+
+    def generate_class(self, stmt, package, src, path, ns, prefix_name, ctx,
+            top_level=False):
+        """Generates a Java class hierarchy providing an interface to a YANG module
+
+        stmt        -- A data model subtree
+        package     -- Name of Java package, also used as path to where files
+                       should be written
+        src         -- The .yang file from which the module was parsed, or the
+                       module name and revision if filename is unknown
+        path        -- The XPath of stmt in the original module
+        ns          -- The XML namespace of the module
+        prefix_name -- The module prefix
+        top_level   -- Whether or not this is a top-level statement
+        ctx         -- Context used to fetch option parameters
+
+        """
+        (filename, name) = extract_names(stmt.arg)
+        access_methods = constructors = cloners = support_methods = names = ''
+        fields = []
+        mods = ' extends Container'
+        i_children_exists = (hasattr(stmt, 'i_children')
+            and stmt.i_children != None
+            and stmt.i_children != [])
+        # TODO preserve correct order in generated class
+        expanded_i_children = []
+        if i_children_exists:
+            for ch in stmt.i_children:
+                tmp_access_methods, tmp_fields = self.generate_child(ch,
+                    package, src, path, ns, prefix_name, ctx)
+                access_methods += tmp_access_methods
+                fields.extend(tmp_fields)
+
+            def expand(children):
+                res = []
+                res.extend(children)
+                for ch in children:
+                    sub_children = []
+                    try:
+                        sub_children.extend(ch.i_children)
+                    except AttributeError:
+                        pass
+                    sub_children.extend(ch.substmts)
+                    res.extend(expand(sub_children))
+                return res
+            expanded_i_children = expand(stmt.i_children)
+        for sub in stmt.substmts:
+            # TODO Avoid quadratic time duplication check (maybe use a set)
+            if sub not in expanded_i_children:
+                tmp_access_methods, tmp_fields = self.generate_child(sub, package,
+                    src, path, ns, prefix_name, ctx)
+                access_methods += tmp_access_methods
+                fields.extend(tmp_fields)
+        if ctx.opts.verbose:
+            print 'Generating Java class "' + filename + '"...'
+        if filter(is_container, stmt.substmts):  # TODO Verify correctness of cond.
+            support_methods = support_add(fields)
+        if stmt.keyword != 'typedef':
+            names = key_names(stmt) + children_names(stmt)
+        if stmt.keyword == 'container':
+            constructors = constructor(stmt, ctx, set_prefix=top_level,
+                root=prefix_name)
+            cloners = clone(name, shallow=False) + clone(name, shallow=True)
+        elif stmt.keyword == 'list':
+            key, only_strings, confm_keys, primitive_keys = extract_keys(stmt, ctx)
+            constructors = constructor(stmt, ctx, root=prefix_name,
+                set_prefix=top_level, throws="\n        throws INMException") + \
+            constructor(stmt, ctx, root=prefix_name, set_prefix=top_level,
+                mode=1, args=confm_keys, throws='''
+            throws INMException''') + \
+            constructor(stmt, ctx, root=prefix_name, set_prefix=top_level,
+                mode=2, args=primitive_keys, throws='''
+            throws INMException''')
+            if not only_strings:
+                constructors += constructor(stmt, ctx, root=prefix_name,
+                    set_prefix=top_level, mode=3, args=primitive_keys, throws='''
+            throws INMException''')
+            cloners = clone(name, map(capitalizeFirst, key.arg.split(' ')),
+                shallow=False) + \
+                clone(name, map(capitalizeFirst, key.arg.split(' ')), shallow=True)
+        elif stmt.keyword == 'typedef':
+            type_stmt = stmt.search_one('type')
+            # If supertype is derived, make sure a class for it is generated
+            if type_stmt.i_typedef:
+                if self.yang_types.defined(type_stmt.i_typedef.arg):
+                    typedef_path = get_package(type_stmt.i_typedef, ctx)
+                    self.generate_class(type_stmt.i_typedef, typedef_path, src,
+                        typedef_path.replace('.', '/') + '/', ns, prefix_name, ctx)
+            # Extract types to use in constructors, etc.
+            super_type = get_types(type_stmt, ctx)[0]
+            mods = ' extends ' + super_type
+            base_type = get_base_type(stmt)
+            primitive = get_types(base_type, ctx)[1]
+            constructors = typedef_constructor(stmt)
+            spec = ', using a string value'
+            arg = 'String ' + stmt.arg + 'Value'
+            body = 'super.setValue(' + stmt.arg + '''Value);
+            check();'''
+            # XXX Intentionally overwrite access_methods
+            access_methods = set_value(stmt, spec1=spec, argument=arg, body=body)
+            """ stmt     -- The statement to set the value for
+                spec1    -- Text to insert before parameter listing
+                spec2    -- parameter description
+                argument -- Full argument listing of method
+                body     -- The code to be put in the method body"""
+            if primitive != 'String':
+                constructors += typedef_constructor(stmt, primitive)
+                spec = ', using ' + primitive + ' value'
+                arg = primitive + ' ' + stmt.arg + 'Value'
+                access_methods += set_value(stmt, spec1=spec, argument=arg,
+                    body=body)
+            access_methods += '''
     /**
      * Checks all restrictions (if any).
      */
@@ -728,130 +754,129 @@ def generate_class(stmt, package, src, path, ns, prefix_name, ctx,
         throws ConfMException {
     }
 '''  # FIXME Move to function and add regexp body
-        # print 'typedef ' + stmt.arg
-        # print 'package: ' + package + ', filename: ' + filename
-        defined_types.append(stmt.arg)
-    write_file(package, filename,
-        java_class(filename, package,
-            ['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
-            # TODO Hashtable not used in generated code
-            'This class represents a "' + path + stmt.arg +
-            '" element\n * from the namespace ' + ns,
-            constructors + cloners + names + access_methods + support_methods,
-            source=src,
-            modifiers=mods
-        ),
-        [stmt],
-        ctx)
+            # print 'typedef ' + stmt.arg
+            # print 'package: ' + package + ', filename: ' + filename
+            self.yang_types.add(stmt.arg)
+        write_file(package, filename,
+            java_class(filename, package,
+                ['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
+                # TODO Hashtable not used in generated code
+                'This class represents a "' + path + stmt.arg +
+                '" element\n * from the namespace ' + ns,
+                constructors + cloners + names + access_methods + support_methods,
+                source=src,
+                modifiers=mods
+            ),
+            [stmt],
+            ctx)
 
+    def generate_child(self, sub, package, src, path, ns, prefix_name, ctx):
+        """Returns a tuple of two strings representing java methods and fields
+        corresponding to access methods to the sub statement. Uses mutual recursion
+        with generate_class.
 
-def generate_child(sub, package, src, path, ns, prefix_name, ctx):
-    """Returns a tuple of two strings representing java methods and fields
-    corresponding to access methods to the sub statement. Uses mutual recursion
-    with generate_class.
+        sub         -- A data model subtree statement. Its parent most not be None.
+        package     -- Name of Java package, also used as path to where files
+                       should be written
+        src         -- The .yang file from which the module was parsed, or the
+                       module name and revision if filename is unknown
+        path        -- The XPath of stmt in the original module
+        ns          -- The XML namespace of the module
+        prefix_name -- The module prefix
+        ctx         -- Context used to fetch option parameters
 
-    sub         -- A data model subtree statement. Its parent most not be None.
-    package     -- Name of Java package, also used as path to where files
-                   should be written
-    src         -- The .yang file from which the module was parsed, or the
-                   module name and revision if filename is unknown
-    path        -- The XPath of stmt in the original module
-    ns          -- The XML namespace of the module
-    prefix_name -- The module prefix
-    ctx         -- Context used to fetch option parameters
-
-    """
-    access_methods = ''
-    fields = []
-    if sub.keyword in ['list', 'container']:
-        generate_class(sub, package + '.' + sub.parent.arg, src,
-            path + sub.parent.arg + '/', ns, prefix_name, ctx)
-        if sub.keyword == 'list':
-            key, _, confm_keys, _ = extract_keys(sub, ctx)
-            access_methods += access_methods_comment(sub) + \
-            get_stmt(sub, confm_keys) + \
-            get_stmt(sub, confm_keys, string=True) + \
-            child_iterator(sub) + \
-            add_stmt(sub, args=[(sub.arg, sub.arg)]) + \
-            add_stmt(sub, args=confm_keys) + \
-            add_stmt(sub, args=confm_keys, string=True) + \
-            add_stmt(sub, args=[]) + \
-            delete_stmt(sub, args=confm_keys) + \
-            delete_stmt(sub, args=confm_keys, string=True)
-        elif sub.keyword == 'container':
-            fields.append(sub.arg)
-            access_methods += access_methods_comment(sub) + \
-            child_field(sub) + \
-            add_stmt(sub, args=[(sub.parent.arg + '.' + sub.arg, sub.arg)],
-                field=True) + \
-            add_stmt(sub, args=[], field=True) + \
-            delete_stmt(sub)
-    elif sub.keyword in ['leaf', 'leaf-list']:
-        type_stmt = sub.search_one('type')
-        if type_stmt.i_typedef:
-            if type_stmt.i_typedef.arg not in defined_types:
-                typedef_path = get_package(type_stmt.i_typedef, ctx)
-                generate_class(type_stmt.i_typedef, 
-                    typedef_path, src,
-                    typedef_path.replace('.', '/') + '/', ns,
-                    prefix_name, ctx)
-        type_str1, type_str2 = get_types(type_stmt, ctx)
-        if sub.keyword == 'leaf':
-            key = sub.parent.search_one('key')
-            if key is not None and sub.arg in key.arg.split(' '):
-                temp = statements.Statement(None, None, None, 'key',
-                    arg=sub.arg) #TODO Copy sub instead?
-                optional = False
-                # Pass temp to avoid multiple keys
-                access_methods += access_methods_comment(temp, optional)
-            else:
-                optional = True
-                access_methods += access_methods_comment(sub, optional)
-                # TODO ensure that the leaf is truly optional
-            access_methods += get_value(sub, ret_type=type_str1) + \
-                set_leaf_value(sub, prefix=prefix_name, arg_type=type_str1) + \
-                set_leaf_value(sub, prefix='', arg_type='String',
-                    confm_type=type_str1)
-            if type_str2 != 'String':
-                access_methods += set_leaf_value(sub, prefix='',
-                    arg_type=type_str2, confm_type=type_str1)
-            if optional:
-                access_methods += unset_value(sub)
-            access_methods += add_value(sub, prefix_name)
-            if optional:
-                access_methods += mark(sub, 'replace') + \
-                mark(sub, 'merge') + \
-                mark(sub, 'create') + \
-                mark(sub, 'delete')
-        elif sub.keyword == 'leaf-list':
-            access_methods += access_methods_comment(sub, optional=False) + \
+        """
+        access_methods = ''
+        fields = []
+        if sub.keyword in ['list', 'container']:
+            self.generate_class(sub, package + '.' + sub.parent.arg, src,
+                path + sub.parent.arg + '/', ns, prefix_name, ctx)
+            if sub.keyword == 'list':
+                key, _, confm_keys, _ = extract_keys(sub, ctx)
+                access_methods += access_methods_comment(sub) + \
+                get_stmt(sub, confm_keys) + \
+                get_stmt(sub, confm_keys, string=True) + \
                 child_iterator(sub) + \
-                set_leaf_value(sub, prefix=prefix_name, arg_type=type_str1) + \
-                set_leaf_value(sub, prefix='', arg_type='String',
-                    confm_type=type_str1)
-            if type_str2 != 'String':
-                access_methods += set_leaf_value(sub, prefix='',
-                    arg_type=type_str2, confm_type=type_str1)
-            access_methods += delete_stmt(sub,
-                    args=[(type_str1, sub.arg + 'Value')], keys=False) + \
-                delete_stmt(sub, args=[(type_str1, sub.arg + 'Value')],
-                    string=True, keys=False) + \
-                add_value(sub, prefix_name) + \
-                mark(sub, 'replace', arg_type=type_str1) + \
-                mark(sub, 'replace', arg_type='String') + \
-                mark(sub, 'merge', arg_type=type_str1) + \
-                mark(sub, 'merge', arg_type='String') + \
-                mark(sub, 'create', arg_type=type_str1) + \
-                mark(sub, 'create', arg_type='String') + \
-                mark(sub, 'delete', arg_type=type_str1) + \
-                mark(sub, 'delete', arg_type='String')
-#    elif sub.keyword == 'type':
-#        print 'type ' + sub.arg + ':'
-#        for ch in sub.substmts:
-#            print '  ' + ch.keyword + ' ' + ch.arg
-#    else:
-#        pass  # print '(' + sub.keyword + ' ' + sub.arg + ')'
-    return access_methods, fields
+                add_stmt(sub, args=[(sub.arg, sub.arg)]) + \
+                add_stmt(sub, args=confm_keys) + \
+                add_stmt(sub, args=confm_keys, string=True) + \
+                add_stmt(sub, args=[]) + \
+                delete_stmt(sub, args=confm_keys) + \
+                delete_stmt(sub, args=confm_keys, string=True)
+            elif sub.keyword == 'container':
+                fields.append(sub.arg)
+                access_methods += access_methods_comment(sub) + \
+                child_field(sub) + \
+                add_stmt(sub, args=[(sub.parent.arg + '.' + sub.arg, sub.arg)],
+                    field=True) + \
+                add_stmt(sub, args=[], field=True) + \
+                delete_stmt(sub)
+        elif sub.keyword in ['leaf', 'leaf-list']:
+            type_stmt = sub.search_one('type')
+            if type_stmt.i_typedef:
+                if self.yang_types.defined(type_stmt.i_typedef.arg):
+                    typedef_path = get_package(type_stmt.i_typedef, ctx)
+                    self.generate_class(type_stmt.i_typedef,
+                        typedef_path, src,
+                        typedef_path.replace('.', '/') + '/', ns,
+                        prefix_name, ctx)
+            type_str1, type_str2 = get_types(type_stmt, ctx)
+            if sub.keyword == 'leaf':
+                key = sub.parent.search_one('key')
+                if key is not None and sub.arg in key.arg.split(' '):
+                    temp = statements.Statement(None, None, None, 'key',
+                        arg=sub.arg)  # TODO Copy sub instead?
+                    optional = False
+                    # Pass temp to avoid multiple keys
+                    access_methods += access_methods_comment(temp, optional)
+                else:
+                    optional = True
+                    access_methods += access_methods_comment(sub, optional)
+                    # TODO ensure that the leaf is truly optional
+                access_methods += get_value(sub, ret_type=type_str1) + \
+                    set_leaf_value(sub, prefix=prefix_name, arg_type=type_str1) + \
+                    set_leaf_value(sub, prefix='', arg_type='String',
+                        confm_type=type_str1)
+                if type_str2 != 'String':
+                    access_methods += set_leaf_value(sub, prefix='',
+                        arg_type=type_str2, confm_type=type_str1)
+                if optional:
+                    access_methods += unset_value(sub)
+                access_methods += add_value(sub, prefix_name)
+                if optional:
+                    access_methods += mark(sub, 'replace') + \
+                    mark(sub, 'merge') + \
+                    mark(sub, 'create') + \
+                    mark(sub, 'delete')
+            elif sub.keyword == 'leaf-list':
+                access_methods += access_methods_comment(sub, optional=False) + \
+                    child_iterator(sub) + \
+                    set_leaf_value(sub, prefix=prefix_name, arg_type=type_str1) + \
+                    set_leaf_value(sub, prefix='', arg_type='String',
+                        confm_type=type_str1)
+                if type_str2 != 'String':
+                    access_methods += set_leaf_value(sub, prefix='',
+                        arg_type=type_str2, confm_type=type_str1)
+                access_methods += delete_stmt(sub,
+                        args=[(type_str1, sub.arg + 'Value')], keys=False) + \
+                    delete_stmt(sub, args=[(type_str1, sub.arg + 'Value')],
+                        string=True, keys=False) + \
+                    add_value(sub, prefix_name) + \
+                    mark(sub, 'replace', arg_type=type_str1) + \
+                    mark(sub, 'replace', arg_type='String') + \
+                    mark(sub, 'merge', arg_type=type_str1) + \
+                    mark(sub, 'merge', arg_type='String') + \
+                    mark(sub, 'create', arg_type=type_str1) + \
+                    mark(sub, 'create', arg_type='String') + \
+                    mark(sub, 'delete', arg_type=type_str1) + \
+                    mark(sub, 'delete', arg_type='String')
+    #    elif sub.keyword == 'type':
+    #        print 'type ' + sub.arg + ':'
+    #        for ch in sub.substmts:
+    #            print '  ' + ch.keyword + ' ' + ch.arg
+    #    else:
+    #        pass  # print '(' + sub.keyword + ' ' + sub.arg + ')'
+        return access_methods, fields
 
 
 def generate_package_info(d, stmt, ctx):
@@ -1031,7 +1056,7 @@ def typedef_constructor(stmt, arg='String'):
      * Constructor for ''' + stmt.arg + ' object from a ' + arg.lower() + '''.
      * @param value Value to construct the ''' + stmt.arg + ''' from.
      */
-    public ''' + stmt.arg + '(' + arg + ''' value) 
+    public ''' + stmt.arg + '(' + arg + ''' value)
         throws ConfMException {
         super(value);
         check();
