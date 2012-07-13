@@ -898,19 +898,31 @@ class PackageInfoGenerator(object):
     """Used to generate package-info.java files, with meaningful content"""
 
     def __init__(self, directory, stmt, ctx):
+        """Initializes a generator with package directory path, top level
+        statement and context for options.
+        
+        stmt      -- Statement representing any YANG module subtree
+        directory -- The package directory as a string
+        ctx       -- Context for options
+        
+        """
         self.d = directory
         self.stmt = stmt
         self.ctx = ctx
 
     def generate_package_info(self):
+        """Main generator method: generates package-info content and writes it
+        to a file
+        
+        """
         is_java_file = lambda s: s.endswith('.java')
         is_not_java_file = lambda s: not is_java_file(s)
         directory_listing = os.listdir(self.d)
         java_files = filter(is_java_file, directory_listing)
         dirs = filter(is_not_java_file, directory_listing)
-        class_hierarchy = generate_javadoc(self.stmt.substmts, java_files, self.ctx)
-        write_file(self.d, 'package-info.java', gen_package_info(class_hierarchy,
-            self.d.replace('/', '.'), self.ctx), self.stmt, self.ctx)
+        class_hierarchy = self.generate_javadoc(self.stmt.substmts, java_files)
+        write_file(self.d, 'package-info.java', self.gen_package_info(class_hierarchy,
+            self.d.replace('/', '.')), self.stmt, self.ctx)
         for directory in dirs:
             for sub in self.stmt.substmts:
                 # XXX refactor
@@ -923,28 +935,105 @@ class PackageInfoGenerator(object):
                     self.stmt = sub
                     self.generate_package_info()
                     self.d = old_d
-                    self.stmt = sub
+                    self.stmt = old_stmt
 
+    def generate_javadoc(self, stmts, java_files):
+        """Generates a list of class filenames and lists of their subclasses'
+        filenames, positioned immediately after each filename if any.
+    
+        stmts      -- list of statements representing a YANG module tree node
+        java_files -- list of Java class filenames that has been generated
+    
+        """
+        hierarchy = []
+        for stmt in stmts:
+            filename = extract_names(stmt.arg)[0]
+            if filename in java_files:
+                java_files.remove(filename)
+                hierarchy.append(filename)
+                children = self.generate_javadoc(stmt.substmts, java_files)
+                if children:
+                    hierarchy.append(children)
+        return hierarchy
 
-def generate_javadoc(stmts, java_files, ctx):
-    """Generates a list of class filenames and lists of their subclasses'
-    filenames, positioned immediately after each filename if any.
+    def parse_hierarchy(self, hierarchy):
+        """Returns html for a list of javadoc pages corresponding to the .java
+        files in the hierarchy list.
+    
+        hierarchy -- a tree of .java files represented as a list, for example:
+            ['Foo.java', ['Bar.java', ['Baz.java'], 'Qu.java']] would represent the
+            hierarchy structure:
+            Foo
+            |   Bar
+            |   |   Baz
+            |   Qu
+    
+            That is, Baz is a child of Bar in the data model tree, and Bar and Qu
+            are children of the top level element Foo.
+    
+        """
+        res = ''
+        for entry in hierarchy:
+            if is_not_list(entry):
+                body = '    <a href="' + entry[:-5] + '.html">' + entry[:-5] + '</a>'
+                res += html_list(body, 1, tag='li')
+            else:
+                body = self.parse_hierarchy(entry)
+                res += html_list(body, 1)
+            if body[-1:] != '\n':
+                res += '\n'
+        return res
 
-    stmts      -- list of statements representing a YANG module tree node
-    java_files -- list of Java class filenames that has been generated
-    ctx        -- Context, ignored
-
-    """
-    hierarchy = []
-    for stmt in stmts:
-        filename = extract_names(stmt.arg)[0]
-        if filename in java_files:
-            java_files.remove(filename)
-            hierarchy.append(filename)
-            children = generate_javadoc(stmt.substmts, java_files, ctx)
-            if children:
-                hierarchy.append(children)
-    return hierarchy
+    def gen_package_info(self, class_hierarchy, package):
+        """Writes a package-info.java file to the package directory with a high
+        level description of the package functionality and requirements.
+    
+        class_hierarchy -- A tree represented as a list as in parse_hierarchy
+        ctx             -- Context used only for debugging purposes
+    
+        """
+        if self.ctx.opts.verbose:
+            print 'Generating package description package-info.java...'
+        src = source = ''
+        decapitalize = lambda s: s[:1].lower() + s[1:] if s else ''
+        top_level_entries = filter(is_not_list, class_hierarchy)
+        for entry in top_level_entries:
+            module_arg = decapitalize(entry[:-5])
+    #        rev = ctx.revs[module_arg][-1:][:0]
+    #        if not rev:
+            rev = 'unknown'
+            src += 'module "' + module_arg + '" (rev "' + rev + '"), '
+        if len(top_level_entries) > 1:
+            source += 's'
+        source += '\n' + src[:-2]
+        html_hierarchy = html_list(self.parse_hierarchy(class_hierarchy), 0)
+        specification = '''
+    This class hierarchy was generated from the Yang module''' + source + \
+    ' by the <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">' + \
+    'JPyang</a> plugin of <a target="_top" ' + \
+    '''href="http://code.google.com/p/pyang/">pyang</a>.
+    The generated classes may be used to manipulate pieces of configuration data
+    with NETCONF operations such as edit-config, delete-config and lock. These
+    operations are typically accessed through the ConfM Java library by
+    instantiating Device objects and setting up NETCONF sessions with real devices
+    using a compatible YANG model.
+    
+    '''
+        # XXX These strings should probably be rewritten for code readability and
+        # ... to comply with the actual functionality of the class
+        return ('/**' + java_docify(specification + html_hierarchy) + '''
+     *
+     * @see <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">''' + \
+        'JPyang project page</a>\n * @see <a target="_top" ' + \
+        'href="ftp://ftp.rfc-editor.org/in-notes/rfc6020.txt">' + \
+        'RFC 6020: YANG - A Data Modeling Language for the Network ' + \
+        'Configuration Protocol (NETCONF)</a>\n * @see <a target="_top" ' + \
+        'href="ftp://ftp.rfc-editor.org/in-notes/rfc6241.txt">RFC 6241: ' + \
+        'Network Configuration Protocol (NETCONF)</a>\n * @see <a ' + \
+        'target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">' + \
+        'RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>\n' + \
+        ' * @see <a target="_top" href="http://www.tail-f.com">Tail-f ' + \
+        'Systems</a>\n */\npackage ' + strip_first(self.d) + ';')
 
 
 def java_class(filename, package, imports, description, body, version='1.0',
@@ -1689,86 +1778,3 @@ def html_list(body, indent_level, tag='ul'):
         body += '\n'
     body += '</' + tag + '>'
     return indent(body.split('\n'), indent_level)
-
-
-def parse_hierarchy(hierarchy):
-    """Returns html for a list of javadoc pages corresponding to the .java
-    files in the hierarchy list.
-
-    hierarchy -- a tree of .java files represented as a list, for example:
-        ['Foo.java', ['Bar.java', ['Baz.java'], 'Qu.java']] would represent the
-        hierarchy structure:
-        Foo
-        |   Bar
-        |   |   Baz
-        |   Qu
-
-        That is, Baz is a child of Bar in the data model tree, and Bar and Qu
-        are children of the top level element Foo.
-
-    """
-    res = ''
-    for entry in hierarchy:
-        if is_not_list(entry):
-            body = '    <a href="' + entry[:-5] + '.html">' + entry[:-5] + \
-                '</a>'
-            res += html_list(body, 1, tag='li')
-        else:
-            body = parse_hierarchy(entry)
-            res += html_list(body, 1)
-        if body[-1:] != '\n':
-            res += '\n'
-    return res
-
-
-def gen_package_info(class_hierarchy, package, ctx):
-    """Writes a package-info.java file to the package directory with a high
-    level description of the package functionality and requirements.
-
-    class_hierarchy -- A tree represented as a list as in parse_hierarchy
-    package         -- The package directory as a string
-    ctx             -- Context used only for debugging purposes
-
-    """
-    if ctx.opts.verbose:
-        print 'Generating package description package-info.java...'
-    src = source = ''
-    decapitalize = lambda s: s[:1].lower() + s[1:] if s else ''
-    top_level_entries = filter(is_not_list, class_hierarchy)
-    for entry in top_level_entries:
-        module_arg = decapitalize(entry[:-5])
-#        rev = ctx.revs[module_arg][-1:][:0]
-#        if not rev:
-        rev = 'unknown'
-        src += 'module "' + module_arg + '" (rev "' + rev + '"), '
-    if len(top_level_entries) > 1:
-        source += 's'
-    source += '\n' + src[:-2]
-    html_hierarchy = html_list(parse_hierarchy(class_hierarchy), 0)
-    specification = '''
-This class hierarchy was generated from the Yang module''' + source + \
-' by the <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">' + \
-'JPyang</a> plugin of <a target="_top" ' + \
-'''href="http://code.google.com/p/pyang/">pyang</a>.
-The generated classes may be used to manipulate pieces of configuration data
-with NETCONF operations such as edit-config, delete-config and lock. These
-operations are typically accessed through the ConfM Java library by
-instantiating Device objects and setting up NETCONF sessions with real devices
-using a compatible YANG model.
-
-'''
-    # XXX These strings should probably be rewritten for code readability and
-    # ... to comply with the actual functionality of the class
-    return ('/**' + java_docify(specification + html_hierarchy) + '''
- *
- * @see <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">''' + \
-    'JPyang project page</a>\n * @see <a target="_top" ' + \
-    'href="ftp://ftp.rfc-editor.org/in-notes/rfc6020.txt">' + \
-    'RFC 6020: YANG - A Data Modeling Language for the Network ' + \
-    'Configuration Protocol (NETCONF)</a>\n * @see <a target="_top" ' + \
-    'href="ftp://ftp.rfc-editor.org/in-notes/rfc6241.txt">RFC 6241: ' + \
-    'Network Configuration Protocol (NETCONF)</a>\n * @see <a ' + \
-    'target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">' + \
-    'RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>\n' + \
-    ' * @see <a target="_top" href="http://www.tail-f.com">Tail-f ' + \
-    'Systems</a>\n */\npackage ' + strip_first(package) + ';')
