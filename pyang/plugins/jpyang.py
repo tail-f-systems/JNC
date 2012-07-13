@@ -194,7 +194,8 @@ class JPyangPlugin(plugin.PyangPlugin):
         for module in modules:
             if module.keyword == 'module':
                 module = make_valid_identifiers(module)
-                generate_package_info(d, module, ctx)
+                package_info_generator = PackageInfoGenerator(d, module, ctx)
+                package_info_generator.generate_package_info()
         javadir = ctx.opts.javadoc_directory
         if javadir:
             if ctx.opts.debug or ctx.opts.verbose:
@@ -893,22 +894,36 @@ class ClassGenerator(object):
         return access_methods, fields
 
 
-def generate_package_info(d, stmt, ctx):
-    is_java_file = lambda s: s.endswith('.java')
-    is_not_java_file = lambda s: not is_java_file(s)
-    directory_listing = os.listdir(d)
-    java_files = filter(is_java_file, directory_listing)
-    dirs = filter(is_not_java_file, directory_listing)
-    class_hierarchy = generate_javadoc(stmt.substmts, java_files, ctx)
-    write_file(d, 'package-info.java', gen_package_info(class_hierarchy,
-        d.replace('/', '.'), ctx), stmt, ctx)
-    for directory in dirs:
-        for sub in stmt.substmts:
-            # XXX refactor
-            if camelize(capitalizeFirst(sub.arg)) == camelize( \
-                    capitalizeFirst(directory).replace('.',
-                    '?')).replace('?', '.'):
-                generate_package_info(d + '/' + directory, sub, ctx)
+class PackageInfoGenerator(object):
+    """Used to generate package-info.java files, with meaningful content"""
+
+    def __init__(self, directory, stmt, ctx):
+        self.d = directory
+        self.stmt = stmt
+        self.ctx = ctx
+
+    def generate_package_info(self):
+        is_java_file = lambda s: s.endswith('.java')
+        is_not_java_file = lambda s: not is_java_file(s)
+        directory_listing = os.listdir(self.d)
+        java_files = filter(is_java_file, directory_listing)
+        dirs = filter(is_not_java_file, directory_listing)
+        class_hierarchy = generate_javadoc(self.stmt.substmts, java_files, self.ctx)
+        write_file(self.d, 'package-info.java', gen_package_info(class_hierarchy,
+            self.d.replace('/', '.'), self.ctx), self.stmt, self.ctx)
+        for directory in dirs:
+            for sub in self.stmt.substmts:
+                # XXX refactor
+                if camelize(capitalizeFirst(sub.arg)) == camelize( \
+                        capitalizeFirst(directory).replace('.',
+                        '?')).replace('?', '.'):
+                    old_d = self.d
+                    self.d += '/' + directory
+                    old_stmt = self.stmt
+                    self.stmt = sub
+                    self.generate_package_info()
+                    self.d = old_d
+                    self.stmt = sub
 
 
 def generate_javadoc(stmts, java_files, ctx):
