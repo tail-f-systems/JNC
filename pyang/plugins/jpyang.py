@@ -976,15 +976,32 @@ class PackageInfoGenerator(object):
         """
         res = ''
         for entry in hierarchy:
-            if is_not_list(entry):
+            if PackageInfoGenerator.is_not_list(entry):
                 body = '    <a href="' + entry[:-5] + '.html">' + entry[:-5] + '</a>'
-                res += html_list(body, 1, tag='li')
+                res += PackageInfoGenerator.html_list(body, 1, tag='li')
             else:
                 body = PackageInfoGenerator.parse_hierarchy(entry)
-                res += html_list(body, 1)
+                res += PackageInfoGenerator.html_list(body, 1)
             if body[-1:] != '\n':
                 res += '\n'
         return res
+
+    @staticmethod
+    def is_not_list(entry):
+        """Returns False iff entry is instance of list"""
+        return not isinstance(entry, list)
+
+    @staticmethod
+    def html_list(body, indent_level, tag='ul'):
+        """Returns a string representing javadoc with a <ul> html-element if ul,
+        else with a <li> html-element.
+    
+        """
+        body = '<' + tag + '>\n' + body
+        if body[-1:] != '\n':
+            body += '\n'
+        body += '</' + tag + '>'
+        return indent(body.split('\n'), indent_level)
 
     def gen_package_info(self, class_hierarchy, package):
         """Writes a package-info.java file to the package directory with a high
@@ -998,7 +1015,7 @@ class PackageInfoGenerator(object):
             print 'Generating package description package-info.java...'
         src = source = ''
         decapitalize = lambda s: s[:1].lower() + s[1:] if s else ''
-        top_level_entries = filter(is_not_list, class_hierarchy)
+        top_level_entries = filter(self.is_not_list, class_hierarchy)
         for entry in top_level_entries:
             module_arg = decapitalize(entry[:-5])
     #        rev = ctx.revs[module_arg][-1:][:0]
@@ -1008,7 +1025,7 @@ class PackageInfoGenerator(object):
         if len(top_level_entries) > 1:
             source += 's'
         source += '\n' + src[:-2]
-        html_hierarchy = html_list(self.parse_hierarchy(class_hierarchy), 0)
+        html_hierarchy = self.html_list(self.parse_hierarchy(class_hierarchy), 0)
         specification = '''
     This class hierarchy was generated from the Yang module''' + source + \
     ' by the <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">' + \
@@ -1763,20 +1780,3 @@ def support_add(fields=[]):
         ''' + assignments + '''
     }
 '''  # TODO '$' should be removed unless it is actually needed
-
-
-def is_not_list(entry):
-    """Returns False iff entry is instance of list"""
-    return not isinstance(entry, list)
-
-
-def html_list(body, indent_level, tag='ul'):
-    """Returns a string representing javadoc with a <ul> html-element if ul,
-    else with a <li> html-element.
-
-    """
-    body = '<' + tag + '>\n' + body
-    if body[-1:] != '\n':
-        body += '\n'
-    body += '</' + tag + '>'
-    return indent(body.split('\n'), indent_level)
