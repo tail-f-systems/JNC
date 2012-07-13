@@ -13,7 +13,7 @@ import java.util.Hashtable;
 
 /**
  * This class represents a "Jinterface" element
- * from the namespace http://test.com/ns/NamingTest/1.0
+ * from the namespace http://test.com/ns/naming-test/1.0
  *
  * @version    1.0 2012-7-13
  * @author    Auto Generated
@@ -24,9 +24,9 @@ public class Jinterface extends Container {
      * Constructor for an empty Jinterface object.
      */
     public Jinterface() {
-        super(NamingTest.NAMESPACE, "Jinterface");
+        super(Naming-test.NAMESPACE, "Jinterface");
         setDefaultPrefix();
-        setPrefix(NamingTest.PREFIX);
+        setPrefix(Naming-test.PREFIX);
     }
 
     /**
@@ -86,7 +86,7 @@ public class Jinterface extends Container {
      */
     public void setAbstractDefaultValue(com.tailf.confm.xs.Boolean abstractDefaultValue)
         throws INMException {
-        setLeafValue(NamingTest.NAMESPACE,
+        setLeafValue(Naming-test.NAMESPACE,
             "abstractDefault",
             abstractDefaultValue,
             childrenNames());
@@ -125,7 +125,7 @@ public class Jinterface extends Container {
      */
     public void addAbstractDefault()
         throws INMException {
-        setLeafValue(NamingTest.NAMESPACE,
+        setLeafValue(Naming-test.NAMESPACE,
             "abstractDefault",
             null,
             childrenNames());
@@ -173,30 +173,39 @@ public class Jinterface extends Container {
      * Return the value for child leaf "Capital".
      * @return The value of the leaf.
      */
-    public CityString getCapitalValue()
+    public src.naming.City-string getCapitalValue()
         throws INMException {
-        return (CityString)getValue("Capital");
+        return (src.naming.City-string)getValue("Capital");
     }
 
     /**
      * Sets the value for child leaf "Capital", using the java primitive value.
      * @param CapitalValue The value to set.
      */
-    public void setCapitalValue(String CapitalValue)
+    public void setCapitalValue(src.naming.City-string CapitalValue)
         throws INMException {
-        setLeafValue(NamingTest.NAMESPACE,
+        setLeafValue(Naming-test.NAMESPACE,
             "Capital",
             CapitalValue,
             childrenNames());
     }
 
     /**
+     * Sets the value for child leaf "Capital", using a string value.
+     * @param CapitalValue The string representation of the value to set.
+     */
+    public void setCapitalValue(String CapitalValue)
+        throws INMException {
+        setCapitalValue(new src.naming.City-string(CapitalValue));
+    }
+
+    /**
      * Sets the value for child leaf "Capital", using the java primitive value.
      * @param CapitalValue The value to set.
      */
-    public void setCapitalValue(CityString CapitalValue)
+    public void setCapitalValue(city-string CapitalValue)
         throws INMException {
-        setCapitalValue(CapitalValue.toString());
+        setCapitalValue(new src.naming.City-string(CapitalValue));
     }
 
     /**
@@ -213,7 +222,7 @@ public class Jinterface extends Container {
      */
     public void addCapital()
         throws INMException {
-        setLeafValue(NamingTest.NAMESPACE,
+        setLeafValue(Naming-test.NAMESPACE,
             "Capital",
             null,
             childrenNames());
