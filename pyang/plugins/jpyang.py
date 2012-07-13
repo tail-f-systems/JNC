@@ -937,7 +937,8 @@ class PackageInfoGenerator(object):
                     self.d = old_d
                     self.stmt = old_stmt
 
-    def generate_javadoc(self, stmts, java_files):
+    @staticmethod
+    def generate_javadoc(stmts, java_files):
         """Generates a list of class filenames and lists of their subclasses'
         filenames, positioned immediately after each filename if any.
     
@@ -951,12 +952,13 @@ class PackageInfoGenerator(object):
             if filename in java_files:
                 java_files.remove(filename)
                 hierarchy.append(filename)
-                children = self.generate_javadoc(stmt.substmts, java_files)
+                children = PackageInfoGenerator.generate_javadoc(stmt.substmts, java_files)
                 if children:
                     hierarchy.append(children)
         return hierarchy
 
-    def parse_hierarchy(self, hierarchy):
+    @staticmethod
+    def parse_hierarchy(hierarchy):
         """Returns html for a list of javadoc pages corresponding to the .java
         files in the hierarchy list.
     
@@ -978,7 +980,7 @@ class PackageInfoGenerator(object):
                 body = '    <a href="' + entry[:-5] + '.html">' + entry[:-5] + '</a>'
                 res += html_list(body, 1, tag='li')
             else:
-                body = self.parse_hierarchy(entry)
+                body = PackageInfoGenerator.parse_hierarchy(entry)
                 res += html_list(body, 1)
             if body[-1:] != '\n':
                 res += '\n'
