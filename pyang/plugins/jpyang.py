@@ -164,15 +164,15 @@ class JPyangPlugin(plugin.PyangPlugin):
 
                     # Generate external schema
                     ns = module.search_one('namespace').arg
+                    schema_generator = SchemaGenerator(module.substmts, '/', ns, ctx)
+                    schema_node = schema_generator.schema_node(module)
+                    schema_nodes = schema_generator.schema_nodes()
                     name = capitalizeFirst(module.search_one('prefix').arg)
                     write_file(d,  # XXX This might ruin directory structure
                         name + '.schema',
                         '<schema>\n' + indent( \
-                            ('<node>\n' + \
-                                indent(schema_node(module, '/', ns, ctx)) + \
-                                '\n</node>' + \
-                                schema_nodes(module.substmts, '/', ns, ctx) \
-                            ).splitlines()) + '\n</schema>',
+                            ('<node>\n' + indent(schema_node) + '\n</node>' + \
+                                schema_nodes).splitlines()) + '\n</schema>',
                         [modules],
                         ctx)
                     if ctx.opts.debug or ctx.opts.verbose:
@@ -512,60 +512,74 @@ def java_docify(s):
         res += ' * ' + row + '\n'
     return res[:-1]  # Don't include the last newline character
 
+class SchemaGenerator(object):
+    """Used to generate an external XML schema from a yang module"""
 
-def schema_nodes(stmts, tagpath, ns, ctx):
-    """Generate XML schema as a list of "node" elements"""
-    res = ''
-    for stmt in stmts:
-        if in_schema(stmt):
-            res += '<node>\n' + \
-                indent(schema_node(stmt, tagpath + stmt.arg + '/', ns,
-                    ctx)) + '\n</node>' + schema_nodes(stmt.substmts,
-                    tagpath + stmt.arg + '/', ns, ctx)
-    return res
+    def __init__(self, stmts, tagpath, ns, ctx):
+        self.stmts = stmts
+        self.tagpath = tagpath
+        self.ns = ns
+        self.ctx = ctx
 
-
-def schema_node(stmt, tagpath, ns, ctx):
-    """Generate "node" element content for an XML schema"""
-    if ctx.opts.verbose:
-        print 'Generating schema node "' + tagpath + '"...'
-    res = []
-    res.append('<tagpath>' + tagpath + '</tagpath>')
-    res.append('<namespace>' + ns + '</namespace>')
-    res.append('<primitive_type>0</primitive_type>')
-
-    min_occurs = '0'
-    max_occurs = '-1'
-    mandatory = stmt.search_one('mandatory')
-    isMandatory = mandatory is not None and mandatory.arg == 'true'
-    unique = stmt.search_one('unique')
-    isUnique = unique is not None and unique.arg == 'true'
-    key = None
-    if stmt.parent is not None:
-        key = stmt.parent.search_one('key')
-    isKey = key is not None and key.arg == stmt.arg
-    childOfContainerOrList = (stmt.parent is not None and \
-        is_container(stmt.parent))
-    if (is_module(stmt) or isKey or
-        (childOfContainerOrList and is_container(stmt, True))):
-        min_occurs = '1'
-        max_occurs = '1'
-    if isMandatory:
-        min_occurs = '1'
-    if isUnique or childOfContainerOrList or is_container(stmt, True):
-        max_occurs = '1'
-    res.append('<min_occurs>' + min_occurs + '</min_occurs>')  # TODO correct?
-    res.append('<max_occurs>' + max_occurs + '</max_occurs>')  # TODO correct?
-
-    children = ''
-    for ch in stmt.substmts:
-        if ch.keyword in ('container', 'list', 'leaf', 'leaf-list'):
-            children += ch.arg + ' '
-    res.append('<children>' + children[:-1] + '</children>')
-
-    res.append('<flags>0</flags>')
-    res.append('<desc></desc>')
-    return res
+    def schema_nodes(self):
+        """Generate XML schema as a list of "node" elements"""
+        res = ''
+        for stmt in self.stmts:
+            if in_schema(stmt):
+                old_stmts = self.stmts
+                self.stmts = stmt.substmts
+                old_tagpath = self.tagpath
+                self.tagpath += stmt.arg + '/'
+                res += ('<node>\n' +
+                        indent(self.schema_node(stmt)) +
+                        '\n</node>' +
+                        self.schema_nodes())
+                self.stmts = old_stmts
+                self.tagpath = old_tagpath
+        return res
+    
+    
+    def schema_node(self, stmt):
+        """Generate "node" element content for an XML schema"""
+        if self.ctx.opts.verbose:
+            print 'Generating schema node "' + self.tagpath + '"...'
+        res = []
+        res.append('<tagpath>' + self.tagpath + '</tagpath>')
+        res.append('<namespace>' + self.ns + '</namespace>')
+        res.append('<primitive_type>0</primitive_type>')
+    
+        min_occurs = '0'
+        max_occurs = '-1'
+        mandatory = stmt.search_one('mandatory')
+        isMandatory = mandatory is not None and mandatory.arg == 'true'
+        unique = stmt.search_one('unique')
+        isUnique = unique is not None and unique.arg == 'true'
+        key = None
+        if stmt.parent is not None:
+            key = stmt.parent.search_one('key')
+        isKey = key is not None and key.arg == stmt.arg
+        childOfContainerOrList = (stmt.parent is not None and \
+            is_container(stmt.parent))
+        if (is_module(stmt) or isKey or
+            (childOfContainerOrList and is_container(stmt, True))):
+            min_occurs = '1'
+            max_occurs = '1'
+        if isMandatory:
+            min_occurs = '1'
+        if isUnique or childOfContainerOrList or is_container(stmt, True):
+            max_occurs = '1'
+        res.append('<min_occurs>' + min_occurs + '</min_occurs>')  # TODO correct?
+        res.append('<max_occurs>' + max_occurs + '</max_occurs>')  # TODO correct?
+    
+        children = ''
+        for ch in stmt.substmts:
+            if ch.keyword in ('container', 'list', 'leaf', 'leaf-list'):
+                children += ch.arg + ' '
+        res.append('<children>' + children[:-1] + '</children>')
+    
+        res.append('<flags>0</flags>')
+        res.append('<desc></desc>')
+        return res
 
 
 class YangType(object):
