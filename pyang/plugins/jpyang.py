@@ -622,8 +622,7 @@ class ClassGenerator(object):
         (filename, name) = extract_names(prefix.arg)
         for stmt in self.module.substmts:
             if stmt.keyword in ['container', 'list']:  # TODO other top-level stmts
-                self.generate_class(stmt, self.package, '', ns_arg, name,
-                    top_level=True)
+                self.generate_class(stmt, '', ns_arg, name, top_level=True)
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + filename + '"...'
         write_file(self.package, filename,
@@ -637,8 +636,7 @@ class ClassGenerator(object):
             [self.module],
             self.ctx)
 
-    def generate_class(self, stmt, package, path, ns, prefix_name,
-            top_level=False):
+    def generate_class(self, stmt, path, ns, prefix_name, top_level=False):
         """Generates a Java class hierarchy providing an interface to a YANG module
 
         stmt        -- A data model subtree
@@ -663,7 +661,7 @@ class ClassGenerator(object):
         if i_children_exists:
             for ch in stmt.i_children:
                 tmp_access_methods, tmp_fields = self.generate_child(ch,
-                    package, path, ns, prefix_name)
+                    self.package, path, ns, prefix_name)
                 access_methods += tmp_access_methods
                 fields.extend(tmp_fields)
 
@@ -684,8 +682,8 @@ class ClassGenerator(object):
         # TODO Avoid quadratic time duplication check (maybe use a set)
         for sub in stmt.substmts:
             if sub not in expanded_i_children:
-                tmp_access_methods, tmp_fields = self.generate_child(sub, package,
-                    path, ns, prefix_name)
+                tmp_access_methods, tmp_fields = self.generate_child(sub,
+                    self.package, path, ns, prefix_name)
                 access_methods += tmp_access_methods
                 fields.extend(tmp_fields)
 
@@ -722,9 +720,11 @@ class ClassGenerator(object):
             # If supertype is derived, make sure a class for it is generated
             if type_stmt.i_typedef:
                 if self.yang_types.defined(type_stmt.i_typedef.arg):
-                    typedef_path = get_package(type_stmt.i_typedef, self.ctx)
-                    self.generate_class(type_stmt.i_typedef, typedef_path,
-                        typedef_path.replace('.', '/') + '/', ns, prefix_name)
+                    old_package = self.package
+                    self.package = get_package(type_stmt.i_typedef, self.ctx)
+                    self.generate_class(type_stmt.i_typedef,
+                        self.package.replace('.', '/') + '/', ns, prefix_name)
+                    self.package = old_package
 
             # Extract types to use in constructors, etc.
             super_type = get_types(type_stmt, self.ctx)[0]
@@ -761,8 +761,8 @@ class ClassGenerator(object):
 #            print 'typedef ' + stmt.arg
 #            print 'package: ' + package + ', filename: ' + filename
             self.yang_types.add(stmt.arg)
-        write_file(package, filename,
-            java_class(filename, package,
+        write_file(self.package, filename,
+            java_class(filename, self.package,
                 ['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
                 # TODO Hashtable not used in generated code
                 
@@ -791,8 +791,10 @@ class ClassGenerator(object):
         access_methods = ''
         fields = []
         if sub.keyword in ['list', 'container']:
-            self.generate_class(sub, package + '.' + sub.parent.arg,
-                path + sub.parent.arg + '/', ns, prefix_name)
+            old_package = self.package
+            self.package += '.' + sub.parent.arg
+            self.generate_class(sub, path + sub.parent.arg + '/', ns, prefix_name)
+            self.package = old_package
             if sub.keyword == 'list':
                 key, _, confm_keys, _ = extract_keys(sub, self.ctx)
                 access_methods += access_methods_comment(sub) + \
@@ -817,9 +819,11 @@ class ClassGenerator(object):
             type_stmt = sub.search_one('type')
             if type_stmt.i_typedef:
                 if self.yang_types.defined(type_stmt.i_typedef.arg):
-                    typedef_path = get_package(type_stmt.i_typedef, self.ctx)
-                    self.generate_class(type_stmt.i_typedef, typedef_path,
-                        typedef_path.replace('.', '/') + '/', ns, prefix_name)
+                    old_package = self.package
+                    self.package = get_package(type_stmt.i_typedef, self.ctx)
+                    self.generate_class(type_stmt.i_typedef,
+                        self.package.replace('.', '/') + '/', ns, prefix_name)
+                    self.package = old_package
             type_str1, type_str2 = get_types(type_stmt, self.ctx)
             if sub.keyword == 'leaf':
                 key = sub.parent.search_one('key')
