@@ -9,3 +9,4 @@ Should be the other way around.
 * No support for lists without a key (not a problem with this module)
 * Correct generation of javadoc (not a top priority at this stage)
 * Use os.pathsep instead of '/'
+* State preconditions in all function specifications (which can be None, etc)
