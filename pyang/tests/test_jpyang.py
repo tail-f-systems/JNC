@@ -187,6 +187,12 @@ class Test(unittest.TestCase):
         assert self.c.arg == 'Jinterface', 'was: ' + self.c.arg
         assert self.key.arg == 'long', 'was: ' + self.c.arg
 
+    def testGet_types(self):
+        stmt = Statement(None, None, None, 'type', arg='string')
+        confm, primitive = jpyang.get_types(stmt, self.ctx)
+        assert confm == 'com.tailf.confm.xs.String', 'was: ' + confm
+        assert primitive == 'String'
+
 
 if __name__ == "__main__":
     """Launch all unit tests"""
