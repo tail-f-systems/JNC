@@ -8,3 +8,4 @@ Should be the other way around.
 * Children names are normalized (perhaps this is ok?)
 * No support for lists without a key (not a problem with this module)
 * Correct generation of javadoc (not a top priority at this stage)
+* Use os.pathsep instead of '/'
