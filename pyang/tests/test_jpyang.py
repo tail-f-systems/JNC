@@ -46,7 +46,7 @@ class Test(unittest.TestCase):
         pass
 
     def testCapitalize_first(self):
-        """Tests simple cases of the capitalize_first function"""
+        """Simple cases of the capitalize_first function"""
         res = jpyang.capitalize_first('A')
         assert res == 'A', 'was: ' + res
         res = jpyang.capitalize_first('Ab')
@@ -61,7 +61,7 @@ class Test(unittest.TestCase):
         assert res == 'TeSt', 'was: ' + res
 
     def testCamelize(self):
-        """Tests special, "unlikely" cases of the camelize function. 
+        """Special, "unlikely" cases of the camelize function 
         
         Does not test for removal of any characters other than - and .
         
@@ -86,7 +86,7 @@ class Test(unittest.TestCase):
         assert res == 'A', 'was: ' + res
     
     def testGet_package(self):
-        """Tests the get_package function on all nodes in the statement tree.
+        """Correct package is retrieved for all nodes in the statement tree
         
         Perform tests on all nodes in the tree. The top level statement and its
         immediate children should have the base package.
@@ -106,7 +106,7 @@ class Test(unittest.TestCase):
         assert res == directory + '.l', 'was: ' + res
 
     def testPairwise(self):
-        """Tests that the iterator includes the next item also"""
+        """The iterator includes the next item also"""
         l = [1, 2, 3]
 
         # Test that the next() method returns correct values
@@ -129,9 +129,9 @@ class Test(unittest.TestCase):
         assert i == len(l), '#iterations (should be ' + len(l) + '): ' + str(i)
 
     def testMake_valid_identifier(self):
-        """Tests conversion of statement arguments to valid Java identifiers.
+        """Statement arguments converts to valid Java identifiers
         
-        Tests that the make_valid_identifier function prepends keyword args
+        the make_valid_identifier function prepends keyword args
         with a J and that the forbidden characters . and - are removed.
         
         Some simple sanity checks are performed as well. There are no tests for
@@ -158,7 +158,14 @@ class Test(unittest.TestCase):
         assert stmt.arg == None, 'was: ' + stmt.arg
         assert res.arg == None, 'was: ' + res.arg
 
-        # Call with reserved word as argument
+        # Call on statement with arg = boolean
+        stmt = Statement(None, None, None, 'container', arg='boolean')
+        assert stmt.arg == 'boolean', 'was: ' + stmt.arg
+        res = jpyang.make_valid_identifier(stmt)
+        assert stmt.arg == 'Jboolean', 'was: ' + stmt.arg
+        assert res.arg == 'Jboolean', 'was: ' + res.arg
+
+        # Check that all reserved words are handled correctly
         assert len(jpyang.java_reserved_words) > 0
         for word in jpyang.java_reserved_words:
             stmt = Statement(None, None, None, 'leaf', arg=word)
@@ -166,6 +173,19 @@ class Test(unittest.TestCase):
             ok = 'J' + jpyang.camelize(stmt.arg)
             jpyang.make_valid_identifier(stmt)
             assert stmt.arg == ok, 'was: ' + stmt.arg + ' (not ' + ok + ')'
+
+    def testMake_valid_identifiers(self):
+        """Tree is recursed correctly"""
+        self.c.arg = 'interface'
+        assert self.c.arg == 'interface', 'was: ' + self.c.arg
+        self.key.arg = 'long'
+        assert self.key.arg == 'long', 'was: ' + self.c.arg
+        jpyang.make_valid_identifiers(self.k)
+        assert self.c.arg == 'interface', 'was: ' + self.c.arg
+        assert self.key.arg == 'long', 'was: ' + self.c.arg
+        jpyang.make_valid_identifiers(self.c)
+        assert self.c.arg == 'Jinterface', 'was: ' + self.c.arg
+        assert self.key.arg == 'long', 'was: ' + self.c.arg
 
 
 if __name__ == "__main__":
