@@ -316,16 +316,19 @@ def capitalize_first(string):
 def camelize(string):
     """Removes hyphens and dots and replaces following character (if any) with
     its upper-case counterpart. Does not remove a trailing hyphen or dot.
+    
+    Returns an empty string if string argument is None.
 
     """
     camelized_str = ''
-    iterator = pairwise(string)
-    for character, next_character in iterator:
-        if next_character and character in '-.':
-            camelized_str += capitalize_first(next_character)
-            iterator.next()
-        else:
-            camelized_str += character
+    if string is not None:
+        iterator = pairwise(string)
+        for character, next_character in iterator:
+            if next_character and character in '-.':
+                camelized_str += capitalize_first(next_character)
+                iterator.next()
+            else:
+                camelized_str += character
     return camelized_str
 
 
@@ -334,7 +337,7 @@ def make_valid_identifier(stmt):
     keyword. Replaces hyphens and dots with an underscore character.
 
     """
-    if stmt.keyword not in immutable_stmts:
+    if stmt and stmt.keyword not in immutable_stmts and stmt.arg:
         stmt.arg = camelize(stmt.arg)
         if stmt.arg in java_reserved_words:
             stmt.arg = 'J' + stmt.arg
