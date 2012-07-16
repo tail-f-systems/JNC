@@ -20,6 +20,7 @@ class DummyOption(object):
     """Used to initialize Context with option fields in test setUp"""
     
     def __init__(self, directory):
+        """Sets the directory field to the supplied value"""
         self.directory = directory
 
 
@@ -45,6 +46,7 @@ class Test(unittest.TestCase):
         pass
 
     def testCapitalize_first(self):
+        """Tests simple cases of the capitalize_first function"""
         res = jpyang.capitalize_first('A')
         assert res == 'A', 'was: ' + res
         res = jpyang.capitalize_first('Ab')
@@ -59,6 +61,7 @@ class Test(unittest.TestCase):
         assert res == 'TeSt', 'was: ' + res
 
     def testCamelize(self):
+        """Tests special, "unlikely" cases of the camelize function"""
         res = jpyang.camelize('teSt')
         assert res == 'teSt', 'was: ' + res
         res = jpyang.camelize('a.weird-stringThis')
@@ -79,7 +82,12 @@ class Test(unittest.TestCase):
         assert res == 'A', 'was: ' + res
     
     def testGet_package(self):
+        """Tests that the get_package function works on all nodes in the
+        statement tree
+        
+        """
         directory = self.ctx.opts.directory
+        
         res = jpyang.get_package(self.c, self.ctx)
         assert res == directory, 'was: ' + res
         res = jpyang.get_package(self.leaf, self.ctx)
@@ -92,18 +100,33 @@ class Test(unittest.TestCase):
         assert res == directory + '.l', 'was: ' + res
 
     def testPairwise(self):
+        """Tests that the pairwise function returns an iterator that includes
+        the next item also
+        
+        """
         l = [1, 2, 3]
+        
+        # Test that the next() method returns correct values
         res = jpyang.pairwise(l)
-        assert res.next() == (1, 2)
-        assert res.next() == (2, 3)
-        assert res.next() == (3, None)
+        for i in range(len(l)):
+            if i != len(l) - 1:
+                assert res.next() == (l[i], l[i+1])
+            else:
+                assert res.next() == (l[i], None)
+        
+        # Test that next_item contains correct value during iteration
         res = jpyang.pairwise(l)
         i = 0
+        prev = l[0]
         for item, next_item in res:
+            assert item != None
+            assert item == prev
+            prev = next_item
             i += 1
-        assert i == 3, 'was: ' + str(i)
+        assert i == len(l), '#iterations (should be ' + len(l) + '): ' + str(i)
 
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testCapitalize_first']
+    """Launch all unit tests"""
+    #import sys;sys.argv = ['', 'Test.testCapitalize_first']  # Only one
     unittest.main()
