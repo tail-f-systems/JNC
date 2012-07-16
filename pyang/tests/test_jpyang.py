@@ -35,11 +35,11 @@ class Test(unittest.TestCase):
         self.ctx.opts = DummyOption('gen')
         
         # Construct a statement tree: c, c/l, c/leaf, c/l/key and c/l/k
-        self.c = Statement(None, None, None, 'container', 'c')
-        self.l = Statement(self.c, self.c, None, 'list', 'l')
-        self.leaf = Statement(self.c, self.c, None, 'leaf', 'leaf')
-        self.key = Statement(self.l, self.l, None, 'key', 'k')
-        self.k = Statement(self.l, self.l, None, 'leaf', 'k')
+        self.c = Statement(None, None, None, 'container', arg='c')
+        self.l = Statement(self.c, self.c, None, 'list', arg='l')
+        self.leaf = Statement(self.c, self.c, None, 'leaf', arg='leaf')
+        self.key = Statement(self.l, self.l, None, 'key', arg='k')
+        self.k = Statement(self.l, self.l, None, 'leaf', arg='k')
 
     def tearDown(self):
         """Runs after each test"""
@@ -145,16 +145,23 @@ class Test(unittest.TestCase):
         assert res.arg == 'c', 'was: ' + res.arg
 
         # Call on statement with arg containing hyphens
-        stmt = Statement(None, None, None, 'container', 'test-hyphen')
+        stmt = Statement(None, None, None, 'container', arg='test-hyphen')
         assert stmt.arg == 'test-hyphen', 'was: ' + stmt.arg
         res = jpyang.make_valid_identifier(stmt)
         assert stmt.arg == 'testHyphen', 'was: ' + stmt.arg
         assert res.arg == 'testHyphen', 'was: ' + res.arg
 
+        # Call on statement with no arg
+        stmt = Statement(None, None, None, 'container', arg=None)
+        assert stmt.arg == None, 'was: ' + stmt.arg
+        res = jpyang.make_valid_identifier(stmt)
+        assert stmt.arg == None, 'was: ' + stmt.arg
+        assert res.arg == None, 'was: ' + res.arg
+
         # Call with reserved word as argument
         assert len(jpyang.java_reserved_words) > 0
         for word in jpyang.java_reserved_words:
-            stmt = Statement(None, None, None, 'leaf', word)
+            stmt = Statement(None, None, None, 'leaf', arg=word)
             assert stmt.arg == word, 'was: ' + stmt.arg
             ok = 'J' + jpyang.camelize(stmt.arg)
             jpyang.make_valid_identifier(stmt)
