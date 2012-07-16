@@ -206,6 +206,29 @@ class Test(unittest.TestCase):
         confm, primitive = jpyang.get_types(stmt, self.ctx)
         assert confm == 'com.tailf.confm.xs.UnsignedLong', 'was: ' + confm
         assert primitive == 'long', 'was: ' + primitive
+        
+        # TODO: Test typedefs, other non-type stmts, None and remaining types
+
+    def testGet_base_type(self):
+        """Correct result from get_base_type for different statements"""
+        # Statement not containing a type at all should return None
+        res = jpyang.get_base_type(self.c)
+        assert res == None, 'was: ' + res
+        
+        # A type statement without any children should also return None
+        type_stmt = Statement(None, None, None, 'type', arg='string')
+        res = jpyang.get_base_type(type_stmt)
+        assert res == None, 'was: ' + res.arg
+        
+        # Adding the type statement as a child to l should work
+        self.l.substmts.append(type_stmt)
+        type_stmt.parent = self.l
+        res = jpyang.get_base_type(self.l)
+        assert res.arg == 'string', 'was: ' + res.arg
+        
+        # Calling with the container c (parent of l) should still return None
+        res = jpyang.get_base_type(self.c)
+        assert res == None, 'was: ' + res.arg
 
 
 if __name__ == "__main__":
