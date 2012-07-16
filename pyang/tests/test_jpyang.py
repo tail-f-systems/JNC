@@ -91,6 +91,18 @@ class Test(unittest.TestCase):
         res = jpyang.get_package(self.k, self.ctx)
         assert res == directory + '.l', 'was: ' + res
 
+    def testPairwise(self):
+        l = [1, 2, 3]
+        res = jpyang.pairwise(l)
+        assert res.next() == (1, 2)
+        assert res.next() == (2, 3)
+        assert res.next() == (3, None)
+        res = jpyang.pairwise(l)
+        i = 0
+        for item, next_item in res:
+            i += 1
+        assert i == 3, 'was: ' + str(i)
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testCapitalize_first']
