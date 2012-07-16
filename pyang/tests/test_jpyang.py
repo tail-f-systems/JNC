@@ -125,6 +125,14 @@ class Test(unittest.TestCase):
             i += 1
         assert i == len(l), '#iterations (should be ' + len(l) + '): ' + str(i)
 
+    def testMake_valid_identifier(self):
+        for word in jpyang.java_reserved_words:
+            stmt = Statement(None, None, None, 'leaf', word)
+            assert stmt.arg == word, 'was: ' + stmt.arg
+            ok = 'J' + jpyang.camelize(stmt.arg)
+            jpyang.make_valid_identifier(stmt)
+            assert stmt.arg == ok, 'was: ' + stmt.arg + ' (not ' + ok + ')'
+
 
 if __name__ == "__main__":
     """Launch all unit tests"""
