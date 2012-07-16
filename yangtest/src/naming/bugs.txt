@@ -6,3 +6,5 @@ Jinterface was called interface when referring to the yang module)
 * Module name is normalized in comments at beginning of file, but prefix is not.
 Should be the other way around.
 * Children names are normalized (perhaps this is ok?)
+* No support for lists without a key (not a problem with this module)
+* Correct generation of javadoc (not a top priority at this stage)
