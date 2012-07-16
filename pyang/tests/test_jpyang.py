@@ -188,10 +188,24 @@ class Test(unittest.TestCase):
         assert self.key.arg == 'long', 'was: ' + self.c.arg
 
     def testGet_types(self):
+        """Type conversions for string, int32, etc."""
+        # String
         stmt = Statement(None, None, None, 'type', arg='string')
         confm, primitive = jpyang.get_types(stmt, self.ctx)
         assert confm == 'com.tailf.confm.xs.String', 'was: ' + confm
         assert primitive == 'String'
+
+        # int32 - signed, so xs.Int and int is used
+        stmt = Statement(None, None, None, 'type', arg='int32')
+        confm, primitive = jpyang.get_types(stmt, self.ctx)
+        assert confm == 'com.tailf.confm.xs.Int', 'was: ' + confm
+        assert primitive == 'int', 'was: ' + primitive
+
+        # uint32 - unsigned, so xs.UnsignedLong and long are used (same as 64)
+        stmt = Statement(None, None, None, 'type', arg='uint32')
+        confm, primitive = jpyang.get_types(stmt, self.ctx)
+        assert confm == 'com.tailf.confm.xs.UnsignedLong', 'was: ' + confm
+        assert primitive == 'long', 'was: ' + primitive
 
 
 if __name__ == "__main__":
