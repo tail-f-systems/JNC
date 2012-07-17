@@ -370,19 +370,6 @@ def make_valid_identifiers(stmt):
     return stmt
 
 
-def copy_substmts(source, dest):
-    if not hasattr(dest, 'i_children'):
-        dest.i_children = []
-    if hasattr(source, 'i_children') and source.i_children != None:
-        for substmt in source.i_children:
-            if substmt not in dest.i_children and substmt not in dest.substmts:
-                dest.i_children.append(substmt)
-    for substmt in source.substmts:
-        if substmt not in dest.i_children and substmt not in dest.substmts:
-            dest.i_children.append(substmt)
-    augmented_modules[dest.top.arg] = dest.top
-
-
 def get_types(yang_type, ctx):
     """Returns confm and primitive counterparts of the type statement yang_type
 
