@@ -1,0 +1,23 @@
+module augmentee {
+
+  namespace "http://test.com/ns/augee/1.0";
+  prefix augee;
+
+  organization
+   "Tail-f Systems AB";
+
+  contact
+   "Emil Wall <mailto:emil@tail-f.com>";
+
+  description 
+   "Augmented by augment-test.yang";
+
+  container target {
+    container c {
+      leaf d {
+        type int32;
+      }
+    }
+  }
+
+}
