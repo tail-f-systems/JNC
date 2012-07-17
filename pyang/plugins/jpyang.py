@@ -1098,8 +1098,8 @@ class JavaClass(object):
         description -- Defines the class semantics.
         body        -- Should contain the actual code of the class
         version     -- Version number, defaults to '1.0'.
-        modifiers   -- Can contain Java statements
-                       such as ' implements Serializable' or ' extends Element'.
+        modifiers   -- Can contain Java statements such as 
+                       ' implements Serializable' or ' extends Element'.
         source      -- A string somehow representing the origin of the class
 
         """
@@ -1111,6 +1111,35 @@ class JavaClass(object):
         self.version = version
         self.modifiers = modifiers
         self.source = source
+        self.constructors = {}
+        self.cloners = {}
+        self.name_getters = {}
+        self.access_methods = {}
+        self.support_methods = {}
+
+    def add_import(self, key, import_):
+        """Adds import_ to list of imports"""
+        self.imports[key] = import_
+
+    def add_constructor(self, key, constructor):
+        """Adds a constructor represented as a string"""
+        self.constructors[key] = constructor
+
+    def add_cloner(self, key, cloner):
+        """Adds a clone method represented as a string"""
+        self.cloners[key] = cloner
+
+    def add_name_getter(self, key, name_getter):
+        """Adds a keyNames or childrenNames method represented as a string"""
+        self.name_getters[key] = name_getter
+
+    def add_access_method(self, key, access_method):
+        """Adds an access method represented as a string"""
+        self.access_methods[key] = access_method
+
+    def add_support_method(self, key, support_method):
+        """Adds a support method represented as a string"""
+        self.support_methods[key] = support_method
 
     def java_class(self):
         """Returns a string representing complete Java code for this class."""
