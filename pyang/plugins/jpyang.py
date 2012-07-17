@@ -193,6 +193,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                         util.get_latest_revision(aug_module) + '".'
                     generator = ClassGenerator(aug_module, directory, src, ctx)
                     generator.generate_classes()
+                augmented_modules.clear()
                 if ctx.opts.debug or ctx.opts.verbose:
                     print 'Java classes generation COMPLETE.'
             else:
@@ -650,7 +651,7 @@ class ClassGenerator(object):
         (filename, name) = extract_names(prefix.arg)
 
         for stmt in self.module.substmts:
-            if stmt.keyword in ['container', 'list', 'augment']:  # TODO other top-level stmts
+            if stmt.keyword in ['container', 'list', 'augment', 'typedef']:  # TODO other top-level stmts
                 self.generate_class(stmt, '', ns_arg, name, top_level=True)
 
         if self.ctx.opts.verbose:
@@ -753,12 +754,15 @@ class ClassGenerator(object):
 
             # If supertype is derived, make sure a class for it is generated
             if type_stmt.i_typedef:
-                if self.yang_types.defined(type_stmt.i_typedef.arg):
+                print type_stmt.i_typedef.arg
+                if not self.yang_types.defined(type_stmt.i_typedef.arg):
+                    print 'defined'
                     old_package = self.package
                     self.package = get_package(type_stmt.i_typedef, self.ctx)
-                    self.generate_class(type_stmt.i_typedef,
-                        self.package.replace('.', '/') + '/', ns, prefix_name)
+                    path = self.package.replace('.', '/') + '/'
+                    self.generate_class(type_stmt.i_typedef, path, ns, prefix_name)
                     self.package = old_package
+                    self.yang_types.add(type_stmt.i_typedef.arg)
 
             # Extract types to use in constructors, etc.
             super_type = get_types(type_stmt, self.ctx)[0]
@@ -1210,22 +1214,12 @@ def typedef_constructor(stmt, arg='String'):
      * Constructor for ''' + stmt.arg + ' object from a ' + arg.lower() + '''.
      * @param value Value to construct the ''' + stmt.arg + ''' from.
      */
-    public ''' + stmt.arg + '(' + arg + ''' value)
+    public ''' + capitalize_first(stmt.arg) + '(' + arg + ''' value)
         throws ConfMException {
         super(value);
         check();
     }
 '''
-
-    '''/**
-     * Constructor for Bogus3 object from a long.
-     * @param value Value to construct the Bogus3 from.
-     */
-    public Bogus3(long value)
-        throws ConfMException {
-        super(value);
-        check();
-    }'''
 
 
 def clone(class_name, key_names=[], shallow='False'):
