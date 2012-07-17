@@ -1096,7 +1096,8 @@ class JavaClass(object):
                        will be included.
         imports     -- Should be a list of names of imported libraries.
         description -- Defines the class semantics.
-        body        -- Should contain the actual code of the class
+        body        -- Should contain the actual code of the class if it is not
+                       supplied through the add-methods
         version     -- Version number, defaults to '1.0'.
         modifiers   -- Can contain Java statements such as 
                        ' implements Serializable' or ' extends Element'.
@@ -1113,6 +1114,9 @@ class JavaClass(object):
         self.source = source
         self.constructors = {}
         self.cloners = {}
+        self.fields = {}
+        self.enabler = {}
+        self.schema_registrators = {}
         self.name_getters = {}
         self.access_methods = {}
         self.support_methods = {}
@@ -1128,6 +1132,18 @@ class JavaClass(object):
     def add_cloner(self, key, cloner):
         """Adds a clone method represented as a string"""
         self.cloners[key] = cloner
+
+    def add_field(self, key, field):
+        """Adds a field represented as a string"""
+        self.fields[key] = field
+
+    def add_enabler(self, key, enabler):
+        """Adds an 'enable'-method as a string"""
+        self.enablers[key] = enabler
+
+    def add_schema_registrator(self, key, schema_registrator):
+        """Adds a register schema method"""
+        self.schema_registrators[key] = schema_registrator
 
     def add_name_getter(self, key, name_getter):
         """Adds a keyNames or childrenNames method represented as a string"""
