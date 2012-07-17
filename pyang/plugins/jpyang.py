@@ -1082,6 +1082,11 @@ class JavaClass(object):
     """Encapsulates package name, imports, class declaration, constructors,
     fields, access methods, etc. for a Java Class. Also includes javadoc
     documentation where applicable.
+    
+    Implementation: Unless the 'body' attribute is used, different kind of
+    methods and fields are stored in separate dictionaries so that the order of
+    them in the generated class does not depend on the order in which they were
+    added.
 
     """
     
@@ -1112,10 +1117,10 @@ class JavaClass(object):
         self.version = version
         self.modifiers = modifiers
         self.source = source
+        self.fields = {}
         self.constructors = {}
         self.cloners = {}
-        self.fields = {}
-        self.enabler = {}
+        self.enablers = {}
         self.schema_registrators = {}
         self.name_getters = {}
         self.access_methods = {}
@@ -1125,6 +1130,10 @@ class JavaClass(object):
         """Adds import_ to list of imports"""
         self.imports[key] = import_
 
+    def add_field(self, key, field):
+        """Adds a field represented as a string"""
+        self.fields[key] = field
+
     def add_constructor(self, key, constructor):
         """Adds a constructor represented as a string"""
         self.constructors[key] = constructor
@@ -1132,10 +1141,6 @@ class JavaClass(object):
     def add_cloner(self, key, cloner):
         """Adds a clone method represented as a string"""
         self.cloners[key] = cloner
-
-    def add_field(self, key, field):
-        """Adds a field represented as a string"""
-        self.fields[key] = field
 
     def add_enabler(self, key, enabler):
         """Adds an 'enable'-method as a string"""
@@ -1157,8 +1162,32 @@ class JavaClass(object):
         """Adds a support method represented as a string"""
         self.support_methods[key] = support_method
 
+    def populate_body(self):
+        """Unless not None, adds fields and methods to self.body"""
+        if self.body:
+            return
+        code = []
+        code.extend(self.fields.values())
+        code.extend(self.constructors.values())
+        code.extend(self.cloners.values())
+        code.extend(self.enablers.values())
+        code.extend(self.schema_registrators.values())
+        code.extend(self.name_getters.values())
+        code.extend(self.access_methods.values())
+        code.extend(self.support_methods.values())
+        self.body = ''.join(code)
+
     def java_class(self):
-        """Returns a string representing complete Java code for this class."""
+        """Returns a string representing complete Java code for this class.
+        
+        It is vital that either self.body contains the complete code body of
+        the class being generated, or that it is None and methods have been
+        added using the JavaClass.add methods prior to calling this method.
+        
+        """
+        # If body is None, fetch code from class fields
+        self.populate_body()
+        
         # Fetch current date and set date format
         time = datetime.date.today()
         date = str(time.day) + '/' + str(time.month) + '/' + str(time.year % 100)
