@@ -31,11 +31,8 @@ CONFD_HOST  ?= localhost
 CONFD_FLAGS = --addloadpath $(CONFD_DIR)/etc/confd
 START_FLAGS ?=
 
-all: augment-self.fxs ssh-keydir $(CDB_DIR)/augment-self.xml
+all: augment-test.fxs augmentee.fxs ssh-keydir $(CDB_DIR)/augment-test.xml
 	@echo "Build complete"
-
-augment-self.xsd: augment-self.fxs
-	$(CONFDC) --emit-xsd augment-self.xsd augment-self.fxs
 
 $(CDB_DIR)/aaa_init.xml: aaa_init.xml $(CDB_DIR)
 	@cp $< $@

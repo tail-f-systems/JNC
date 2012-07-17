@@ -20,4 +20,10 @@ module augmentee {
     }
   }
 
+  container other {
+    leaf something {
+      type string;
+    }
+  }
+
 }

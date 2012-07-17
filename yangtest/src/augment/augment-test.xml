@@ -2,7 +2,7 @@
   <c>
     <d>7</d>
   </c>
-  <augmented xmlns="http://test.com/ns/aug/1.0">>
+  <augmented xmlns="http://test.com/ns/aug/1.0">
     <data>Seven</data>
   </augmented>
 </target>
