@@ -46,6 +46,7 @@ from pyang import error
 from pyang import statements
 
 
+# TODO Might be more efficient to use dicts instead of set and list for these
 java_reserved_words = {'abstract', 'assert', 'boolean', 'break', 'byte',
     'case', 'catch', 'char', 'class', 'const*', 'continue', 'default',
     'double', 'do', 'else', 'enum', 'extends', 'false',
@@ -58,15 +59,18 @@ java_reserved_words = {'abstract', 'assert', 'boolean', 'break', 'byte',
 """A set of identifiers that are reserved in Java"""
 
 
-outputted_warnings = []
-"""A list of warning message IDs that are used to avoid duplicate warnings"""
-
-
 immutable_stmts = {'type', 'typedef', 'namespace', 'prefix', 'organization',
     'contact', 'description', 'range'}
 """A set of statement keywords that should not have their arguments modified"""
 # TODO add more keywords to immutable_stmts
-# TODO Might be more efficient to use dicts instead of set and list for these
+
+
+outputted_warnings = []
+"""A list of warning message IDs that are used to avoid duplicate warnings"""
+
+
+augmented_modules = {}
+"""A dict of external modules that are augmented by this module"""
 
 
 def pyang_plugin_init():
@@ -79,7 +83,7 @@ class JPyangPlugin(plugin.PyangPlugin):
 
     def add_output_format(self, fmts):
         """Adds 'java' and 'jpyang' as valid output formats"""
-        self.multiple_modules = True
+        self.multiple_modules = False
         fmts['java'] = fmts['jpyang'] = self
 
     def add_opts(self, optparser):
@@ -184,6 +188,11 @@ class JPyangPlugin(plugin.PyangPlugin):
                     util.get_latest_revision(module) + '".'
                 generator = ClassGenerator(module, directory, src, ctx)
                 generator.generate_classes()
+                for aug_module in augmented_modules.values():
+                    src = 'module "' + aug_module.arg + '", revision: "' + \
+                        util.get_latest_revision(aug_module) + '".'
+                    generator = ClassGenerator(aug_module, directory, src, ctx)
+                    generator.generate_classes()
                 if ctx.opts.debug or ctx.opts.verbose:
                     print 'Java classes generation COMPLETE.'
             else:
@@ -361,6 +370,19 @@ def make_valid_identifiers(stmt):
     return stmt
 
 
+def copy_substmts(source, dest):
+    if not hasattr(dest, 'i_children'):
+        dest.i_children = []
+    if hasattr(source, 'i_children') and source.i_children != None:
+        for substmt in source.i_children:
+            if substmt not in dest.i_children and substmt not in dest.substmts:
+                dest.i_children.append(substmt)
+    for substmt in source.substmts:
+        if substmt not in dest.i_children and substmt not in dest.substmts:
+            dest.i_children.append(substmt)
+    augmented_modules[dest.top.arg] = dest.top
+
+
 def get_types(yang_type, ctx):
     """Returns confm and primitive counterparts of the type statement yang_type
 
@@ -516,6 +538,7 @@ def java_docify(s):
         res += ' * ' + row + '\n'
     return res[:-1]  # Don't include the last newline character
 
+
 class SchemaGenerator(object):
     """Used to generate an external XML schema from a yang module"""
 
@@ -638,9 +661,11 @@ class ClassGenerator(object):
             prefix = parent_module.search_one('prefix')
             ns_arg = '<unknown/prefix: ' + prefix.arg + '>'
         (filename, name) = extract_names(prefix.arg)
+
         for stmt in self.module.substmts:
-            if stmt.keyword in ['container', 'list']:  # TODO other top-level stmts
+            if stmt.keyword in ['container', 'list', 'augment']:  # TODO other top-level stmts
                 self.generate_class(stmt, '', ns_arg, name, top_level=True)
+
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + filename + '"...'
         write_file(self.package, filename,
@@ -671,6 +696,15 @@ class ClassGenerator(object):
         i_children_exists = (hasattr(stmt, 'i_children')
             and stmt.i_children != None
             and stmt.i_children != [])
+
+        if stmt.keyword == 'augment':
+            if not hasattr(stmt, "i_target_node"):  # TODO: EAFP
+                warn_msg = 'Target missing from augment statement'
+                print_warning(warn_msg, warn_msg, self.ctx)
+            else:
+                target = stmt.i_target_node
+                augmented_modules[target.top.arg] = target.top
+            return
 
         # TODO preserve correct order in generated class
         expanded_i_children = []
@@ -703,9 +737,8 @@ class ClassGenerator(object):
 
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + filename + '"...'
-        if filter(is_container, stmt.substmts):  # TODO Verify correctness of cond.
-            support_methods = support_add(fields)
         if stmt.keyword != 'typedef':
+            support_methods = support_add(fields)
             names = key_names(stmt) + children_names(stmt)
         if stmt.keyword == 'container':
             constructors = constructor(stmt, self.ctx, set_prefix=top_level,
