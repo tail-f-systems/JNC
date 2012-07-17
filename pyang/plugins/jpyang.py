@@ -656,12 +656,12 @@ class ClassGenerator(object):
 
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + filename + '"...'
-        root_class = JavaClass(filename, self.package,
-                ['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
-                'The root class for namespace ' + ns_arg + \
+        root_class = JavaClass(filename=filename, package=self.package,
+                imports=['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
+                description='The root class for namespace ' + ns_arg + \
                 ' (accessible from \n * ' + name + '.NAMESPACE) with prefix "' + \
                 prefix.arg + '" (' + name + '.PREFIX).',
-                class_fields(ns_arg, prefix.arg) + enable(name) + register_schema(name),
+                body=class_fields(ns_arg, prefix.arg) + enable(name) + register_schema(name),
                 source=self.src)
         write_file(self.package, filename,
             root_class.java_class(),
@@ -797,13 +797,13 @@ class ClassGenerator(object):
 #            print 'typedef ' + stmt.arg
 #            print 'package: ' + package + ', filename: ' + filename
             self.yang_types.add(stmt.arg)
-        class_instance = JavaClass(filename, self.package,
-                ['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
+        class_instance = JavaClass(filename=filename, package=self.package,
+                imports=['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
                 # TODO Hashtable not used in generated code
                 
-                'This class represents a "' + path + stmt.arg +
+                description='This class represents a "' + path + stmt.arg +
                 '" element\n * from the namespace ' + ns,
-                constructors + cloners + names + access_methods + support_methods,
+                body=constructors + cloners + names + access_methods + support_methods,
                 source=self.src,
                 modifiers=mods) 
         write_file(self.package, filename, class_instance.java_class(), [stmt],
@@ -1085,8 +1085,9 @@ class JavaClass(object):
 
     """
     
-    def __init__(self, filename, package, imports, description, body, version='1.0',
-               modifiers='', source='<unknown>.yang'):
+    def __init__(self, filename=None, package=None, imports=[],
+                 description=None, body=None, version='1.0',
+                 modifiers='', source='<unknown>.yang'):
         """Constructor.
 
         filename    -- Should preferably not contain a complete path since it is
