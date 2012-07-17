@@ -1075,6 +1075,40 @@ class PackageInfoGenerator(object):
         'Systems</a>\n */\npackage ' + strip_first(self.d) + ';')
 
 
+class JavaClass(object):
+    """Encapsulates package name, imports, class declaration, constructors,
+    fields, access methods, etc. for a Java Class. Also includes javadoc
+    documentation where applicable.
+
+    """
+    
+    def __init__(self, filename, package, imports, description, body, version='1.0',
+               modifiers='', source='<unknown>.yang'):
+        """Constructor.
+
+        filename    -- Should preferably not contain a complete path since it is
+                       displayed in a Java comment in the beginning of the code.
+        package     -- Should be just the name of the package in which the class
+                       will be included.
+        imports     -- Should be a list of names of imported libraries.
+        description -- Defines the class semantics.
+        body        -- Should contain the actual code of the class
+        version     -- Version number, defaults to '1.0'.
+        modifiers   -- Can contain Java statements
+                       such as ' implements Serializable' or ' extends Element'.
+        source      -- A string somehow representing the origin of the class
+
+        """
+        self.filename = filename
+        self.package = package
+        self.imports = imports
+        self.description = description
+        self.body = body
+        self.version = version
+        self.modifiers = modifiers
+        self.source = source
+
+
 def java_class(filename, package, imports, description, body, version='1.0',
                modifiers='', source='<unknown>.yang'):
     """The java_class function returns a string representing Java code for a
