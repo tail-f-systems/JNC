@@ -784,14 +784,7 @@ class ClassGenerator(object):
                 arg = primitive + ' ' + stmt.arg + 'Value'
                 access_methods += set_value(stmt, spec1=spec, argument=arg,
                     body=body)
-            access_methods += '''
-    /**
-     * Checks all restrictions (if any).
-     */
-    public void check()
-        throws ConfMException {
-    }
-'''  # FIXME Move to function and add regexp body
+            access_methods += check()
 #            print 'typedef ' + stmt.arg
 #            print 'package: ' + package + ', filename: ' + filename
             self.yang_types.add(stmt.arg)
@@ -1772,6 +1765,17 @@ def delete_stmt(stmt, args=[], string=False, keys=True):
         throws INMException {
         ''' + spec2 + 'String path = "' + stmt.arg + spec3 + '''";
         delete(path);
+    }
+'''
+
+
+def check(regexp=''):
+    return '''
+    /**
+     * Checks all restrictions (if any).
+     */
+    public void check()
+        ''' + regexp + '''throws ConfMException {
     }
 '''
 
