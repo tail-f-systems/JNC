@@ -562,8 +562,8 @@ class SchemaGenerator(object):
                 self.stmts = old_stmts
                 self.tagpath = old_tagpath
         return res
-    
-    
+
+
     def schema_node(self, stmt):
         """Generate "node" element content for an XML schema"""
         if self.ctx.opts.verbose:
@@ -722,17 +722,12 @@ class ClassGenerator(object):
                 augmented_modules[target.top.arg] = target.top
             return  # XXX: Do not generate a class for the augment statement
 
-        # Instantiate java class to be generated
-#        root_class = JavaClass():
-
         # TODO: preserve correct order in generated class
         expanded_i_children = []
         if i_children_exists:
             for ch in stmt.i_children:
                 tmp_access_methods, tmp_fields = self.generate_child(ch, path, ns, prefix_name)
                 class_instance.add_access_method(ch.arg, tmp_access_methods)
-#                for tmp_field in tmp_fields:
-#                    class_instance.add_field(ch.arg, tmp_field)
                 access_methods += tmp_access_methods
                 fields.extend(tmp_fields)
 
@@ -755,8 +750,6 @@ class ClassGenerator(object):
             if sub not in expanded_i_children:
                 tmp_access_methods, tmp_fields = self.generate_child(sub, path, ns, prefix_name)
                 class_instance.add_access_method(sub.arg, tmp_access_methods)
-#                for tmp_field in tmp_fields:
-#                    class_instance.add_field(sub.arg, tmp_field)
                 access_methods += tmp_access_methods
                 fields.extend(tmp_fields)
 
@@ -849,18 +842,7 @@ class ClassGenerator(object):
                     body=body)
             class_instance.add_access_method('check', check())
             access_methods += check()
-#            print 'typedef ' + stmt.arg
-#            print 'package: ' + package + ', filename: ' + filename
             self.yang_types.add(stmt.arg)
-#        class_instance = JavaClass(filename=filename, package=self.package,
-#                imports=['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
-#                # TODO: Hashtable not used in generated code
-#                
-#                description='This class represents a "' + path + stmt.arg +
-#                '" element\n * from the namespace ' + ns,
-#                body=constructors + cloners + names + access_methods + support_methods,
-#                source=self.src,
-#                modifiers=mods) 
         write_file(self.package, 
                    filename, 
                    class_instance.java_class(), 
@@ -966,12 +948,6 @@ class ClassGenerator(object):
                     mark(sub, 'create', arg_type='String') + \
                     mark(sub, 'delete', arg_type=type_str1) + \
                     mark(sub, 'delete', arg_type='String')
-#            elif sub.keyword == 'type':
-#                print 'type ' + sub.arg + ':'
-#                for ch in sub.substmts:
-#                    print '  ' + ch.keyword + ' ' + ch.arg
-#            else:
-#                pass  # print '(' + sub.keyword + ' ' + sub.arg + ')'
         return access_methods, fields
 
 
@@ -1099,9 +1075,7 @@ class PackageInfoGenerator(object):
         top_level_entries = filter(self.is_not_list, class_hierarchy)
         for entry in top_level_entries:
             module_arg = decapitalize(entry[:-5])
-    #        rev = ctx.revs[module_arg][-1:][:0]
-    #        if not rev:
-            rev = 'unknown'
+            rev = 'unknown'  # FIXME: Fetch revision
             src += 'module "' + module_arg + '" (rev "' + rev + '"), '
         if len(top_level_entries) > 1:
             source += 's'
