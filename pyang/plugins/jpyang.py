@@ -695,7 +695,6 @@ class ClassGenerator(object):
 
         """
         (filename, name) = extract_names(stmt.arg)
-        constructors = access_methods = ''
         fields = []
         mods = ' extends Container'
         
@@ -728,7 +727,6 @@ class ClassGenerator(object):
             for ch in stmt.i_children:
                 tmp_access_methods, tmp_fields = self.generate_child(ch, path, ns, prefix_name)
                 class_instance.add_access_method(ch.arg, tmp_access_methods)
-                access_methods += tmp_access_methods
                 fields.extend(tmp_fields)
 
             def expand(children):
@@ -750,7 +748,6 @@ class ClassGenerator(object):
             if sub not in expanded_i_children:
                 tmp_access_methods, tmp_fields = self.generate_child(sub, path, ns, prefix_name)
                 class_instance.add_access_method(sub.arg, tmp_access_methods)
-                access_methods += tmp_access_methods
                 fields.extend(tmp_fields)
 
         if self.ctx.opts.verbose:
@@ -762,8 +759,6 @@ class ClassGenerator(object):
         if stmt.keyword == 'container':
             class_instance.add_constructor('unique', constructor(
                 stmt, self.ctx, set_prefix=top_level, root=prefix_name))
-            constructors = constructor(stmt, self.ctx, set_prefix=top_level,
-                root=prefix_name)
             class_instance.add_cloner('deep', clone(name, shallow=False))
             class_instance.add_cloner('shallow', clone(name, shallow=True))
         elif stmt.keyword == 'list':
@@ -776,21 +771,10 @@ class ClassGenerator(object):
             class_instance.add_constructor('2', constructor(stmt, self.ctx, root=prefix_name, set_prefix=top_level,
                 mode=2, args=primitive_keys, throws='''
             throws INMException'''))
-            constructors = constructor(stmt, self.ctx, root=prefix_name,
-                set_prefix=top_level, throws="\n        throws INMException") + \
-            constructor(stmt, self.ctx, root=prefix_name, set_prefix=top_level,
-                mode=1, args=confm_keys, throws='''
-            throws INMException''') + \
-            constructor(stmt, self.ctx, root=prefix_name, set_prefix=top_level,
-                mode=2, args=primitive_keys, throws='''
-            throws INMException''')
             if not only_strings:
                 class_instance.add_constructor('3', constructor(stmt, self.ctx, root=prefix_name,
                     set_prefix=top_level, mode=3, args=primitive_keys, throws='''
             throws INMException'''))
-                constructors += constructor(stmt, self.ctx, root=prefix_name,
-                    set_prefix=top_level, mode=3, args=primitive_keys, throws='''
-            throws INMException''')
             class_instance.add_cloner('deep', clone(name, map(capitalize_first,
                 key.arg.split(' ')), shallow=False))
             class_instance.add_cloner('shallow', clone(name,
@@ -815,8 +799,7 @@ class ClassGenerator(object):
             mods = ' extends ' + super_type
             base_type = get_base_type(stmt)
             primitive = get_types(base_type, self.ctx)[1]
-            class_instance.add_constructor('unique', typedef_constructor(stmt))
-            constructors = typedef_constructor(stmt)
+            class_instance.add_constructor('string', typedef_constructor(stmt))
             spec = ', using a string value'
             arg = 'String ' + stmt.arg + 'Value'
             body = 'super.setValue(' + stmt.arg + '''Value);
@@ -825,17 +808,13 @@ class ClassGenerator(object):
             # XXX: Intentionally overwrite access_methods
             class_instance.access_methods.clear()
             class_instance.add_access_method('string', set_value(stmt, spec1=spec, argument=arg, body=body))
-            access_methods = set_value(stmt, spec1=spec, argument=arg, body=body)
             if primitive != 'String':
-                constructors += typedef_constructor(stmt, primitive)
+                class_instance.add_constructor('primitive', typedef_constructor(stmt, primitive))
                 spec = ', using ' + primitive + ' value'
                 arg = primitive + ' ' + stmt.arg + 'Value'
                 class_instance.add_access_method('primitive', set_value(stmt,
                     spec1=spec, argument=arg, body=body))
-                access_methods += set_value(stmt, spec1=spec, argument=arg,
-                    body=body)
             class_instance.add_access_method('check', check())
-            access_methods += check()
             self.yang_types.add(stmt.arg)
         write_file(self.package, 
                    filename, 
