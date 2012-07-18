@@ -695,7 +695,7 @@ class ClassGenerator(object):
 
         """
         (filename, name) = extract_names(stmt.arg)
-        constructors = cloners = names = access_methods = support_methods = ''
+        constructors = access_methods = ''
         fields = []
         mods = ' extends Container'
         
@@ -757,10 +757,8 @@ class ClassGenerator(object):
             print 'Generating Java class "' + filename + '"...'
         if stmt.keyword != 'typedef':  # TODO: Only add key name getter when relevant
             class_instance.add_support_method('unique', support_add(fields))
-            support_methods = support_add(fields)
             class_instance.add_name_getter('keys', key_names(stmt))
             class_instance.add_name_getter('children', children_names(stmt))
-            names = key_names(stmt) + children_names(stmt)
         if stmt.keyword == 'container':
             class_instance.add_constructor('unique', constructor(
                 stmt, self.ctx, set_prefix=top_level, root=prefix_name))
@@ -768,7 +766,6 @@ class ClassGenerator(object):
                 root=prefix_name)
             class_instance.add_cloner('deep', clone(name, shallow=False))
             class_instance.add_cloner('shallow', clone(name, shallow=True))
-            cloners = clone(name, shallow=False) + clone(name, shallow=True)
         elif stmt.keyword == 'list':
             key, only_strings, confm_keys, primitive_keys = extract_keys(stmt, self.ctx)
             class_instance.add_constructor('0', constructor(stmt, self.ctx, root=prefix_name,
@@ -798,9 +795,6 @@ class ClassGenerator(object):
                 key.arg.split(' ')), shallow=False))
             class_instance.add_cloner('shallow', clone(name,
                 map(capitalize_first, key.arg.split(' ')), shallow=True))
-            cloners = clone(name, map(capitalize_first, key.arg.split(' ')),
-                shallow=False) + \
-                clone(name, map(capitalize_first, key.arg.split(' ')), shallow=True)
         elif stmt.keyword == 'typedef':
             type_stmt = stmt.search_one('type')
 
