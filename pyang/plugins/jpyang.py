@@ -29,9 +29,6 @@ Or, if you like to keep things simple:
 
 """
 
-from __future__ import with_statement  # Not required from Python 2.6 and
-# ... onwards, but kept for the sake of backwards compatibility
-
 import optparse  # TODO Deprecated in python 2.7, should use argparse instead
 # ... See http://stackoverflow.com/questions/3217673/why-use-argparse-rather-than-optparse
 # ... and http://docs.python.org/dev/library/argparse.html#upgrading-optparse-code
