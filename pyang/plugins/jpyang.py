@@ -1199,6 +1199,8 @@ class JavaClass(object):
         added using the JavaClass.add methods prior to calling this method.
         Otherwise the class will be empty.
         
+        The class name is the filename without the file extension.
+        
         """
         # The header is placed in the beginning of the Java file
         header = '/* \n * @(#)' + self.filename + ' ' * 8 + self.version + \
@@ -1209,21 +1211,18 @@ class JavaClass(object):
  
         # package and import statement goes here
         header += '\n\npackage ' + strip_first(self.package) + ';\n'
-        if len(self.imports) > 0:
-            header += '\n'
-        for im in self.imports:
-            header += 'import ' + im + ';\n'
+        if self.imports:
+            header += '\nimport ' + ';\nimport '.join(self.imports) + ';\n'
+        
+        # Class doc-comment and declaration, with modifiers
         header += '''
 /**
  * ''' + self.description + '''
  *
- * @version    ''' + self.version + ' ' + get_date(date_format=1) + '''
- * @author    Auto Generated
+ * @version ''' + self.version + ' ' + get_date(date_format=1) + '''
+ * @author Auto Generated
  */
 public class ''' + self.filename.split('.')[0] + self.modifiers + ' {\n'
-        # Here is the class declaration, with modifiers.
-        # The class name is the filename without the file extension.
-        
         return header + self.get_body() + '\n}'
 
 
