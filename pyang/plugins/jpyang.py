@@ -758,7 +758,7 @@ class ClassGenerator(object):
         if i_children_exists:
             for ch in stmt.i_children:
                 tmp_access_methods, tmp_fields = self.generate_child(ch)
-                self.java_class.add_access_method(ch.arg, tmp_access_methods)
+#                self.java_class.add_access_method(ch.arg, tmp_access_methods)
                 fields.extend(tmp_fields)
 
             def expand(children):
@@ -779,7 +779,7 @@ class ClassGenerator(object):
         for sub in stmt.substmts:
             if sub not in expanded_i_children:
                 tmp_access_methods, tmp_fields = self.generate_child(sub)
-                self.java_class.add_access_method(sub.arg, tmp_access_methods)
+#                self.java_class.add_access_method(sub.arg, tmp_access_methods)
                 fields.extend(tmp_fields)
 
         if self.ctx.opts.verbose:
@@ -839,16 +839,16 @@ class ClassGenerator(object):
 
             # XXX: Intentionally overwrite access_methods
             self.java_class.access_methods.clear()
-            self.java_class.add_access_method('string', 
+            self.java_class.append_access_method('string', 
                 set_value(stmt, spec1=spec, argument=arg, body=body))
             if primitive != 'String':
                 self.java_class.add_constructor('primitive', 
                     typedef_constructor(stmt, primitive))
                 spec = ', using ' + primitive + ' value'
                 arg = primitive + ' ' + stmt.arg + 'Value'
-                self.java_class.add_access_method('primitive', set_value(stmt,
+                self.java_class.append_access_method('primitive', set_value(stmt,
                     spec1=spec, argument=arg, body=body))
-            self.java_class.add_access_method('check', check())
+            self.java_class.append_access_method('check', check())
             self.yang_types.add(stmt.arg)
         self.write_to_file()
 
@@ -860,8 +860,8 @@ class ClassGenerator(object):
         sub -- A data model subtree statement. Its parent most not be None.
 
         """
-        access_methods = ''
         fields = []
+        add = self.java_class.append_access_method  # XXX: add is a function
         if sub.keyword in ('list', 'container'):
             child_generator = ClassGenerator(stmt=sub,
                 package=self.package + '.' + sub.parent.arg,
@@ -870,24 +870,23 @@ class ClassGenerator(object):
             child_generator.generate()
             if sub.keyword == 'list':
                 key, _, confm_keys, _ = extract_keys(sub, self.ctx)
-                access_methods += access_methods_comment(sub) + \
-                get_stmt(sub, confm_keys) + \
-                get_stmt(sub, confm_keys, string=True) + \
-                child_iterator(sub) + \
-                add_stmt(sub, args=[(sub.arg, sub.arg)]) + \
-                add_stmt(sub, args=confm_keys) + \
-                add_stmt(sub, args=confm_keys, string=True) + \
-                add_stmt(sub, args=[]) + \
-                delete_stmt(sub, args=confm_keys) + \
-                delete_stmt(sub, args=confm_keys, string=True)
+                add(sub.arg, access_methods_comment(sub))
+                add(sub.arg, get_stmt(sub, confm_keys))
+                add(sub.arg, get_stmt(sub, confm_keys, string=True))
+                add(sub.arg, child_iterator(sub))
+                add(sub.arg, add_stmt(sub, args=[(sub.arg, sub.arg)]))
+                add(sub.arg, add_stmt(sub, args=confm_keys))
+                add(sub.arg, add_stmt(sub, args=confm_keys, string=True))
+                add(sub.arg, add_stmt(sub, args=[]))
+                add(sub.arg, delete_stmt(sub, args=confm_keys))
+                add(sub.arg, delete_stmt(sub, args=confm_keys, string=True))
             elif sub.keyword == 'container':
                 fields.append(sub.arg)
-                access_methods += access_methods_comment(sub) + \
-                child_field(sub) + \
-                add_stmt(sub, args=[(sub.parent.arg + '.' + sub.arg, sub.arg)],
-                    field=True) + \
-                add_stmt(sub, args=[], field=True) + \
-                delete_stmt(sub)
+                add(sub.arg, access_methods_comment(sub))
+                add(sub.arg, child_field(sub))
+                add(sub.arg, add_stmt(sub, args=[(sub.parent.arg + '.' + sub.arg, sub.arg)], field=True))
+                add(sub.arg, add_stmt(sub, args=[], field=True))
+                add(sub.arg, delete_stmt(sub))
         elif sub.keyword in ('leaf', 'leaf-list'):
             type_stmt = sub.search_one('type')
             if type_stmt.i_typedef:
@@ -907,50 +906,50 @@ class ClassGenerator(object):
                     optional = False
                     
                     # Pass temp to avoid multiple keys
-                    access_methods += access_methods_comment(temp, optional)
+                    add(sub.arg, access_methods_comment(temp, optional))
                 else:
                     optional = True
                     # TODO: ensure that the leaf is truly optional
                     
-                    access_methods += access_methods_comment(sub, optional)
-                access_methods += get_value(sub, ret_type=type_str1) + \
-                    set_leaf_value(sub, prefix=self.prefix_name, arg_type=type_str1) + \
-                    set_leaf_value(sub, prefix='', arg_type='String',
-                        confm_type=type_str1)
+                    add(sub.arg, access_methods_comment(sub, optional))
+                add(sub.arg, get_value(sub, ret_type=type_str1))
+                add(sub.arg, set_leaf_value(sub, prefix=self.prefix_name, arg_type=type_str1))
+                add(sub.arg, set_leaf_value(sub, prefix='', arg_type='String',
+                        confm_type=type_str1))
                 if type_str2 != 'String':
-                    access_methods += set_leaf_value(sub, prefix='',
-                        arg_type=type_str2, confm_type=type_str1)
+                    add(sub.arg, set_leaf_value(sub, prefix='',
+                        arg_type=type_str2, confm_type=type_str1))
                 if optional:
-                    access_methods += unset_value(sub)
-                access_methods += add_value(sub, self.prefix_name)
+                    add(sub.arg, unset_value(sub))
+                add(sub.arg, add_value(sub, self.prefix_name))
                 if optional:
-                    access_methods += mark(sub, 'replace') + \
-                    mark(sub, 'merge') + \
-                    mark(sub, 'create') + \
-                    mark(sub, 'delete')
+                    add(sub.arg, mark(sub, 'replace'))
+                    add(sub.arg, mark(sub, 'merge'))
+                    add(sub.arg, mark(sub, 'create'))
+                    add(sub.arg, mark(sub, 'delete'))
             elif sub.keyword == 'leaf-list':
-                access_methods += access_methods_comment(sub, optional=False) + \
-                    child_iterator(sub) + \
-                    set_leaf_value(sub, prefix=self.prefix_name, arg_type=type_str1) + \
-                    set_leaf_value(sub, prefix='', arg_type='String',
-                        confm_type=type_str1)
+                add(sub.arg, access_methods_comment(sub, optional=False))
+                add(sub.arg, child_iterator(sub))
+                add(sub.arg, set_leaf_value(sub, prefix=self.prefix_name, arg_type=type_str1))
+                add(sub.arg, set_leaf_value(sub, prefix='', arg_type='String',
+                        confm_type=type_str1))
                 if type_str2 != 'String':
-                    access_methods += set_leaf_value(sub, prefix='',
-                        arg_type=type_str2, confm_type=type_str1)
-                access_methods += delete_stmt(sub,
-                        args=[(type_str1, sub.arg + 'Value')], keys=False) + \
-                    delete_stmt(sub, args=[(type_str1, sub.arg + 'Value')],
-                        string=True, keys=False) + \
-                    add_value(sub, self.prefix_name) + \
-                    mark(sub, 'replace', arg_type=type_str1) + \
-                    mark(sub, 'replace', arg_type='String') + \
-                    mark(sub, 'merge', arg_type=type_str1) + \
-                    mark(sub, 'merge', arg_type='String') + \
-                    mark(sub, 'create', arg_type=type_str1) + \
-                    mark(sub, 'create', arg_type='String') + \
-                    mark(sub, 'delete', arg_type=type_str1) + \
-                    mark(sub, 'delete', arg_type='String')
-        return access_methods, fields
+                    add(sub.arg, set_leaf_value(sub, prefix='',
+                        arg_type=type_str2, confm_type=type_str1))
+                add(sub.arg, delete_stmt(sub,
+                        args=[(type_str1, sub.arg + 'Value')], keys=False))
+                add(sub.arg, delete_stmt(sub, args=[(type_str1, sub.arg + 'Value')],
+                        string=True, keys=False))
+                add(sub.arg, add_value(sub, self.prefix_name))
+                add(sub.arg, mark(sub, 'replace', arg_type=type_str1))
+                add(sub.arg, mark(sub, 'replace', arg_type='String'))
+                add(sub.arg, mark(sub, 'merge', arg_type=type_str1))
+                add(sub.arg, mark(sub, 'merge', arg_type='String'))
+                add(sub.arg, mark(sub, 'create', arg_type=type_str1))
+                add(sub.arg, mark(sub, 'create', arg_type='String'))
+                add(sub.arg, mark(sub, 'delete', arg_type=type_str1))
+                add(sub.arg, mark(sub, 'delete', arg_type='String'))
+        return None, fields
 
     def write_to_file(self):
         write_file(self.package,
@@ -1196,9 +1195,11 @@ class JavaClass(object):
         """Adds a keyNames or childrenNames method represented as a string"""
         self.name_getters[key] = name_getter
 
-    def add_access_method(self, key, access_method):
+    def append_access_method(self, key, access_method):
         """Adds an access method represented as a string"""
-        self.access_methods[key] = access_method
+        if self.access_methods.get(key) is None:
+            self.access_methods[key] = []
+        self.access_methods[key].append(access_method)
 
     def add_support_method(self, key, support_method):
         """Adds a support method represented as a string"""
@@ -1215,7 +1216,8 @@ class JavaClass(object):
             code.extend(self.enablers.values())
             code.extend(self.schema_registrators.values())
             code.extend(self.name_getters.values())
-            code.extend(self.access_methods.values())
+            for methods in self.access_methods.values():
+                code.extend(methods)
             code.extend(self.support_methods.values())
             self.body = ''.join(code)
         return self.body
