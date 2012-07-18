@@ -724,7 +724,10 @@ class ClassGenerator(object):
         self.write_to_file()
 
     def generate_class(self):
-        """Generates a Java class hierarchy providing an interface to a YANG module"""
+        """Generates a Java class hierarchy providing an interface to a YANG 
+        module. Uses mutual recursion with generate_child.
+        
+        """
         stmt = self.stmt
         (self.filename, name) = extract_names(stmt.arg)
         fields = []
@@ -757,9 +760,7 @@ class ClassGenerator(object):
         expanded_i_children = []
         if i_children_exists:
             for ch in stmt.i_children:
-                tmp_access_methods, tmp_fields = self.generate_child(ch)
-#                self.java_class.add_access_method(ch.arg, tmp_access_methods)
-                fields.extend(tmp_fields)
+                fields.extend(self.generate_child(ch))
 
             def expand(children):
                 res = []
@@ -778,9 +779,7 @@ class ClassGenerator(object):
         # TODO: Avoid quadratic time duplication check (maybe use a set)
         for sub in stmt.substmts:
             if sub not in expanded_i_children:
-                tmp_access_methods, tmp_fields = self.generate_child(sub)
-#                self.java_class.add_access_method(sub.arg, tmp_access_methods)
-                fields.extend(tmp_fields)
+                fields.extend(self.generate_child(sub))
 
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + self.filename + '"...'
@@ -853,9 +852,12 @@ class ClassGenerator(object):
         self.write_to_file()
 
     def generate_child(self, sub):
-        """Returns a tuple of two strings representing java methods and fields
-        corresponding to access methods to the sub statement. Uses mutual recursion
-        with generate_class.
+        """Appends access methods to class for children in the YANG module.
+        Returns a list which contains the name of sub if it is a container,
+        otherwise an empty list is returned. Uses mutual recursion with 
+        generate_class.
+        
+        For this function to work, self.java_class must be defined.
 
         sub -- A data model subtree statement. Its parent most not be None.
 
@@ -908,9 +910,8 @@ class ClassGenerator(object):
                     # Pass temp to avoid multiple keys
                     add(sub.arg, access_methods_comment(temp, optional))
                 else:
-                    optional = True
                     # TODO: ensure that the leaf is truly optional
-                    
+                    optional = True
                     add(sub.arg, access_methods_comment(sub, optional))
                 add(sub.arg, get_value(sub, ret_type=type_str1))
                 add(sub.arg, set_leaf_value(sub, prefix=self.prefix_name, arg_type=type_str1))
@@ -949,7 +950,7 @@ class ClassGenerator(object):
                 add(sub.arg, mark(sub, 'create', arg_type='String'))
                 add(sub.arg, mark(sub, 'delete', arg_type=type_str1))
                 add(sub.arg, mark(sub, 'delete', arg_type='String'))
-        return None, fields
+        return fields
 
     def write_to_file(self):
         write_file(self.package,
