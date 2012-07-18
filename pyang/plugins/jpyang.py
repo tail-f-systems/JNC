@@ -574,7 +574,11 @@ class SchemaGenerator(object):
             print 'Generating schema node "' + self.tagpath + '"...'
         res = []
         res.append('<tagpath>' + self.tagpath + '</tagpath>')
-        res.append('<namespace>' + self.ns + '</namespace>')
+        if stmt.top is None:
+            ns = stmt.search_one('namespace').arg
+        else:
+            ns = stmt.top.search_one('namespace').arg
+        res.append('<namespace>' + ns + '</namespace>')
         res.append('<primitive_type>0</primitive_type>')
     
         min_occurs = '0'
