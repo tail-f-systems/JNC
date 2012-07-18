@@ -1,8 +1,7 @@
 #!/usr/bin/python
 # -*- coding: latin-1 -*-
 """JPyang: Java output plug-in
- * Copyright (c) 2012 Tail-F Systems AB.
- * Korgmakargränd 2, SE-111 22, Stockholm, Sweden
+ * Copyright (c) 2012 Tail-F Systems AB, Stockholm, Sweden
  * All rights reserved.
  *
  * This software is the confidential and proprietary information of Tail-F
@@ -29,7 +28,7 @@ Or, if you like to keep things simple:
 
 """
 
-import optparse  # TODO Deprecated in python 2.7, should use argparse instead
+import optparse  # TODO: Deprecated in python 2.7, should use argparse instead
 # ... See http://stackoverflow.com/questions/3217673/why-use-argparse-rather-than-optparse
 # ... and http://docs.python.org/dev/library/argparse.html#upgrading-optparse-code
 import os
@@ -44,7 +43,7 @@ from pyang import statements
 import collections
 
 
-# TODO Might be more efficient to use dicts instead of set and list for these
+# TODO: Might be more efficient to use dicts instead of set and list for these
 java_reserved_words = {'abstract', 'assert', 'boolean', 'break', 'byte',
     'case', 'catch', 'char', 'class', 'const*', 'continue', 'default',
     'double', 'do', 'else', 'enum', 'extends', 'false',
@@ -60,7 +59,7 @@ java_reserved_words = {'abstract', 'assert', 'boolean', 'break', 'byte',
 immutable_stmts = {'type', 'typedef', 'namespace', 'prefix', 'organization',
     'contact', 'description', 'range'}
 """A set of statement keywords that should not have their arguments modified"""
-# TODO add more keywords to immutable_stmts
+# TODO: add more keywords to immutable_stmts
 
 
 outputted_warnings = []
@@ -170,7 +169,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                     schema_node = schema_generator.schema_node(module)
                     schema_nodes = schema_generator.schema_nodes()
                     name = capitalize_first(module.search_one('prefix').arg)
-                    write_file(d,  # XXX This might ruin directory structure
+                    write_file(d,  # XXX: This might ruin directory structure
                         name + '.schema',
                         '<schema>\n' + indent( \
                             ('<node>\n' + indent(schema_node) + '\n</node>' + \
@@ -395,7 +394,7 @@ def get_types(yang_type, ctx):
             integer_type = ['long', 'long', 'int', 'short']
         else:
             integer_type = ['long', 'int', 'short', 'byte']
-        # XXX One might want to implement uint8 as short instead of byte, etc.
+        # XXX: One might want to implement uint8 as short instead of byte, etc.
         if yang_type.arg[-2:] == '64':
             primitive = integer_type[0]
         elif yang_type.arg[-2:] == '32':
@@ -410,14 +409,14 @@ def get_types(yang_type, ctx):
             primitive = 'long'
     elif yang_type.arg == 'decimal64':
         primitive = 'double'
-        # TODO Maybe this should be com.tailf.confm.confd.Decimal64
+        # TODO: Maybe this should be com.tailf.confm.confd.Decimal64
     elif yang_type.arg == 'boolean':
         primitive = 'boolean'
 #    elif yang_type.arg == 'enumeration':  # Handled by else clause
 #    elif yang_type.arg == 'bits':  # Handled by else clause
-#    TODO add support for built-in datatypes bits, empty, identityref,
+#    TODO: add support for built-in datatypes bits, empty, identityref,
 #    instance-identifier, leafref and union
-#    TODO enumeration and derived datatypes?
+#    TODO: enumeration and derived datatypes?
     else:
         try:
             typedef = yang_type.i_typedef
@@ -462,7 +461,7 @@ def extract_keys(stmt, ctx):
         confm_keys.append((confm, arg))
         primitive_keys.append((primitive, arg))
         only_strings *= primitive_keys[-1][0] == 'String'
-        # XXX 'b *= a' is syntactically equivalent to b = b and a
+        # XXX: 'b *= a' is syntactically equivalent to b = b and a
 
     return key, only_strings, confm_keys, primitive_keys
 
@@ -523,7 +522,7 @@ def indent(lines, level=1):
     level -- indentation level (number of spaces divided by 4)
 
     """
-    # TODO implement a more efficient version using replace on strings
+    # TODO: implement a more efficient version using replace on strings
     res = ''
     for line in lines:
         res += ' ' * level * 4 + line + '\n'
@@ -594,8 +593,8 @@ class SchemaGenerator(object):
             min_occurs = '1'
         if isUnique or childOfContainerOrList or is_container(stmt, True):
             max_occurs = '1'
-        res.append('<min_occurs>' + min_occurs + '</min_occurs>')  # TODO correct?
-        res.append('<max_occurs>' + max_occurs + '</max_occurs>')  # TODO correct?
+        res.append('<min_occurs>' + min_occurs + '</min_occurs>')  # TODO: correct?
+        res.append('<max_occurs>' + max_occurs + '</max_occurs>')  # TODO: correct?
     
         children = ''
         for ch in stmt.substmts:
@@ -662,7 +661,7 @@ class ClassGenerator(object):
         (filename, name) = extract_names(prefix.arg)
 
         for stmt in self.module.substmts:
-            if stmt.keyword in ('container', 'list', 'augment', 'typedef'):  # TODO other top-level stmts
+            if stmt.keyword in ('container', 'list', 'augment', 'typedef'):  # TODO: other top-level stmts
                 self.generate_class(stmt, '', ns_arg, name, top_level=True)
 
         if self.ctx.opts.verbose:
@@ -716,7 +715,7 @@ class ClassGenerator(object):
         # Instantiate java class to be generated
 #        root_class = JavaClass():
 
-        # TODO preserve correct order in generated class
+        # TODO: preserve correct order in generated class
         expanded_i_children = []
         if i_children_exists:
             for ch in stmt.i_children:
@@ -738,7 +737,7 @@ class ClassGenerator(object):
                 return res
             expanded_i_children = expand(stmt.i_children)
 
-        # TODO Avoid quadratic time duplication check (maybe use a set)
+        # TODO: Avoid quadratic time duplication check (maybe use a set)
         for sub in stmt.substmts:
             if sub not in expanded_i_children:
                 tmp_access_methods, tmp_fields = self.generate_child(sub, path, ns, prefix_name)
@@ -797,7 +796,7 @@ class ClassGenerator(object):
             body = 'super.setValue(' + stmt.arg + '''Value);
             check();'''
 
-            # XXX Intentionally overwrite access_methods
+            # XXX: Intentionally overwrite access_methods
             access_methods = set_value(stmt, spec1=spec, argument=arg, body=body)
             """ stmt     -- The statement to set the value for
                 spec1    -- Text to insert before parameter listing
@@ -816,7 +815,7 @@ class ClassGenerator(object):
             self.yang_types.add(stmt.arg)
         class_instance = JavaClass(filename=filename, package=self.package,
                 imports=['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
-                # TODO Hashtable not used in generated code
+                # TODO: Hashtable not used in generated code
                 
                 description='This class represents a "' + path + stmt.arg +
                 '" element\n * from the namespace ' + ns,
@@ -881,14 +880,14 @@ class ClassGenerator(object):
                 key = sub.parent.search_one('key')
                 if key is not None and sub.arg in key.arg.split(' '):
                     temp = statements.Statement(None, None, None, 'key',
-                        arg=sub.arg)  # TODO Copy sub instead?
+                        arg=sub.arg)  # TODO: Copy sub instead?
                     optional = False
                     
                     # Pass temp to avoid multiple keys
                     access_methods += access_methods_comment(temp, optional)
                 else:
                     optional = True
-                    # TODO ensure that the leaf is truly optional
+                    # TODO: ensure that the leaf is truly optional
                     
                     access_methods += access_methods_comment(sub, optional)
                 access_methods += get_value(sub, ret_type=type_str1) + \
@@ -968,7 +967,7 @@ class PackageInfoGenerator(object):
             self.d.replace('/', '.')), self.stmt, self.ctx)
         for directory in dirs:
             for sub in self.stmt.substmts:
-                # XXX refactor
+                # XXX: refactor
                 if camelize(capitalize_first(sub.arg)) == camelize( \
                         capitalize_first(directory).replace('.',
                         '?')).replace('?', '.'):
@@ -1081,7 +1080,7 @@ class PackageInfoGenerator(object):
     using a compatible YANG model.
     
     '''
-        # XXX These strings should probably be rewritten for code readability and
+        # XXX: These strings should probably be rewritten for code readability and
         # ... to comply with the actual functionality of the class
         return ('/**' + java_docify(specification + html_hierarchy) + '''
      *
@@ -1284,10 +1283,10 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
 #                tmp_list_confm = []
 #                get_types(arg_type, tmp_list_confm, [], ctx)
 #                decl = 'new ' + tmp_list_confm[0][0] + '('
-                decl = 'new String('  # FIXME should call get_types with a stmt
+                decl = 'new String('  # FIXME: should call get_types with a stmt
                 values.append(decl + arg_name + 'Value)')
         for (arg_type, arg_name), value in zip(args, values):
-            # TODO http://en.wikipedia.org/wiki/Loop_unswitching
+            # TODO: http://en.wikipedia.org/wiki/Loop_unswitching
 
             inserts += '''
         // Set key element: ''' + arg_name + '''
@@ -1367,7 +1366,7 @@ def clone(class_name, key_names=[], shallow='False'):
     if not shallow:
         copy = 'n exact'
         signature = 'Object clone()'
-        cast = '(' + class_name + ')'  # TODO Not always required
+        cast = '(' + class_name + ')'  # TODO: Not always required
         method = 'cloneContent'
     else:
         copy = ' shallow'
@@ -1411,7 +1410,7 @@ def key_names(stmt):
     public String[] keyNames() {
         ''' + res + ''';
     }
-'''  # TODO Add support for multiple keys
+'''  # TODO: Add support for multiple keys
 
 
 def children_names(stmt):
@@ -1421,7 +1420,7 @@ def children_names(stmt):
     stmt -- A pyang Statement, typically a list or a container
 
     """
-    children = filter(lambda x:  # x.keyword != 'key' and # TODO add more
+    children = filter(lambda x:  # x.keyword != 'key' and # TODO: add more
         x.keyword != 'key',
         stmt.substmts)
     names = [ch.arg for ch in children]
@@ -1440,7 +1439,7 @@ def children_names(stmt):
             ''' + names + '''
         };
     }
-'''  # FIXME What if there are no children?
+'''  # FIXME: What if there are no children?
 
 
 def static_string(identifier, value):
@@ -1845,7 +1844,7 @@ def delete_stmt(stmt, args=[], string=False, keys=True):
         elif string:
             spec1 += '\n     * The value is specified as a String'
         for (arg_type, arg_name) in args:
-            # TODO http://en.wikipedia.org/wiki/Loop_unswitching
+            # TODO: http://en.wikipedia.org/wiki/Loop_unswitching
 
             if string:
                 arguments += 'String ' + arg_name + ', '
@@ -1911,4 +1910,4 @@ def support_add(fields=[]):
         super.addChild($child);
         ''' + assignments + '''
     }
-'''  # TODO '$' should be removed unless it is actually needed
+'''  # TODO: '$' should be removed unless it is actually needed
