@@ -695,9 +695,19 @@ class ClassGenerator(object):
 
         """
         (filename, name) = extract_names(stmt.arg)
-        access_methods = constructors = cloners = support_methods = names = ''
+        constructors = cloners = names = access_methods = support_methods = ''
         fields = []
         mods = ' extends Container'
+        
+        class_instance = JavaClass(filename=filename, package=self.package,
+                imports=['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
+                # TODO: Hashtable not used in generated code
+                
+                description='This class represents a "' + path + stmt.arg +
+                '" element\n * from the namespace ' + ns,
+                source=self.src,
+                modifiers=mods) 
+        
         i_children_exists = (hasattr(stmt, 'i_children')
             and stmt.i_children != None
             and stmt.i_children != [])
@@ -720,6 +730,9 @@ class ClassGenerator(object):
         if i_children_exists:
             for ch in stmt.i_children:
                 tmp_access_methods, tmp_fields = self.generate_child(ch, path, ns, prefix_name)
+                class_instance.add_access_method(ch.arg, tmp_access_methods)
+#                for tmp_field in tmp_fields:
+#                    class_instance.add_field(ch.arg, tmp_field)
                 access_methods += tmp_access_methods
                 fields.extend(tmp_fields)
 
@@ -741,20 +754,38 @@ class ClassGenerator(object):
         for sub in stmt.substmts:
             if sub not in expanded_i_children:
                 tmp_access_methods, tmp_fields = self.generate_child(sub, path, ns, prefix_name)
+                class_instance.add_access_method(sub.arg, tmp_access_methods)
+#                for tmp_field in tmp_fields:
+#                    class_instance.add_field(sub.arg, tmp_field)
                 access_methods += tmp_access_methods
                 fields.extend(tmp_fields)
 
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + filename + '"...'
-        if stmt.keyword != 'typedef':
+        if stmt.keyword != 'typedef':  # TODO: Only add key name getter when relevant
+            class_instance.add_support_method('unique', support_add(fields))
             support_methods = support_add(fields)
+            class_instance.add_name_getter('keys', key_names(stmt))
+            class_instance.add_name_getter('children', children_names(stmt))
             names = key_names(stmt) + children_names(stmt)
         if stmt.keyword == 'container':
+            class_instance.add_constructor('unique', constructor(
+                stmt, self.ctx, set_prefix=top_level, root=prefix_name))
             constructors = constructor(stmt, self.ctx, set_prefix=top_level,
                 root=prefix_name)
+            class_instance.add_cloner('deep', clone(name, shallow=False))
+            class_instance.add_cloner('shallow', clone(name, shallow=True))
             cloners = clone(name, shallow=False) + clone(name, shallow=True)
         elif stmt.keyword == 'list':
             key, only_strings, confm_keys, primitive_keys = extract_keys(stmt, self.ctx)
+            class_instance.add_constructor('0', constructor(stmt, self.ctx, root=prefix_name,
+                set_prefix=top_level, throws="\n        throws INMException"))
+            class_instance.add_constructor('1', constructor(stmt, self.ctx, root=prefix_name, set_prefix=top_level,
+                mode=1, args=confm_keys, throws='''
+            throws INMException'''))
+            class_instance.add_constructor('2', constructor(stmt, self.ctx, root=prefix_name, set_prefix=top_level,
+                mode=2, args=primitive_keys, throws='''
+            throws INMException'''))
             constructors = constructor(stmt, self.ctx, root=prefix_name,
                 set_prefix=top_level, throws="\n        throws INMException") + \
             constructor(stmt, self.ctx, root=prefix_name, set_prefix=top_level,
@@ -764,9 +795,16 @@ class ClassGenerator(object):
                 mode=2, args=primitive_keys, throws='''
             throws INMException''')
             if not only_strings:
+                class_instance.add_constructor('3', constructor(stmt, self.ctx, root=prefix_name,
+                    set_prefix=top_level, mode=3, args=primitive_keys, throws='''
+            throws INMException'''))
                 constructors += constructor(stmt, self.ctx, root=prefix_name,
                     set_prefix=top_level, mode=3, args=primitive_keys, throws='''
             throws INMException''')
+            class_instance.add_cloner('deep', clone(name, map(capitalize_first,
+                key.arg.split(' ')), shallow=False))
+            class_instance.add_cloner('shallow', clone(name,
+                map(capitalize_first, key.arg.split(' ')), shallow=True))
             cloners = clone(name, map(capitalize_first, key.arg.split(' ')),
                 shallow=False) + \
                 clone(name, map(capitalize_first, key.arg.split(' ')), shallow=True)
@@ -790,6 +828,7 @@ class ClassGenerator(object):
             mods = ' extends ' + super_type
             base_type = get_base_type(stmt)
             primitive = get_types(base_type, self.ctx)[1]
+            class_instance.add_constructor('unique', typedef_constructor(stmt))
             constructors = typedef_constructor(stmt)
             spec = ', using a string value'
             arg = 'String ' + stmt.arg + 'Value'
@@ -797,31 +836,31 @@ class ClassGenerator(object):
             check();'''
 
             # XXX: Intentionally overwrite access_methods
+            class_instance.access_methods.clear()
+            class_instance.add_access_method('string', set_value(stmt, spec1=spec, argument=arg, body=body))
             access_methods = set_value(stmt, spec1=spec, argument=arg, body=body)
-            """ stmt     -- The statement to set the value for
-                spec1    -- Text to insert before parameter listing
-                spec2    -- parameter description
-                argument -- Full argument listing of method
-                body     -- The code to be put in the method body"""
             if primitive != 'String':
                 constructors += typedef_constructor(stmt, primitive)
                 spec = ', using ' + primitive + ' value'
                 arg = primitive + ' ' + stmt.arg + 'Value'
+                class_instance.add_access_method('primitive', set_value(stmt,
+                    spec1=spec, argument=arg, body=body))
                 access_methods += set_value(stmt, spec1=spec, argument=arg,
                     body=body)
+            class_instance.add_access_method('check', check())
             access_methods += check()
 #            print 'typedef ' + stmt.arg
 #            print 'package: ' + package + ', filename: ' + filename
             self.yang_types.add(stmt.arg)
-        class_instance = JavaClass(filename=filename, package=self.package,
-                imports=['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
-                # TODO: Hashtable not used in generated code
-                
-                description='This class represents a "' + path + stmt.arg +
-                '" element\n * from the namespace ' + ns,
-                body=constructors + cloners + names + access_methods + support_methods,
-                source=self.src,
-                modifiers=mods) 
+#        class_instance = JavaClass(filename=filename, package=self.package,
+#                imports=['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
+#                # TODO: Hashtable not used in generated code
+#                
+#                description='This class represents a "' + path + stmt.arg +
+#                '" element\n * from the namespace ' + ns,
+#                body=constructors + cloners + names + access_methods + support_methods,
+#                source=self.src,
+#                modifiers=mods) 
         write_file(self.package, 
                    filename, 
                    class_instance.java_class(), 
