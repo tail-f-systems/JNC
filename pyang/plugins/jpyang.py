@@ -161,11 +161,28 @@ class JPyangPlugin(plugin.PyangPlugin):
         d = directory.replace('.', '/')
         for module in modules:
             if module.keyword == 'module':
+                # Generate Java classes
+                module = make_valid_identifiers(module)
+                src = 'module "' + module.arg + '", revision: "' + \
+                    util.get_latest_revision(module) + '".'
+                generator = ClassGenerator(module, package=directory, src=src, ctx=ctx)
+                generator.generate()
+                for aug_module in augmented_modules.values():
+                    src = 'module "' + aug_module.arg + '", revision: "' + \
+                        util.get_latest_revision(aug_module) + '".'
+                    generator = ClassGenerator(aug_module, package=directory, src=src, ctx=ctx)
+                    generator.generate()
+                if ctx.opts.debug or ctx.opts.verbose:
+                    print 'Java classes generation COMPLETE.'
                 if not ctx.opts.no_schema:
 
                     # Generate external schema
                     ns = module.search_one('namespace').arg
-                    schema_generator = SchemaGenerator(module.substmts, '/', ns, ctx)
+                    stmts = []
+                    stmts.extend(module.substmts)
+                    for aug_module in augmented_modules.values():
+                        stmts.extend(aug_module.substmts)
+                    schema_generator = SchemaGenerator(stmts, '/', ns, ctx)
                     schema_node = schema_generator.schema_node(module)
                     schema_nodes = schema_generator.schema_nodes()
                     name = capitalize_first(module.search_one('prefix').arg)
@@ -178,20 +195,8 @@ class JPyangPlugin(plugin.PyangPlugin):
                     if ctx.opts.debug or ctx.opts.verbose:
                         print 'Schema generation COMPLETE.'
 
-                # Generate Java classes
-                module = make_valid_identifiers(module)
-                src = 'module "' + module.arg + '", revision: "' + \
-                    util.get_latest_revision(module) + '".'
-                generator = ClassGenerator(module, package=directory, src=src, ctx=ctx)
-                generator.generate()
-                for aug_module in augmented_modules.values():
-                    src = 'module "' + aug_module.arg + '", revision: "' + \
-                        util.get_latest_revision(aug_module) + '".'
-                    generator = ClassGenerator(aug_module, package=directory, src=src, ctx=ctx)
-                    generator.generate()
                 augmented_modules.clear()
-                if ctx.opts.debug or ctx.opts.verbose:
-                    print 'Java classes generation COMPLETE.'
+
             else:
                 print_warning(msg='Ignoring schema tree rooted at "' + \
                     module.keyword + ' ' + module.arg + '" - not a module')
