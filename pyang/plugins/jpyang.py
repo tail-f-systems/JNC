@@ -183,12 +183,12 @@ class JPyangPlugin(plugin.PyangPlugin):
                 module = make_valid_identifiers(module)
                 src = 'module "' + module.arg + '", revision: "' + \
                     util.get_latest_revision(module) + '".'
-                generator = ClassGenerator(module, directory, src, ctx)
+                generator = ClassGenerator(module, package=directory, src=src, ctx=ctx)
                 generator.generate()
                 for aug_module in augmented_modules.values():
                     src = 'module "' + aug_module.arg + '", revision: "' + \
                         util.get_latest_revision(aug_module) + '".'
-                    generator = ClassGenerator(aug_module, directory, src, ctx)
+                    generator = ClassGenerator(aug_module, package=directory, src=src, ctx=ctx)
                     generator.generate()
                 augmented_modules.clear()
                 if ctx.opts.debug or ctx.opts.verbose:
@@ -629,8 +629,8 @@ class YangType(object):
 class ClassGenerator(object):
     """Used to generate java classes from a yang module"""
 
-    def __init__(self, stmt, package, src, ctx, path='', ns='', 
-                 prefix_name='', top_level=False):
+    def __init__(self, stmt, package=None, src=None, ctx=None, path='', ns='', 
+            prefix_name='', top_level=False, yang_types=None, parent=None):
         """Constructor.
 
         stmt        -- A statement (sub)tree, parsed from a YANG model
@@ -643,19 +643,24 @@ class ClassGenerator(object):
         ns          -- The XML namespace of the module
         prefix_name -- The module prefix
         top_level   -- Whether or not this is a top-level statement
+        yang_types  -- An instance of the YangType class
+        parent      -- ClassGenerator to copy arguments that were not supplied
+                       from (if applicable)
 
         """  # TODO: Clarify why some arguments are optional
         self.stmt = stmt
         self.package = package
         self.src = src
         self.ctx = ctx
-        
         self.path = path
         self.ns = ns
         self.prefix_name = prefix_name
         self.top_level = top_level
-        
-        self.yang_types = YangType()
+        self.yang_types = yang_types
+        if parent is not None:
+            for attr in ['package', 'src', 'ctx', 'path', 'ns', 'prefix_name', 'yang_types']:
+                if getattr(self, attr) is None:
+                    setattr(self, attr, getattr(parent, attr))
 
     def generate(self):
         """Generates class(es) for self.stmt"""
@@ -681,8 +686,8 @@ class ClassGenerator(object):
 
         for stmt in self.stmt.substmts:
             if stmt.keyword in ('container', 'list', 'augment', 'typedef'):  # TODO: other top-level stmts
-                child_generator = ClassGenerator(stmt, self.package, self.src,
-                    self.ctx, ns=ns_arg, prefix_name=name, top_level=True)
+                child_generator = ClassGenerator(stmt, ns=ns_arg,
+                    prefix_name=name, top_level=True, parent=self)
                 child_generator.generate()
 
         if self.ctx.opts.verbose:
@@ -800,9 +805,8 @@ class ClassGenerator(object):
             if type_stmt.i_typedef:
                 if not self.yang_types.defined(type_stmt.i_typedef.arg):
                     typedef_generator = ClassGenerator(type_stmt.i_typedef, 
-                        get_package(type_stmt.i_typedef, self.ctx), self.src,
-                        self.ctx, self.package.replace('.', '/') + '/',
-                        self.ns, self.prefix_name)
+                        package=get_package(type_stmt.i_typedef, self.ctx),
+                        path=self.package.replace('.', '/') + '/', parent=self)
                     typedef_generator.generate()
                     self.yang_types.add(type_stmt.i_typedef.arg)
 
@@ -846,9 +850,8 @@ class ClassGenerator(object):
         fields = []
         if sub.keyword in ('list', 'container'):
             child_generator = ClassGenerator(stmt=sub,
-                package=self.package + '.' + sub.parent.arg, src=self.src,
-                ctx=self.ctx, path=self.path + sub.parent.arg + '/',
-                ns=self.ns, prefix_name=self.prefix_name)
+                package=self.package + '.' + sub.parent.arg,
+                path=self.path + sub.parent.arg + '/', parent=self)
             child_generator.generate()
             if sub.keyword == 'list':
                 key, _, confm_keys, _ = extract_keys(sub, self.ctx)
@@ -877,9 +880,7 @@ class ClassGenerator(object):
                     type_generator = ClassGenerator(stmt=type_stmt.i_typedef,
                         package=get_package(type_stmt.i_typedef,
                                             self.ctx).replace('.', '/') + '/',
-                        src=self.src,
-                        ctx=self.ctx, path=self.path + sub.parent.arg + '/',
-                        ns=self.ns, prefix_name=self.prefix_name)
+                        path=self.path + sub.parent.arg + '/', parent=self)
                     type_generator.generate()
             type_str1, type_str2 = get_types(type_stmt, self.ctx)
             if sub.keyword == 'leaf':
