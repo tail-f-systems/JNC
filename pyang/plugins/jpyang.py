@@ -177,21 +177,27 @@ class JPyangPlugin(plugin.PyangPlugin):
                 if not ctx.opts.no_schema:
 
                     # Generate external schema
-                    ns = module.search_one('namespace').arg
+                    schema_nodes = ['<schema>']
                     stmts = []
                     stmts.extend(module.substmts)
+                    module_root = SchemaNode(module, '/')
+                    schema_nodes.extend(module_root.as_list())
                     for aug_module in augmented_modules.values():
                         stmts.extend(aug_module.substmts)
-                    schema_generator = SchemaGenerator(stmts, '/', ns, ctx)
-                    schema_node = schema_generator.schema_node(module)
-                    schema_nodes = schema_generator.schema_nodes()
+                        aug_module_root = SchemaNode(aug_module, '/')
+                        schema_nodes.extend(aug_module_root.as_list())
+                    schema_generator = SchemaGenerator(stmts, '/', ctx)
+                    schema_nodes.extend(schema_generator.schema_nodes())
+                    schema_nodes.append('</schema>')
+                    for i in range(1, len(schema_nodes)):
+                        # Indent all but the first and last line
+                        if schema_nodes[i] in ('<node>', '</node>'):
+                            schema_nodes[i] = ' ' * 4 + schema_nodes[i]
+                        else:
+                            schema_nodes[i] = ' ' * 8 + schema_nodes[i]
+                    
                     name = capitalize_first(module.search_one('prefix').arg)
-                    write_file(d,  # XXX: This might ruin directory structure
-                        name + '.schema',
-                        '<schema>\n' + indent( \
-                            ('<node>\n' + indent(schema_node) + '\n</node>' + \
-                                schema_nodes).splitlines()) + '\n</schema>',
-                        ctx)
+                    write_file(d, name + '.schema', '\n'.join(schema_nodes), ctx)
                     if ctx.opts.debug or ctx.opts.verbose:
                         print 'Schema generation COMPLETE.'
 
@@ -541,38 +547,16 @@ def java_docify(s):
     return res[:-1]  # Don't include the last newline character
 
 
-class SchemaGenerator(object):
-    """Used to generate an external XML schema from a yang module"""
+class SchemaNode(object):
 
-    def __init__(self, stmts, tagpath, ns, ctx):
-        self.stmts = stmts
+    def __init__(self, stmt, tagpath):
+        self.stmt = stmt
         self.tagpath = tagpath
-        self.ns = ns
-        self.ctx = ctx
 
-    def schema_nodes(self):
-        """Generate XML schema as a list of "node" elements"""
-        res = ''
-        for stmt in self.stmts:
-            if in_schema(stmt):
-                old_stmts = self.stmts
-                self.stmts = stmt.substmts
-                old_tagpath = self.tagpath
-                self.tagpath += stmt.arg + '/'
-                res += ('<node>\n' +
-                        indent(self.schema_node(stmt)) +
-                        '\n</node>' +
-                        self.schema_nodes())
-                self.stmts = old_stmts
-                self.tagpath = old_tagpath
-        return res
-
-
-    def schema_node(self, stmt):
-        """Generate "node" element content for an XML schema"""
-        if self.ctx.opts.verbose:
-            print 'Generating schema node "' + self.tagpath + '"...'
-        res = []
+    def as_list(self):
+        """Returns a string repr "node" element content for an XML schema"""
+        res = ['<node>']
+        stmt = self.stmt
         res.append('<tagpath>' + self.tagpath + '</tagpath>')
         if stmt.top is None:
             ns = stmt.search_one('namespace').arg
@@ -612,6 +596,30 @@ class SchemaGenerator(object):
     
         res.append('<flags>0</flags>')
         res.append('<desc></desc>')
+        res.append('</node>')
+        return res
+
+
+class SchemaGenerator(object):
+    """Used to generate an external XML schema from a yang module"""
+
+    def __init__(self, stmts, tagpath, ctx):
+        self.stmts = stmts
+        self.tagpath = tagpath
+        self.ctx = ctx
+
+    def schema_nodes(self):
+        """Generate XML schema as a list of "node" elements"""
+        res = []
+        for stmt in self.stmts:
+            if in_schema(stmt):
+                node = SchemaNode(stmt, self.tagpath + stmt.arg + '/')
+                substmt_generator = SchemaGenerator(stmt.substmts,
+                    self.tagpath + stmt.arg + '/', self.ctx)
+                if self.ctx.opts.verbose:
+                    print 'Generating schema node "' + self.tagpath + '"...'
+                res.extend(node.as_list())
+                res.extend(substmt_generator.schema_nodes())
         return res
 
 
