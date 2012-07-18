@@ -802,7 +802,8 @@ class ClassGenerator(object):
                 if not self.yang_types.defined(type_stmt.i_typedef.arg):
                     typedef_generator = ClassGenerator(type_stmt.i_typedef, 
                         package=get_package(type_stmt.i_typedef, self.ctx),
-                        path=self.package.replace('.', '/') + '/', parent=self)
+                        path=self.package.replace('.', '/') + '/', ns=None,
+                        prefix_name=None, parent=self)
                     typedef_generator.generate()
                     self.yang_types.add(type_stmt.i_typedef.arg)
 
@@ -843,7 +844,8 @@ class ClassGenerator(object):
         if sub.keyword in ('list', 'container'):
             child_generator = ClassGenerator(stmt=sub,
                 package=self.package + '.' + sub.parent.arg,
-                path=self.path + sub.parent.arg + '/', parent=self)
+                path=self.path + sub.parent.arg + '/', ns=None,
+                prefix_name=None, parent=self)
             child_generator.generate()
             if sub.keyword == 'list':
                 key, _, confm_keys, _ = extract_keys(sub, self.ctx)
@@ -872,7 +874,8 @@ class ClassGenerator(object):
                     type_generator = ClassGenerator(stmt=type_stmt.i_typedef,
                         package=get_package(type_stmt.i_typedef,
                                             self.ctx).replace('.', '/') + '/',
-                        path=self.path + sub.parent.arg + '/', parent=self)
+                        path=self.path + sub.parent.arg + '/', ns=None,
+                        prefix_name=None, parent=self)
                     type_generator.generate()
             type_str1, type_str2 = get_types(type_stmt, self.ctx)
             if sub.keyword == 'leaf':
