@@ -883,7 +883,7 @@ class ClassGenerator(object):
             elif sub.keyword == 'container':
                 fields.append(sub.arg)
                 add(sub.arg, access_methods_comment(sub))
-                add(sub.arg, child_field(sub))
+                self.java_class.add_field(sub.arg, child_field(sub))
                 add(sub.arg, add_stmt(sub, args=[(sub.parent.arg + '.' + sub.arg, sub.arg)], field=True))
                 add(sub.arg, add_stmt(sub, args=[], field=True))
                 add(sub.arg, delete_stmt(sub))
