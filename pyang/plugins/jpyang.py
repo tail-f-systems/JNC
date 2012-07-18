@@ -174,7 +174,6 @@ class JPyangPlugin(plugin.PyangPlugin):
                         '<schema>\n' + indent( \
                             ('<node>\n' + indent(schema_node) + '\n</node>' + \
                                 schema_nodes).splitlines()) + '\n</schema>',
-                        [modules],
                         ctx)
                     if ctx.opts.debug or ctx.opts.verbose:
                         print 'Schema generation COMPLETE.'
@@ -257,7 +256,7 @@ def print_warning(msg='', key='', ctx=None):
                 'to string.', key, ctx)
 
 
-def write_file(d, file_name, file_content, modules, ctx):
+def write_file(d, file_name, file_content, ctx):
     """Creates the directory d if it does not yet exist and writes a file to it
     named file_name with file_content in it.
 
@@ -682,7 +681,7 @@ class ClassGenerator(object):
             parent_module = self.stmt.search_one('belongs-to')
             prefix = parent_module.search_one('prefix')
             ns_arg = '<unknown/prefix: ' + prefix.arg + '>'
-        (filename, name) = extract_names(prefix.arg)
+        (self.filename, name) = extract_names(prefix.arg)
 
         for stmt in self.stmt.substmts:
             if stmt.keyword in ('container', 'list', 'augment', 'typedef'):  # TODO: other top-level stmts
@@ -691,33 +690,30 @@ class ClassGenerator(object):
                 child_generator.generate()
 
         if self.ctx.opts.verbose:
-            print 'Generating Java class "' + filename + '"...'
-        root_class = JavaClass(filename=filename, package=self.package,
-                description='The root class for namespace ' + ns_arg + \
-                ' (accessible from \n * ' + name + '.NAMESPACE) with prefix "' + \
-                prefix.arg + '" (' + name + '.PREFIX).',
+            print 'Generating Java class "' + self.filename + '"...'
+        self.java_class = JavaClass(filename=self.filename, 
+                package=self.package, description='The root class for namespace ' + \
+                    ns_arg + ' (accessible from \n * ' + name + \
+                    '.NAMESPACE) with prefix "' + prefix.arg + '" (' + name + \
+                    '.PREFIX).',
                 source=self.src)
-        root_class.add_import('confm', 'com.tailf.confm.*')
-        root_class.add_import('inm', 'com.tailf.inm.*')
-        root_class.add_import('Hashtable', 'java.util.Hashtable')
-        root_class.add_field('NAMESPACE', static_string('NAMESPACE', ns_arg))
-        root_class.add_field('PREFIX', static_string('PREFIX', prefix.arg))
-        root_class.add_enabler(name, enable(name))
-        root_class.add_schema_registrator(name, register_schema(name))
-        write_file(self.package, 
-                   filename,
-                   root_class.java_class(),
-                   [self.stmt],
-                   self.ctx)
+        self.java_class.add_import('confm', 'com.tailf.confm.*')
+        self.java_class.add_import('inm', 'com.tailf.inm.*')
+        self.java_class.add_import('Hashtable', 'java.util.Hashtable')
+        self.java_class.add_field('NAMESPACE', static_string('NAMESPACE', ns_arg))
+        self.java_class.add_field('PREFIX', static_string('PREFIX', prefix.arg))
+        self.java_class.add_enabler(name, enable(name))
+        self.java_class.add_schema_registrator(name, register_schema(name))
+        self.write_to_file()
 
     def generate_class(self):
         """Generates a Java class hierarchy providing an interface to a YANG module"""
         stmt = self.stmt
-        (filename, name) = extract_names(stmt.arg)
+        (self.filename, name) = extract_names(stmt.arg)
         fields = []
         mods = ' extends Container'
         
-        class_instance = JavaClass(filename=filename, package=self.package,
+        self.java_class = JavaClass(filename=self.filename, package=self.package,
                 imports=['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
                 # TODO: Hashtable not used in generated code
                 
@@ -745,7 +741,7 @@ class ClassGenerator(object):
         if i_children_exists:
             for ch in stmt.i_children:
                 tmp_access_methods, tmp_fields = self.generate_child(ch)
-                class_instance.add_access_method(ch.arg, tmp_access_methods)
+                self.java_class.add_access_method(ch.arg, tmp_access_methods)
                 fields.extend(tmp_fields)
 
             def expand(children):
@@ -766,37 +762,37 @@ class ClassGenerator(object):
         for sub in stmt.substmts:
             if sub not in expanded_i_children:
                 tmp_access_methods, tmp_fields = self.generate_child(sub)
-                class_instance.add_access_method(sub.arg, tmp_access_methods)
+                self.java_class.add_access_method(sub.arg, tmp_access_methods)
                 fields.extend(tmp_fields)
 
         if self.ctx.opts.verbose:
-            print 'Generating Java class "' + filename + '"...'
+            print 'Generating Java class "' + self.filename + '"...'
         if stmt.keyword != 'typedef':  # TODO: Only add key name getter when relevant
-            class_instance.add_support_method('unique', support_add(fields))
-            class_instance.add_name_getter('keys', key_names(stmt))
-            class_instance.add_name_getter('children', children_names(stmt))
+            self.java_class.add_support_method('unique', support_add(fields))
+            self.java_class.add_name_getter('keys', key_names(stmt))
+            self.java_class.add_name_getter('children', children_names(stmt))
         if stmt.keyword == 'container':
-            class_instance.add_constructor('unique', constructor(
+            self.java_class.add_constructor('unique', constructor(
                 stmt, self.ctx, set_prefix=self.top_level, root=self.prefix_name))
-            class_instance.add_cloner('deep', clone(name, shallow=False))
-            class_instance.add_cloner('shallow', clone(name, shallow=True))
+            self.java_class.add_cloner('deep', clone(name, shallow=False))
+            self.java_class.add_cloner('shallow', clone(name, shallow=True))
         elif stmt.keyword == 'list':
             key, only_strings, confm_keys, primitive_keys = extract_keys(stmt, self.ctx)
-            class_instance.add_constructor('0', constructor(stmt, self.ctx, root=self.prefix_name,
+            self.java_class.add_constructor('0', constructor(stmt, self.ctx, root=self.prefix_name,
                 set_prefix=self.top_level, throws="\n        throws INMException"))
-            class_instance.add_constructor('1', constructor(stmt, self.ctx, root=self.prefix_name, set_prefix=self.top_level,
+            self.java_class.add_constructor('1', constructor(stmt, self.ctx, root=self.prefix_name, set_prefix=self.top_level,
                 mode=1, args=confm_keys, throws='''
             throws INMException'''))
-            class_instance.add_constructor('2', constructor(stmt, self.ctx, root=self.prefix_name, set_prefix=self.top_level,
+            self.java_class.add_constructor('2', constructor(stmt, self.ctx, root=self.prefix_name, set_prefix=self.top_level,
                 mode=2, args=primitive_keys, throws='''
             throws INMException'''))
             if not only_strings:
-                class_instance.add_constructor('3', constructor(stmt, self.ctx, root=self.prefix_name,
+                self.java_class.add_constructor('3', constructor(stmt, self.ctx, root=self.prefix_name,
                     set_prefix=self.top_level, mode=3, args=primitive_keys, throws='''
             throws INMException'''))
-            class_instance.add_cloner('deep', clone(name, map(capitalize_first,
+            self.java_class.add_cloner('deep', clone(name, map(capitalize_first,
                 key.arg.split(' ')), shallow=False))
-            class_instance.add_cloner('shallow', clone(name,
+            self.java_class.add_cloner('shallow', clone(name,
                 map(capitalize_first, key.arg.split(' ')), shallow=True))
         elif stmt.keyword == 'typedef':
             type_stmt = stmt.search_one('type')
@@ -815,28 +811,24 @@ class ClassGenerator(object):
             mods = ' extends ' + super_type
             base_type = get_base_type(stmt)
             primitive = get_types(base_type, self.ctx)[1]
-            class_instance.add_constructor('string', typedef_constructor(stmt))
+            self.java_class.add_constructor('string', typedef_constructor(stmt))
             spec = ', using a string value'
             arg = 'String ' + stmt.arg + 'Value'
             body = 'super.setValue(' + stmt.arg + '''Value);
             check();'''
 
             # XXX: Intentionally overwrite access_methods
-            class_instance.access_methods.clear()
-            class_instance.add_access_method('string', set_value(stmt, spec1=spec, argument=arg, body=body))
+            self.java_class.access_methods.clear()
+            self.java_class.add_access_method('string', set_value(stmt, spec1=spec, argument=arg, body=body))
             if primitive != 'String':
-                class_instance.add_constructor('primitive', typedef_constructor(stmt, primitive))
+                self.java_class.add_constructor('primitive', typedef_constructor(stmt, primitive))
                 spec = ', using ' + primitive + ' value'
                 arg = primitive + ' ' + stmt.arg + 'Value'
-                class_instance.add_access_method('primitive', set_value(stmt,
+                self.java_class.add_access_method('primitive', set_value(stmt,
                     spec1=spec, argument=arg, body=body))
-            class_instance.add_access_method('check', check())
+            self.java_class.add_access_method('check', check())
             self.yang_types.add(stmt.arg)
-        write_file(self.package, 
-                   filename, 
-                   class_instance.java_class(), 
-                   [stmt],
-                   self.ctx)
+        self.write_to_file()
 
     def generate_child(self, sub):
         """Returns a tuple of two strings representing java methods and fields
@@ -936,6 +928,12 @@ class ClassGenerator(object):
                     mark(sub, 'delete', arg_type='String')
         return access_methods, fields
 
+    def write_to_file(self):
+        write_file(self.package,
+                   self.filename,
+                   self.java_class.java_class(),
+                   self.ctx)
+
 
 class PackageInfoGenerator(object):
     """Used to generate package-info.java files, with meaningful content"""
@@ -965,7 +963,7 @@ class PackageInfoGenerator(object):
         dirs = filter(is_not_java_file, directory_listing)
         class_hierarchy = self.generate_javadoc(self.stmt.substmts, java_files)
         write_file(self.d, 'package-info.java', self.gen_package_info(class_hierarchy,
-            self.d.replace('/', '.')), self.stmt, self.ctx)
+            self.d.replace('/', '.')), self.ctx)
         for directory in dirs:
             for sub in self.stmt.substmts:
                 # XXX: refactor
