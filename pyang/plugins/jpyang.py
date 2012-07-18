@@ -44,6 +44,7 @@ from pyang import plugin
 from pyang import util
 from pyang import error
 from pyang import statements
+import collections
 
 
 # TODO Might be more efficient to use dicts instead of set and list for these
@@ -1133,7 +1134,7 @@ class JavaClass(object):
         """
         self.filename = filename
         self.package = package
-        self.imports = {}
+        self.imports = collections.OrderedDict()
         for i in range(len(imports)):
             self.imports[str(i)] = imports[i]
         self.description = description
@@ -1141,14 +1142,14 @@ class JavaClass(object):
         self.version = version
         self.modifiers = modifiers
         self.source = source
-        self.fields = {}
-        self.constructors = {}
-        self.cloners = {}
-        self.enablers = {}
-        self.schema_registrators = {}
-        self.name_getters = {}
-        self.access_methods = {}
-        self.support_methods = {}
+        self.fields = collections.OrderedDict()
+        self.constructors = collections.OrderedDict()
+        self.cloners = collections.OrderedDict()
+        self.enablers = collections.OrderedDict()
+        self.schema_registrators = collections.OrderedDict()
+        self.name_getters = collections.OrderedDict()
+        self.access_methods = collections.OrderedDict()
+        self.support_methods = collections.OrderedDict()
 
     def add_import(self, key, import_):
         """Adds import_ to list of imports"""
