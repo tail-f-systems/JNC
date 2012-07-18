@@ -780,10 +780,12 @@ class ClassGenerator(object):
             key, only_strings, confm_keys, primitive_keys = extract_keys(stmt, self.ctx)
             self.java_class.add_constructor('0', constructor(stmt, self.ctx, root=self.prefix_name,
                 set_prefix=self.top_level, throws="\n        throws INMException"))
-            self.java_class.add_constructor('1', constructor(stmt, self.ctx, root=self.prefix_name, set_prefix=self.top_level,
+            self.java_class.add_constructor('1', constructor(stmt, self.ctx, 
+                root=self.prefix_name, set_prefix=self.top_level,
                 mode=1, args=confm_keys, throws='''
             throws INMException'''))
-            self.java_class.add_constructor('2', constructor(stmt, self.ctx, root=self.prefix_name, set_prefix=self.top_level,
+            self.java_class.add_constructor('2', constructor(stmt, self.ctx, 
+                root=self.prefix_name, set_prefix=self.top_level,
                 mode=2, args=primitive_keys, throws='''
             throws INMException'''))
             if not only_strings:
@@ -820,9 +822,11 @@ class ClassGenerator(object):
 
             # XXX: Intentionally overwrite access_methods
             self.java_class.access_methods.clear()
-            self.java_class.add_access_method('string', set_value(stmt, spec1=spec, argument=arg, body=body))
+            self.java_class.add_access_method('string', 
+                set_value(stmt, spec1=spec, argument=arg, body=body))
             if primitive != 'String':
-                self.java_class.add_constructor('primitive', typedef_constructor(stmt, primitive))
+                self.java_class.add_constructor('primitive', 
+                    typedef_constructor(stmt, primitive))
                 spec = ', using ' + primitive + ' value'
                 arg = primitive + ' ' + stmt.arg + 'Value'
                 self.java_class.add_access_method('primitive', set_value(stmt,
