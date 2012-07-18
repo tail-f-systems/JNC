@@ -676,10 +676,11 @@ class ClassGenerator(object):
                 prefix.arg + '" (' + name + '.PREFIX).',
                 body=class_fields(ns_arg, prefix.arg) + enable(name) + register_schema(name),
                 source=self.src)
-        write_file(self.package, filename,
-            root_class.java_class(),
-            [self.module],
-            self.ctx)
+        write_file(self.package, 
+                   filename,
+                   root_class.java_class(),
+                   [self.module],
+                   self.ctx)
 
     def generate_class(self, stmt, path, ns, prefix_name, top_level=False):
         """Generates a Java class hierarchy providing an interface to a YANG module
@@ -819,8 +820,11 @@ class ClassGenerator(object):
                 body=constructors + cloners + names + access_methods + support_methods,
                 source=self.src,
                 modifiers=mods) 
-        write_file(self.package, filename, class_instance.java_class(), [stmt],
-            self.ctx)
+        write_file(self.package, 
+                   filename, 
+                   class_instance.java_class(), 
+                   [stmt],
+                   self.ctx)
 
     def generate_child(self, sub, path, ns, prefix_name):
         """Returns a tuple of two strings representing java methods and fields
