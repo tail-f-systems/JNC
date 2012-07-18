@@ -664,18 +664,23 @@ class ClassGenerator(object):
         (filename, name) = extract_names(prefix.arg)
 
         for stmt in self.module.substmts:
-            if stmt.keyword in ['container', 'list', 'augment', 'typedef']:  # TODO other top-level stmts
+            if stmt.keyword in ('container', 'list', 'augment', 'typedef'):  # TODO other top-level stmts
                 self.generate_class(stmt, '', ns_arg, name, top_level=True)
 
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + filename + '"...'
         root_class = JavaClass(filename=filename, package=self.package,
-                imports=['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
                 description='The root class for namespace ' + ns_arg + \
                 ' (accessible from \n * ' + name + '.NAMESPACE) with prefix "' + \
                 prefix.arg + '" (' + name + '.PREFIX).',
-                body=class_fields(ns_arg, prefix.arg) + enable(name) + register_schema(name),
                 source=self.src)
+        root_class.add_import('confm', 'com.tailf.confm.*')
+        root_class.add_import('inm', 'com.tailf.inm.*')
+        root_class.add_import('Hashtable', 'java.util.Hashtable')
+        root_class.add_field('NAMESPACE', static_string('NAMESPACE', ns_arg))
+        root_class.add_field('PREFIX', static_string('PREFIX', prefix.arg))
+        root_class.add_enabler(name, enable(name))
+        root_class.add_schema_registrator(name, register_schema(name))
         write_file(self.package, 
                    filename,
                    root_class.java_class(),
@@ -1128,7 +1133,9 @@ class JavaClass(object):
         """
         self.filename = filename
         self.package = package
-        self.imports = imports
+        self.imports = {}
+        for i in range(len(imports)):
+            self.imports[str(i)] = imports[i]
         self.description = description
         self.body = body
         self.version = version
@@ -1216,7 +1223,7 @@ class JavaClass(object):
         # package and import statement goes here
         header += '\n\npackage ' + strip_first(self.package) + ';\n'
         if self.imports:
-            header += '\nimport ' + ';\nimport '.join(self.imports) + ';\n'
+            header += '\nimport ' + ';\nimport '.join(self.imports.values()) + ';\n'
         
         # Class doc-comment and declaration, with modifiers
         header += '''
@@ -1438,13 +1445,11 @@ def children_names(stmt):
 '''  # FIXME What if there are no children?
 
 
-def class_fields(ns_arg, prefix_arg):
+def static_string(identifier, value):
     """Returns a string representing java code for two fields"""
     return '''
-    public static final String NAMESPACE = "''' + ns_arg + '''";
-
-    public static final String PREFIX = "''' + prefix_arg + '''";
-    '''
+    public static final String ''' + identifier + ' = "' + value + '''";
+'''
 
 
 def enable(prefix_name):
