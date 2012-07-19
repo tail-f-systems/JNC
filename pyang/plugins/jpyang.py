@@ -1133,7 +1133,7 @@ class JavaClass(object):
 
     """
     
-    def __init__(self, filename=None, package=None, imports=[],
+    def __init__(self, filename=None, package=None, imports=None,
                  description=None, body=None, version='1.0',
                  modifiers='', source='<unknown>.yang'):
         """Constructor.
@@ -1152,6 +1152,8 @@ class JavaClass(object):
         source      -- A string somehow representing the origin of the class
 
         """
+        if imports is None:
+            imports = []
         self.filename = filename
         self.package = package
         self.imports = collections.OrderedDict()
@@ -1411,7 +1413,7 @@ class MethodGenerator(object):
         return method
 
 
-def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
+def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
     throws=''):
     """The constructor function returns a string representing Java code for a
     constructor of a Java class corresponding to the stmt parameter.
@@ -1436,6 +1438,8 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
     """
     name = capitalize_first(stmt.arg)
     setters = docstring = inserts = arguments = ''
+    if args is None:
+        args = []
     MAX_COLS = 80 - len('    public ' + name + '(')
     if root == '':
         root = name
@@ -1511,7 +1515,7 @@ def typedef_constructor(stmt, arg='String'):
 '''
 
 
-def clone(class_name, key_names=[], shallow='False'):
+def clone(class_name, key_names=None, shallow='False'):
     """Returns a string representing a Java clone method. Iff key_names is
     empty, get<key_name>Value() methods are called to fetch constructor
     arguments and null is returned if an INMException is raised. If shallow is
@@ -1523,6 +1527,8 @@ def clone(class_name, key_names=[], shallow='False'):
 
     """
     try_stmt = children = cast = ''
+    if key_names is None:
+        key_names = []
     if key_names:
         try_stmt = 'try {\n' + ' ' * 12
         catch_stmt = '('
@@ -1933,7 +1939,7 @@ def child_iterator(substmt):
 '''
 
 
-def add_stmt(stmt, args=[], field=False, string=False):
+def add_stmt(stmt, args=None, field=False, string=False):
     """Generates add-method for stmt, optionally parametrized by an
     argument of specified type and with customizable comments.
 
@@ -1957,6 +1963,8 @@ def add_stmt(stmt, args=[], field=False, string=False):
               in a class representing a YANG container element.
 
     """
+    if args is None:
+        args = []
     name = capitalize_first(stmt.arg)
     spec2 = spec3 = ''
     if len(args) == 1 and args[0][0] == stmt.arg:
@@ -1998,7 +2006,7 @@ def add_stmt(stmt, args=[], field=False, string=False):
 '''
 
 
-def delete_stmt(stmt, args=[], string=False, keys=True):
+def delete_stmt(stmt, args=None, string=False, keys=True):
     """Delete method generator. Similar to add_stmt (see above).
 
     stmt   -- Typically a list or container statement
@@ -2013,6 +2021,8 @@ def delete_stmt(stmt, args=[], string=False, keys=True):
 
     """
     spec1 = spec2 = spec3 = arguments = ''
+    if args is None:
+        args = []
     if args:
         if keys:
             spec1 = '", with specified keys.'
@@ -2061,13 +2071,15 @@ def check(regexp=''):
 '''
 
 
-def support_add(fields=[]):
+def support_add(fields=None):
     """Generates an addChild method.
 
     fields -- a list of fields in the generated class
 
     """
     assignments = ''
+    if fields is None:
+        fields = []
     for i in range(len(fields) - 1, -1, -1):
         assignments += 'if ($child instanceof ' + capitalize_first(fields[i]) + \
             ') ' + fields[i] + ' = (' + capitalize_first(fields[i]) + ')$child;'
