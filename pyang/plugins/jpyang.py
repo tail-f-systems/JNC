@@ -304,13 +304,10 @@ def get_package(stmt, ctx):
 
     """
     sub_packages = collections.deque()
-    try:
-        tmp_stmt = stmt.parent
-        while tmp_stmt.parent != None:
-            sub_packages.appendleft(tmp_stmt.arg)
-            tmp_stmt = tmp_stmt.parent
-    except AttributeError:
-        pass
+    while stmt.parent != None:
+        stmt = stmt.parent
+        if stmt.parent != None:
+            sub_packages.appendleft(stmt.arg)
     full_package = collections.deque(ctx.opts.directory.split(os.sep))
     full_package.extend(sub_packages)
     if full_package and full_package[0] == 'src':
