@@ -1392,25 +1392,30 @@ class JavaMethod(JavaValue):
 class MethodGenerator(object):
     """A generator for JavaMethod objects"""
     
-    def __init__(self, ctx=None):
+    def __init__(self, stmt, ctx=None):
         """Constructor. Context must be supplied for some methods to work."""
+        self.stmt = stmt
+        self.stmt_name = extract_names(stmt.arg)[1]
         self.ctx = ctx
 
-    def empty_constructor(self, stmt):
-        name = extract_names(stmt.arg)[1]
-        method = JavaMethod(modifiers=['public'], name=name)
+    def constructor(self):
+        constructor = JavaMethod(modifiers=['public'], name=self.stmt_name)
         javadoc = ['Constructor for an empty ']
-        javadoc.append(name)
+        javadoc.append(self.stmt_name)
         javadoc.append(' object.')
-        method.add_line_to_javadoc(''.join(javadoc))
+        constructor.add_line_to_javadoc(''.join(javadoc))
         call = ['super(']
-        root = extract_names(stmt.top.search_one('prefix').arg)[1]
+        root = extract_names(self.stmt.top.search_one('prefix').arg)[1]
         call.append(root)
         call.append('.NAMESPACE, "')
-        call.append(stmt.arg)
+        call.append(self.stmt.arg)
         call.append('");')
-        method.add_line(''.join(call))
-        return method
+        constructor.add_line(''.join(call))
+        if self.stmt.parent == self.stmt.top:
+            # Top level statement
+            constructor.add_line('setDefaultPrefix();')
+            constructor.add_line(''.join(['setPrefix(', root, '.PREFIX);']))
+        return constructor
 
 
 def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
