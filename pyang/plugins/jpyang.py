@@ -1294,7 +1294,7 @@ class JavaValue(object):
         self.modifiers.append(modifier)
         self.exact = None  # Invalidate cache
 
-    def add_line_to_javadoc(self, line):
+    def add_javadoc(self, line):
         """Adds line to javadoc comment, leading ' ', '*' and '/' removed"""
         self.javadocs.append(line.lstrip(' */'))
         self.exact = None  # Invalidate cache
@@ -1395,15 +1395,15 @@ class MethodGenerator(object):
     def __init__(self, stmt, ctx=None):
         """Constructor. Context must be supplied for some methods to work."""
         self.stmt = stmt
-        self.stmt_name = extract_names(stmt.arg)[1]
+        self.n = extract_names(stmt.arg)[1]
         self.ctx = ctx
 
     def constructor(self):
-        constructor = JavaMethod(modifiers=['public'], name=self.stmt_name)
+        constructor = JavaMethod(modifiers=['public'], name=self.n)
         javadoc = ['Constructor for an empty ']
-        javadoc.append(self.stmt_name)
+        javadoc.append(self.n)
         javadoc.append(' object.')
-        constructor.add_line_to_javadoc(''.join(javadoc))
+        constructor.add_javadoc(''.join(javadoc))
         call = ['super(']
         root = extract_names(self.stmt.top.search_one('prefix').arg)[1]
         call.append(root)
@@ -1416,6 +1416,20 @@ class MethodGenerator(object):
             constructor.add_line('setDefaultPrefix();')
             constructor.add_line(''.join(['setPrefix(', root, '.PREFIX);']))
         return constructor
+
+    def clone(self):
+        cloners = [JavaMethod(), JavaMethod()]
+        a = ('an exact', 'a shallow')
+        b = ('', ' Children are not included.')
+        c = ('', 'Shallow.')
+        for i, cloner in enumerate(cloners):
+            cloner.add_javadoc('Clones this object, returning %s copy.' % a[i])
+            cloner.add_javadoc('@return A clone of the object.%s' % b[i])
+            cloner.add_modifier('public')
+            cloner.set_return_type('Container')
+            cloner.set_name('clone%s' % c[i])
+            cloner.add_line('return clone%sContent(new %s());' % c[i], self.n)
+        return cloners
 
 
 def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
