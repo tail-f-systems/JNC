@@ -864,12 +864,14 @@ class ClassGenerator(object):
         """
         fields = []
         add = self.java_class.append_access_method  # XXX: add is a function
-        if sub.keyword in ('list', 'container'):
+        if sub.keyword in ('list', 'container', 'typedef'):
             child_generator = ClassGenerator(stmt=sub,
                 package=self.package + '.' + sub.parent.arg,
                 path=self.path + sub.parent.arg + '/', ns=None,
                 prefix_name=None, parent=self)
             child_generator.generate()
+            sub_package = get_package(sub, self.ctx) + '.' + sub.arg
+            self.java_class.add_import(sub_package, sub_package)
             if sub.keyword == 'list':
                 key, _, confm_keys, _ = extract_keys(sub, self.ctx)
                 add(sub.arg, access_methods_comment(sub))
