@@ -1450,13 +1450,15 @@ class MethodGenerator(object):
         self.is_list = stmt.keyword == 'list'
         self.is_config = is_config(stmt)
         self.is_typedef = stmt.keyword == 'typedef'
+        self.stmt_type = stmt.search_one('type')
+        self.is_string = self.stmt_type and self.stmt_type.arg == 'string'
         self.ctx = ctx
 
     def constructors(self):
         constructors = []
 
         # Parameter-free constructor
-        if(not self.is_typedef):
+        if not self.is_typedef:
             constructor = JavaMethod(modifiers=['public'], name=self.n)
             javadoc = ['Constructor for an empty ']
             javadoc.append(self.n)
@@ -1475,21 +1477,30 @@ class MethodGenerator(object):
                 constructor.add_line(''.join(setPrefix))
             constructors.append(constructor)
         
-        # Typedef String constructor
-        if(self.is_typedef):
+        # Typedef
+        if self.is_typedef:
+            # String constructor
             constructor = JavaMethod(modifiers=['public'], name=self.n)
             javadoc = ['Constructor for ']
             javadoc.append(self.n)
             javadoc.append(' object from a string.')
             constructor.add_javadoc(''.join(javadoc))
-            javadoc = ['@param value Value to construct the ']
-            javadoc.append(self.n)
-            javadoc.append(' from.')
-            constructor.add_javadoc(''.join(javadoc))
+            javadoc2 = ['@param value Value to construct the ']
+            javadoc2.append(self.n)
+            javadoc2.append(' from.')
+            constructor.add_javadoc(''.join(javadoc2))
+            constructor.add_parameter('String value')
             constructor.add_exception('ConfMException')  # TODO: Check if needed
             constructor.add_line('super(value);')
             constructor.add_line('check();')  # TODO: Check if needed
             constructors.append(constructor)
+            
+            # Value constructor
+            if not self.is_string:
+                constructor = constructor.clone()
+                constructor.javadocs[0] = javadoc2[:-7] + self.stmt_type.arg  # FIXME ugly and wrong type
+                constructor.parameters = [self.stmt_type.arg + ' value']  # FIXME ugly and wrong type
+                constructors.append(constructor)
 
         return constructors
 
