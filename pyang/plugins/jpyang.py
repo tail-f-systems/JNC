@@ -1387,6 +1387,14 @@ class JavaMethod(JavaValue):
         return self.exact
 
 
+class MethodGenerator(object):
+    """A generator for JavaMethod objects"""
+    
+    def __init__(self, ctx=None):
+        """Constructor. Context must be supplied for some methods to work."""
+        self.ctx = ctx
+
+
 def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
     throws=''):
     """The constructor function returns a string representing Java code for a
