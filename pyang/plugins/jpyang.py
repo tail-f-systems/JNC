@@ -1261,6 +1261,117 @@ public class ''' + self.filename.split('.')[0] + self.modifiers + ' {\n'
         return header + self.get_body() + '\n}'
 
 
+class JavaValue(object):
+    """A Java value"""
+    
+    def __init__(self, exact=None, javadocs=[], modifiers=[], name=None,
+                 value=None, indent=0):
+        """Value constructor"""
+        self.exact = exact
+        self.javadocs = javadocs
+        self.modifiers = modifiers
+        self.name = name
+        self.indent = ' ' * indent
+    
+    def set_name(self, name):
+        """Sets the identifier of this value"""
+        self.name = name
+        self.exact = None  # Invalidate cache
+
+    def set_indent(self, indent=4):
+        """Sets indentation used in the as_string methods"""
+        self.indent = ' ' * indent
+        self.exact = None  # Invalidate cache
+
+    def add_modifier(self, modifier):
+        """Adds modifier to end of list of modifiers"""
+        self.modifiers.append(modifier)
+        self.exact = None  # Invalidate cache
+
+    def add_line_to_javadoc(self, line):
+        """Adds line to javadoc comment, leading ' ', '*' and '/' removed"""
+        self.javadocs.append(line.lstrip(' */'))
+        self.exact = None  # Invalidate cache
+    
+    def javadoc_as_string(self):
+        lines = []
+        if self.javadocs:
+            lines.append( self.indent + '/**' )
+            lines.extend([self.indent + ' * ' + line for line in self.javadocs])
+            lines.append( self.indent + ' */' )
+        return lines
+    
+    def as_string(self):
+        """String representation of this Java value"""
+        if self.exact is None:
+            lines = ['']
+            lines.extend(self.javadoc_as_string())
+            lines.append(''.join([self.indent,
+                                  ' '.join(self.modifiers,
+                                           self.name,
+                                           '=',
+                                           self.value),
+                                  ';']))
+            lines.append('')
+            self.exact = '\n'.join(lines)  # Cache the string representation
+        return self.exact
+
+class JavaMethod(JavaValue):
+    """A Java method"""
+    
+    def __init__(self, exact=None, javadocs=[], modifiers=[], return_type=None,
+                 name=None, parameters=[], exceptions=[], body=[], indent=4):
+        """Method constructor"""
+        super(JavaMethod, self).__init__(exact=exact, javadocs=javadocs,
+                                         modifiers=modifiers, name=name,
+                                         value=None, indent=indent)
+        self.return_type = return_type
+        self.parameters = parameters
+        self.exceptions = exceptions
+        self.body = body
+
+    def set_return_type(self, return_type):
+        """Sets the type of the return value of this method"""
+        self.return_type = return_type
+        self.exact = None  # Invalidate cache
+
+    def add_parameter(self, parameter):
+        """Adds parameter to parameter list"""
+        self.parameters.append(parameter)
+        self.exact = None  # Invalidate cache
+
+    def add_exception(self, exception):
+        """Adds exception to method"""
+        self.exceptions.append(exception)
+        self.exact = None  # Invalidate cache
+
+    def add_line(self, line):
+        """Adds line to method body"""
+        self.body.append(self.indent + ' ' * 4 + line)
+        self.exact = None  # Invalidate cache
+
+    def as_string(self):
+        """String representation of method. Overrides JavaValue.as_string()."""
+        if self.exact is None:
+            lines = ['']
+            lines.extend(self.javadoc_as_string())
+            lines.append(''.join([self.indent,
+                                  ' '.join(self.modifiers,
+                                           self.return_type,
+                                           self.name),
+                                  '(',
+                                  ', '.join(self.parameters),
+                                  ')']))
+            if self.exceptions:
+                lines[1] += ''.join([' throws ', ', '.join(self.exceptions)])
+            lines[1] += ' {'
+            lines.extend(self.body)
+            lines.append(self.indent + '}')
+            lines.append('')
+            self.exact = '\n'.join(lines)  # Cache the string representation
+        return self.exact
+
+
 def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
     throws=''):
     """The constructor function returns a string representing Java code for a
