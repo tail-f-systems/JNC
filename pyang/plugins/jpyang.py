@@ -304,9 +304,9 @@ def get_package(stmt, ctx):
 
     """
     sub_packages = collections.deque()
-    while stmt.parent != None:
+    while stmt.parent is not None:
         stmt = stmt.parent
-        if stmt.parent != None:
+        if stmt.parent is not None:
             sub_packages.appendleft(stmt.arg)
     full_package = collections.deque(ctx.opts.directory.split(os.sep))
     full_package.extend(sub_packages)
@@ -743,7 +743,7 @@ class ClassGenerator(object):
                 modifiers=mods) 
         
         i_children_exists = (hasattr(stmt, 'i_children')
-            and stmt.i_children != None
+            and stmt.i_children is not None
             and stmt.i_children != [])
 
         # If augment, add target module to augmented_modules dict
