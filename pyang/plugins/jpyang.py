@@ -1287,6 +1287,26 @@ class JavaValue(object):
             self.modifiers = []
         self.name = name
         self.indent = ' ' * indent
+
+    def clone(self):
+        """Returns a deep copy of self"""
+        value = JavaValue()
+        self.clone_to(value)
+        return value
+
+    def clone_to(self, value):
+        """Adds copies of attributes to value"""
+        value.exact = None
+        if self.exact is not None:
+            value.exact = list(self.exact)
+        value.javadocs = []
+        if self.javadocs is not None:
+            value.javadocs = list(self.javadocs)
+        value.modifiers = []
+        if self.modifiers is not None:
+            value.modifiers = list(self.modifiers)
+        value.name = self.name
+        value.indent = self.indent
     
     def set_name(self, name):
         """Sets the identifier of this value"""
@@ -1352,24 +1372,20 @@ class JavaMethod(JavaValue):
             self.body = []
 
     def clone(self):
+        """Returns a deep copy of self"""
         method = JavaMethod()
-        method.exact = self.exact
-        method.javadocs = []
-        if self.javadocs is not None:
-        method.javadocs = list(self.javadocs)
-        method.modifiers = self.modifiers
-        if self.modifiers is not None:
-            method.modifiers = []
+        super(JavaMethod, self).clone_to(method)
         method.return_type = self.return_type
-        method.name = self.name
-        method.parameters = self.parameters
+        method.parameters = []
         if self.parameters is not None:
-            method.parameters = []
-        method.exceptions = self.exceptions
+            method.parameters = list(self.parameters)
+        method.exceptions = []
         if self.exceptions is not None:
-            method.exceptions = []
-        method.body = self.body
-        method.indent = self.indent
+            method.exceptions = list(self.exceptions)
+        method.body = []
+        if self.body is not None:
+            method.body = list(self.body)
+        return method
 
     def set_return_type(self, return_type):
         """Sets the type of the return value of this method"""
