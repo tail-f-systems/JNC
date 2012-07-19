@@ -1264,12 +1264,16 @@ public class ''' + self.filename.split('.')[0] + self.modifiers + ' {\n'
 class JavaValue(object):
     """A Java value"""
     
-    def __init__(self, exact=None, javadocs=[], modifiers=[], name=None,
+    def __init__(self, exact=None, javadocs=None, modifiers=None, name=None,
                  value=None, indent=0):
         """Value constructor"""
         self.exact = exact
         self.javadocs = javadocs
+        if javadocs is None:
+            self.javadocs = []
         self.modifiers = modifiers
+        if modifiers is None:
+            self.modifiers = []
         self.name = name
         self.indent = ' ' * indent
     
@@ -1306,12 +1310,11 @@ class JavaValue(object):
         if self.exact is None:
             lines = ['']
             lines.extend(self.javadoc_as_string())
-            lines.append(''.join([self.indent,
-                                  ' '.join(self.modifiers,
-                                           self.name,
-                                           '=',
-                                           self.value),
-                                  ';']))
+            declaration = [self.modifiers, self.name]
+            if self.value is not None:
+                declaration.append('=')
+                declaration.append(self.value)
+            lines.append(''.join([self.indent, ' '.join(declaration), ';']))
             lines.append('')
             self.exact = '\n'.join(lines)  # Cache the string representation
         return self.exact
@@ -1319,16 +1322,23 @@ class JavaValue(object):
 class JavaMethod(JavaValue):
     """A Java method"""
     
-    def __init__(self, exact=None, javadocs=[], modifiers=[], return_type=None,
-                 name=None, parameters=[], exceptions=[], body=[], indent=4):
+    def __init__(self, exact=None, javadocs=None, modifiers=None,
+                 return_type=None, name=None, parameters=None, exceptions=None,
+                 body=None, indent=4):
         """Method constructor"""
         super(JavaMethod, self).__init__(exact=exact, javadocs=javadocs,
                                          modifiers=modifiers, name=name,
                                          value=None, indent=indent)
         self.return_type = return_type
         self.parameters = parameters
+        if parameters is None:
+            self.parameters = []
         self.exceptions = exceptions
+        if exceptions is None:
+            self.exceptions = []
         self.body = body
+        if body is None:
+            self.body = []
 
     def set_return_type(self, return_type):
         """Sets the type of the return value of this method"""
@@ -1355,16 +1365,21 @@ class JavaMethod(JavaValue):
         if self.exact is None:
             lines = ['']
             lines.extend(self.javadoc_as_string())
-            lines.append(''.join([self.indent,
-                                  ' '.join(self.modifiers,
-                                           self.return_type,
-                                           self.name),
-                                  '(',
-                                  ', '.join(self.parameters),
-                                  ')']))
+            header = []
+            header.extend(self.modifiers)
+            if self.return_type is not None:
+                header.append(self.return_type)
+            header.append(self.name)
+            signature = [self.indent]
+            signature.append(' '.join(header))
+            signature.append('(')
+            signature.append(', '.join(self.parameters))
+            signature.append(')')
             if self.exceptions:
-                lines[1] += ''.join([' throws ', ', '.join(self.exceptions)])
-            lines[1] += ' {'
+                signature.append(' throws ')
+                signature.append(', '.join(self.exceptions))
+            signature.append(' {')
+            lines.append(''.join(signature))
             lines.extend(self.body)
             lines.append(self.indent + '}')
             lines.append('')
