@@ -10,3 +10,4 @@ Should be the other way around.
 * Correct generation of javadoc (not a top priority at this stage)
 * Use os.pathsep instead of '/'
 * State preconditions in all function specifications (which can be None, etc)
+* When package-info.java is generated, it does not consider augmented modules
