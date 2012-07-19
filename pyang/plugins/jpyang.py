@@ -1351,6 +1351,26 @@ class JavaMethod(JavaValue):
         if body is None:
             self.body = []
 
+    def clone(self):
+        method = JavaMethod()
+        method.exact = self.exact
+        method.javadocs = []
+        if self.javadocs is not None:
+        method.javadocs = list(self.javadocs)
+        method.modifiers = self.modifiers
+        if self.modifiers is not None:
+            method.modifiers = []
+        method.return_type = self.return_type
+        method.name = self.name
+        method.parameters = self.parameters
+        if self.parameters is not None:
+            method.parameters = []
+        method.exceptions = self.exceptions
+        if self.exceptions is not None:
+            method.exceptions = []
+        method.body = self.body
+        method.indent = self.indent
+
     def set_return_type(self, return_type):
         """Sets the type of the return value of this method"""
         self.return_type = return_type
@@ -1448,7 +1468,7 @@ class MethodGenerator(object):
             constructor.add_javadoc(''.join(javadoc))
             constructor.add_exception('ConfMException')  # TODO: Check if needed
             constructor.add_line('super(value);')
-            constructor.add_line('check;')  # TODO: Check if needed
+            constructor.add_line('check();')  # TODO: Check if needed
             constructors.append(constructor)
 
         return constructors
