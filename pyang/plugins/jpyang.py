@@ -511,6 +511,15 @@ def is_container(stmt, strict=False):
         (not strict and stmt.keyword == 'list'))
 
 
+def is_config(stmt):
+    """Returns True if stmt is a configuration data statement"""
+    config = None
+    while config is None and stmt is not None:
+        config = stmt.search_one('config')
+        stmt = stmt.parent
+    return config is None or config.arg == 'true'
+
+
 def in_schema(stmt):
     """Returns True iff stmt is to be included in schema."""
     return (is_container(stmt) or
@@ -1396,26 +1405,53 @@ class MethodGenerator(object):
         """Constructor. Context must be supplied for some methods to work."""
         self.stmt = stmt
         self.n = extract_names(stmt.arg)[1]
+        self.root = extract_names(self.stmt.top.search_one('prefix').arg)[1]
+        self.is_container = stmt.keyword == 'container'
+        self.is_list = stmt.keyword == 'list'
+        self.is_config = is_config(stmt)
+        self.is_typedef = stmt.keyword == 'typedef'
         self.ctx = ctx
 
-    def constructor(self):
-        constructor = JavaMethod(modifiers=['public'], name=self.n)
-        javadoc = ['Constructor for an empty ']
-        javadoc.append(self.n)
-        javadoc.append(' object.')
-        constructor.add_javadoc(''.join(javadoc))
-        call = ['super(']
-        root = extract_names(self.stmt.top.search_one('prefix').arg)[1]
-        call.append(root)
-        call.append('.NAMESPACE, "')
-        call.append(self.stmt.arg)
-        call.append('");')
-        constructor.add_line(''.join(call))
-        if self.stmt.parent == self.stmt.top:
-            # Top level statement
-            constructor.add_line('setDefaultPrefix();')
-            constructor.add_line(''.join(['setPrefix(', root, '.PREFIX);']))
-        return constructor
+    def constructors(self):
+        constructors = []
+
+        # Parameter-free constructor
+        if(not self.is_typedef):
+            constructor = JavaMethod(modifiers=['public'], name=self.n)
+            javadoc = ['Constructor for an empty ']
+            javadoc.append(self.n)
+            javadoc.append(' object.')
+            constructor.add_javadoc(''.join(javadoc))
+            call = ['super(']
+            call.append(self.root)
+            call.append('.NAMESPACE, "')
+            call.append(self.stmt.arg)
+            call.append('");')
+            constructor.add_line(''.join(call))
+            if self.stmt.parent == self.stmt.top:
+                # Top level statement
+                constructor.add_line('setDefaultPrefix();')
+                setPrefix = ['setPrefix(', self.root, '.PREFIX);']
+                constructor.add_line(''.join(setPrefix))
+            constructors.append(constructor)
+        
+        # Typedef String constructor
+        if(self.is_typedef):
+            constructor = JavaMethod(modifiers=['public'], name=self.n)
+            javadoc = ['Constructor for ']
+            javadoc.append(self.n)
+            javadoc.append(' object from a string.')
+            constructor.add_javadoc(''.join(javadoc))
+            javadoc = ['@param value Value to construct the ']
+            javadoc.append(self.n)
+            javadoc.append(' from.')
+            constructor.add_javadoc(''.join(javadoc))
+            constructor.add_exception('ConfMException')  # TODO: Check if needed
+            constructor.add_line('super(value);')
+            constructor.add_line('check;')  # TODO: Check if needed
+            constructors.append(constructor)
+
+        return constructors
 
     def clone(self):
         cloners = [JavaMethod(), JavaMethod()]
