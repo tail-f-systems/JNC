@@ -1394,6 +1394,22 @@ class MethodGenerator(object):
         """Constructor. Context must be supplied for some methods to work."""
         self.ctx = ctx
 
+    def empty_constructor(self, stmt):
+        name = extract_names(stmt.arg)[1]
+        method = JavaMethod(modifiers=['public'], name=name)
+        javadoc = ['Constructor for an empty ']
+        javadoc.append(name)
+        javadoc.append(' object.')
+        method.add_line_to_javadoc(''.join(javadoc))
+        call = ['super(']
+        root = extract_names(stmt.top.search_one('prefix').arg)[1]
+        call.append(root)
+        call.append('.NAMESPACE, "')
+        call.append(stmt.arg)
+        call.append('");')
+        method.add_line(''.join(call))
+        return method
+
 
 def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=[],
     throws=''):
