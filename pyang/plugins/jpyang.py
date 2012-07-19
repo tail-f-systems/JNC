@@ -1374,6 +1374,11 @@ class JavaMethod(JavaValue):
     def clone(self):
         """Returns a deep copy of self"""
         method = JavaMethod()
+        self.clone_to(method)
+        return method
+
+    def clone_to(self, method):
+        """Adds copies of attributes to value"""
         super(JavaMethod, self).clone_to(method)
         method.return_type = self.return_type
         method.parameters = []
@@ -1385,7 +1390,6 @@ class JavaMethod(JavaValue):
         method.body = []
         if self.body is not None:
             method.body = list(self.body)
-        return method
 
     def set_return_type(self, return_type):
         """Sets the type of the return value of this method"""
