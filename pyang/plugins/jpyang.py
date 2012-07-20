@@ -1541,7 +1541,7 @@ class MethodGenerator(object):
             constructor.add_javadoc(''.join(javadoc1))
             constructor.add_javadoc(javadoc2[i])
             constructor.add_exception('INMException')  # TODO: Add only if needed
-            call = ['super(']
+            call = ['super']
             call.extend(self.root_namespace(self.stmt.arg))
             constructor.add_line(''.join(call))
             for key in key_stmts:
