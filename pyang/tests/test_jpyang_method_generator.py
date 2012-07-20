@@ -139,6 +139,7 @@ class Test(unittest.TestCase):
         assert self.tgen.ctx is self.ctx
 
     def testRoot_namespace(self):
+        """Joining root_namespace return value yields (RootM.NAMESPACE, "c")"""
         res = self.cgen.root_namespace()
         expected = ['(', self.cgen.root, '.NAMESPACE, "']
         expected.extend([self.cgen.stmt.arg, '");'])
