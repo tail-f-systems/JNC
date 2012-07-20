@@ -1445,7 +1445,10 @@ class MethodGenerator(object):
         """Constructor. Context must be supplied for some methods to work."""
         self.stmt = stmt
         self.n = extract_names(stmt.arg)[1]
-        self.root = extract_names(self.stmt.top.search_one('prefix').arg)[1]
+        prefix = self.stmt.top.search_one('prefix')
+        self.root = None
+        if prefix is not None:
+            self.root = extract_names(prefix.arg)[1]
         self.is_container = stmt.keyword == 'container'
         self.is_list = stmt.keyword == 'list'
         self.is_config = is_config(stmt)
