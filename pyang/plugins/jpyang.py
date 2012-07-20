@@ -1469,7 +1469,7 @@ class MethodGenerator(object):
         javadoc.append(self.n)
         javadoc.append(' object.')
         constructor.add_javadoc(''.join(javadoc))
-        call = ['super(']
+        call = ['super']
         call.extend(self.root_namespace())
         constructor.add_line(''.join(call))
         if self.stmt.parent == self.stmt.top:
