@@ -40,12 +40,12 @@ class Test(unittest.TestCase):
         self.c = Statement(self.m, self.m, None, 'container', arg='c')
         self.m.substmts = [self.p, self.c]
         
-        self.l = Statement(self.c, self.c, None, 'list', arg='l')
-        self.leaf = Statement(self.c, self.c, None, 'leaf', arg='leaf')
+        self.l = Statement(self.m, self.c, None, 'list', arg='l')
+        self.leaf = Statement(self.m, self.c, None, 'leaf', arg='leaf')
         self.c.substmts = [self.l, self.leaf]
         
-        self.key = Statement(self.l, self.l, None, 'key', arg='k')
-        self.k = Statement(self.l, self.l, None, 'leaf', arg='k')
+        self.key = Statement(self.m, self.l, None, 'key', arg='k')
+        self.k = Statement(self.m, self.l, None, 'leaf', arg='k')
         self.l.substmts = [self.key, self.k]
         
         # Create new Method Generators for the list and container statements
