@@ -1454,55 +1454,68 @@ class MethodGenerator(object):
         self.is_string = self.stmt_type and self.stmt_type.arg == 'string'
         self.ctx = ctx
 
-    def constructors(self):
-        constructors = []
+    def empty_constructor(self):
+        assert not self.is_typedef, "Typedefs don't have empty constructors"
+        constructor = JavaMethod(modifiers=['public'], name=self.n)
+        javadoc = ['Constructor for an empty ']
+        javadoc.append(self.n)
+        javadoc.append(' object.')
+        constructor.add_javadoc(''.join(javadoc))
+        call = ['super(']
+        call.append(self.root)
+        call.append('.NAMESPACE, "')
+        call.append(self.stmt.arg)
+        call.append('");')
+        constructor.add_line(''.join(call))
+        if self.stmt.parent == self.stmt.top:
+            # Top level statement
+            constructor.add_line('setDefaultPrefix();')
+            setPrefix = ['setPrefix(', self.root, '.PREFIX);']
+            constructor.add_line(''.join(setPrefix))
+        return constructor
 
-        # Parameter-free constructor
-        if not self.is_typedef:
-            constructor1 = JavaMethod(modifiers=['public'], name=self.n)
-            javadoc = ['Constructor for an empty ']
-            javadoc.append(self.n)
-            javadoc.append(' object.')
-            constructor1.add_javadoc(''.join(javadoc))
-            call = ['super(']
-            call.append(self.root)
-            call.append('.NAMESPACE, "')
-            call.append(self.stmt.arg)
-            call.append('");')
-            constructor1.add_line(''.join(call))
-            if self.stmt.parent == self.stmt.top:
-                # Top level statement
-                constructor1.add_line('setDefaultPrefix();')
-                setPrefix = ['setPrefix(', self.root, '.PREFIX);']
-                constructor1.add_line(''.join(setPrefix))
-            constructors.append(constructor1)
+    def typedef_constructors(self):
+        assert self.is_typedef, 'This method is only called with typedef stmts'
+        # String constructor
+        string_constructor = JavaMethod(modifiers=['public'], name=self.n)
+        javadoc = ['Constructor for ']
+        javadoc.append(self.n)
+        javadoc.append(' object from a string.')
+        string_constructor.add_javadoc(''.join(javadoc))
+        javadoc2 = ['@param value Value to construct the ']
+        javadoc2.append(self.n)
+        javadoc2.append(' from.')
+        string_constructor.add_javadoc(''.join(javadoc2))
+        string_constructor.add_parameter('String value')
+        string_constructor.add_exception('ConfMException')  # TODO: Add only if needed
+        string_constructor.add_line('super(value);')
+        string_constructor.add_line('check();')  # TODO: Add only if needed
         
-        # Typedef
-        if self.is_typedef:
-            # String constructor
-            constructor2 = JavaMethod(modifiers=['public'], name=self.n)
-            javadoc = ['Constructor for ']
-            javadoc.append(self.n)
-            javadoc.append(' object from a string.')
-            constructor2.add_javadoc(''.join(javadoc))
-            javadoc2 = ['@param value Value to construct the ']
-            javadoc2.append(self.n)
-            javadoc2.append(' from.')
-            constructor2.add_javadoc(''.join(javadoc2))
-            constructor2.add_parameter('String value')
-            constructor2.add_exception('ConfMException')  # TODO: Check if needed
-            constructor2.add_line('super(value);')
-            constructor2.add_line('check();')  # TODO: Check if needed
-            constructors.append(constructor2)
-            
-            # Value constructor
-            if not self.is_string:
-                primitive = get_types(self.stmt_type, self.ctx)[1]
-                constructor3 = constructor2.clone()  # XXX: Dangerous dependency
-                constructor3.javadocs[0] = javadoc2[:-7] + primitive
-                constructor3.parameters = [primitive + ' value']
-                constructors.append(constructor3)
+        # Value constructor
+        if not self.is_string:
+            primitive = get_types(self.stmt_type, self.ctx)[1]
+            value_constructor = string_constructor.clone()
+            value_constructor.javadocs[0] = javadoc2[:-7] + primitive  # XXX: Dangerous dependency
+            value_constructor.parameters = [primitive + ' value']
+            return [string_constructor, value_constructor]
+        else:
+            return [string_constructor]
 
+    def value_constructors(self):
+        return NotImplemented
+
+    def constructors(self):
+        """Returns a list of JavaMethods representing constructors to include
+        in generated class of self.stmt
+        
+        """
+        constructors = []
+        if not self.is_typedef:
+            # Parameter-free constructor
+            constructors.append(self.empty_constructor())
+        else:
+            # Number of constructors depends on the type
+            constructors.extend(self.typedef_constructors())
         return constructors
 
     def clone(self):
