@@ -93,6 +93,8 @@ class Test(unittest.TestCase):
         assert res == [[self.ty]], 'was: ' + mystr(res)
         res = map(self.l.search, ['key', 'leaf'])
         assert res == [[self.key], [self.k, self.my]], 'was: ' + mystr(res)
+        self.stmt_type = self.leaf.search_one('type')
+        assert self.stmt_type and self.stmt_type.arg == 'string'
 
     def testInit(self):
         """Values correct in newly created Method Generator"""
