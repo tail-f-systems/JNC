@@ -146,6 +146,9 @@ class Test(unittest.TestCase):
         assert ''.join(expected) == '(RootM.NAMESPACE, "c")'
         assert res == expected, 'was: ' + str(res) + '\nnot: ' + str(expected)
 
+    def testTypedef_constructors(self):
+        return NotImplemented
+
 if __name__ == "__main__":
     """Launch all unit tests"""
     #import sys;sys.argv = ['', 'Test.testCapitalize_first']  # Only one
