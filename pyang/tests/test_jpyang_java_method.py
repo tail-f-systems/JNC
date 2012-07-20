@@ -103,6 +103,13 @@ class Test(unittest.TestCase):
         """Values correct in Java Methods created in different ways"""
         return NotImplemented
 
+    def testClone(self):
+        """Clones have equal string representation but different reference"""
+        method = self.cgen.empty_constructor()
+        clone = method.clone()
+        assert method is not clone, 'Different reference'
+        assert method.as_string() == clone.as_string(), 'Same string repr'
+
 
 if __name__ == "__main__":
     """Launch all unit tests"""
