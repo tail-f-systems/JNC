@@ -147,7 +147,28 @@ class Test(unittest.TestCase):
         assert res == expected, 'was: ' + str(res) + '\nnot: ' + str(expected)
 
     def testTypedef_constructors(self):
-        return NotImplemented
+        constructors = self.tgen.typedef_constructors()
+        assert constructors[0].as_string() == '''
+    /**
+     * Constructor for T object from a string.
+     * @param value Value to construct the T from.
+     */
+    public T(String value) throws ConfMException {
+        super(value);
+        check();
+    }
+''', 'was: ' + constructors[0].as_string()
+        assert constructors[1].as_string() == '''
+    /**
+     * Constructor for T object from a int.
+     * @param value Value to construct the T from.
+     */
+    public T(int value) throws ConfMException {
+        super(value);
+        check();
+    }
+''', 'was: ' + constructors[1].as_string()
+        
 
 if __name__ == "__main__":
     """Launch all unit tests"""
