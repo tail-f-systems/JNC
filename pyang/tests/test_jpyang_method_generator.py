@@ -255,6 +255,25 @@ class Test(unittest.TestCase):
                                                          setvalue[i][0],
                                                          setvalue[i][1])
 
+    def testConstructors(self):
+        """The correct subroutines are called from constructor"""
+        # List constructors
+        constructors = self.lgen.constructors()
+        expected = [self.lgen.empty_constructor()]
+        expected.extend(self.lgen.value_constructors())
+        assert map(jpyang.JavaMethod.as_string, constructors) == \
+               map(jpyang.JavaMethod.as_string, expected)
+        
+        # Container constructors
+        assert self.cgen.constructors()[0].as_string() == \
+               self.cgen.empty_constructor().as_string()
+        
+        # Typedef constructors
+        constructors = self.tgen.constructors()
+        expected = self.tgen.typedef_constructors()
+        assert map(jpyang.JavaMethod.as_string, constructors) == \
+               map(jpyang.JavaMethod.as_string, expected)
+
 
 if __name__ == "__main__":
     """Launch all unit tests"""
