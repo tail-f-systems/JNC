@@ -1454,7 +1454,16 @@ class MethodGenerator(object):
         self.is_string = self.stmt_type and self.stmt_type.arg == 'string'
         self.ctx = ctx
 
+    def root_namespace(self):
+        """Returns '([Root].NAMESPACE, "[stmt.arg]")'"""
+        call = ['(' + self.root]
+        call.append('.NAMESPACE, "')
+        call.append(self.stmt.arg)
+        call.append('");')
+        return call
+
     def empty_constructor(self):
+        """Returns parameter-free constructor as a JavaMethod object"""
         assert not self.is_typedef, "Typedefs don't have empty constructors"
         constructor = JavaMethod(modifiers=['public'], name=self.n)
         javadoc = ['Constructor for an empty ']
@@ -1462,10 +1471,7 @@ class MethodGenerator(object):
         javadoc.append(' object.')
         constructor.add_javadoc(''.join(javadoc))
         call = ['super(']
-        call.append(self.root)
-        call.append('.NAMESPACE, "')
-        call.append(self.stmt.arg)
-        call.append('");')
+        call.extend(self.root_namespace())
         constructor.add_line(''.join(call))
         if self.stmt.parent == self.stmt.top:
             # Top level statement
@@ -1475,7 +1481,9 @@ class MethodGenerator(object):
         return constructor
 
     def typedef_constructors(self):
+        """Returns a list containing a single or a pair of constructors"""
         assert self.is_typedef, 'This method is only called with typedef stmts'
+
         # String constructor
         string_constructor = JavaMethod(modifiers=['public'], name=self.n)
         javadoc = ['Constructor for ']
@@ -1502,7 +1510,58 @@ class MethodGenerator(object):
             return [string_constructor]
 
     def value_constructors(self):
-        return NotImplemented
+        """Returns a list of constructors for configuration data lists"""
+        assert not self.is_typedef, 'Not called with typedef stmts'
+        assert not self.is_container, 'Not called with container stmts'
+        assert self.is_list, 'Only called with list stmts'
+        assert self.is_config, 'Only called with configuration data stmts'
+        
+        keys = self.stmt.search_one('key').arg.split(' ')
+        key_stmts = map(lambda k: self.stmt.search_one('leaf', k), keys)
+
+        # String constructor
+        string_constructor = JavaMethod(modifiers=['public'], name=self.n)
+        javadoc = ['Constructor for an initialized ', self.n, ' object,']
+        string_constructor.add_javadoc(''.join(javadoc))
+        string_constructor.add_javadoc('with Strings for the keys.')
+        javadoc2 = ['@param ', self.stmt.arg]
+        javadoc2.append('Value Key argument for the child.')
+        string_constructor.add_javadoc(''.join(javadoc2))
+        string_constructor.add_exception('INMException')  # TODO: Add only if needed
+        call = ['super(']
+        call.extend(self.root_namespace())
+        string_constructor.add_line(''.join(call))
+        for key in key_stmts:
+            parameter = ['String ', key.arg, 'value']
+            newLeaf = ['Leaf ', key.arg, ' = new Leaf']
+            newLeaf.extend(self.root_namespace())
+            setValue = [key.arg, '.setValue(', key.arg, 'Value);']
+            insertChild = ['insertChild(', key.arg, ', childrenNames());']
+            string_constructor.add_parameter(''.join(parameter))
+            string_constructor.add_line(''.join(newLeaf))
+            string_constructor.add_line(''.join(setValue))
+            string_constructor.add_line(''.join(insertChild))
+
+        default_constructor = string_constructor.clone()
+        default_constructor.javadocs.remove('with Strings for the keys.')  # XXX: Dangerous dependency
+        default_constructor.parameters = []
+        for key in key_stmts:
+            primitive = get_types(key, self.ctx)[0]
+            parameter = [primitive, ' ', key.arg, 'value']
+            default_constructor.add_parameter(''.join(parameter))
+
+        if filter(lambda k: k.arg != 'string', key_stmts):
+            # Constructor with primitive values
+            primitive_constructor = string_constructor.clone()
+            primitive_constructor.javadocs[1] = 'with primitive java types.'  # XXX: Dangerous dependency
+            primitive_constructor.parameters = []
+            for key in key_stmts:
+                primitive = get_types(key, self.ctx)[1]
+                parameter = [primitive, ' ', key.arg, 'value']
+                primitive_constructor.add_parameter(''.join(parameter))
+            return [default_constructor, string_constructor, primitive_constructor]
+        else:
+            return [default_constructor, string_constructor]
 
     def constructors(self):
         """Returns a list of JavaMethods representing constructors to include
@@ -1511,8 +1570,10 @@ class MethodGenerator(object):
         """
         constructors = []
         if not self.is_typedef:
-            # Parameter-free constructor
             constructors.append(self.empty_constructor())
+            if self.is_list and self.is_config:
+                # Number of constructors depends on the type of the key
+                constructors.extend(self.value_constructors())
         else:
             # Number of constructors depends on the type
             constructors.extend(self.typedef_constructors())
