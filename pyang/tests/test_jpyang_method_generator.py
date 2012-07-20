@@ -19,9 +19,11 @@ from pyang import Context
 class DummyOption(object):
     """Used to initialize Context with option fields in test setUp"""
     
-    def __init__(self, directory):
+    def __init__(self, directory, debug, verbose):
         """Sets the directory field to the supplied value"""
         self.directory = directory
+        self.debug = debug
+        self.verbose = verbose
 
 
 class Test(unittest.TestCase):
@@ -32,7 +34,7 @@ class Test(unittest.TestCase):
         # Initialize context with directory 'gen'
         repo = FileRepository()
         self.ctx = Context(repo)
-        self.ctx.opts = DummyOption('gen')
+        self.ctx.opts = DummyOption('gen', False, False)
         
         ###### Construct a statement tree rooted at m
         
@@ -200,6 +202,11 @@ class Test(unittest.TestCase):
         assert res[1].as_string() == expected.format('int', 'int'), \
             '\nwas:' + res[1].as_string() + \
             '\nnot:' + expected.format('int', 'int')
+
+    def testValue_constructors(self):
+        """All methods' fields and as_string representations as expected"""
+        res = self.lgen.value_constructors()
+        assert len(res) == 3, 'There should be three constructors'
 
 
 if __name__ == "__main__":
