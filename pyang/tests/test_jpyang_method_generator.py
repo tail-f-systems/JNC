@@ -147,27 +147,31 @@ class Test(unittest.TestCase):
         assert res == expected, 'was: ' + str(res) + '\nnot: ' + str(expected)
 
     def testTypedef_constructors(self):
-        constructors = self.tgen.typedef_constructors()
-        assert constructors[0].as_string() == '''
+        """Method fields and as_string representation as expected"""
+        res = self.tgen.typedef_constructors()
+        assert res[0].modifiers == res[1].modifiers == ['public']
+        assert res[0].return_type == res[1].return_type == None
+        assert res[0].name == res[1].name == 'T'
+        assert res[0].parameters == ['String value']
+        assert res[1].parameters == ['int value']
+        assert res[0].exceptions == res[1].exceptions == ['ConfMException']
+        assert res[0].indent == res[1].indent == '    '
+        expected = '''
     /**
-     * Constructor for T object from a string.
+     * Constructor for T object from a %s.
      * @param value Value to construct the T from.
      */
-    public T(String value) throws ConfMException {
+    public T(%s value) throws ConfMException {
         super(value);
         check();
     }
-''', 'was: ' + constructors[0].as_string()
-        assert constructors[1].as_string() == '''
-    /**
-     * Constructor for T object from a int.
-     * @param value Value to construct the T from.
-     */
-    public T(int value) throws ConfMException {
-        super(value);
-        check();
-    }
-''', 'was: ' + constructors[1].as_string()
+'''
+        assert res[0].as_string() == expected % ('string', 'String'), \
+            '\nwas:' + res[0].as_string() + \
+            '\nnot:' + expected % ('string', 'String')
+        assert res[1].as_string() == expected % ('int', 'int'), \
+            '\nwas:' + res[1].as_string() + \
+            '\nnot:' + expected % ('int', 'int')
         
 
 if __name__ == "__main__":
