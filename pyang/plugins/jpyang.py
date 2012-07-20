@@ -1458,12 +1458,8 @@ class MethodGenerator(object):
         self.ctx = ctx
 
     def root_namespace(self):
-        """Returns '([Root].NAMESPACE, "[stmt.arg]")'"""
-        call = ['(' + self.root]
-        call.append('.NAMESPACE, "')
-        call.append(self.stmt.arg)
-        call.append('");')
-        return call
+        """Returns '([Root].NAMESPACE, "[stmt.arg]");'"""
+        return ['(', self.root, '.NAMESPACE, "', self.stmt.arg, '");']
 
     def empty_constructor(self):
         """Returns parameter-free constructor as a JavaMethod object"""
