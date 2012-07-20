@@ -1457,9 +1457,9 @@ class MethodGenerator(object):
         self.is_string = self.stmt_type and self.stmt_type.arg == 'string'
         self.ctx = ctx
 
-    def root_namespace(self):
+    def root_namespace(self, stmt_arg):
         """Returns '([Root].NAMESPACE, "[stmt.arg]");'"""
-        return ['(', self.root, '.NAMESPACE, "', self.stmt.arg, '");']
+        return ['(', self.root, '.NAMESPACE, "', stmt_arg, '");']
 
     def empty_constructor(self):
         """Returns parameter-free constructor as a JavaMethod object"""
@@ -1470,7 +1470,7 @@ class MethodGenerator(object):
         javadoc.append(' object.')
         constructor.add_javadoc(''.join(javadoc))
         call = ['super']
-        call.extend(self.root_namespace())
+        call.extend(self.root_namespace(self.stmt.arg))
         constructor.add_line(''.join(call))
         if self.stmt.parent == self.stmt.top:
             # Top level statement
@@ -1522,22 +1522,21 @@ class MethodGenerator(object):
 
         # String constructor
         string_constructor = JavaMethod(modifiers=['public'], name=self.n)
-        javadoc = ['Constructor for an initialized ', self.n, ' object,']
-        string_constructor.add_javadoc(''.join(javadoc))
+        javadoc1 = ['Constructor for an initialized ', self.n, ' object,']
+        string_constructor.add_javadoc(''.join(javadoc1))
         string_constructor.add_javadoc('with Strings for the keys.')
-        javadoc2 = ['@param ', self.stmt.arg]
-        javadoc2.append('Value Key argument for the child.')
-        string_constructor.add_javadoc(''.join(javadoc2))
         string_constructor.add_exception('INMException')  # TODO: Add only if needed
         call = ['super(']
-        call.extend(self.root_namespace())
+        call.extend(self.root_namespace(self.stmt.arg))
         string_constructor.add_line(''.join(call))
         for key in key_stmts:
-            parameter = ['String ', key.arg, 'value']
+            javadoc = ['@param ', key.arg, 'Value Key argument of child.']
+            parameter = ['String ', key.arg, 'Value']
             newLeaf = ['Leaf ', key.arg, ' = new Leaf']
-            newLeaf.extend(self.root_namespace())
+            newLeaf.extend(self.root_namespace(key.arg))
             setValue = [key.arg, '.setValue(', key.arg, 'Value);']
             insertChild = ['insertChild(', key.arg, ', childrenNames());']
+            string_constructor.add_javadoc(''.join(javadoc))
             string_constructor.add_parameter(''.join(parameter))
             string_constructor.add_line(''.join(newLeaf))
             string_constructor.add_line(''.join(setValue))
@@ -1548,18 +1547,20 @@ class MethodGenerator(object):
         default_constructor.parameters = []
         for key in key_stmts:
             primitive = get_types(key, self.ctx)[0]
-            parameter = [primitive, ' ', key.arg, 'value']
+            parameter = [primitive, ' ', key.arg, 'Value']
             default_constructor.add_parameter(''.join(parameter))
+            # FIXME: should do setValue with new instance
 
         if filter(lambda k: k.arg != 'string', key_stmts):
             # Constructor with primitive values
             primitive_constructor = string_constructor.clone()
-            primitive_constructor.javadocs[1] = 'with primitive java types.'  # XXX: Dangerous dependency
+            primitive_constructor.javadocs[1] = 'with primitive Java types.'  # XXX: Dangerous dependency
             primitive_constructor.parameters = []
             for key in key_stmts:
                 primitive = get_types(key, self.ctx)[1]
-                parameter = [primitive, ' ', key.arg, 'value']
+                parameter = [primitive, ' ', key.arg, 'Value']
                 primitive_constructor.add_parameter(''.join(parameter))
+                # FIXME: should do setValue with new instance
             return [default_constructor, string_constructor, primitive_constructor]
         else:
             return [default_constructor, string_constructor]

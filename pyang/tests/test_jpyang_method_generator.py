@@ -142,10 +142,17 @@ class Test(unittest.TestCase):
 
     def testRoot_namespace(self):
         """Joining root_namespace return value yields (RootM.NAMESPACE, "c")"""
-        res = self.cgen.root_namespace()
+        res = self.cgen.root_namespace(self.cgen.stmt.arg)
         expected = ['(', self.cgen.root, '.NAMESPACE, "']
         expected.extend([self.cgen.stmt.arg, '");'])
         assert ''.join(expected) == '(RootM.NAMESPACE, "c");'
+        assert res == expected, 'was: ' + str(res) + '\nnot: ' + str(expected)
+        
+        # 
+        res = self.lgen.root_namespace(self.my.arg)
+        expected = ['(', self.lgen.root, '.NAMESPACE, "']
+        expected.extend([self.my.arg, '");'])
+        assert ''.join(expected) == '(RootM.NAMESPACE, "my");'
         assert res == expected, 'was: ' + str(res) + '\nnot: ' + str(expected)
 
     def testEmpty_constructor(self):
@@ -207,6 +214,15 @@ class Test(unittest.TestCase):
         """All methods' fields and as_string representations as expected"""
         res = self.lgen.value_constructors()
         assert len(res) == 3, 'There should be three constructors'
+        #params = ['']
+        for i, method in enumerate(res):
+            assert method.modifiers == ['public']
+            assert method.return_type == None
+            assert method.name == 'L'
+            #assert method.parameters == ['String value']
+            assert method.exceptions == ['INMException']
+            assert method.indent == '    '
+            print method.as_string()
 
 
 if __name__ == "__main__":
