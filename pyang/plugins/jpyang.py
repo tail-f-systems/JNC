@@ -1459,48 +1459,49 @@ class MethodGenerator(object):
 
         # Parameter-free constructor
         if not self.is_typedef:
-            constructor = JavaMethod(modifiers=['public'], name=self.n)
+            constructor1 = JavaMethod(modifiers=['public'], name=self.n)
             javadoc = ['Constructor for an empty ']
             javadoc.append(self.n)
             javadoc.append(' object.')
-            constructor.add_javadoc(''.join(javadoc))
+            constructor1.add_javadoc(''.join(javadoc))
             call = ['super(']
             call.append(self.root)
             call.append('.NAMESPACE, "')
             call.append(self.stmt.arg)
             call.append('");')
-            constructor.add_line(''.join(call))
+            constructor1.add_line(''.join(call))
             if self.stmt.parent == self.stmt.top:
                 # Top level statement
-                constructor.add_line('setDefaultPrefix();')
+                constructor1.add_line('setDefaultPrefix();')
                 setPrefix = ['setPrefix(', self.root, '.PREFIX);']
-                constructor.add_line(''.join(setPrefix))
-            constructors.append(constructor)
+                constructor1.add_line(''.join(setPrefix))
+            constructors.append(constructor1)
         
         # Typedef
         if self.is_typedef:
             # String constructor
-            constructor = JavaMethod(modifiers=['public'], name=self.n)
+            constructor2 = JavaMethod(modifiers=['public'], name=self.n)
             javadoc = ['Constructor for ']
             javadoc.append(self.n)
             javadoc.append(' object from a string.')
-            constructor.add_javadoc(''.join(javadoc))
+            constructor2.add_javadoc(''.join(javadoc))
             javadoc2 = ['@param value Value to construct the ']
             javadoc2.append(self.n)
             javadoc2.append(' from.')
-            constructor.add_javadoc(''.join(javadoc2))
-            constructor.add_parameter('String value')
-            constructor.add_exception('ConfMException')  # TODO: Check if needed
-            constructor.add_line('super(value);')
-            constructor.add_line('check();')  # TODO: Check if needed
-            constructors.append(constructor)
+            constructor2.add_javadoc(''.join(javadoc2))
+            constructor2.add_parameter('String value')
+            constructor2.add_exception('ConfMException')  # TODO: Check if needed
+            constructor2.add_line('super(value);')
+            constructor2.add_line('check();')  # TODO: Check if needed
+            constructors.append(constructor2)
             
             # Value constructor
             if not self.is_string:
-                constructor = constructor.clone()
-                constructor.javadocs[0] = javadoc2[:-7] + self.stmt_type.arg  # FIXME ugly and wrong type
-                constructor.parameters = [self.stmt_type.arg + ' value']  # FIXME ugly and wrong type
-                constructors.append(constructor)
+                primitive = get_types(self.stmt_type, self.ctx)[1]
+                constructor3 = constructor2.clone()  # XXX: Dangerous dependency
+                constructor3.javadocs[0] = javadoc2[:-7] + primitive
+                constructor3.parameters = [primitive + ' value']
+                constructors.append(constructor3)
 
         return constructors
 
