@@ -156,22 +156,22 @@ class Test(unittest.TestCase):
         assert res[1].parameters == ['int value']
         assert res[0].exceptions == res[1].exceptions == ['ConfMException']
         assert res[0].indent == res[1].indent == '    '
-        expected = '\n'.join(['',
-            '    /**',
-            '     * Constructor for T object from a %s.',
-            '     * @param value Value to construct the T from.',
-            '     */',
-            '    public T(%s value) throws ConfMException {',
-            '        super(value);',
-            '        check();',
-            '    }',
-            ''])
-        assert res[0].as_string() == expected % ('string', 'String'), \
+        expected = '''
+    /**
+     * Constructor for T object from a {}.
+     * @param value Value to construct the T from.
+     */
+    public T({} value) throws ConfMException {{
+        super(value);
+        check();
+    }}
+'''
+        assert res[0].as_string() == expected.format('string', 'String'), \
             '\nwas:' + res[0].as_string() + \
-            '\nnot:' + expected % ('string', 'String')
-        assert res[1].as_string() == expected % ('int', 'int'), \
+            '\nnot:' + expected.format('string', 'String')
+        assert res[1].as_string() == expected.format('int', 'int'), \
             '\nwas:' + res[1].as_string() + \
-            '\nnot:' + expected % ('int', 'int')
+            '\nnot:' + expected.format('int', 'int')
         
 
 if __name__ == "__main__":
