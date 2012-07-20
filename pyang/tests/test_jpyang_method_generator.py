@@ -71,6 +71,7 @@ class Test(unittest.TestCase):
         
         # type child of c/l/my
         self.myty = Statement(self.m, self.my, None, 'type', arg='t')
+        self.myty.i_typedef = self.t
         self.my.substmts = [self.myty]
         
         ########
