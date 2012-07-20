@@ -146,33 +146,6 @@ class Test(unittest.TestCase):
         assert ''.join(expected) == '(RootM.NAMESPACE, "c");'
         assert res == expected, 'was: ' + str(res) + '\nnot: ' + str(expected)
 
-    def testTypedef_constructors(self):
-        """Both methods' fields and as_string representations as expected"""
-        res = self.tgen.typedef_constructors()
-        assert res[0].modifiers == res[1].modifiers == ['public']
-        assert res[0].return_type == res[1].return_type == None
-        assert res[0].name == res[1].name == 'T'
-        assert res[0].parameters == ['String value']
-        assert res[1].parameters == ['int value']
-        assert res[0].exceptions == res[1].exceptions == ['ConfMException']
-        assert res[0].indent == res[1].indent == '    '
-        expected = '''
-    /**
-     * Constructor for T object from a {}.
-     * @param value Value to construct the T from.
-     */
-    public T({} value) throws ConfMException {{
-        super(value);
-        check();
-    }}
-'''
-        assert res[0].as_string() == expected.format('string', 'String'), \
-            '\nwas:' + res[0].as_string() + \
-            '\nnot:' + expected.format('string', 'String')
-        assert res[1].as_string() == expected.format('int', 'int'), \
-            '\nwas:' + res[1].as_string() + \
-            '\nnot:' + expected.format('int', 'int')
-
     def testEmpty_constructor(self):
         """Method fields and as_string representation as expected"""
         res = [self.cgen.empty_constructor(), self.lgen.empty_constructor()]
@@ -200,6 +173,33 @@ class Test(unittest.TestCase):
         assert res[1].as_string() == expected.format('L', 'l', ''), \
             '\nwas:' + res[1].as_string() + \
             '\nnot:' + expected.format('L', 'l', '')
+
+    def testTypedef_constructors(self):
+        """Both methods' fields and as_string representations as expected"""
+        res = self.tgen.typedef_constructors()
+        assert res[0].modifiers == res[1].modifiers == ['public']
+        assert res[0].return_type == res[1].return_type == None
+        assert res[0].name == res[1].name == 'T'
+        assert res[0].parameters == ['String value']
+        assert res[1].parameters == ['int value']
+        assert res[0].exceptions == res[1].exceptions == ['ConfMException']
+        assert res[0].indent == res[1].indent == '    '
+        expected = '''
+    /**
+     * Constructor for T object from a {}.
+     * @param value Value to construct the T from.
+     */
+    public T({} value) throws ConfMException {{
+        super(value);
+        check();
+    }}
+'''
+        assert res[0].as_string() == expected.format('string', 'String'), \
+            '\nwas:' + res[0].as_string() + \
+            '\nnot:' + expected.format('string', 'String')
+        assert res[1].as_string() == expected.format('int', 'int'), \
+            '\nwas:' + res[1].as_string() + \
+            '\nnot:' + expected.format('int', 'int')
 
 
 if __name__ == "__main__":
