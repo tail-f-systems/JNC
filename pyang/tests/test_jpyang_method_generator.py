@@ -175,26 +175,31 @@ class Test(unittest.TestCase):
 
     def testEmpty_constructor(self):
         """Method fields and as_string representation as expected"""
-        res = self.cgen.empty_constructor()
-        assert res.modifiers == ['public']
-        assert res.return_type == None
-        assert res.name == 'C'
-        assert res.parameters == []
-        assert res.exceptions == []
-        assert res.indent == '    '
+        res = [self.cgen.empty_constructor(), self.lgen.empty_constructor()]
+        assert res[0].modifiers == res[1].modifiers == ['public']
+        assert res[0].return_type == res[1].return_type == None
+        assert res[0].name == 'C'
+        assert res[1].name == 'L'
+        assert res[0].parameters == res[1].parameters == []
+        assert res[0].exceptions == res[1].exceptions == []
+        assert res[0].indent == res[1].indent == '    '
         expected = '''
     /**
      * Constructor for an empty {0} object.
      */
     public {0}() {{
-        super({1}.NAMESPACE, "{2}");
-        setDefaultPrefix();
-        setPrefix({1}.PREFIX);
+        super(RootM.NAMESPACE, "{1}");{2}
     }}
 '''
-        assert res.as_string() == expected.format('C', 'RootM', 'c'), \
-            '\nwas:' + res.as_string() + \
-            '\nnot:' + expected.format('C', 'RootM', 'c')
+        set_prefix = '''
+        setDefaultPrefix();
+        setPrefix(RootM.PREFIX);'''
+        assert res[0].as_string() == expected.format('C', 'c', set_prefix), \
+            '\nwas:' + res[0].as_string() + \
+            '\nnot:' + expected.format('C', 'c', set_prefix)
+        assert res[1].as_string() == expected.format('L', 'l', ''), \
+            '\nwas:' + res[1].as_string() + \
+            '\nnot:' + expected.format('L', 'l', '')
 
 
 if __name__ == "__main__":
