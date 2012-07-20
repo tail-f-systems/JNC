@@ -82,6 +82,17 @@ class Test(unittest.TestCase):
         """Runs after each test"""
         pass
 
+    def testSetUp(self):
+        """Statement tree in this test is properly constructed"""
+        res = map(self.m.search, ['prefix', 'container', 'typedef'])
+        assert res == [[self.p], [self.c], [self.t]]
+        res = map(self.c.search, ['list', 'leaf'])
+        assert res == [[self.l], [self.leaf]]
+        res = map(self.t.search, ['type'])
+        assert res == [[self.ty]]
+        res = map(self.l.search, ['key', 'leaf'])
+        assert res == [[self.key], [self.k, self.my]]
+
     def testInit(self):
         """Values correct in newly created Method Generator"""
         assert self.cgen.stmt == self.c, 'was: ' + self.c.arg
