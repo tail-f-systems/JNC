@@ -258,21 +258,30 @@ class Test(unittest.TestCase):
     def testConstructors(self):
         """The correct subroutines are called from constructor"""
         # List constructors
-        constructors = self.lgen.constructors()
-        expected = [self.lgen.empty_constructor()]
-        expected.extend(self.lgen.value_constructors())
-        assert map(jpyang.JavaMethod.as_string, constructors) == \
-               map(jpyang.JavaMethod.as_string, expected)
+        constructors1 = self.lgen.constructors()
+        constructors2 = [self.lgen.empty_constructor()]
+        constructors2.extend(self.lgen.value_constructors())
+        res = map(jpyang.JavaMethod.as_string, constructors1)
+        expected = map(jpyang.JavaMethod.as_string, constructors2)
+        msg = ['All 4 LIST constructors should be generated correctly']
+        msg.extend(['was:', ''.join(res), 'expected:', ''.join(expected)])
+        assert res == expected, '\n'.join(msg)
         
         # Container constructors
-        assert self.cgen.constructors()[0].as_string() == \
-               self.cgen.empty_constructor().as_string()
+        res = self.cgen.constructors()[0].as_string()
+        expected = self.cgen.empty_constructor().as_string()
+        msg = ['CONTAINER constructor generated should be parameter free']
+        msg.extend(['was:', ''.join(res), 'expected:', ''.join(expected)])
+        assert res == expected, '\n'.join(msg)
         
         # Typedef constructors
-        constructors = self.tgen.constructors()
-        expected = self.tgen.typedef_constructors()
-        assert map(jpyang.JavaMethod.as_string, constructors) == \
-               map(jpyang.JavaMethod.as_string, expected)
+        constructors1 = self.tgen.constructors()
+        constructors2 = self.tgen.typedef_constructors()
+        res = map(jpyang.JavaMethod.as_string, constructors1)
+        expected = map(jpyang.JavaMethod.as_string, constructors2)
+        msg = ['TYPEDEF constructors should be generated properly']
+        msg.extend(['was:', ''.join(res), 'expected:', ''.join(expected)])
+        assert res == expected, '\n'.join(msg)
 
 
 if __name__ == "__main__":
