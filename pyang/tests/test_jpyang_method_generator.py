@@ -143,7 +143,7 @@ class Test(unittest.TestCase):
         res = self.cgen.root_namespace()
         expected = ['(', self.cgen.root, '.NAMESPACE, "']
         expected.extend([self.cgen.stmt.arg, '");'])
-        assert ''.join(expected) == '(RootM.NAMESPACE, "c")'
+        assert ''.join(expected) == '(RootM.NAMESPACE, "c");'
         assert res == expected, 'was: ' + str(res) + '\nnot: ' + str(expected)
 
     def testTypedef_constructors(self):
