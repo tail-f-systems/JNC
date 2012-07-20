@@ -84,14 +84,15 @@ class Test(unittest.TestCase):
 
     def testSetUp(self):
         """Statement tree in this test is properly constructed"""
+        mystr = lambda l: str(map(lambda ll: map(lambda s: s.arg, ll), l))
         res = map(self.m.search, ['prefix', 'container', 'typedef'])
-        assert res == [[self.p], [self.c], [self.t]]
+        assert res == [[self.p], [self.c], [self.t]], 'was: ' + mystr(res)
         res = map(self.c.search, ['list', 'leaf'])
-        assert res == [[self.l], [self.leaf]]
+        assert res == [[self.l], [self.leaf]], 'was: ' + mystr(res)
         res = map(self.t.search, ['type'])
-        assert res == [[self.ty]]
+        assert res == [[self.ty]], 'was: ' + mystr(res)
         res = map(self.l.search, ['key', 'leaf'])
-        assert res == [[self.key], [self.k, self.my]]
+        assert res == [[self.key], [self.k, self.my]], 'was: ' + mystr(res)
 
     def testInit(self):
         """Values correct in newly created Method Generator"""
