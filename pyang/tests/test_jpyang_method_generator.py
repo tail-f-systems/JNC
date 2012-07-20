@@ -156,16 +156,16 @@ class Test(unittest.TestCase):
         assert res[1].parameters == ['int value']
         assert res[0].exceptions == res[1].exceptions == ['ConfMException']
         assert res[0].indent == res[1].indent == '    '
-        expected = '''
-    /**
-     * Constructor for T object from a %s.
-     * @param value Value to construct the T from.
-     */
-    public T(%s value) throws ConfMException {
-        super(value);
-        check();
-    }
-'''
+        expected = '\n'.join(['',
+            '    /**',
+            '     * Constructor for T object from a %s.',
+            '     * @param value Value to construct the T from.',
+            '     */',
+            '    public T(%s value) throws ConfMException {',
+            '        super(value);',
+            '        check();',
+            '    }',
+            ''])
         assert res[0].as_string() == expected % ('string', 'String'), \
             '\nwas:' + res[0].as_string() + \
             '\nnot:' + expected % ('string', 'String')
