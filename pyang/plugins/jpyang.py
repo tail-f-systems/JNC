@@ -483,7 +483,7 @@ def extract_names(arg):
     arg -- Any string, really
 
     """
-    capitalized = capitalize_first(arg)
+    capitalized = capitalize_first(camelize(arg))
     return (capitalized + '.java', capitalized)
 
 
