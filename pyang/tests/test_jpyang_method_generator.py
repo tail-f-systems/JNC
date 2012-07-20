@@ -147,7 +147,7 @@ class Test(unittest.TestCase):
         assert res == expected, 'was: ' + str(res) + '\nnot: ' + str(expected)
 
     def testTypedef_constructors(self):
-        """Method fields and as_string representation as expected"""
+        """Both methods' fields and as_string representations as expected"""
         res = self.tgen.typedef_constructors()
         assert res[0].modifiers == res[1].modifiers == ['public']
         assert res[0].return_type == res[1].return_type == None
@@ -172,7 +172,30 @@ class Test(unittest.TestCase):
         assert res[1].as_string() == expected.format('int', 'int'), \
             '\nwas:' + res[1].as_string() + \
             '\nnot:' + expected.format('int', 'int')
-        
+
+    def testEmpty_constructor(self):
+        """Method fields and as_string representation as expected"""
+        res = self.cgen.empty_constructor()
+        assert res.modifiers == ['public']
+        assert res.return_type == None
+        assert res.name == 'C'
+        assert res.parameters == []
+        assert res.exceptions == []
+        assert res.indent == '    '
+        expected = '''
+    /**
+     * Constructor for an empty {0} object.
+     */
+    public {0}() {{
+        super({1}.NAMESPACE, "{2}");
+        setDefaultPrefix();
+        setPrefix({1}.PREFIX);
+    }}
+'''
+        assert res.as_string() == expected.format('C', 'RootM', 'c'), \
+            '\nwas:' + res.as_string() + \
+            '\nnot:' + expected.format('C', 'RootM', 'c')
+
 
 if __name__ == "__main__":
     """Launch all unit tests"""
