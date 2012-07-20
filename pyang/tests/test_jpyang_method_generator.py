@@ -215,15 +215,45 @@ class Test(unittest.TestCase):
         """All methods' fields and as_string representations as expected"""
         res = self.lgen.value_constructors()
         assert len(res) == 3, 'There should be three constructors'
-        #params = ['']
+        params = [['com.tailf.confm.xs.String kValue', 'gen.T myValue'],
+                  ['String kValue', 'String myValue'],
+                  ['String kValue', 'int myValue']]
+        addition = ['',
+                    'with Strings for the keys.',
+                    'with primitive Java types.']
+        confm_string = 'new com.tailf.confm.xs.String('
+        gen_t = 'new gen.T('
+        setvalue = [['kValue', 'myValue'],
+                    [confm_string + 'kValue)', gen_t + 'myValue)'],
+                    [confm_string + 'kValue)', gen_t + 'myValue)']]
+        expected = '''
+    /**
+     * Constructor for an initialized L object,
+     * {}
+     * @param kValue Key argument of child.
+     * @param myValue Key argument of child.
+     */
+    public L({}) throws INMException {{
+        super(RootM.NAMESPACE, "l");
+        Leaf k = new Leaf(RootM.NAMESPACE, "k");
+        k.setValue({});
+        insertChild(k, childrenNames());
+        Leaf my = new Leaf(RootM.NAMESPACE, "my");
+        my.setValue({});
+        insertChild(my, childrenNames());
+    }}
+'''
         for i, method in enumerate(res):
             assert method.modifiers == ['public']
             assert method.return_type == None
             assert method.name == 'L'
-            #assert method.parameters == ['String value']
+            assert method.parameters == params[i]
             assert method.exceptions == ['INMException']
             assert method.indent == '    '
-            print method.as_string()
+            assert method.as_string() == expected.format(addition[i],
+                                                         ', '.join(params[i]),
+                                                         setvalue[i][0],
+                                                         setvalue[i][1])
 
 
 if __name__ == "__main__":
