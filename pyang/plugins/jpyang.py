@@ -379,9 +379,14 @@ def make_valid_identifiers(stmt):
 
 
 def get_types(yang_type, ctx):
-    """Returns confm and primitive counterparts of the type statement yang_type
+    """Returns confm and primitive counterparts of yang_type, which is a type,
+    typedef or leaf statement.
 
     """
+    if yang_type.keyword == 'leaf':
+        yang_type = yang_type.search_one('type')
+    assert yang_type.keyword in ('type', 'typedef'), \
+        'argument is type, typedef or leaf'
     confm = 'com.tailf.confm.xs.'
     primitive = 'String'
     alt = ''
@@ -434,9 +439,10 @@ def get_types(yang_type, ctx):
             type_id = get_package(yang_type, ctx) + yang_type.arg
             print_warning(key=type_id, ctx=ctx)
         else:
+            basetype = get_base_type(typedef)
             package = get_package(typedef, ctx)
-            confm = package + '.'
-            primitive = yang_type.arg
+            typedef_arg = capitalize_first(yang_type.arg)
+            return package + '.' + typedef_arg, get_types(basetype, ctx)[1]
     return confm + capitalize_first(primitive), primitive + alt
 
 
