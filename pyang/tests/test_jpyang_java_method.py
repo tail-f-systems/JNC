@@ -107,7 +107,10 @@ class Test(unittest.TestCase):
         """Clones have equal string representation but different reference"""
         method = self.cgen.empty_constructor()
         clone = method.clone()
+        assert method is method, 'Sanity check'
+        assert method == method, 'method.__eq__ should return True'
         assert method is not clone, 'Different reference'
+        assert method != clone, 'method.__eq__ should (maybe) return False'
         assert method.as_string() == clone.as_string(), 'Same string repr'
 
 
