@@ -1502,7 +1502,9 @@ class MethodGenerator(object):
         if not self.is_string:
             primitive = get_types(self.stmt_type, self.ctx)[1]
             value_constructor = string_constructor.clone()
-            value_constructor.javadocs[0] = javadoc2[:-7] + primitive  # XXX: Dangerous dependency
+            javadoc3 = javadoc[:-1]
+            javadoc3.extend([' object from a ', primitive, '.'])
+            value_constructor.javadocs[0] = ''.join(javadoc3) # XXX: Dangerous dependency
             value_constructor.parameters = [primitive + ' value']
             return [string_constructor, value_constructor]
         else:
