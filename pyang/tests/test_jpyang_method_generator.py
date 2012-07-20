@@ -138,6 +138,12 @@ class Test(unittest.TestCase):
         assert self.lgen.ctx is self.ctx
         assert self.tgen.ctx is self.ctx
 
+    def testRoot_namespace(self):
+        res = self.cgen.root_namespace()
+        expected = ['(', self.cgen.root, '.NAMESPACE, "']
+        expected.extend([self.cgen.stmt.arg, '");'])
+        assert ''.join(expected) == '(RootM.NAMESPACE, "c")'
+        assert res == expected, 'was: ' + str(res) + '\nnot: ' + str(expected)
 
 if __name__ == "__main__":
     """Launch all unit tests"""
