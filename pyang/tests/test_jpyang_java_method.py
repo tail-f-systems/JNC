@@ -10,7 +10,7 @@ $ python -m unittest discover -v
 """
 import unittest
 
-# from pyang.plugins import jpyang  #@UnresolvedImport
+from pyang.plugins import jpyang  #@UnresolvedImport
 from pyang.tests import util  #@UnresolvedImport
 
 
@@ -36,17 +36,40 @@ class Test(unittest.TestCase):
 
     def testInit(self):
         """Values and references correct in Java Methods of different origin"""
-        # Empty constructor for container statement c
-        method = self.cgen.empty_constructor()
-        assert method.exact is None
-        assert method.javadocs
-        assert 'public' in method.modifiers
-        assert method.return_type is None
-        assert method.name == self.cgen.n
-        assert method.parameters == []
-        assert method.exceptions == []
-        assert method.body
-        assert method.indent == ' ' * 4
+        # Create method with default settings
+        method1 = jpyang.JavaMethod()
+        assert method1.exact is None
+        assert method1.javadocs == []
+        assert method1.modifiers == []
+        assert method1.return_type is None
+        assert method1.name is None
+        assert method1.parameters == []
+        assert method1.exceptions == []
+        assert method1.body == []
+        assert method1.indent == ' ' * 4
+        
+        # Create empty constructor method for container statement c
+        method2 = self.cgen.empty_constructor()
+        assert method2.exact is None
+        assert method2.javadocs
+        assert 'public' in method2.modifiers
+        assert method2.return_type is None
+        assert method2.name == self.cgen.n
+        assert method2.parameters == []
+        assert method2.exceptions == []
+        assert method2.body
+        assert method2.indent == ' ' * 4
+        
+        # Check that no references are shared, even for empty lists
+        assert method1.javadocs is not method2.javadocs
+        assert method1.modifiers is not method2.modifiers
+        assert method1.parameters is not method2.parameters
+        assert method1.parameters == method2.parameters
+        assert method1.exceptions is not method2.exceptions
+        assert method1.exceptions == method2.exceptions
+        assert method1.body is not method2.body
+        assert method1.indent is not method2.indent
+        assert method1.indent == method2.indent
 
     def testClone(self):
         """Clones have equal string representation but different reference"""
