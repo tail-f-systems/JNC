@@ -84,6 +84,13 @@ def create_method_generators(self):
     self.tgen = jpyang.MethodGenerator(self.t, self.ctx)
 
 
+def test_default_context(self):
+    """The context of self has the default attribute values"""
+    assert self.ctx.opts.directory == 'gen', 'directory should be \'gen\''
+    assert not self.ctx.opts.debug, 'debug option should be turned off'
+    assert not self.ctx.opts.verbose, 'verbose option should be turned off'
+
+
 def test_statement_tree(self):
     """Statement tree is structured as intended"""
     mystr = lambda l: str(map(lambda ll: map(lambda s: s.arg, ll), l))
@@ -100,10 +107,58 @@ def test_statement_tree(self):
 
 
 def test_method_generators(self):
-    """Generator attributes present, with correct statements"""
+    """Method generator attributes present, with correct values"""
+    # Attributes present
     assert hasattr(self, 'cgen'), 'self should have a generator attribute cgen'
     assert hasattr(self, 'lgen'), 'self should have a generator attribute lgen'
     assert hasattr(self, 'tgen'), 'self should have a generator attribute tgen'
+    
+    # Correct generator statement value
+    assert self.cgen.stmt == self.c, 'was: ' + self.c.arg
+    assert self.lgen.stmt == self.l, 'was: ' + self.l.arg
+    assert self.tgen.stmt == self.t, 'was: ' + self.t.arg
+    
+    # Correct generator statement reference
     assert self.cgen.stmt is self.c, 'statement of cgen should be c'
     assert self.lgen.stmt is self.l, 'statement of lgen should be l'
     assert self.tgen.stmt is self.t, 'statement of tgen should be t'
+    
+    # Correct generator statement name
+    assert self.cgen.n == 'C', 'was: ' + self.cgen.n
+    assert self.lgen.n == 'L', 'was: ' + self.lgen.n
+    assert self.tgen.n == 'T', 'was: ' + self.tgen.n
+    
+    # Correct generator statement root
+    assert self.cgen.root == 'RootM', 'was: ' + self.cgen.root
+    assert self.lgen.root == 'RootM', 'was: ' + self.lgen.root
+    assert self.tgen.root == 'RootM', 'was: ' + self.tgen.root
+    
+    # Correct value of fields
+    assert self.cgen.is_container
+    assert not self.lgen.is_container
+    assert not self.tgen.is_container
+    
+    assert not self.cgen.is_list
+    assert self.lgen.is_list
+    assert not self.tgen.is_list
+    
+    assert self.cgen.is_config
+    assert self.lgen.is_config
+    assert self.tgen.is_config  # TODO Check that this is expected result
+    
+    assert not self.cgen.is_typedef
+    assert not self.lgen.is_typedef
+    assert self.tgen.is_typedef
+    
+    assert self.cgen.stmt_type is None, 'was: ' + self.cgen.stmt_type.arg
+    assert self.lgen.stmt_type is None, 'was: ' + self.lgen.stmt_type.arg
+    assert self.tgen.stmt_type == self.ty, 'was: ' + self.tgen.stmt_type.arg
+    
+    assert not self.cgen.is_string
+    assert not self.lgen.is_string
+    assert not self.tgen.is_string
+    
+    # Correct reference to context
+    assert self.cgen.ctx is self.ctx
+    assert self.lgen.ctx is self.ctx
+    assert self.tgen.ctx is self.ctx

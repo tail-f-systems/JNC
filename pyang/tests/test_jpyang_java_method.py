@@ -29,7 +29,8 @@ class Test(unittest.TestCase):
         pass
 
     def testSetUp(self):
-        """Statement tree in this test is properly constructed"""
+        """Statement tree and generators are properly constructed"""
+        util.test_default_context(self)
         util.test_statement_tree(self)
         util.test_method_generators(self)
 

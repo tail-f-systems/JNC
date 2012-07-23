@@ -22,6 +22,7 @@ class Test(unittest.TestCase):
         """Runs before each test"""
         # Initialize context with directory 'gen'
         util.init_context(self)
+        util.test_default_context(self)
         
         # Construct a statement tree: c, c/l, c/leaf, c/l/key and c/l/k
         self.c = Statement(None, None, None, 'container', arg='c')

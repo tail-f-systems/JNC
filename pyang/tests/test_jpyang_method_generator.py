@@ -29,51 +29,10 @@ class Test(unittest.TestCase):
         pass
 
     def testSetUp(self):
-        """Statement tree in this test is properly constructed"""
+        """Statement tree and generators are properly constructed"""
+        util.test_default_context(self)
         util.test_statement_tree(self)
         util.test_method_generators(self)
-
-    def testInit(self):
-        """Values correct in newly created Method Generator"""
-        assert self.cgen.stmt == self.c, 'was: ' + self.c.arg
-        assert self.lgen.stmt == self.l, 'was: ' + self.l.arg
-        assert self.tgen.stmt == self.t, 'was: ' + self.t.arg
-        
-        assert self.cgen.n == 'C', 'was: ' + self.cgen.n
-        assert self.lgen.n == 'L', 'was: ' + self.lgen.n
-        assert self.tgen.n == 'T', 'was: ' + self.tgen.n
-        
-        assert self.cgen.root == 'RootM', 'was: ' + self.cgen.root
-        assert self.lgen.root == 'RootM', 'was: ' + self.lgen.root
-        assert self.tgen.root == 'RootM', 'was: ' + self.tgen.root
-        
-        assert self.cgen.is_container
-        assert not self.lgen.is_container
-        assert not self.tgen.is_container
-        
-        assert not self.cgen.is_list
-        assert self.lgen.is_list
-        assert not self.tgen.is_list
-        
-        assert self.cgen.is_config
-        assert self.lgen.is_config
-        assert self.tgen.is_config  # TODO Check that this is expected result
-        
-        assert not self.cgen.is_typedef
-        assert not self.lgen.is_typedef
-        assert self.tgen.is_typedef
-        
-        assert self.cgen.stmt_type is None, 'was: ' + self.cgen.stmt_type.arg
-        assert self.lgen.stmt_type is None, 'was: ' + self.lgen.stmt_type.arg
-        assert self.tgen.stmt_type == self.ty, 'was: ' + self.tgen.stmt_type.arg
-        
-        assert not self.cgen.is_string
-        assert not self.lgen.is_string
-        assert not self.tgen.is_string
-        
-        assert self.cgen.ctx is self.ctx
-        assert self.lgen.ctx is self.ctx
-        assert self.tgen.ctx is self.ctx
 
     def testRoot_namespace(self):
         """Joining root_namespace return value yields (RootM.NAMESPACE, "c")"""
