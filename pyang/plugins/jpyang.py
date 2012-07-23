@@ -41,6 +41,7 @@ from pyang import util
 from pyang import error
 from pyang import statements
 import collections
+import types
 
 
 # TODO: Might be more efficient to use dicts instead of set and list for these
@@ -1297,11 +1298,17 @@ class JavaValue(object):
     def clone(self):
         """Returns a deep copy of self"""
         value = JavaValue()
-        self.clone_to(value)
+        self.clone_with(JavaValue.__init__)
         return value
 
-    def clone_to(self, value):
+    def clone_with(self, origin=None, constructor=None):
         """Adds copies of attributes to value"""
+        if constructor is None:
+            constructor = JavaValue.__init__
+        bound_constructor = constructor.__get__(self, JavaValue)
+        # bound_constructor = types.MethodType(constructor, JavaValue(), JavaValue)
+        print bound_constructor
+        value = bound_constructor(origin)
         value.exact = None
         if self.exact is not None:
             value.exact = list(self.exact)
@@ -1313,6 +1320,7 @@ class JavaValue(object):
             value.modifiers = list(self.modifiers)
         value.name = self.name
         value.indent = self.indent
+        return value
     
     def set_name(self, name):
         """Sets the identifier of this value"""
@@ -1379,13 +1387,13 @@ class JavaMethod(JavaValue):
 
     def clone(self):
         """Returns a deep copy of self"""
-        method = JavaMethod()
-        self.clone_to(method)
-        return method
+        return self.clone_with(JavaMethod.__init__)
 
-    def clone_to(self, method):
-        """Adds copies of attributes to value"""
-        super(JavaMethod, self).clone_to(method)
+    def clone_with(self, constructor=None):
+        """Adds copies of attributes to method"""
+        if constructor is None:
+            constructor = JavaMethod.__init__
+        method = super(JavaMethod, self).clone_with(self, constructor)
         method.return_type = self.return_type
         method.parameters = []
         if self.parameters is not None:
@@ -1396,6 +1404,7 @@ class JavaMethod(JavaValue):
         method.body = []
         if self.body is not None:
             method.body = list(self.body)
+        return method
 
     def set_return_type(self, return_type):
         """Sets the type of the return value of this method"""
