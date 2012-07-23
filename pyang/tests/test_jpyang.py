@@ -3,7 +3,7 @@ Created on 16 jul 2012
 
 @author: emil@tail-f.com
 
-PyUnit is needed to run these tests.
+Contains class Test, for function tests. PyUnit is needed to run these tests.
 
 To run, stand in project dir and enter:
 $ python -m unittest discover -v
@@ -11,28 +11,17 @@ $ python -m unittest discover -v
 import unittest
 
 from pyang.plugins import jpyang  #@UnresolvedImport
+from pyang.tests import util  #@UnresolvedImport
 from pyang.statements import Statement
-from pyang import FileRepository
-from pyang import Context
-
-
-class DummyOption(object):
-    """Used to initialize Context with option fields in test setUp"""
-    
-    def __init__(self, directory):
-        """Sets the directory field to the supplied value"""
-        self.directory = directory
 
 
 class Test(unittest.TestCase):
-    """Contains all JPyang tests"""
+    """Contains all JPyang function tests"""
 
     def setUp(self):
         """Runs before each test"""
         # Initialize context with directory 'gen'
-        repo = FileRepository()
-        self.ctx = Context(repo)
-        self.ctx.opts = DummyOption('gen')
+        util.init_context(self)
         
         # Construct a statement tree: c, c/l, c/leaf, c/l/key and c/l/k
         self.c = Statement(None, None, None, 'container', arg='c')
