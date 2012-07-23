@@ -85,7 +85,7 @@ def create_method_generators(self):
 
 
 def test_statement_tree(self):
-    """Test that the statement tree is structured as intended"""
+    """Statement tree is structured as intended"""
     mystr = lambda l: str(map(lambda ll: map(lambda s: s.arg, ll), l))
     res = map(self.m.search, ['prefix', 'container', 'typedef'])
     assert res == [[self.p], [self.c], [self.t]], 'was: ' + mystr(res)
@@ -100,6 +100,7 @@ def test_statement_tree(self):
 
 
 def test_method_generators(self):
+    """Generator attributes present, with correct statements"""
     assert hasattr(self, 'cgen'), 'self should have a generator attribute cgen'
     assert hasattr(self, 'lgen'), 'self should have a generator attribute lgen'
     assert hasattr(self, 'tgen'), 'self should have a generator attribute tgen'
