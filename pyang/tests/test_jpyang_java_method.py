@@ -35,8 +35,18 @@ class Test(unittest.TestCase):
         util.test_method_generators(self)
 
     def testInit(self):
-        """Values correct in Java Methods created in different ways"""
-        return NotImplemented
+        """Values and references correct in Java Methods of different origin"""
+        # Empty constructor for container statement c
+        method = self.cgen.empty_constructor()
+        assert method.exact is None
+        assert method.javadocs
+        assert 'public' in method.modifiers
+        assert method.return_type is None
+        assert method.name == self.cgen.n
+        assert method.parameters == []
+        assert method.exceptions == []
+        assert method.body
+        assert method.indent == ' ' * 4
 
     def testClone(self):
         """Clones have equal string representation but different reference"""
