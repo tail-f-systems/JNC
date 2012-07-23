@@ -75,10 +75,10 @@ def create_method_generators(self):
     create_statement_tree.
     
     """
-    assert hasattr(self, 'c'), 'Statement attribute of self should be c'
-    assert hasattr(self, 'l'), 'Statement attribute of self should be l'
-    assert hasattr(self, 't'), 'Statement attribute of self should be t'
-    assert hasattr(self, 'ctx'), 'Context attribute of self should be ctx'
+    assert hasattr(self, 'c'), 'self should have a statement attribute c'
+    assert hasattr(self, 'l'), 'self should have a statement attribute l'
+    assert hasattr(self, 't'), 'self should have a statement attribute t'
+    assert hasattr(self, 'ctx'), 'self should have a context attribute ctx'
     self.cgen = jpyang.MethodGenerator(self.c, self.ctx)
     self.lgen = jpyang.MethodGenerator(self.l, self.ctx)
     self.tgen = jpyang.MethodGenerator(self.t, self.ctx)
@@ -100,9 +100,9 @@ def test_statement_tree(self):
 
 
 def test_method_generators(self):
-    assert hasattr(self, 'cgen'), 'Generator attribute of self should be cgen'
-    assert hasattr(self, 'lgen'), 'Generator attribute of self should be lgen'
-    assert hasattr(self, 'tgen'), 'Generator attribute of self should be tgen'
-    assert self.cgen.stmt is self.c, 'cgen statement should be c'
-    assert self.lgen.stmt is self.l, 'lgen statement should be l'
-    assert self.tgen.stmt is self.t, 'tgen statement should be t'
+    assert hasattr(self, 'cgen'), 'self should have a generator attribute cgen'
+    assert hasattr(self, 'lgen'), 'self should have a generator attribute lgen'
+    assert hasattr(self, 'tgen'), 'self should have a generator attribute tgen'
+    assert self.cgen.stmt is self.c, 'statement of cgen should be c'
+    assert self.lgen.stmt is self.l, 'statement of lgen should be l'
+    assert self.tgen.stmt is self.t, 'statement of tgen should be t'
