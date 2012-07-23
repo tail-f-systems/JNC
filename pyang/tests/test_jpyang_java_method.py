@@ -81,6 +81,15 @@ class Test(unittest.TestCase):
         assert method != clone, 'method.__eq__ should (maybe) return False'
         assert method.as_string() == clone.as_string(), 'Same string repr'
 
+    def testClone_to(self):
+        """Clones have equal string representation but different reference"""
+        method1 = self.cgen.empty_constructor()
+        method2 = jpyang.JavaMethod()
+        method1.clone_to(method2)
+        assert method1 is not method2, 'Different reference'
+        assert method1 != method2, 'method.__eq__ should (maybe) return False'
+        assert method1.as_string() == method2.as_string(), 'Same string repr'
+
 
 if __name__ == "__main__":
     """Launch all unit tests"""
