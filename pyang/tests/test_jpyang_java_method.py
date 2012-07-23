@@ -82,10 +82,14 @@ class Test(unittest.TestCase):
         assert method.as_string() == clone.as_string(), 'Same string repr'
 
     def testClone_to(self):
-        """Clones have equal string representation but different reference"""
-        method1 = self.cgen.empty_constructor()
-        method2 = jpyang.JavaMethod()
+        """Clone_to has desired side effects"""
+        method1 = method2 = self.cgen.empty_constructor()
+        assert method1 is method2, 'Same reference'
+        assert method1 == method2, 'Same object => equal object'
+        assert method1.as_string() == method2.as_string(), 'Same string repr'
+
         method1.clone_to(method2)
+
         assert method1 is not method2, 'Different reference'
         assert method1 != method2, 'method.__eq__ should (maybe) return False'
         assert method1.as_string() == method2.as_string(), 'Same string repr'
