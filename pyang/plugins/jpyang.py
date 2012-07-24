@@ -1599,6 +1599,22 @@ class MethodGenerator(object):
             cloner.add_line('return clone%sContent(new %s());' % (c[i], self.n))
         return cloners
 
+    def typedef_setters(self):
+        """Returns a list of set_value JavaMethods"""
+        return [NotImplemented]
+
+    def setters(self):
+        """Returns a list of JavaMethods representing setters to include
+        in generated class of self.stmt
+
+        """
+        setters = []
+        if not self.is_typedef:
+            return NotImplemented
+        else:
+            setters.extend(self.typedef_setters())
+        return setters
+
 
 def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
     throws=''):
