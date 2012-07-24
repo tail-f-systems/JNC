@@ -176,6 +176,15 @@ class Test(unittest.TestCase):
         msg.extend(['was:', ''.join(res), 'expected:', ''.join(expected)])
         assert res == expected, '\n'.join(msg)
 
+    def testCloners(self):
+        # List cloners
+        res = self.lgen.cloners()
+        expected = ''
+        assert res[0].as_string() == expected, '\nwas:' + res[0].as_string() + \
+            '\nnot:' + expected#.format('string', 'String')
+        assert res[1].as_string() == expected, '\nwas:' + res[1].as_string() + \
+            '\nnot:' + expected#.format('int', 'int')
+
 
 if __name__ == "__main__":
     """Launch all unit tests"""
