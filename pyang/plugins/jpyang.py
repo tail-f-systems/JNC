@@ -34,13 +34,16 @@ import optparse  # TODO: Deprecated in python 2.7, should use argparse instead
 import os
 import errno
 import sys
-import datetime
+import collections
+
+from datetime import date
+from copy import deepcopy
+from numbers import Number
 
 from pyang import plugin
 from pyang import util
 from pyang import error
 from pyang import statements
-import collections
 
 
 # TODO: Might be more efficient to use dicts instead of set and list for these
@@ -499,7 +502,7 @@ def get_date(date_format=0):
     yyyy-mm-dd.
     
     """
-    time = datetime.date.today()
+    time = date.today()
     if date_format == 0:
         return '/'.join(map(str, [time.day, time.month, time.year % 100]))
     else:
@@ -1310,8 +1313,7 @@ class JavaValue(object):
 
     def shares_mutables_with(self, other):
         """Returns True iff self and other share mutable fields"""
-        import numbers
-        Immutable = basestring, tuple, numbers.Number, frozenset
+        Immutable = basestring, tuple, Number, frozenset
         for attr, value in self.__dict__.iteritems():
             if value is None or isinstance(value, Immutable):
                 continue
@@ -1475,7 +1477,6 @@ class MethodGenerator(object):
 
     def typedef_constructors(self):
         """Returns a list containing a single or a pair of constructors"""
-        import copy
         assert self.is_typedef, 'This method is only called with typedef stmts'
 
         # String constructor
@@ -1496,7 +1497,7 @@ class MethodGenerator(object):
         # Value constructor
         if not self.is_string:
             primitive = get_types(self.stmt_type, self.ctx)[1]
-            value_constructor = copy.deepcopy(string_constructor)
+            value_constructor = deepcopy(string_constructor)
             javadoc3 = javadoc[:-1]
             javadoc3.extend([' object from a ', primitive, '.'])
             value_constructor.javadocs[0] = ''.join(javadoc3) # XXX: Dangerous dependency
