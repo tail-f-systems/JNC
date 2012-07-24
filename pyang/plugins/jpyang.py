@@ -37,7 +37,6 @@ import sys
 import collections
 
 from datetime import date
-from copy import deepcopy
 from numbers import Number
 
 from pyang import plugin
@@ -1485,33 +1484,31 @@ class MethodGenerator(object):
     def typedef_constructors(self):
         """Returns a list containing a single or a pair of constructors"""
         assert self.is_typedef, 'This method is only called with typedef stmts'
-
-        # String constructor
-        string_constructor = JavaMethod(modifiers=['public'], name=self.n)
-        javadoc = ['Constructor for ']
-        javadoc.append(self.n)
-        javadoc.append(' object from a string.')
-        string_constructor.add_javadoc(''.join(javadoc))
-        javadoc2 = ['@param value Value to construct the ']
-        javadoc2.append(self.n)
-        javadoc2.append(' from.')
-        string_constructor.add_javadoc(''.join(javadoc2))
-        string_constructor.add_parameter('String value')
-        string_constructor.add_exception('ConfMException')  # TODO: Add only if needed
-        string_constructor.add_line('super(value);')
-        string_constructor.add_line('check();')  # TODO: Add only if needed
-
-        # Value constructor
-        if not self.is_string:
-            primitive = get_types(self.stmt_type, self.ctx)[1]
-            value_constructor = deepcopy(string_constructor)
-            javadoc3 = javadoc[:-1]
-            javadoc3.extend([' object from a ', primitive, '.'])
-            value_constructor.javadocs[0] = ''.join(javadoc3) # XXX: Dangerous dependency
-            value_constructor.parameters = [primitive + ' value']
-            return [string_constructor, value_constructor]
-        else:
-            return [string_constructor]
+        constructors = []
+        for i in range(1 + (not self.is_string)):  # XXX: Run once if string
+            constructor = JavaMethod(modifiers=['public'], name=self.n)
+            if i == 1:  # Value constructor
+                primitive = get_types(self.stmt_type, self.ctx)[1]
+            javadoc = ['Constructor for ']
+            javadoc.append(self.n)
+            if i == 0:
+                # String constructor
+                javadoc.append(' object from a string.')
+                constructor.add_parameter('String value')
+            else:
+                # i == 1, Value constructor
+                javadoc.extend([' object from a ', primitive, '.'])
+                constructor.add_parameter(primitive + ' value')
+            constructor.add_javadoc(''.join(javadoc))
+            javadoc2 = ['@param value Value to construct the ']
+            javadoc2.append(self.n)
+            javadoc2.append(' from.')
+            constructor.add_javadoc(''.join(javadoc2))
+            constructor.add_exception('ConfMException')  # TODO: Add only if needed
+            constructor.add_line('super(value);')
+            constructor.add_line('check();')  # TODO: Add only if needed
+            constructors.append(constructor)
+        return constructors
 
     def value_constructors(self):
         """Returns a list of constructors for configuration data lists"""
