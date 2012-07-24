@@ -190,10 +190,13 @@ class Test(unittest.TestCase):
 
         # List and Container cloners
         for gen, name in [(self.lgen, 'L'), (self.cgen, 'C')]:
+            # Deep clone method
             res = gen.cloners()
             expected0 = expected.format('an exact', '', '', name)
             res0 = res[0].as_string() 
             assert res0 == expected0, '\nwas:' + res0 + '\nnot:' + expected0
+            
+            # Shallow clone method
             tmp = ' Children are not included.'
             expected1 = expected.format('a shallow', tmp, 'Shallow', name)
             res1 = res[1].as_string() 
