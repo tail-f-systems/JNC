@@ -74,24 +74,24 @@ class Test(unittest.TestCase):
 
     def testEq(self):
         """Equality checks with == and != works as expected"""
-        method = clone = self.cgen.empty_constructor()
-        assert method is clone, 'Sanity check: same reference'
-        assert method == clone, 'Sanity check: equal objects'
-        assert not method != clone, 'Sanity check: equal objects'
+        method = method2 = self.cgen.empty_constructor()
+        assert method is method2, 'Sanity check: same reference'
+        assert method == method2, 'Sanity check: equal objects'
+        assert not method != method2, 'Sanity check: equal objects'
         
         # Test equality between objects returned from same function
-        clone2 = self.cgen.empty_constructor()
-        assert method is not clone2, 'Different reference'
-        assert method == clone2, 'But still equal'
-        clone2.return_type = 'bogus'
-        assert method != clone2, 'return_type matters for equality'
-        assert not method == clone2, 'check both __eq__ and __ne__'
+        clone = self.cgen.empty_constructor()
+        assert method is not clone, 'Different reference'
+        assert method == clone, 'But still equal'
+        clone.return_type = 'bogus'
+        assert method != clone, 'return_type matters for equality'
+        assert not(method == clone), 'check both __eq__ and __ne__'
         clone.return_type = None
         assert method == clone, 'Should be equal again'
         
         # Test that deleted attributes are handled correctly
         del clone.return_type
-        assert not method == clone, 'Not equal if attribute is missing'
+        assert not(method == clone), 'Not equal if attribute is missing'
         clone.return_type = None
         assert method == clone, 'Should be equal again'
 
