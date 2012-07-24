@@ -1312,7 +1312,7 @@ class JavaValue(object):
         return not self.__eq__(other)
 
     def shares_mutables_with(self, other):
-        """Returns True iff self and other share mutable fields"""
+        """Returns True iff mutable instance data is shared with other"""
         Immutable = basestring, tuple, Number, frozenset
         for attr, value in self.__dict__.iteritems():
             if value is None or isinstance(value, Immutable):
