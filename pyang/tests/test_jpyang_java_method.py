@@ -96,7 +96,7 @@ class Test(unittest.TestCase):
         assert method == clone, 'Should be equal again'
 
     def testShares_mutables_with(self):
-        """Clones have equal string representation but different reference"""
+        """Sharing of mutable instance data is detected"""
         method = self.cgen.empty_constructor()
         clone = copy.deepcopy(method)
         shallow = copy.copy(method)
