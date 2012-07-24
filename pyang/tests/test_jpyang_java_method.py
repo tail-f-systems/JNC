@@ -138,7 +138,7 @@ class Test(unittest.TestCase):
         # If we set the name, the method can be represented once again
         method.set_name('name')
         res = method.as_string()
-        expected = '\n  name() {\n  }\n'
+        expected = '\n'.join(['', '  name() {', '  }', ''])
         assert res == expected, '\nwas: ' + res + '\nnot: ' + expected
         
         # Shadow the true representation by assigning a value to the cache
@@ -148,7 +148,7 @@ class Test(unittest.TestCase):
         # Adding a modifiers invalidates the cache again
         method.add_modifier('public')
         res = method.as_string()
-        expected = '\n  public name() {\n  }\n'
+        expected = '\n'.join(['', '  public name() {', '  }', ''])
         assert res == expected, '\nwas: ' + res + '\nnot: ' + expected
 
 
