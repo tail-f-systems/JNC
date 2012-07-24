@@ -179,11 +179,25 @@ class Test(unittest.TestCase):
     def testCloners(self):
         # List cloners
         res = self.lgen.cloners()
-        expected = ''
-        assert res[0].as_string() == expected, '\nwas:' + res[0].as_string() + \
-            '\nnot:' + expected#.format('string', 'String')
-        assert res[1].as_string() == expected, '\nwas:' + res[1].as_string() + \
-            '\nnot:' + expected#.format('int', 'int')
+        expected = '''
+    /**
+     * Clones this object, returning {0} copy.
+     * @return A clone of the object.{1}
+     */
+    public Container clone{2}() {{
+        return clone{2}Content(new L());
+    }}
+'''
+        assert res[0].as_string() == expected.format('an exact', '', '', ''), \
+            '\nwas:' + res[0].as_string() + \
+            '\nnot:' + expected.format('an exact', '', '', '')
+        assert res[1].as_string() == expected.format('a shallow', 
+                                                     ' Children are not included.', 
+                                                     'Shallow'), \
+            '\nwas:' + res[1].as_string() + \
+            '\nnot:' + expected.format('a shallow', 
+                                       ' Children are not included.', 
+                                       'Shallow')
 
 
 if __name__ == "__main__":
