@@ -177,26 +177,30 @@ class Test(unittest.TestCase):
         assert res == expected, '\n'.join(msg)
 
     def testCloners(self):
-        # List cloners
-        res = self.lgen.cloners()
+        """Cloners correctly generated for lists and containers"""
         expected = '''
     /**
      * Clones this object, returning {0} copy.
      * @return A clone of the object.{1}
      */
     public Container clone{2}() {{
-        return clone{2}Content(new L());
+        return clone{2}Content(new {3}());
     }}
 '''
-        expected0 = expected.format('an exact', '', '')
-        res0 = res[0].as_string() 
-        assert res0 == expected0, '\nwas:' + res0 + '\nnot:' + expected0
-        expected1 = expected.format('a shallow',
-                                    ' Children are not included.',
-                                    'Shallow')
-        res1 = res[1].as_string() 
-        assert res1 == expected1, '\nwas:' + res1 + '\nnot:' + expected1
 
+        # List and Container cloners
+        for gen, name in [(self.lgen, 'L'), (self.cgen, 'C')]:
+            res = gen.cloners()
+            expected0 = expected.format('an exact', '', '', name)
+            res0 = res[0].as_string() 
+            assert res0 == expected0, '\nwas:' + res0 + '\nnot:' + expected0
+            tmp = ' Children are not included.'
+            expected1 = expected.format('a shallow', tmp, 'Shallow', name)
+            res1 = res[1].as_string() 
+            assert res1 == expected1, '\nwas:' + res1 + '\nnot:' + expected1
+        
+        # Generating cloners for a typedef should raise an AssertionError
+        self.assertRaises(AssertionError, self.tgen.cloners)
 
 if __name__ == "__main__":
     """Launch all unit tests"""
