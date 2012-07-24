@@ -1585,6 +1585,7 @@ class MethodGenerator(object):
         return constructors
 
     def cloners(self):
+        assert not self.is_typedef, "Typedefs don't have clone methods"
         cloners = [JavaMethod(), JavaMethod()]
         a = ('an exact', 'a shallow')
         b = ('', ' Children are not included.')
