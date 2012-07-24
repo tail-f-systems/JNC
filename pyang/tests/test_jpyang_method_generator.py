@@ -188,16 +188,14 @@ class Test(unittest.TestCase):
         return clone{2}Content(new L());
     }}
 '''
-        assert res[0].as_string() == expected.format('an exact', '', '', ''), \
-            '\nwas:' + res[0].as_string() + \
-            '\nnot:' + expected.format('an exact', '', '', '')
-        assert res[1].as_string() == expected.format('a shallow', 
-                                                     ' Children are not included.', 
-                                                     'Shallow'), \
-            '\nwas:' + res[1].as_string() + \
-            '\nnot:' + expected.format('a shallow', 
-                                       ' Children are not included.', 
-                                       'Shallow')
+        expected0 = expected.format('an exact', '', '')
+        res0 = res[0].as_string() 
+        assert res0 == expected0, '\nwas:' + res0 + '\nnot:' + expected0
+        expected1 = expected.format('a shallow',
+                                    ' Children are not included.',
+                                    'Shallow')
+        res1 = res[1].as_string() 
+        assert res1 == expected1, '\nwas:' + res1 + '\nnot:' + expected1
 
 
 if __name__ == "__main__":
