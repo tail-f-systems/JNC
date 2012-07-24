@@ -1363,9 +1363,11 @@ class JavaValue(object):
     def as_string(self):
         """String representation of this Java value"""
         if self.exact is None:
+            assert self.name is not None
+            assert self.indent is not None
             lines = ['']
             lines.extend(self.javadoc_as_string())
-            declaration = [self.modifiers, self.name]
+            declaration = self.modifiers + [self.name]
             if self.value is not None:
                 declaration.append('=')
                 declaration.append(self.value)
@@ -1413,6 +1415,8 @@ class JavaMethod(JavaValue):
     def as_string(self):
         """String representation of method. Overrides JavaValue.as_string()."""
         if self.exact is None:
+            assert self.name is not None
+            assert self.indent is not None
             lines = ['']
             lines.extend(self.javadoc_as_string())
             header = []
