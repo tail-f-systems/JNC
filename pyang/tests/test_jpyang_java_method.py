@@ -13,7 +13,6 @@ import unittest
 from pyang.plugins import jpyang  #@UnresolvedImport
 from pyang.tests import util  #@UnresolvedImport
 import copy
-import numbers
 
 
 class Test(unittest.TestCase):

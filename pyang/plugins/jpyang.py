@@ -41,9 +41,6 @@ from pyang import util
 from pyang import error
 from pyang import statements
 import collections
-import types
-import copy
-import numbers
 
 
 # TODO: Might be more efficient to use dicts instead of set and list for these
@@ -1313,6 +1310,7 @@ class JavaValue(object):
 
     def shares_mutables_with(self, other):
         """Returns True iff self and other share mutable fields"""
+        import numbers
         Immutable = basestring, tuple, numbers.Number, frozenset
         for attr, value in self.__dict__.iteritems():
             if value is None or isinstance(value, Immutable):
@@ -1477,6 +1475,7 @@ class MethodGenerator(object):
 
     def typedef_constructors(self):
         """Returns a list containing a single or a pair of constructors"""
+        import copy
         assert self.is_typedef, 'This method is only called with typedef stmts'
 
         # String constructor
