@@ -42,6 +42,7 @@ from pyang import error
 from pyang import statements
 import collections
 import types
+import copy
 
 
 # TODO: Might be more efficient to use dicts instead of set and list for these
@@ -1294,33 +1295,6 @@ class JavaValue(object):
             self.modifiers = []
         self.name = name
         self.indent = ' ' * indent
-
-    def clone(self):
-        """Returns a deep copy of self"""
-        value = JavaValue()
-        self.clone_with(JavaValue.__init__)
-        return value
-
-    def clone_with(self, origin=None, constructor=None):
-        """Adds copies of attributes to value"""
-        if constructor is None:
-            constructor = JavaValue.__init__
-        bound_constructor = constructor.__get__(self, JavaValue)
-        # bound_constructor = types.MethodType(constructor, JavaValue(), JavaValue)
-        print bound_constructor
-        value = bound_constructor(origin)
-        value.exact = None
-        if self.exact is not None:
-            value.exact = list(self.exact)
-        value.javadocs = []
-        if self.javadocs is not None:
-            value.javadocs = list(self.javadocs)
-        value.modifiers = []
-        if self.modifiers is not None:
-            value.modifiers = list(self.modifiers)
-        value.name = self.name
-        value.indent = self.indent
-        return value
     
     def set_name(self, name):
         """Sets the identifier of this value"""
@@ -1384,27 +1358,6 @@ class JavaMethod(JavaValue):
         self.body = body
         if body is None:
             self.body = []
-
-    def clone(self):
-        """Returns a deep copy of self"""
-        return self.clone_with(JavaMethod.__init__)
-
-    def clone_with(self, constructor=None):
-        """Adds copies of attributes to method"""
-        if constructor is None:
-            constructor = JavaMethod.__init__
-        method = super(JavaMethod, self).clone_with(self, constructor)
-        method.return_type = self.return_type
-        method.parameters = []
-        if self.parameters is not None:
-            method.parameters = list(self.parameters)
-        method.exceptions = []
-        if self.exceptions is not None:
-            method.exceptions = list(self.exceptions)
-        method.body = []
-        if self.body is not None:
-            method.body = list(self.body)
-        return method
 
     def set_return_type(self, return_type):
         """Sets the type of the return value of this method"""
@@ -1516,7 +1469,7 @@ class MethodGenerator(object):
         # Value constructor
         if not self.is_string:
             primitive = get_types(self.stmt_type, self.ctx)[1]
-            value_constructor = string_constructor.clone()
+            value_constructor = copy.deepcopy(string_constructor)
             javadoc3 = javadoc[:-1]
             javadoc3.extend([' object from a ', primitive, '.'])
             value_constructor.javadocs[0] = ''.join(javadoc3) # XXX: Dangerous dependency

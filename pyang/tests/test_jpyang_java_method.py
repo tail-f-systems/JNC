@@ -12,6 +12,7 @@ import unittest
 
 from pyang.plugins import jpyang  #@UnresolvedImport
 from pyang.tests import util  #@UnresolvedImport
+import copy
 
 
 class Test(unittest.TestCase):
@@ -71,28 +72,15 @@ class Test(unittest.TestCase):
         assert method1.indent is not method2.indent
         assert method1.indent == method2.indent
 
-    def testClone(self):
+    def testCopy(self):
         """Clones have equal string representation but different reference"""
         method = self.cgen.empty_constructor()
-        clone = method.clone()
+        clone = copy.deepcopy(method)
         assert method is method, 'Sanity check'
         assert method == method, 'method.__eq__ should return True'
         assert method is not clone, 'Different reference'
         assert method != clone, 'method.__eq__ should (maybe) return False'
         assert method.as_string() == clone.as_string(), 'Same string repr'
-
-    def testClone_to(self):
-        """Clone_to has desired side effects"""
-        method1 = method2 = self.cgen.empty_constructor()
-        assert method1 is method2, 'Same reference'
-        assert method1 == method2, 'Same object => equal object'
-        assert method1.as_string() == method2.as_string(), 'Same string repr'
-
-        method1.clone_to(method2)
-
-        assert method1 is not method2, 'Different reference'
-        assert method1 != method2, 'method.__eq__ should (maybe) return False'
-        assert method1.as_string() == method2.as_string(), 'Same string repr'
 
 
 if __name__ == "__main__":
