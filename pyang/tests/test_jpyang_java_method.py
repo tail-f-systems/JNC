@@ -78,18 +78,30 @@ class Test(unittest.TestCase):
         assert method is clone, 'Sanity check: same reference'
         assert method == clone, 'Sanity check: equal objects'
         assert not method != clone, 'Sanity check: equal objects'
+        
+        # Test equality between objects returned from same function
         clone2 = self.cgen.empty_constructor()
         assert method is not clone2, 'Different reference'
         assert method == clone2, 'But still equal'
         clone2.return_type = 'bogus'
         assert method != clone2, 'return_type matters for equality'
         assert not method == clone2, 'check both __eq__ and __ne__'
+        clone.return_type = None
+        assert method == clone, 'Should be equal again'
+        
+        # Test that deleted attributes are handled correctly
+        del clone.return_type
+        assert not method == clone, 'Not equal if attribute is missing'
+        clone.return_type = None
+        assert method == clone, 'Should be equal again'
 
     def testShares_mutables_with(self):
         """Clones have equal string representation but different reference"""
         method = self.cgen.empty_constructor()
         clone = copy.deepcopy(method)
         shallow = copy.copy(method)
+        
+        # Test that the copy methods works as expected
         assert method is not clone, 'Different reference'
         assert method is not shallow, 'Different reference'
         assert method == clone, 'But still equal'
@@ -98,14 +110,8 @@ class Test(unittest.TestCase):
         assert method.as_string() == shallow.as_string(), 'Same string repr'
         assert not method.shares_mutables_with(clone)
         assert method.shares_mutables_with(shallow)
-        clone.return_type = 'bogus'
-        assert not method == clone, 'return_type matters for equality'
-        clone.return_type = None
-        assert method == clone, 'Should be equal again'
-        del clone.return_type
-        assert not method == clone, 'Not equal if attribute is missing'
-        clone.return_type = None
-        assert method == clone, 'Should be equal again'
+        
+        # Test that deleted attributes are handled correctly
         clone.javadocs = method.javadocs
         assert method.shares_mutables_with(clone), 'javadoc is shared'
         del clone.javadocs
