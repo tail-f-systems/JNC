@@ -1300,7 +1300,10 @@ class JavaValue(object):
     def __eq__(self, other):
         """Returns True iff self and other represents an identical value"""
         for attr, value in self.__dict__.iteritems():
-            if getattr(other, attr, True) != value:
+            try:
+                if getattr(other, attr) != value:
+                    return False
+            except AttributeError:
                 return False
         return True
 
@@ -1312,8 +1315,13 @@ class JavaValue(object):
         """Returns True iff self and other share mutable fields"""
         Immutable = basestring, tuple, numbers.Number, frozenset
         for attr, value in self.__dict__.iteritems():
-            if getattr(other, attr, False) is value:
-                return not isinstance(value, Immutable)
+            if value is None or isinstance(value, Immutable):
+                continue
+            try:
+                if getattr(other, attr) is value:
+                    return True
+            except AttributeError:
+                pass
         return False
 
     def set_name(self, name):
