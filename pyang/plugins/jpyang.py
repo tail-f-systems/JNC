@@ -1584,7 +1584,7 @@ class MethodGenerator(object):
             constructors.extend(self.typedef_constructors())
         return constructors
 
-    def clone(self):
+    def cloners(self):
         cloners = [JavaMethod(), JavaMethod()]
         a = ('an exact', 'a shallow')
         b = ('', ' Children are not included.')
