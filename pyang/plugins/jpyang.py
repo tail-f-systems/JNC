@@ -1614,7 +1614,7 @@ class MethodGenerator(object):
                 setter.add_parameter('String value')
             else:
                 # i == 1, Primitive setter
-                javadoc2.extend(['value of type', primitive, '.'])
+                javadoc2.extend(['value of type ', primitive, '.'])
                 setter.add_parameter(primitive + ' value')
             setter.add_javadoc(''.join(javadoc2))
             setter.add_javadoc(javadoc)
