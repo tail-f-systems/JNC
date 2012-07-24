@@ -24,6 +24,8 @@ class Test(unittest.TestCase):
         util.init_context(self)
         util.create_statement_tree(self)
         util.create_method_generators(self)
+        self.method = jpyang.JavaMethod()
+        self.constructor = self.cgen.empty_constructor()
 
     def tearDown(self):
         """Runs after each test"""
@@ -38,67 +40,65 @@ class Test(unittest.TestCase):
     def testInit(self):
         """Values and references correct in Java Methods of different origin"""
         # Create method with default settings
-        method1 = jpyang.JavaMethod()
-        assert method1.exact is None
-        assert method1.javadocs == []
-        assert method1.modifiers == []
-        assert method1.return_type is None
-        assert method1.name is None
-        assert method1.parameters == []
-        assert method1.exceptions == []
-        assert method1.body == []
-        assert method1.indent == ' ' * 4
+        assert self.method.exact is None
+        assert self.method.javadocs == []
+        assert self.method.modifiers == []
+        assert self.method.return_type is None
+        assert self.method.name is None
+        assert self.method.parameters == []
+        assert self.method.exceptions == []
+        assert self.method.body == []
+        assert self.method.indent == ' ' * 4
         
         # Create empty constructor method for container statement c
-        method2 = self.cgen.empty_constructor()
-        assert method2.exact is None
-        assert method2.javadocs
-        assert 'public' in method2.modifiers
-        assert method2.return_type is None
-        assert method2.name == self.cgen.n
-        assert method2.parameters == []
-        assert method2.exceptions == []
-        assert method2.body
-        assert method2.indent == ' ' * 4
+        assert self.constructor.exact is None
+        assert self.constructor.javadocs
+        assert 'public' in self.constructor.modifiers
+        assert self.constructor.return_type is None
+        assert self.constructor.name == self.cgen.n
+        assert self.constructor.parameters == []
+        assert self.constructor.exceptions == []
+        assert self.constructor.body
+        assert self.constructor.indent == ' ' * 4
         
         # Check that no references to mutable instance data are shared
-        assert method1.javadocs is not method2.javadocs
-        assert method1.modifiers is not method2.modifiers
-        assert method1.parameters is not method2.parameters
-        assert method1.parameters == method2.parameters
-        assert method1.exceptions is not method2.exceptions
-        assert method1.exceptions == method2.exceptions
-        assert method1.body is not method2.body
-        assert method1.indent is not method2.indent
-        assert method1.indent == method2.indent
-        assert not method1.shares_mutables_with(method2)
+        assert self.method.javadocs is not self.constructor.javadocs
+        assert self.method.modifiers is not self.constructor.modifiers
+        assert self.method.parameters is not self.constructor.parameters
+        assert self.method.parameters == self.constructor.parameters
+        assert self.method.exceptions is not self.constructor.exceptions
+        assert self.method.exceptions == self.constructor.exceptions
+        assert self.method.body is not self.constructor.body
+        assert self.method.indent is not self.constructor.indent
+        assert self.method.indent == self.constructor.indent
+        assert not self.method.shares_mutables_with(self.constructor)
 
     def testEq(self):
         """Equality checks with == and != works as expected"""
-        method = method2 = self.cgen.empty_constructor()
-        assert method is method2, 'Sanity check: same reference'
-        assert method == method2, 'Sanity check: equal objects'
-        assert not method != method2, 'Sanity check: equal objects'
+        method2 = self.constructor
+        assert self.constructor is method2, 'Sanity check: same reference'
+        assert self.constructor == method2, 'Sanity check: equal objects'
+        assert not self.constructor != method2, 'Sanity check: equal objects'
         
         # Test equality between objects returned from same function
         clone = self.cgen.empty_constructor()
-        assert method is not clone, 'Different reference'
-        assert method == clone, 'But still equal'
+        assert self.constructor is not clone, 'Different reference'
+        assert self.constructor == clone, 'But still equal'
         clone.return_type = 'bogus'
-        assert method != clone, 'return_type matters for equality'
-        assert not(method == clone), 'check both __eq__ and __ne__'
+        assert self.constructor != clone, 'return_type matters for equality'
+        assert not(self.constructor == clone), 'check both __eq__ and __ne__'
         clone.return_type = None
-        assert method == clone, 'Should be equal again'
+        assert self.constructor == clone, 'Should be equal again'
         
         # Test that deleted attributes are handled correctly
         del clone.return_type
-        assert not(method == clone), 'Not equal if attribute is missing'
+        assert not(self.constructor == clone), 'Not equal if attribute is missing'
         clone.return_type = None
-        assert method == clone, 'Should be equal again'
+        assert self.constructor == clone, 'Should be equal again'
 
     def testShares_mutables_with(self):
         """Sharing of mutable instance data is detected"""
-        method = self.cgen.empty_constructor()
+        method = self.constructor
         clone = copy.deepcopy(method)
         shallow = copy.copy(method)
         
