@@ -1588,14 +1588,14 @@ class MethodGenerator(object):
         cloners = [JavaMethod(), JavaMethod()]
         a = ('an exact', 'a shallow')
         b = ('', ' Children are not included.')
-        c = ('', 'Shallow.')
+        c = ('', 'Shallow')
         for i, cloner in enumerate(cloners):
             cloner.add_javadoc('Clones this object, returning %s copy.' % a[i])
             cloner.add_javadoc('@return A clone of the object.%s' % b[i])
             cloner.add_modifier('public')
             cloner.set_return_type('Container')
             cloner.set_name('clone%s' % c[i])
-            cloner.add_line('return clone%sContent(new %s());' % c[i], self.n)
+            cloner.add_line('return clone%sContent(new %s());' % (c[i], self.n))
         return cloners
 
 
