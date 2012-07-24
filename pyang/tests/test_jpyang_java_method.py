@@ -73,13 +73,22 @@ class Test(unittest.TestCase):
         assert method1.indent is not method2.indent
         assert method1.indent == method2.indent
 
-    def testCopy(self):
-        """Clones have equal string representation but different reference"""
+    def testEquality(self):
+        """Equality checks with == and != works as expected"""
         method = clone = self.cgen.empty_constructor()
         assert method is clone, 'Sanity check: same reference'
         assert method == clone, 'Sanity check: equal objects'
-        
-        # Copy method to clone and check that references are different
+        assert not method != clone, 'Sanity check: equal objects'
+        clone2 = self.cgen.empty_constructor()
+        assert method is not clone2, 'Different reference'
+        assert method == clone2, 'But still equal'
+        clone2.return_type = 'bogus'
+        assert method != clone2, 'return_type matters for equality'
+        assert not method == clone2, 'check both __eq__ and __ne__'
+
+    def testCopy(self):
+        """Clones have equal string representation but different reference"""
+        method = self.cgen.empty_constructor()
         clone = copy.deepcopy(method)
         shallow = copy.copy(method)
         assert method is not clone, 'Different reference'
