@@ -1310,6 +1310,17 @@ class JavaValue(object):
         """Returns True iff self and other represents different values"""
         return not self.__eq__(other)
 
+    def shares_mutables_with(self, other):
+        """Returns True iff self and other share mutable fields"""
+        Immutable = basestring, tuple, numbers.Number, frozenset
+        is_value_field = lambda s: (not s.startswith(('__', 'set_', 'add_'))
+                                    and not s.endswith(('as_string', '_with')))
+        for attr in filter(is_value_field, dir(self)):
+            attribute = getattr(other, attr, False)
+            if attribute is getattr(self, attr, True):
+                return not isinstance(attribute, Immutable)
+        return False
+
     def set_name(self, name):
         """Sets the identifier of this value"""
         self.name = name

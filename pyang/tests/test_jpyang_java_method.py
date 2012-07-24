@@ -88,6 +88,8 @@ class Test(unittest.TestCase):
         assert method == shallow, 'But still equal'
         assert method.as_string() == clone.as_string(), 'Same string repr'
         assert method.as_string() == shallow.as_string(), 'Same string repr'
+        assert not method.shares_mutables_with(clone)
+        assert method.shares_mutables_with(shallow)
 
 if __name__ == "__main__":
     """Launch all unit tests"""
