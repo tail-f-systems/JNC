@@ -179,5 +179,5 @@ class Test(unittest.TestCase):
 
 if __name__ == "__main__":
     """Launch all unit tests"""
-    #import sys;sys.argv = ['', 'Test.testCapitalize_first']  # Only one
+    #import sys;sys.argv = ['', 'Test.testInit']  # Only one
     unittest.main()
