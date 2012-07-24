@@ -1324,25 +1324,33 @@ class JavaValue(object):
                 pass
         return False
 
+    def _set_instance_data(self, attr, value):
+        try:
+            data = getattr(self, attr)
+            if isinstance(data, list):
+                data.append(value)
+            else:
+                setattr(self, attr, value)
+        except AttributeError:
+            print_warning(msg='Unknown attribute: ' + attr, key=attr)
+        else:
+            self.exact = None  # Invalidate cache
+
     def set_name(self, name):
         """Sets the identifier of this value"""
-        self.name = name
-        self.exact = None  # Invalidate cache
+        self._set_instance_data('name', name)
 
     def set_indent(self, indent=4):
         """Sets indentation used in the as_string methods"""
-        self.indent = ' ' * indent
-        self.exact = None  # Invalidate cache
+        self._set_instance_data('indent', ' ' * indent)
 
     def add_modifier(self, modifier):
         """Adds modifier to end of list of modifiers"""
-        self.modifiers.append(modifier)
-        self.exact = None  # Invalidate cache
+        self._set_instance_data('modifiers', modifier)
 
     def add_javadoc(self, line):
         """Adds line to javadoc comment, leading ' ', '*' and '/' removed"""
-        self.javadocs.append(line.lstrip(' */'))
-        self.exact = None  # Invalidate cache
+        self._set_instance_data('javadocs', line.lstrip(' */'))
     
     def javadoc_as_string(self):
         lines = []
@@ -1389,23 +1397,18 @@ class JavaMethod(JavaValue):
 
     def set_return_type(self, return_type):
         """Sets the type of the return value of this method"""
-        self.return_type = return_type
-        self.exact = None  # Invalidate cache
+        self._set_instance_data('return_type', return_type)
 
     def add_parameter(self, parameter):
-        """Adds parameter to parameter list"""
-        self.parameters.append(parameter)
-        self.exact = None  # Invalidate cache
+        self._set_instance_data('parameters', parameter)
 
     def add_exception(self, exception):
         """Adds exception to method"""
-        self.exceptions.append(exception)
-        self.exact = None  # Invalidate cache
+        self._set_instance_data('exceptions', exception)
 
     def add_line(self, line):
         """Adds line to method body"""
-        self.body.append(self.indent + ' ' * 4 + line)
-        self.exact = None  # Invalidate cache
+        self._set_instance_data('body', self.indent + ' ' * 4 + line)
 
     def as_string(self):
         """String representation of method. Overrides JavaValue.as_string()."""
