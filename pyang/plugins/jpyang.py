@@ -43,6 +43,7 @@ from pyang import statements
 import collections
 import types
 import copy
+import numbers
 
 
 # TODO: Might be more efficient to use dicts instead of set and list for these
@@ -1299,7 +1300,7 @@ class JavaValue(object):
     def __eq__(self, other):
         """Returns True iff self and other represents an identical value"""
         is_value_field = lambda s: (not s.startswith(('__', 'set_', 'add_')) 
-                                    and not s.endswith('as_string'))
+                                    and not s.endswith(('as_string', '_with')))
         for attr in filter(is_value_field, dir(self)):
             if getattr(other, attr, False) != getattr(self, attr, True):
                 return False

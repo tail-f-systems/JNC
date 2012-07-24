@@ -13,6 +13,7 @@ import unittest
 from pyang.plugins import jpyang  #@UnresolvedImport
 from pyang.tests import util  #@UnresolvedImport
 import copy
+import numbers
 
 
 class Test(unittest.TestCase):
@@ -75,13 +76,18 @@ class Test(unittest.TestCase):
     def testCopy(self):
         """Clones have equal string representation but different reference"""
         method = clone = self.cgen.empty_constructor()
-        assert method is clone, 'Sanity check'
-        assert method == clone, 'method.__eq__ should return True'
+        assert method is clone, 'Sanity check: same reference'
+        assert method == clone, 'Sanity check: equal objects'
+        
+        # Copy method to clone and check that references are different
         clone = copy.deepcopy(method)
+        shallow = copy.copy(method)
         assert method is not clone, 'Different reference'
+        assert method is not shallow, 'Different reference'
         assert method == clone, 'But still equal'
+        assert method == shallow, 'But still equal'
         assert method.as_string() == clone.as_string(), 'Same string repr'
-
+        assert method.as_string() == shallow.as_string(), 'Same string repr'
 
 if __name__ == "__main__":
     """Launch all unit tests"""
