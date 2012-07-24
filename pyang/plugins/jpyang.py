@@ -1295,7 +1295,20 @@ class JavaValue(object):
             self.modifiers = []
         self.name = name
         self.indent = ' ' * indent
-    
+
+    def __eq__(self, other):
+        """Returns True iff self and other represents an identical value"""
+        is_value_field = lambda s: (not s.startswith(('__', 'set_', 'add_')) 
+                                    and not s.endswith('as_string'))
+        for attr in filter(is_value_field, dir(self)):
+            if getattr(other, attr, False) != getattr(self, attr, True):
+                return False
+        return True
+
+    def __ne__(self, other):
+        """Returns True iff self and other represents different values"""
+        return not self.__eq__(other)
+
     def set_name(self, name):
         """Sets the identifier of this value"""
         self.name = name
