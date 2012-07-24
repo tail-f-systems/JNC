@@ -61,7 +61,7 @@ class Test(unittest.TestCase):
         assert method2.body
         assert method2.indent == ' ' * 4
         
-        # Check that no references are shared, even for empty lists
+        # Check that no references to mutable instance data are shared
         assert method1.javadocs is not method2.javadocs
         assert method1.modifiers is not method2.modifiers
         assert method1.parameters is not method2.parameters
@@ -71,6 +71,7 @@ class Test(unittest.TestCase):
         assert method1.body is not method2.body
         assert method1.indent is not method2.indent
         assert method1.indent == method2.indent
+        assert not method1.shares_mutables_with(method2)
 
     def testEq(self):
         """Equality checks with == and != works as expected"""
@@ -118,7 +119,7 @@ class Test(unittest.TestCase):
         assert not hasattr(clone, 'javadocs'), 'deleted from clone'
         assert hasattr(method, 'javadocs'), 'not deleted from method'
         assert not method.shares_mutables_with(clone), 'Not sharing anymore'
-        
+
 
 if __name__ == "__main__":
     """Launch all unit tests"""
