@@ -1299,7 +1299,7 @@ class JavaValue(object):
 
     def __eq__(self, other):
         """Returns True iff self and other represents an identical value"""
-        for attr, value in self.__dict__.iteritems():
+        for attr, value in vars(self).items():
             try:
                 if getattr(other, attr) != value:
                     return False
@@ -1314,7 +1314,7 @@ class JavaValue(object):
     def shares_mutables_with(self, other):
         """Returns True iff mutable instance data is shared with other"""
         Immutable = basestring, tuple, Number, frozenset
-        for attr, value in self.__dict__.iteritems():
+        for attr, value in vars(self).items():
             if value is None or isinstance(value, Immutable):
                 continue
             try:
