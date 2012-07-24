@@ -1299,10 +1299,8 @@ class JavaValue(object):
 
     def __eq__(self, other):
         """Returns True iff self and other represents an identical value"""
-        is_value_field = lambda s: (not s.startswith(('__', 'set_', 'add_')) 
-                                    and not s.endswith(('as_string', '_with')))
-        for attr in filter(is_value_field, dir(self)):
-            if getattr(other, attr, False) != getattr(self, attr, True):
+        for attr, value in self.__dict__.iteritems():
+            if getattr(other, attr, True) != value:
                 return False
         return True
 
@@ -1313,12 +1311,9 @@ class JavaValue(object):
     def shares_mutables_with(self, other):
         """Returns True iff self and other share mutable fields"""
         Immutable = basestring, tuple, numbers.Number, frozenset
-        is_value_field = lambda s: (not s.startswith(('__', 'set_', 'add_'))
-                                    and not s.endswith(('as_string', '_with')))
-        for attr in filter(is_value_field, dir(self)):
-            attribute = getattr(other, attr, False)
-            if attribute is getattr(self, attr, True):
-                return not isinstance(attribute, Immutable)
+        for attr, value in self.__dict__.iteritems():
+            if getattr(other, attr, False) is value:
+                return not isinstance(value, Immutable)
         return False
 
     def set_name(self, name):
