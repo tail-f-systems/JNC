@@ -1500,7 +1500,7 @@ class MethodGenerator(object):
                 javadoc2.append(' object from a string.')
                 constructor.add_parameter('String value')
             else:
-                # i == 1, Value constructor
+                # i == 1, Primitive constructor
                 javadoc2.extend([' object from a ', primitive, '.'])
                 constructor.add_parameter(primitive + ' value')
             constructor.add_javadoc(''.join(javadoc2))
@@ -1599,7 +1599,30 @@ class MethodGenerator(object):
 
     def typedef_setters(self):
         """Returns a list of set_value JavaMethods"""
-        return [NotImplemented]
+        assert self.is_typedef, 'This method is only called with typedef stmts'
+        setters = []
+        primitive = get_types(self.stmt_type, self.ctx)[1]
+        javadoc = '@param value The value to set.'
+
+        # Iterate once if string, twice otherwise
+        for i in range(1 + (not self.is_string)):
+            setter = JavaMethod(modifiers=['public', 'void'], name='setValue')
+            javadoc2 = ['Sets the value using a ']
+            if i == 0:
+                # String setter
+                javadoc2.append('string value.')
+                setter.add_parameter('String value')
+            else:
+                # i == 1, Primitive setter
+                javadoc2.extend(['value of type', primitive, '.'])
+                setter.add_parameter(primitive + ' value')
+            setter.add_javadoc(''.join(javadoc2))
+            setter.add_javadoc(javadoc)
+            setter.add_exception('ConfMException')  # TODO: Add only if needed
+            setter.add_line('super.setValue(value);')
+            setter.add_line('check();')  # TODO: Add only if needed
+            setters.append(setter)
+        return setters
 
     def setters(self):
         """Returns a list of JavaMethods representing setters to include
