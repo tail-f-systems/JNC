@@ -198,7 +198,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                             schema_nodes[i] = ' ' * 4 + schema_nodes[i]
                         else:
                             schema_nodes[i] = ' ' * 8 + schema_nodes[i]
-                    
+
                     name = capitalize_first(module.search_one('prefix').arg)
                     write_file(d, name + '.schema', '\n'.join(schema_nodes), ctx)
                     if ctx.opts.debug or ctx.opts.verbose:
@@ -336,7 +336,7 @@ def capitalize_first(string):
 def camelize(string):
     """Removes hyphens and dots and replaces following character (if any) with
     its upper-case counterpart. Does not remove a trailing hyphen or dot.
-    
+
     Returns an empty string if string argument is None.
 
     """
@@ -500,7 +500,7 @@ def get_date(date_format=0):
     """Returns a string representation of today's date. If date_format has the
     default value of 0, the format is dd/mm/yy. Otherwise, it is on the form
     yyyy-mm-dd.
-    
+
     """
     time = date.today()
     if date_format == 0:
@@ -582,7 +582,7 @@ class SchemaNode(object):
             ns = stmt.top.search_one('namespace').arg
         res.append('<namespace>' + ns + '</namespace>')
         res.append('<primitive_type>0</primitive_type>')
-    
+
         min_occurs = '0'
         max_occurs = '-1'
         mandatory = stmt.search_one('mandatory')
@@ -605,13 +605,13 @@ class SchemaNode(object):
             max_occurs = '1'
         res.append('<min_occurs>' + min_occurs + '</min_occurs>')  # TODO: correct?
         res.append('<max_occurs>' + max_occurs + '</max_occurs>')  # TODO: correct?
-    
+
         children = ''
         for ch in stmt.substmts:
             if ch.keyword in ('container', 'list', 'leaf', 'leaf-list'):
                 children += ch.arg + ' '
         res.append('<children>' + children[:-1] + '</children>')
-    
+
         res.append('<flags>0</flags>')
         res.append('<desc></desc>')
         res.append('</node>')
@@ -744,22 +744,22 @@ class ClassGenerator(object):
     def generate_class(self):
         """Generates a Java class hierarchy providing an interface to a YANG 
         module. Uses mutual recursion with generate_child.
-        
+
         """
         stmt = self.stmt
         (self.filename, name) = extract_names(stmt.arg)
         fields = []
         mods = ' extends Container'
-        
+
         self.java_class = JavaClass(filename=self.filename, package=self.package,
                 imports=['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
                 # TODO: Hashtable not used in generated code
-                
+
                 description='This class represents a "' + self.path + stmt.arg +
                 '" element\n * from the namespace ' + self.ns,
                 source=self.src,
                 modifiers=mods) 
-        
+
         i_children_exists = (hasattr(stmt, 'i_children')
             and stmt.i_children is not None
             and stmt.i_children != [])
@@ -874,7 +874,7 @@ class ClassGenerator(object):
         Returns a list which contains the name of sub if it is a container,
         otherwise an empty list is returned. Uses mutual recursion with 
         generate_class.
-        
+
         For this function to work, self.java_class must be defined.
 
         sub -- A data model subtree statement. Its parent most not be None.
@@ -927,7 +927,7 @@ class ClassGenerator(object):
                     temp = statements.Statement(None, None, None, 'key',
                         arg=sub.arg)  # TODO: Copy sub instead?
                     optional = False
-                    
+
                     # Pass temp to avoid multiple keys
                     add(sub.arg, access_methods_comment(temp, optional))
                 else:
@@ -986,11 +986,11 @@ class PackageInfoGenerator(object):
     def __init__(self, directory, stmt, ctx):
         """Initializes a generator with package directory path, top level
         statement and context for options.
-        
+
         stmt      -- Statement representing any YANG module subtree
         directory -- The package directory as a string
         ctx       -- Context for options
-        
+
         """
         self.d = directory
         self.stmt = stmt
@@ -999,7 +999,7 @@ class PackageInfoGenerator(object):
     def generate_package_info(self):
         """Main generator method: generates package-info content and writes it
         to a file
-        
+
         """
         is_java_file = lambda s: s.endswith('.java')
         is_not_java_file = lambda s: not is_java_file(s)
@@ -1027,10 +1027,10 @@ class PackageInfoGenerator(object):
     def generate_javadoc(stmts, java_files):
         """Generates a list of class filenames and lists of their subclasses'
         filenames, positioned immediately after each filename if any.
-    
+
         stmts      -- list of statements representing a YANG module tree node
         java_files -- list of Java class filenames that has been generated
-    
+
         """
         hierarchy = []
         for stmt in stmts:
@@ -1047,7 +1047,7 @@ class PackageInfoGenerator(object):
     def parse_hierarchy(hierarchy):
         """Returns html for a list of javadoc pages corresponding to the .java
         files in the hierarchy list.
-    
+
         hierarchy -- a tree of .java files represented as a list, for example:
             ['Foo.java', ['Bar.java', ['Baz.java'], 'Qu.java']] would represent the
             hierarchy structure:
@@ -1055,10 +1055,10 @@ class PackageInfoGenerator(object):
             |   Bar
             |   |   Baz
             |   Qu
-    
+
             That is, Baz is a child of Bar in the data model tree, and Bar and Qu
             are children of the top level element Foo.
-    
+
         """
         res = ''
         for entry in hierarchy:
@@ -1081,7 +1081,7 @@ class PackageInfoGenerator(object):
     def html_list(body, indent_level, tag='ul'):
         """Returns a string representing javadoc with a <ul> html-element if ul,
         else with a <li> html-element.
-    
+
         """
         body = '<' + tag + '>\n' + body
         if body[-1:] != '\n':
@@ -1092,10 +1092,10 @@ class PackageInfoGenerator(object):
     def gen_package_info(self, class_hierarchy, package):
         """Writes a package-info.java file to the package directory with a high
         level description of the package functionality and requirements.
-    
+
         class_hierarchy -- A tree represented as a list as in parse_hierarchy
         ctx             -- Context used only for debugging purposes
-    
+
         """
         if self.ctx.opts.verbose:
             print 'Generating package description package-info.java...'
@@ -1120,7 +1120,7 @@ class PackageInfoGenerator(object):
     operations are typically accessed through the ConfM Java library by
     instantiating Device objects and setting up NETCONF sessions with real devices
     using a compatible YANG model.
-    
+
     '''
         # XXX: These strings should probably be rewritten for code readability and
         # ... to comply with the actual functionality of the class
@@ -1143,14 +1143,14 @@ class JavaClass(object):
     """Encapsulates package name, imports, class declaration, constructors,
     fields, access methods, etc. for a Java Class. Also includes javadoc
     documentation where applicable.
-    
+
     Implementation: Unless the 'body' attribute is used, different kind of
     methods and fields are stored in separate dictionaries so that the order of
     them in the generated class does not depend on the order in which they were
     added.
 
     """
-    
+
     def __init__(self, filename=None, package=None, imports=None,
                  description=None, body=None, version='1.0',
                  modifiers='', source='<unknown>.yang'):
@@ -1248,14 +1248,14 @@ class JavaClass(object):
 
     def java_class(self):
         """Returns a string representing complete Java code for this class.
-        
+
         It is vital that either self.body contains the complete code body of
         the class being generated, or that it is None and methods have been
         added using the JavaClass.add methods prior to calling this method.
         Otherwise the class will be empty.
-        
+
         The class name is the filename without the file extension.
-        
+
         """
         # The header is placed in the beginning of the Java file
         header = '/* \n * @(#)' + self.filename + ' ' * 8 + self.version + \
@@ -1268,7 +1268,7 @@ class JavaClass(object):
         header += '\n\npackage ' + strip_first(self.package) + ';\n'
         if self.imports:
             header += '\nimport ' + ';\nimport '.join(self.imports.values()) + ';\n'
-        
+
         # Class doc-comment and declaration, with modifiers
         header += '''
 /**
@@ -1283,7 +1283,7 @@ public class ''' + self.filename.split('.')[0] + self.modifiers + ' {\n'
 
 class JavaValue(object):
     """A Java value"""
-    
+
     def __init__(self, exact=None, javadocs=None, modifiers=None, name=None,
                  value=None, indent=0):
         """Value constructor"""
@@ -1351,7 +1351,7 @@ class JavaValue(object):
     def add_javadoc(self, line):
         """Adds line to javadoc comment, leading ' ', '*' and '/' removed"""
         self._set_instance_data('javadocs', line.lstrip(' */'))
-    
+
     def javadoc_as_string(self):
         lines = []
         if self.javadocs:
@@ -1359,7 +1359,7 @@ class JavaValue(object):
             lines.extend([self.indent + ' * ' + line for line in self.javadocs])
             lines.append( self.indent + ' */' )
         return lines
-    
+
     def as_string(self):
         """String representation of this Java value"""
         if self.exact is None:
@@ -1376,7 +1376,7 @@ class JavaValue(object):
 
 class JavaMethod(JavaValue):
     """A Java method"""
-    
+
     def __init__(self, exact=None, javadocs=None, modifiers=None,
                  return_type=None, name=None, parameters=None, exceptions=None,
                  body=None, indent=4):
@@ -1439,7 +1439,7 @@ class JavaMethod(JavaValue):
 
 class MethodGenerator(object):
     """A generator for JavaMethod objects"""
-    
+
     def __init__(self, stmt, ctx=None):
         """Constructor. Context must be supplied for some methods to work."""
         self.stmt = stmt
@@ -1496,7 +1496,7 @@ class MethodGenerator(object):
         string_constructor.add_exception('ConfMException')  # TODO: Add only if needed
         string_constructor.add_line('super(value);')
         string_constructor.add_line('check();')  # TODO: Add only if needed
-        
+
         # Value constructor
         if not self.is_string:
             primitive = get_types(self.stmt_type, self.ctx)[1]
@@ -1515,11 +1515,11 @@ class MethodGenerator(object):
         assert not self.is_container, 'Not called with container stmts'
         assert self.is_list, 'Only called with list stmts'
         assert self.is_config, 'Only called with configuration data stmts'
-        
+
         keys = self.stmt.search_one('key').arg.split(' ')
         key_stmts = map(lambda k: self.stmt.search_one('leaf', k), keys)
         constructors = []
-        
+
         # Determine number of constructors
         number_of_value_constructors = 2
         javadoc1 = ['Constructor for an initialized ', self.n, ' object,']
@@ -1527,7 +1527,7 @@ class MethodGenerator(object):
         if filter(lambda k: k.arg != 'string', key_stmts):
             number_of_value_constructors += 1
             javadoc2.append('with primitive Java types.')
-        
+
         # Create constructors in a loop
         for i in range(number_of_value_constructors):
             constructor = JavaMethod(modifiers=['public'], name=self.n)
@@ -1567,7 +1567,7 @@ class MethodGenerator(object):
     def constructors(self):
         """Returns a list of JavaMethods representing constructors to include
         in generated class of self.stmt
-        
+
         """
         constructors = []
         if not self.is_typedef:
