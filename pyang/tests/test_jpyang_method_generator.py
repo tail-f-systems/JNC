@@ -205,6 +205,27 @@ class Test(unittest.TestCase):
         # Generating cloners for a typedef should raise an AssertionError
         self.assertRaises(AssertionError, self.tgen.cloners)
 
+    def testSetters(self):
+        """Setters correctly generated for lists, containers and typedefs"""
+        expected = '''
+    /**
+     * Sets the value using a {}.
+     * @param value The value to set.
+     */
+    public void setValue({} value) throws ConfMException {{
+        super.setValue(value);
+        check();
+    }}
+'''
+        res = self.tgen.setters()
+        expected0 = expected.format('string value', 'String')
+        res0 = res[0].as_string() 
+        assert res0 == expected0, '\nwas:' + res0 + '\nnot:' + expected0
+        expected1 = expected.format('value of type int', 'int')
+        res1 = res[1].as_string() 
+        assert res1 == expected1, '\nwas:' + res1 + '\nnot:' + expected1
+
+
 if __name__ == "__main__":
     """Launch all unit tests"""
     #import sys;sys.argv = ['', 'Test.testInit']  # Only one
