@@ -72,7 +72,7 @@ class Test(unittest.TestCase):
         assert method1.indent is not method2.indent
         assert method1.indent == method2.indent
 
-    def testEquality(self):
+    def testEq(self):
         """Equality checks with == and != works as expected"""
         method = clone = self.cgen.empty_constructor()
         assert method is clone, 'Sanity check: same reference'
@@ -85,7 +85,7 @@ class Test(unittest.TestCase):
         assert method != clone2, 'return_type matters for equality'
         assert not method == clone2, 'check both __eq__ and __ne__'
 
-    def testCopy(self):
+    def testShares_mutables_with(self):
         """Clones have equal string representation but different reference"""
         method = self.cgen.empty_constructor()
         clone = copy.deepcopy(method)
@@ -104,6 +104,15 @@ class Test(unittest.TestCase):
         assert method == clone, 'Should be equal again'
         del clone.return_type
         assert not method == clone, 'Not equal if attribute is missing'
+        clone.return_type = None
+        assert method == clone, 'Should be equal again'
+        clone.javadocs = method.javadocs
+        assert method.shares_mutables_with(clone), 'javadoc is shared'
+        del clone.javadocs
+        assert not hasattr(clone, 'javadocs'), 'deleted from clone'
+        assert hasattr(method, 'javadocs'), 'not deleted from method'
+        assert not method.shares_mutables_with(clone), 'Not sharing anymore'
+        
 
 if __name__ == "__main__":
     """Launch all unit tests"""
