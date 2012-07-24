@@ -1485,25 +1485,26 @@ class MethodGenerator(object):
         """Returns a list containing a single or a pair of constructors"""
         assert self.is_typedef, 'This method is only called with typedef stmts'
         constructors = []
-        for i in range(1 + (not self.is_string)):  # XXX: Run once if string
+        primitive = get_types(self.stmt_type, self.ctx)[1]
+        javadoc = ['@param value Value to construct the ']
+        javadoc.append(self.n)
+        javadoc.append(' from.')
+
+        # Iterate once if string, twice otherwise
+        for i in range(1 + (not self.is_string)):
             constructor = JavaMethod(modifiers=['public'], name=self.n)
-            if i == 1:  # Value constructor
-                primitive = get_types(self.stmt_type, self.ctx)[1]
-            javadoc = ['Constructor for ']
-            javadoc.append(self.n)
+            javadoc2 = ['Constructor for ']
+            javadoc2.append(self.n)
             if i == 0:
                 # String constructor
-                javadoc.append(' object from a string.')
+                javadoc2.append(' object from a string.')
                 constructor.add_parameter('String value')
             else:
                 # i == 1, Value constructor
-                javadoc.extend([' object from a ', primitive, '.'])
+                javadoc2.extend([' object from a ', primitive, '.'])
                 constructor.add_parameter(primitive + ' value')
-            constructor.add_javadoc(''.join(javadoc))
-            javadoc2 = ['@param value Value to construct the ']
-            javadoc2.append(self.n)
-            javadoc2.append(' from.')
             constructor.add_javadoc(''.join(javadoc2))
+            constructor.add_javadoc(''.join(javadoc))
             constructor.add_exception('ConfMException')  # TODO: Add only if needed
             constructor.add_line('super(value);')
             constructor.add_line('check();')  # TODO: Add only if needed
