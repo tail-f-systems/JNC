@@ -90,6 +90,12 @@ class Test(unittest.TestCase):
         assert method.as_string() == shallow.as_string(), 'Same string repr'
         assert not method.shares_mutables_with(clone)
         assert method.shares_mutables_with(shallow)
+        clone.return_type = 'bogus'
+        assert not method == clone, 'return_type matters for equality'
+        clone.return_type = None
+        assert method == clone, 'Should be equal again'
+        del clone.return_type
+        assert not method == clone, 'Not equal if attribute is missing'
 
 if __name__ == "__main__":
     """Launch all unit tests"""
