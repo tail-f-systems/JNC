@@ -53,11 +53,11 @@ public class Language extends Token implements Serializable {
                 len++;
             }
             if (len == 0 || len > 8)
-                throwException(true);
+                ConfMException.throwException(true, this);
 
             if (i < b.length) {
                 if (b[i++] != '-')
-                    throwException(true);
+                    ConfMException.throwException(true, this);
             }
         }
     }

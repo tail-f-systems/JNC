@@ -12,6 +12,7 @@
 package com.tailf.confm.xs;
 
 import com.tailf.confm.*;
+
 import java.io.Serializable;
 
 /**
@@ -48,7 +49,7 @@ public class NCName extends Name implements Serializable {
         byte[] s = value.getBytes();
         for (int i = 0; i < s.length; i++) {
             if (s[i] == ':')
-                throwException(true);
+                ConfMException.throwException(true, this);
         }
     }
 

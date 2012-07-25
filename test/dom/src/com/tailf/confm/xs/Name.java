@@ -12,6 +12,7 @@
 package com.tailf.confm.xs;
 
 import com.tailf.confm.*;
+
 import java.io.Serializable;
 
 /**
@@ -58,7 +59,7 @@ public class Name extends Token implements Serializable {
             return;
         if (b == '-' || b == ':')
             return;
-        throwException(true);
+        ConfMException.throwException(true, this);
     }
 
 }
