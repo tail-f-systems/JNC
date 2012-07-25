@@ -1375,6 +1375,7 @@ class JavaValue(object):
             self.exact = '\n'.join(lines)  # Cache the string representation
         return self.exact
 
+
 class JavaMethod(JavaValue):
     """A Java method"""
 
