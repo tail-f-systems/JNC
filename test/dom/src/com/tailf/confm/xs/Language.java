@@ -63,24 +63,21 @@ public class Language extends Token implements Serializable {
     }
 
     /**
-     * Overrride equals to not check upper or lower cases.
-     * 
+     * Override equals to not check upper or lower cases.
      */
     public boolean equals(java.lang.String b) {
-        java.lang.String s1 = b.toLowerCase();
-        java.lang.String s2 = getValue().toLowerCase();
-        return s1.equals(s2);
+        return b.equalsIgnoreCase(getValue());
     }
 
     public boolean equals(Language b) {
-        java.lang.String s1 = b.getValue().toLowerCase();
-        java.lang.String s2 = getValue().toLowerCase();
-        return s1.equals(s2);
+        return b.getValue().equalsIgnoreCase(getValue());
     }
 
     public boolean equals(Object b) {
         if (b instanceof Language) {
             return equals((Language) b);
+        } else if (b instanceof java.lang.String) {
+            return equals((java.lang.String) b);
         }
         return false;
     }
