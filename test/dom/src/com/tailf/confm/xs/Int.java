@@ -103,7 +103,7 @@ public class Int implements Serializable {
     }
 
     /**
-     * xs:maxExclusive defines a maximum value that cannot be reached.
+     * xs:maxExclusive defines a maximum value that can be reached.
      */
     protected void maxInclusive(int restriction) throws ConfMException {
         throwException(value > restriction);
