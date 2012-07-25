@@ -29,6 +29,156 @@ import java.net.InetAddress;
 public class Confd {
 
     /**
+     * This class implements the "Counter32" datatype.
+     * 
+     */
+    static public class Counter32 extends com.tailf.confm.confd.Counter32
+            implements Serializable {
+
+        public Counter32(String value) throws ConfMException {
+            super(value);
+        }
+
+        public Counter32(int value) throws ConfMException {
+            super(value);
+        }
+
+        public Counter32(long value) throws ConfMException {
+            super(value);
+        }
+    }
+
+    /**
+     * This class implements the "Counter64" datatype.
+     * 
+     */
+    static public class Counter64 extends com.tailf.confm.confd.Counter64
+            implements Serializable {
+
+        public Counter64(String value) throws ConfMException {
+            super(value);
+        }
+
+        public Counter64(long value) throws ConfMException {
+            super(value);
+        }
+    }
+
+    /**
+     * This class inplements an existance element.
+     */
+    static public class Exists extends com.tailf.confm.confd.Exists implements
+            Serializable {
+        public Exists() throws ConfMException {
+            super();
+        }
+    }
+
+    /**
+     * This class implements the "Gauge32" datatype.
+     * 
+     */
+    static public class Gauge32 extends com.tailf.confm.confd.Gauge32 implements
+            Serializable {
+
+        public Gauge32(String value) throws ConfMException {
+            super(value);
+        }
+
+        public Gauge32(int value) throws ConfMException {
+            super(value);
+        }
+
+        public Gauge32(long value) throws ConfMException {
+            super(value);
+        }
+    }
+
+    /**
+     * This class implements the "HexList" datatype.
+     * 
+     */
+    static public class HexList extends com.tailf.confm.confd.HexList implements
+            Serializable {
+
+        public HexList(String value) throws ConfMException {
+            super(value);
+        }
+
+        public HexList(long value) throws ConfMException {
+            super(value);
+        }
+
+        public HexList(int value) throws ConfMException {
+            super(value);
+        }
+
+        public HexList(byte[] value) throws ConfMException {
+            super(value);
+        }
+    }
+
+    /**
+     * This class implements the "inetAddress" datatype.
+     * 
+     */
+    static public class InetAddress extends com.tailf.confm.confd.InetAddress
+            implements Serializable {
+
+        public InetAddress(String value) throws ConfMException {
+            super(value);
+        }
+
+        public InetAddress(com.tailf.confm.confd.InetAddressIPv4 value)
+                throws ConfMException {
+            super(value);
+        }
+
+        public InetAddress(com.tailf.confm.confd.InetAddressIPv6 value)
+                throws ConfMException {
+            super(value);
+        }
+
+        public InetAddress(com.tailf.confm.confd.InetAddressDNS value)
+                throws ConfMException {
+            super(value);
+        }
+    }
+
+    /**
+     * This class implements the "inetAddressDNS" datatype.
+     * 
+     */
+    static public class InetAddressDNS extends
+            com.tailf.confm.confd.InetAddressDNS implements Serializable {
+
+        public InetAddressDNS(String value) throws ConfMException {
+            super(value);
+        }
+    }
+
+    /**
+     * This class implements the "inetAddressIP" datatype.
+     */
+    static public class InetAddressIP extends
+            com.tailf.confm.confd.InetAddressIP implements Serializable {
+
+        public InetAddressIP(String value) throws ConfMException {
+            super(value);
+        }
+
+        public InetAddressIP(com.tailf.confm.confd.InetAddressIPv4 value)
+                throws ConfMException {
+            super(value);
+        }
+
+        public InetAddressIP(com.tailf.confm.confd.InetAddressIPv6 value)
+                throws ConfMException {
+            super(value);
+        }
+    }
+
+    /**
      * This class implements the "inetAddressIPV4" datatype.
      * 
      */
@@ -63,67 +213,7 @@ public class Confd {
     }
 
     /**
-     * This class implements the "inetAddressIP" datatype.
-     */
-    static public class InetAddressIP extends
-            com.tailf.confm.confd.InetAddressIP implements Serializable {
-
-        public InetAddressIP(String value) throws ConfMException {
-            super(value);
-        }
-
-        public InetAddressIP(com.tailf.confm.confd.InetAddressIPv4 value)
-                throws ConfMException {
-            super(value);
-        }
-
-        public InetAddressIP(com.tailf.confm.confd.InetAddressIPv6 value)
-                throws ConfMException {
-            super(value);
-        }
-    }
-
-    /**
-     * This class implements the "inetAddressDNS" datatype.
-     * 
-     */
-    static public class InetAddressDNS extends
-            com.tailf.confm.confd.InetAddressDNS implements Serializable {
-
-        public InetAddressDNS(String value) throws ConfMException {
-            super(value);
-        }
-    }
-
-    /**
-     * This class implements the "inetAddress" datatype.
-     * 
-     */
-    static public class InetAddress extends com.tailf.confm.confd.InetAddress
-            implements Serializable {
-
-        public InetAddress(String value) throws ConfMException {
-            super(value);
-        }
-
-        public InetAddress(com.tailf.confm.confd.InetAddressIPv4 value)
-                throws ConfMException {
-            super(value);
-        }
-
-        public InetAddress(com.tailf.confm.confd.InetAddressIPv6 value)
-                throws ConfMException {
-            super(value);
-        }
-
-        public InetAddress(com.tailf.confm.confd.InetAddressDNS value)
-                throws ConfMException {
-            super(value);
-        }
-    }
-
-    /**
-     * This class implements the "inetAddress" datatype.
+     * This class implements the "InetPortNumber" datatype.
      * 
      */
     static public class InetPortNumber extends
@@ -134,130 +224,6 @@ public class Confd {
         }
 
         public InetPortNumber(int value) throws ConfMException {
-            super(value);
-        }
-    }
-
-    /**
-     * This class implements the "size" datatype.
-     * 
-     */
-    static public class Size extends com.tailf.confm.confd.Size implements
-            Serializable {
-
-        public Size(String value) throws ConfMException {
-            super(value);
-        }
-    }
-
-    /**
-     * This class implements the "Counter32" datatype.
-     * 
-     */
-    static public class Counter32 extends com.tailf.confm.confd.Counter32
-            implements Serializable {
-
-        public Counter32(String value) throws ConfMException {
-            super(value);
-        }
-
-        public Counter32(int value) throws ConfMException {
-            super(value);
-        }
-
-        public Counter32(long value) throws ConfMException {
-            super(value);
-        }
-    }
-
-    /**
-     * This class implements the "Gauge32" datatype.
-     * 
-     */
-    static public class Gauge32 extends com.tailf.confm.confd.Gauge32 implements
-            Serializable {
-
-        public Gauge32(String value) throws ConfMException {
-            super(value);
-        }
-
-        public Gauge32(int value) throws ConfMException {
-            super(value);
-        }
-
-        public Gauge32(long value) throws ConfMException {
-            super(value);
-        }
-    }
-
-    /**
-     * This class implements the "Counter64" datatype.
-     * 
-     */
-    static public class Counter64 extends com.tailf.confm.confd.Counter64
-            implements Serializable {
-
-        public Counter64(String value) throws ConfMException {
-            super(value);
-        }
-
-        public Counter64(long value) throws ConfMException {
-            super(value);
-        }
-    }
-
-    /**
-     * This class implements the "HexList" datatype.
-     * 
-     */
-    static public class HexList extends com.tailf.confm.confd.HexList implements
-            Serializable {
-
-        public HexList(String value) throws ConfMException {
-            super(value);
-        }
-
-        public HexList(long value) throws ConfMException {
-            super(value);
-        }
-
-        public HexList(int value) throws ConfMException {
-            super(value);
-        }
-
-        public HexList(byte[] value) throws ConfMException {
-            super(value);
-        }
-    }
-
-    /**
-     * This class implements the "OID" datatype.
-     * 
-     */
-    static public class OID extends com.tailf.confm.confd.OID implements
-            Serializable {
-
-        public OID(String value) throws ConfMException {
-            super(value);
-        }
-
-        public OID(int[] value) throws ConfMException {
-            super(value);
-        }
-    }
-
-    /**
-     * This class implements the "OctetList" datatype.
-     * 
-     */
-    static public class OctetList extends com.tailf.confm.confd.OctetList
-            implements Serializable {
-
-        public OctetList(String value) throws ConfMException {
-            super(value);
-        }
-
-        public OctetList(byte[] value) throws ConfMException {
             super(value);
         }
     }
@@ -297,12 +263,46 @@ public class Confd {
     }
 
     /**
-     * This class inplements an existance element.
+     * This class implements the "OctetList" datatype.
+     * 
      */
-    static public class Exists extends com.tailf.confm.confd.Exists implements
+    static public class OctetList extends com.tailf.confm.confd.OctetList
+            implements Serializable {
+
+        public OctetList(String value) throws ConfMException {
+            super(value);
+        }
+
+        public OctetList(byte[] value) throws ConfMException {
+            super(value);
+        }
+    }
+
+    /**
+     * This class implements the "OID" datatype.
+     * 
+     */
+    static public class OID extends com.tailf.confm.confd.OID implements
             Serializable {
-        public Exists() throws ConfMException {
-            super();
+
+        public OID(String value) throws ConfMException {
+            super(value);
+        }
+
+        public OID(int[] value) throws ConfMException {
+            super(value);
+        }
+    }
+
+    /**
+     * This class implements the "size" datatype.
+     * 
+     */
+    static public class Size extends com.tailf.confm.confd.Size implements
+            Serializable {
+
+        public Size(String value) throws ConfMException {
+            super(value);
         }
     }
 
