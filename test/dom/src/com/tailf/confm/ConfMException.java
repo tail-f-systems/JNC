@@ -67,4 +67,18 @@ public class ConfMException extends INMException {
             return super.toString();
         }
     }
+
+    /**
+     * Asserts that fail is false, throws BAD_VALUE with o otherwise.
+     * 
+     * @param fail Determines if a Bad Value ConfM exception is thrown
+     * @param o Object which toString-method will be appended to exception
+     * @throws ConfMException if and only if fail is true
+     */
+    public static void throwException(boolean fail, Object o)
+            throws ConfMException {
+        if (fail)
+            throw new ConfMException(BAD_VALUE, o);
+    }
+    
 }
