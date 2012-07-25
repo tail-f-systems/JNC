@@ -67,6 +67,45 @@ public class String implements Serializable {
         return false;
     }
 
+    /**
+     * xs:whiteSpace collapse. Contiguous sequences of 0x20 are collapsed into a
+     * single #x20, and initial and/or final #x20s are deleted.
+     * <p>
+     * This method is used by most all other data types to collapse Strings that
+     * come from the XML parser.
+     */
+    public static java.lang.String wsCollapse(java.lang.String value) {
+        // collapse will always do replace first
+        value = wsReplace(value);
+        byte[] s = value.getBytes();
+
+        // remove 0x20 at beginning and end
+        int i = 0;
+        while (i < s.length && s[i] == 0x20)
+            i++;
+        int n = s.length - 1;
+        while (n >= 0 && s[n] == 0x20)
+            n--;
+        s = new java.lang.String(s, i, n - i + 1).getBytes();
+
+        // collapse multiple 0x20
+        byte[] r = new byte[s.length];
+        boolean allow_space = true;
+        int j = 0;
+        for (i = 0; i < s.length; i++) {
+            if (s[i] == 0x20) {
+                if (allow_space) {
+                    r[j++] = s[i];
+                    allow_space = false;
+                }
+            } else {
+                r[j++] = s[i];
+                allow_space = true;
+            }
+        }
+        return new java.lang.String(r, 0, j);
+    }
+
     /** ---------- Restrictions ---------- */
 
     /**
@@ -135,28 +174,22 @@ public class String implements Serializable {
      * xs:enumeration
      */
     protected boolean enumeration(java.lang.String value) {
-        if (this.value.equals(value))
-            return true;
-        else
-            return false;
+        return this.value.equals(value);
     }
 
     /**
      * Assert that the value is 'false' Throw an ConfMException otherwise
      */
     protected void throwException(boolean v) throws ConfMException {
-        if (!v)
-            return;
-        throw new ConfMException(ConfMException.BAD_VALUE, this);
+        throwException(v, this);
     }
 
     /**
      * Assert that the value is 'false' Throw an ConfMException otherwise
      */
     protected void throwException(boolean v, Object o) throws ConfMException {
-        if (!v)
-            return;
-        throw new ConfMException(ConfMException.BAD_VALUE, o);
+        if (v == true)
+            throw new ConfMException(ConfMException.BAD_VALUE, o);
     }
 
     /** ---------- package private --------- */
@@ -178,45 +211,6 @@ public class String implements Serializable {
                 break;
             default:
                 r[j++] = s[i];
-            }
-        }
-        return new java.lang.String(r, 0, j);
-    }
-
-    /**
-     * xs:whiteSpace collapse. Contiguous sequences of 0x20 are collapsed into a
-     * single #x20, and initial and/or final #x20s are deleted.
-     * <p>
-     * This method is used by most all other data types to collapse Strings that
-     * come from the XML parser.
-     */
-    public static java.lang.String wsCollapse(java.lang.String value) {
-        // collapse will always do replace first
-        value = wsReplace(value);
-        byte[] s = value.getBytes();
-
-        // remove 0x20 at beginning and end
-        int i = 0;
-        while (i < s.length && s[i] == 0x20)
-            i++;
-        int n = s.length - 1;
-        while (n >= 0 && s[n] == 0x20)
-            n--;
-        s = new java.lang.String(s, i, n - i + 1).getBytes();
-
-        // collapse multiple 0x20
-        byte[] r = new byte[s.length];
-        boolean allow_space = true;
-        int j = 0;
-        for (i = 0; i < s.length; i++) {
-            if (s[i] == 0x20) {
-                if (allow_space) {
-                    r[j++] = s[i];
-                    allow_space = false;
-                }
-            } else {
-                r[j++] = s[i];
-                allow_space = true;
             }
         }
         return new java.lang.String(r, 0, j);
