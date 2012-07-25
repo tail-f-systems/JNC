@@ -1638,6 +1638,14 @@ class MethodGenerator(object):
         return setters
 
 
+class TypedefMethodGenerator(MethodGenerator):
+    """Method generator specific to typedef classes"""
+    
+    def __init__(self, stmt, ctx=None):
+        super(TypedefMethodGenerator, self).__init__(stmt, ctx)
+        assert self.is_typedef, 'This class is only valid for typedef stmts'
+
+
 def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
     throws=''):
     """The constructor function returns a string representing Java code for a
