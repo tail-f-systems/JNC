@@ -81,15 +81,14 @@ public class String implements Serializable {
      * come from the XML parser.
      */
     public static java.lang.String wsCollapse(java.lang.String value) {
-        java.lang.String res = new java.lang.String(value);
-        
         // Collapse multiple spaces into single spaces
-        res.replaceAll(" +", " ");
+        java.lang.String res = value.replaceAll(" +", " ");
         
         // Remove any leading and/or trailing space
         if (res.length() > 0) {
             boolean hasLeadingSpace = res.charAt(0) == ' ';
             boolean hasTrailingSpace = res.charAt(res.length() - 1) == ' ';
+            hasTrailingSpace &= res.length() > 1;  // " " exception.
             if (hasLeadingSpace && hasTrailingSpace) {
                 return res.substring(1, res.length()-1);
             } else if (hasLeadingSpace) {
@@ -106,9 +105,7 @@ public class String implements Serializable {
      * matching "[\t\n\r]" replaced by " " (a blank).
      */
     public static java.lang.String wsReplace(java.lang.String value) {
-        java.lang.String res = new java.lang.String(value);
-        res.replaceAll("[\t\n\r]", " ");
-        return res;
+        return value.replaceAll("[\t\n\r]", " ");
     }
 
     /** ---------- Restrictions ---------- */
