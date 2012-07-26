@@ -2,6 +2,9 @@ package com.tailf.confm.xs;
 
 import static org.junit.Assert.*;
 
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -114,7 +117,7 @@ public class StringTest {
             abc.pattern("(abc)*c+d*");
             fail("Did not raise ConfMException for '[abc]*c+d*'");
         } catch (ConfMException e) {
-            // TODO check that ConfMException opaque data is correct in e
+            assertSame(e.opaqueData.toString(), abc, e.opaqueData);
         }
         
         withSpaces.pattern("  A string   in space ");
@@ -136,7 +139,7 @@ public class StringTest {
             withTabs.pattern("\\s+Two\\stabs\\s+Two\\slines");
             fail("Did not raise ConfMException for \\s+Two\\stabs\\s+Two\\slines'");
         } catch (ConfMException e) {
-            // TODO check opaque data
+            assertSame(e.opaqueData.toString(), withTabs, e.opaqueData);
         }
     }
 
@@ -154,7 +157,14 @@ public class StringTest {
             abc.pattern(abcpatterns2);
             fail("Did not raise ConfMException for '[abc]*c+d*'");
         } catch (ConfMException e) {
-            // TODO check opaque data
+            assertSame(e.opaqueData.toString(), abc, e.opaqueData);
+        }
+        
+        try {
+            withSpaces.pattern("**");
+            fail("Did not raise ConfMException for invalid pattern");
+        } catch (ConfMException e) {
+            assertTrue(e.opaqueData instanceof PatternSyntaxException);
         }
     }
 
