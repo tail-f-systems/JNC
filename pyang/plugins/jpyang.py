@@ -1457,6 +1457,10 @@ class MethodGenerator(object):
         self.is_config = is_config(stmt)
         self.is_typedef = stmt.keyword == 'typedef'
         self.ctx = ctx
+        self.gen = self
+        if type(self) is MethodGenerator:
+            if self.is_typedef:
+                self.gen = TypedefMethodGenerator(stmt, ctx)
 
     def root_namespace(self, stmt_arg):
         """Returns '([Root].NAMESPACE, "[stmt.arg]");'"""
@@ -1548,9 +1552,8 @@ class MethodGenerator(object):
                 constructors.extend(self.value_constructors())
         else:
             # Number of constructors depends on if type is string or not
-            typedef_gen = TypedefMethodGenerator(self.stmt, self.ctx)
             # XXX: Infinite loop unless subclass overrides constructors method
-            constructors.extend(typedef_gen.constructors())
+            constructors.extend(self.gen.constructors())
         return constructors
 
     def cloners(self):
@@ -1573,13 +1576,11 @@ class MethodGenerator(object):
         in generated class of self.stmt
 
         """
-        setters = []
         if not self.is_typedef:
             return NotImplemented
         else:
-            typedef_gen = TypedefMethodGenerator(self.stmt, self.ctx)
-            setters.extend(typedef_gen.setters())
-        return setters
+            # XXX: Infinite loop unless subclass overrides setters method
+            return self.gen.setters()
 
 
 class TypedefMethodGenerator(MethodGenerator):

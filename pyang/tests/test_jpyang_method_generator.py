@@ -79,7 +79,7 @@ class Test(unittest.TestCase):
 
     def testTypedef_constructors(self):
         """Both methods' fields and as_string representations as expected"""
-        res = self.tgen.typedef_constructors()
+        res = self.tgen.constructors()
         assert res[0].modifiers == res[1].modifiers == ['public']
         assert res[0].return_type == res[1].return_type == None
         assert res[0].name == res[1].name == 'T'
@@ -169,7 +169,7 @@ class Test(unittest.TestCase):
         
         # Typedef constructors
         constructors1 = self.tgen.constructors()
-        constructors2 = self.tgen.typedef_constructors()
+        constructors2 = self.tgen.gen.constructors()
         res = map(jpyang.JavaMethod.as_string, constructors1)
         expected = map(jpyang.JavaMethod.as_string, constructors2)
         msg = ['TYPEDEF constructors should be generated properly']

@@ -150,15 +150,12 @@ def test_method_generators(self):
     assert not self.lgen.is_typedef
     assert self.tgen.is_typedef
     
-    assert self.cgen.stmt_type is None, 'was: ' + self.cgen.stmt_type.arg
-    assert self.lgen.stmt_type is None, 'was: ' + self.lgen.stmt_type.arg
-    assert self.tgen.stmt_type == self.ty, 'was: ' + self.tgen.stmt_type.arg
-    
-    assert not self.cgen.is_string
-    assert not self.lgen.is_string
-    assert not self.tgen.is_string
-    
     # Correct reference to context
     assert self.cgen.ctx is self.ctx
     assert self.lgen.ctx is self.ctx
     assert self.tgen.ctx is self.ctx
+
+def testTypedef_method_generators(self):
+    test_method_generators(self)
+    assert self.tgen.stmt_type == self.ty, 'was: ' + self.tgen.stmt_type.arg
+    assert not self.tgen.is_string
