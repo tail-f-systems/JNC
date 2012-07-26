@@ -106,7 +106,7 @@ class Test(unittest.TestCase):
 
     def testValue_constructors(self):
         """All methods' fields and as_string representations as expected"""
-        res = self.lgen.value_constructors()
+        res = self.lgen.gen.value_constructors()
         assert len(res) == 3, 'There should be three constructors'
         params = [['com.tailf.confm.xs.String kValue', 'gen.T myValue'],
                   ['String kValue', 'String myValue'],
@@ -153,7 +153,7 @@ class Test(unittest.TestCase):
         # List constructors
         constructors1 = self.lgen.constructors()
         constructors2 = [self.lgen.empty_constructor()]
-        constructors2.extend(self.lgen.value_constructors())
+        constructors2.extend(self.lgen.gen.value_constructors())
         res = map(jpyang.JavaMethod.as_string, constructors1)
         expected = map(jpyang.JavaMethod.as_string, constructors2)
         msg = ['All 4 LIST constructors should be generated correctly']

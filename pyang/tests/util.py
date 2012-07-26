@@ -108,54 +108,28 @@ def test_statement_tree(self):
 
 def test_method_generators(self):
     """Method generator attributes present, with correct values"""
-    # Attributes present
-    assert hasattr(self, 'cgen'), 'self should have a generator attribute cgen'
-    assert hasattr(self, 'lgen'), 'self should have a generator attribute lgen'
-    assert hasattr(self, 'tgen'), 'self should have a generator attribute tgen'
+    generators = (('cgen', self.cgen, self.c),
+                  ('lgen', self.lgen, self.l),
+                  ('tgen', self.tgen, self.t))
     
-    # Correct generator statement value
-    assert self.cgen.stmt == self.c, 'was: ' + self.c.arg
-    assert self.lgen.stmt == self.l, 'was: ' + self.l.arg
-    assert self.tgen.stmt == self.t, 'was: ' + self.t.arg
-    
-    # Correct generator statement reference
-    assert self.cgen.stmt is self.c, 'statement of cgen should be c'
-    assert self.lgen.stmt is self.l, 'statement of lgen should be l'
-    assert self.tgen.stmt is self.t, 'statement of tgen should be t'
-    
-    # Correct generator statement name
-    assert self.cgen.n == 'C', 'was: ' + self.cgen.n
-    assert self.lgen.n == 'L', 'was: ' + self.lgen.n
-    assert self.tgen.n == 'T', 'was: ' + self.tgen.n
-    
-    # Correct generator statement root
-    assert self.cgen.root == 'RootM', 'was: ' + self.cgen.root
-    assert self.lgen.root == 'RootM', 'was: ' + self.lgen.root
-    assert self.tgen.root == 'RootM', 'was: ' + self.tgen.root
-    
-    # Correct value of fields
-    assert self.cgen.is_container
-    assert not self.lgen.is_container
-    assert not self.tgen.is_container
-    
-    assert not self.cgen.is_list
-    assert self.lgen.is_list
-    assert not self.tgen.is_list
-    
-    assert self.cgen.is_config
-    assert self.lgen.is_config
-    assert self.tgen.is_config  # TODO Check that this is expected result
-    
-    assert not self.cgen.is_typedef
-    assert not self.lgen.is_typedef
-    assert self.tgen.is_typedef
-    
-    # Correct reference to context
-    assert self.cgen.ctx is self.ctx
-    assert self.lgen.ctx is self.ctx
-    assert self.tgen.ctx is self.ctx
-
-def testTypedef_method_generators(self):
-    test_method_generators(self)
-    assert self.tgen.stmt_type == self.ty, 'was: ' + self.tgen.stmt_type.arg
-    assert not self.tgen.is_string
+    for genattr, gen, stmt in generators:
+        # Generator reference to context and subclass instance correct
+        assert gen.ctx is self.ctx
+        assert (type(gen) is jpyang.MethodGenerator) != (gen.gen is gen)
+        assert (type(gen.gen) is jpyang.ContainerMethodGenerator) == gen.is_container
+        assert (type(gen.gen) is jpyang.ListMethodGenerator) == gen.is_list
+        assert (type(gen.gen) is jpyang.TypedefMethodGenerator) == gen.is_typedef
+        
+        # Correct generator statement value, reference, name and root
+        assert gen.stmt == stmt, 'was: ' + stmt.arg
+        assert gen.stmt is stmt, 'statement of ' + genattr + ' should be ' + stmt.arg
+        assert gen.n == jpyang.extract_names(stmt.arg)[1], 'was: ' + gen.n
+        assert gen.root == 'RootM', 'was: ' + gen.root
+        
+        # Correct values of fields
+        assert (stmt.keyword == 'container') == gen.is_container
+        assert (stmt.keyword == 'list') == gen.is_list
+        assert (stmt.keyword == 'typedef') == gen.is_typedef
+        assert not hasattr(gen, 'is_config') or gen.is_config
+        assert not hasattr(gen, 'stmt_type') or gen.stmt_type == self.ty
+        assert not hasattr(gen, 'is_string') or not gen.is_string
