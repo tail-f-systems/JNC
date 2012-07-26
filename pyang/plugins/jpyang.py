@@ -1258,11 +1258,13 @@ class JavaClass(object):
         """Returns self.body. If it is None, fields and methods are added to it
         before it is returned."""
         if self.body is None:
-            self.body = flatten(self.attrs)
-            for i, method in enumerate(self.body):
+            self.body = []
+            for method in flatten(self.attrs):
                 if hasattr(method, 'as_string'):
-                    self.body[i] = method.as_string()
-            self.body.append('')
+                    self.body.append(method.as_string())
+                else:
+                    self.body.append(method)
+                self.body.append('')
             self.body.append('}')
         return self.body
 
