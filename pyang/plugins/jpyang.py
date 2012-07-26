@@ -354,6 +354,9 @@ def camelize(string):
 def flatten(l):
     """Returns a flattened version of iterable l
     
+    l must not have an attribute named values unless the return value values()
+    is a valid substitution of l. Same applies to all items in l.
+    
     Example: flatten([['12', '34'], ['56', ['7']]]) = ['12', '34', '56', '7']
     """
     res = []

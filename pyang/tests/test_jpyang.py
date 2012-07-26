@@ -120,12 +120,29 @@ class Test(unittest.TestCase):
 
     def testFlatten(self):
         """Able to flatten list structures"""
-        res = jpyang.flatten([['12', '34'], ['56', ['7']]])
-        assert res == ['12', '34', '56', '7'], 'was: ' + res
+        # Empty list
+        res = jpyang.flatten([])
+        assert res == [], 'was: ' + res
+        
+        # Nested structure of empty lists
         res = jpyang.flatten([[[[], []]], [[]]])
         assert res == [], 'was: ' + res
+        
+        # Simple case with integers
         res = jpyang.flatten([[1, 2], 3])
         assert res == [1, 2, 3], 'was: ' + res
+        
+        # Simple case with strings
+        res = jpyang.flatten([['12', '34'], ['56', ['7']]])
+        assert res == ['12', '34', '56', '7'], 'was: ' + res
+        
+        # Dictionary
+        res = jpyang.flatten({'a': 1, 'b': 2})
+        assert res == [1, 2], 'was: ' + res
+        
+        # Nested dictionary, with list
+        res = jpyang.flatten({'a': {'a': 1, 'b': 2}, 'b': [3, [4]]})
+        assert res == [1, 2, 3, 4], 'was: ' + res
 
     def testMake_valid_identifier(self):
         """Statement arguments converts to valid Java identifiers
