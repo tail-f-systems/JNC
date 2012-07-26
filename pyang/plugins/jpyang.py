@@ -134,8 +134,8 @@ class JPyangPlugin(plugin.PyangPlugin):
             sys.exit(0)
         if ctx.opts.format in ['java', 'jpyang'] and not ctx.opts.directory:
             ctx.opts.directory = 'gen'
-            print_warning(msg='Option -d (or --java-package) not set, ' + \
-                'defaulting to "gen".')
+            print_warning(msg=('Option -d (or --java-package) not set, ' +
+                'defaulting to "gen".'))
 
     def setup_fmt(self, ctx):
         """Disables implicit errors for the Context"""
@@ -157,21 +157,21 @@ class JPyangPlugin(plugin.PyangPlugin):
                 self.fatal("%s contains errors" % epos.top.arg)
             if (etag in ('TYPE_NOT_FOUND', 'FEATURE_NOT_FOUND',
                 'IDENTITY_NOT_FOUND', 'GROUPING_NOT_FOUND')):
-                print_warning(msg=etag.lower() + ', generated class ' + \
-                    'hierarchy might be incomplete.', key=etag)
+                print_warning(msg=(etag.lower() + ', generated class ' + 
+                    'hierarchy might be incomplete.'), key=etag)
         directory = ctx.opts.directory
         d = directory.replace('.', '/')
         for module in modules:
             if module.keyword == 'module':
                 # Generate Java classes
                 module = make_valid_identifiers(module)
-                src = 'module "' + module.arg + '", revision: "' + \
-                    util.get_latest_revision(module) + '".'
+                src = ('module "' + module.arg + '", revision: "' +
+                    util.get_latest_revision(module) + '".')
                 generator = ClassGenerator(module, package=directory, src=src, ctx=ctx)
                 generator.generate()
                 for aug_module in augmented_modules.values():
-                    src = 'module "' + aug_module.arg + '", revision: "' + \
-                        util.get_latest_revision(aug_module) + '".'
+                    src = ('module "' + aug_module.arg + '", revision: "' +
+                        util.get_latest_revision(aug_module) + '".')
                     generator = ClassGenerator(aug_module, package=directory, src=src, ctx=ctx)
                     generator.generate()
                 if ctx.opts.debug or ctx.opts.verbose:
@@ -206,8 +206,8 @@ class JPyangPlugin(plugin.PyangPlugin):
                 augmented_modules.clear()
 
             else:
-                print_warning(msg='Ignoring schema tree rooted at "' + \
-                    module.keyword + ' ' + module.arg + '" - not a module')
+                print_warning(msg=('Ignoring schema tree rooted at "' +
+                    module.keyword + ' ' + module.arg + '" - not a module'))
 
         # Generate javadoc
         for module in modules:
@@ -222,13 +222,13 @@ class JPyangPlugin(plugin.PyangPlugin):
             if ctx.opts.verbose:
                 os.system('javadoc -d ' + javadir + ' -subpackages ' + d)
             else:
-                os.system('javadoc -d ' + javadir + ' -subpackages ' + d + \
-                    ' >/dev/null')
+                os.system(('javadoc -d ' + javadir + ' -subpackages ' + d +
+                    ' >/dev/null'))
             if ctx.opts.debug or ctx.opts.verbose:
                 print 'Javadoc generation COMPLETE.'
         if len(modules) != 1:
-            print_warning(msg='Generating code for several modules has not' + \
-                ' been tested thoroughly.', ctx=ctx)
+            print_warning(msg=('Generating code for several modules has not' +
+                ' been tested thoroughly.'), ctx=ctx)
 
     def fatal(self, exitCode=1):
         """Raise an EmitError"""
@@ -265,8 +265,8 @@ def print_warning(msg='', key='', ctx=None):
             if key:
                 outputted_warnings.append(key)
         else:
-            print_warning('No support for type "' + key + '", defaulting ' + \
-                'to string.', key, ctx)
+            print_warning(('No support for type "' + key + '", defaulting ' +
+                'to string.'), key, ctx)
 
 
 def write_file(d, file_name, file_content, ctx):
@@ -287,9 +287,9 @@ def write_file(d, file_name, file_content, ctx):
         os.chdir(d)
     except OSError as exc:
         if exc.errno == errno.ENOTDIR:
-            print_warning(msg='Unable to change directory to ' + d + \
-                '. Probably a non-directory file with same name as one of ' + \
-                'the subdirectories already exists.', key=d, ctx=ctx)
+            print_warning(msg=('Unable to change directory to ' + d +
+                '. Probably a non-directory file with same name as one of ' +
+                'the subdirectories already exists.'), key=d, ctx=ctx)
         else:
             raise
     finally:
@@ -387,8 +387,7 @@ def get_types(yang_type, ctx):
     """
     if yang_type.keyword == 'leaf':
         yang_type = yang_type.search_one('type')
-    assert yang_type.keyword in ('type', 'typedef'), \
-        'argument is type, typedef or leaf'
+    assert yang_type.keyword in ('type', 'typedef'), 'argument is type, typedef or leaf'
     confm = 'com.tailf.confm.xs.'
     primitive = 'String'
     alt = ''
@@ -591,8 +590,7 @@ class SchemaNode(object):
         if stmt.parent is not None:
             key = stmt.parent.search_one('key')
         isKey = key is not None and key.arg == stmt.arg
-        childOfContainerOrList = (stmt.parent is not None and \
-            is_container(stmt.parent))
+        childOfContainerOrList = (stmt.parent is not None and is_container(stmt.parent))
         if (is_module(stmt) or isKey or
             (childOfContainerOrList and is_container(stmt, True))):
             min_occurs = '1'
@@ -727,10 +725,10 @@ class ClassGenerator(object):
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + self.filename + '"...'
         self.java_class = JavaClass(filename=self.filename, 
-                package=self.package, description='The root class for namespace ' + \
-                    ns_arg + ' (accessible from \n * ' + name + \
-                    '.NAMESPACE) with prefix "' + prefix.arg + '" (' + name + \
-                    '.PREFIX).',
+                package=self.package, description=('The root class for namespace ' +
+                    ns_arg + ' (accessible from \n * ' + name +
+                    '.NAMESPACE) with prefix "' + prefix.arg + '" (' + name +
+                    '.PREFIX).'),
                 source=self.src)
         self.java_class.add_import('confm', 'com.tailf.confm.*')
         self.java_class.add_import('inm', 'com.tailf.inm.*')
@@ -1016,9 +1014,9 @@ class PackageInfoGenerator(object):
         for directory in dirs:
             for sub in self.stmt.substmts:
                 # XXX: refactor
-                if camelize(capitalize_first(sub.arg)) == camelize( \
-                        capitalize_first(directory).replace('.',
-                        '?')).replace('?', '.'):
+                if(camelize(capitalize_first(sub.arg)) == 
+                   camelize(capitalize_first(directory).replace('.',
+                        '?')).replace('?', '.')):
                     old_d = self.d
                     self.d += '/' + directory
                     old_stmt = self.stmt
@@ -1114,10 +1112,10 @@ class PackageInfoGenerator(object):
             source += 's'
         source += '\n' + src[:-2]
         html_hierarchy = self.html_list(self.parse_hierarchy(class_hierarchy), 0)
-        specification = '''
-    This class hierarchy was generated from the Yang module''' + source + \
-    ' by the <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">' + \
-    'JPyang</a> plugin of <a target="_top" ' + \
+        specification = ('''
+    This class hierarchy was generated from the Yang module''' + source +
+    ' by the <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">' +
+    'JPyang</a> plugin of <a target="_top" ' +
     '''href="http://code.google.com/p/pyang/">pyang</a>.
     The generated classes may be used to manipulate pieces of configuration data
     with NETCONF operations such as edit-config, delete-config and lock. These
@@ -1125,22 +1123,22 @@ class PackageInfoGenerator(object):
     instantiating Device objects and setting up NETCONF sessions with real devices
     using a compatible YANG model.
 
-    '''
+    ''')
         # XXX: These strings should probably be rewritten for code readability and
         # ... to comply with the actual functionality of the class
-        return ('/**' + java_docify(specification + html_hierarchy) + '''
+        return ('/**' + java_docify(specification + html_hierarchy) + ('''
      *
-     * @see <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">''' + \
-        'JPyang project page</a>\n * @see <a target="_top" ' + \
-        'href="ftp://ftp.rfc-editor.org/in-notes/rfc6020.txt">' + \
-        'RFC 6020: YANG - A Data Modeling Language for the Network ' + \
-        'Configuration Protocol (NETCONF)</a>\n * @see <a target="_top" ' + \
-        'href="ftp://ftp.rfc-editor.org/in-notes/rfc6241.txt">RFC 6241: ' + \
-        'Network Configuration Protocol (NETCONF)</a>\n * @see <a ' + \
-        'target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">' + \
-        'RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>\n' + \
-        ' * @see <a target="_top" href="http://www.tail-f.com">Tail-f ' + \
-        'Systems</a>\n */\npackage ' + strip_first(self.d) + ';')
+     * @see <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">''' +
+        'JPyang project page</a>\n * @see <a target="_top" ' +
+        'href="ftp://ftp.rfc-editor.org/in-notes/rfc6020.txt">' +
+        'RFC 6020: YANG - A Data Modeling Language for the Network ' +
+        'Configuration Protocol (NETCONF)</a>\n * @see <a target="_top" ' +
+        'href="ftp://ftp.rfc-editor.org/in-notes/rfc6241.txt">RFC 6241: ' +
+        'Network Configuration Protocol (NETCONF)</a>\n * @see <a ' +
+        'target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">' +
+        'RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>\n' +
+        ' * @see <a target="_top" href="http://www.tail-f.com">Tail-f ' +
+        'Systems</a>\n */\npackage ' + strip_first(self.d) + ';'))
 
 
 class JavaClass(object):
@@ -1274,11 +1272,11 @@ class JavaClass(object):
 
         """
         # The header is placed in the beginning of the Java file
-        header = '/* \n * @(#)' + self.filename + ' ' * 8 + self.version + \
+        header = ('/* \n * @(#)' + self.filename + ' ' * 8 + self.version +
             ' ' + get_date(date_format=0) + '''
  *
  * This file has been auto-generated by JPyang, the Java output format plug-in
- * of pyang. Origin: ''' + self.source + '\n */'
+ * of pyang. Origin: ''' + self.source + '\n */')
  
         # package and import statement goes here
         header += '\n\npackage ' + strip_first(self.package) + ';\n'
@@ -1749,15 +1747,15 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
         for (arg_type, arg_name), value in zip(args, values):
             # TODO: http://en.wikipedia.org/wiki/Loop_unswitching
 
-            inserts += '''
+            inserts += ('''
         // Set key element: ''' + arg_name + '''
-        Leaf ''' + arg_name + ' = new Leaf(' + root + '.NAMESPACE, "' + \
+        Leaf ''' + arg_name + ' = new Leaf(' + root + '.NAMESPACE, "' +
             arg_name + '''");
         ''' + arg_name + '.setValue(' + value + ''');
-        insertChild(''' + arg_name + ', childrenNames());'
+        insertChild(''' + arg_name + ', childrenNames());')
             arg_name = arg_name + 'Value'
-            docstring += '\n     * @param ' + arg_name + \
-                ' Key argument of child.'
+            docstring += ('\n     * @param ' + arg_name +
+                ' Key argument of child.')
             if mode == 2:  # String arguments
                 tmp = 'String ' + arg_name + ', '
             else:  # ConfM or Java primitive arguments
@@ -1769,16 +1767,16 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
                 MAX_COLS -= len(tmp)
             arguments += tmp
         arguments = arguments[:-2]  # Skip the last ', '
-    return '''
+    return ('''
     /**
-     * Constructor for an ''' + obj_status + name + ' object.' + docstring + \
+     * Constructor for an ''' + obj_status + name + ' object.' + docstring +
      '''
      */
     public ''' + name + '(' + arguments + ')' + throws + ''' {
-        super(''' + root + '.NAMESPACE, "' + stmt.arg + '");' + \
+        super(''' + root + '.NAMESPACE, "' + stmt.arg + '");' +
         inserts + setters + '''
     }
-'''
+''')
 
 
 def typedef_constructor(stmt, arg='String'):
@@ -1836,14 +1834,14 @@ def clone(class_name, key_names=None, shallow='False'):
         children = ' Children are not included.'
         signature = 'Element cloneShallow()'
         method = 'cloneShallowContent'
-    return '''
+    return ('''
     /**
      * Clones this object, returning a''' + copy + ''' copy.
      * @return A clone of the object.''' + children + '''
      */
     public ''' + signature + ''' {
-        ''' + try_stmt + 'return ' + cast + method + '(new ' + class_name + \
-            catch_stmt
+        ''' + try_stmt + 'return ' + cast + method + '(new ' + class_name +
+            catch_stmt)
 
 
 def key_names(stmt):
@@ -1941,7 +1939,7 @@ def register_schema(prefix_name):
     prefix_name -- The name of the class containing the registerSchema method
 
     """
-    return '''
+    return ('''
     /**
      * Register the schema for this namespace in the global
      * schema table (CsTree) making it possible to lookup
@@ -1950,7 +1948,7 @@ def register_schema(prefix_name):
     public static void registerSchema() throws INMException {
         StackTraceElement[] sTrace = (new Exception()).getStackTrace();
         ClassLoader loader = sTrace[0].getClass().getClassLoader();
-        java.net.URL schemaUrl = loader.getSystemResource("''' + \
+        java.net.URL schemaUrl = loader.getSystemResource("''' +
             prefix_name + '''.schema");
         SchemaParser parser = new SchemaParser();
         Hashtable h = CsTree.create(NAMESPACE);
@@ -1959,7 +1957,7 @@ def register_schema(prefix_name):
         else
             parser.readFile(schemaUrl, h);
     }
-'''
+''')
 
 
 def access_methods_comment(stmt, optional=False):
@@ -1968,14 +1966,14 @@ def access_methods_comment(stmt, optional=False):
         opt = 'optional '
     else:
         opt = ''
-    return '''
+    return ('''
     /**
      * -------------------------------------------------------
-     * Access methods for ''' + opt + stmt.keyword + \
+     * Access methods for ''' + opt + stmt.keyword +
      ' child: "' + stmt.arg + '''".
      * -------------------------------------------------------
      */
-'''
+''')
 
 
 def child_field(stmt):
@@ -2008,10 +2006,10 @@ def get_stmt(stmt, keys, string=False):
         else:
             arguments += key_type + ' ' + key_name + ', '
         xpath += '[' + key_name + '=\'" + ' + key_name + ' + "\']'
-    return '''
+    return ('''
     /**
      * Get method for ''' + stmt.keyword + ' entry: "' + stmt.arg + '''".
-     * Return the child with the specified keys ''' + \
+     * Return the child with the specified keys ''' +
      '(if any).' + spec + '''
      * @return The ''' + stmt.keyword + ''' entry with the specified keys.
      */
@@ -2020,7 +2018,7 @@ def get_stmt(stmt, keys, string=False):
         String path = "''' + stmt.arg + xpath + '''";
         return (''' + name + ''')getListContainer(path);
     }
-'''
+''')
 
 
 def get_value(stmt, ret_type='com.tailf.confm.xs.String'):
@@ -2057,8 +2055,8 @@ def set_leaf_value(stmt, prefix='', arg_type='', confm_type=''):
     """
     name = capitalize_first(stmt.arg)
     spec1 = spec2 = ''
-    MAX_COLS = 80 - len('     * Sets the value for child ' + stmt.keyword + \
-        ' "' + stmt.arg + '",.')  # Space left to margin
+    MAX_COLS = 80 - len(('     * Sets the value for child ' + stmt.keyword +
+        ' "' + stmt.arg + '",.'))  # Space left to margin
 
     # Add different comments depending on argument type
     if arg_type == 'String':
@@ -2084,8 +2082,8 @@ def set_leaf_value(stmt, prefix='', arg_type='', confm_type=''):
             ''' + stmt.arg + '''Value,
             childrenNames());'''
     else:
-        body = 'set' + name + 'Value(new ' + confm_type + '(' + stmt.arg + \
-            'Value));'
+        body = ('set' + name + 'Value(new ' + confm_type + '(' + stmt.arg +
+            'Value));')
 
     # Prepare method argument listing
     argument = arg_type + ' ' + stmt.arg + 'Value'
@@ -2111,16 +2109,16 @@ def set_value(stmt, nameID='', spec1='', spec2='', argument='', body=''):
     if argument:
         spec1 += '''.
      * @param ''' + stmt.arg + 'Value The ' + spec2 + 'value to set'
-    return '''
+    return ('''
     /**
-     * Sets the value for child ''' + stmt.keyword + ' "' + stmt.arg + '"' + \
+     * Sets the value for child ''' + stmt.keyword + ' "' + stmt.arg + '"' +
         spec1 + '''.
      */
     public void set''' + nameID + 'Value(' + argument + ''')
         throws INMException {
         ''' + body + '''
     }
-'''
+''')
 
 
 def unset_value(stmt):
@@ -2150,10 +2148,10 @@ def add_value(stmt, prefix):
         name = 'Empty'
         value_type = 'List'
     name += capitalize_first(stmt.arg)
-    return '''
+    return ('''
     /**
      * This method is used for creating a subtree filter.
-     * The added "''' + stmt.arg + '" ' + stmt.keyword + \
+     * The added "''' + stmt.arg + '" ' + stmt.keyword +
         ''' will not have a value.
      */
     public void add''' + name + '''()
@@ -2163,7 +2161,7 @@ def add_value(stmt, prefix):
             null,
             childrenNames());
     }
-'''
+''')
 
 
 def mark(stmt, op, arg_type='String'):
@@ -2186,17 +2184,17 @@ def mark(stmt, op, arg_type='String'):
             spec += ', given as a String'
         argument = arg_type + ' ' + stmt.arg + 'Value'
         path += '[name=\'" + ' + stmt.arg + 'Value+"\']'
-    return '''
+    return ('''
     /**
-     * Marks the "''' + stmt.arg + '" ' + stmt.keyword + \
+     * Marks the "''' + stmt.arg + '" ' + stmt.keyword +
         ' with operation "' + spec + '''.
      */
-    public void mark''' + capitalize_first(stmt.arg) + capitalize_first(op) + \
+    public void mark''' + capitalize_first(stmt.arg) + capitalize_first(op) +
         '(' + argument + ''')
         throws INMException {
         markLeaf''' + capitalize_first(op) + '("' + path + '''");
     }
-'''
+''')
 
 
 def child_iterator(substmt):
@@ -2205,18 +2203,18 @@ def child_iterator(substmt):
         iterator_type = 'LeafListValue'
     else:
         iterator_type = 'Children'
-    return '''
+    return ('''
     /**
-     * Iterator method for the ''' + substmt.keyword + ' "' + substmt.arg + \
+     * Iterator method for the ''' + substmt.keyword + ' "' + substmt.arg +
         '''".
      * @return An iterator for the ''' + substmt.keyword + '''.
      */
-    public Element''' + iterator_type + 'Iterator ' + substmt.arg + \
+    public Element''' + iterator_type + 'Iterator ' + substmt.arg +
         '''Iterator() {
-        return new Element''' + iterator_type + 'Iterator(children, "' + \
+        return new Element''' + iterator_type + 'Iterator(children, "' +
         substmt.arg + '''");
     }
-'''
+''')
 
 
 def add_stmt(stmt, args=None, field=False, string=False):
@@ -2248,12 +2246,12 @@ def add_stmt(stmt, args=None, field=False, string=False):
     name = capitalize_first(stmt.arg)
     spec2 = spec3 = ''
     if len(args) == 1 and args[0][0] == stmt.arg:
-        spec1 = '.\n     * @param ' + args[0][1] + \
-            ' Child to be added to children'
+        spec1 = ('.\n     * @param ' + args[0][1] +
+            ' Child to be added to children')
         spec2 = name + ' ' + stmt.arg + ', '
     else:
-        spec3 = '\n' + ' ' * 8 + name + ' ' + stmt.arg + \
-            ' = new ' + name + '('
+        spec3 = ('\n' + ' ' * 8 + name + ' ' + stmt.arg +
+            ' = new ' + name + '(')
         if not args:
             spec1 = '''.
      * This method is used for creating subtree filters'''
@@ -2263,8 +2261,8 @@ def add_stmt(stmt, args=None, field=False, string=False):
             if string:
                 spec1 += '.\n     * The keys are specified as strings'
             for (arg_type, arg_name) in args:
-                spec1 += '.\n     * @param ' + arg_name + \
-                    ' Key argument of child'
+                spec1 += ('.\n     * @param ' + arg_name +
+                    ' Key argument of child')
                 if string:
                     spec2 += 'String ' + arg_name + ', '
                 else:
@@ -2318,12 +2316,12 @@ def delete_stmt(stmt, args=None, string=False, keys=True):
             else:
                 arguments += arg_type + ' ' + arg_name + ', '
             if keys:
-                spec1 += '\n     * @param ' + arg_name + \
-                    ' Key argument of child.'
+                spec1 += ('\n     * @param ' + arg_name +
+                    ' Key argument of child.')
                 spec3 += '[' + arg_name + '=\'" + ' + arg_name + ' + "\']'
             else:
-                spec1 += '\n     * @param ' + arg_name + \
-                    ' Child to be removed.'
+                spec1 += ('\n     * @param ' + arg_name +
+                    ' Child to be removed.')
                 spec3 += '[name=\'" + ' + arg_name + ' + "\']'
     else:
         spec1 = ''
@@ -2361,8 +2359,8 @@ def support_add(fields=None):
     if fields is None:
         fields = []
     for i in range(len(fields) - 1, -1, -1):
-        assignments += 'if ($child instanceof ' + capitalize_first(fields[i]) + \
-            ') ' + fields[i] + ' = (' + capitalize_first(fields[i]) + ')$child;'
+        assignments += ('if ($child instanceof ' + capitalize_first(fields[i]) +
+            ') ' + fields[i] + ' = (' + capitalize_first(fields[i]) + ')$child;')
         if i > 0:
             assignments += '\n        else '
     return '''
