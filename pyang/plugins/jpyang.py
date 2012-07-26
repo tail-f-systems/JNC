@@ -1203,8 +1203,6 @@ class JavaClass(object):
         self.version = version
         self.modifiers = modifiers
         self.source = source
-        self.not_attr = {'filename', 'package', 'imports', 'description',
-                         'body', 'version', 'modifiers', 'source', 'not_attr'}
         self.fields = collections.OrderedDict()
         self.constructors = collections.OrderedDict()
         self.cloners = collections.OrderedDict()
@@ -1213,10 +1211,10 @@ class JavaClass(object):
         self.name_getters = collections.OrderedDict()
         self.access_methods = collections.OrderedDict()
         self.support_methods = collections.OrderedDict()
-    
-    def _attrs(self):
-        """Returns a list of the instance data of self not in self.not_attr"""
-        return [v for k, v in vars(self).items() if not k in self.not_attr]
+        self.attrs = [self.fields, self.constructors, self.cloners,
+                      self.enablers, self.schema_registrators,
+                      self.name_getters, self.access_methods,
+                      self.support_methods]
 
     def add_import(self, key, import_):
         """Adds import_ to list of imports"""
@@ -1260,7 +1258,7 @@ class JavaClass(object):
         """Returns self.body. If it is None, fields and methods are added to it
         before it is returned."""
         if self.body is None:
-            self.body = flatten(self._attrs())
+            self.body = flatten(self.attrs)
             for i, method in enumerate(self.body):
                 if hasattr(method, 'as_string'):
                     self.body[i] = method.as_string()
