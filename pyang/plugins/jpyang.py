@@ -351,6 +351,23 @@ def camelize(string):
     return camelized_str
 
 
+def flatten(l):
+    """Returns a flattened version of iterable l
+    
+    Example: flatten([['12', '34'], ['56', ['7']]]) = ['12', '34', '56', '7']
+    """
+    res = []
+    for item in l:
+        try:
+            assert not isinstance(item, basestring)
+            iter(item)
+        except (AssertionError, TypeError):
+            res.append(item)
+        else:
+            res.extend(flatten(item))
+    return res
+
+
 def make_valid_identifier(stmt):
     """Prepends a J character to the args field of stmt if it is a Java
     keyword. Replaces hyphens and dots with an underscore character.
@@ -1236,18 +1253,6 @@ class JavaClass(object):
                      self.enablers, self.schema_registrators,
                      self.name_getters, self.access_methods, 
                      self.support_methods]
-            def flatten(l):
-                res = []
-                for item in l:
-                    try:
-                        assert not isinstance(item, basestring)
-                        iter(item)
-                    except (AssertionError, TypeError):
-                        res.append(item)
-                    else:
-                        res.extend(flatten(item))
-                return res
-
             methods = flatten(map(lambda x: x.values(), attrs))
             for i, method in enumerate(methods):
                 try:
@@ -1572,7 +1577,6 @@ class TypedefMethodGenerator(MethodGenerator):
             constructor.add_line('super(value);')
             constructor.add_line('check();')  # TODO: Add only if needed
             constructors.append(constructor)
-        print len(constructors)
         return constructors
 
     def setters(self):
