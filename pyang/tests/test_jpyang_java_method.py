@@ -107,8 +107,8 @@ class Test(unittest.TestCase):
         assert method is not shallow, 'Different reference'
         assert method == clone, 'But still equal'
         assert method == shallow, 'But still equal'
-        assert method.as_string() == clone.as_string(), 'Same string repr'
-        assert method.as_string() == shallow.as_string(), 'Same string repr'
+        assert method.as_list() == clone.as_list(), 'Same string repr'
+        assert method.as_list() == shallow.as_list(), 'Same string repr'
         assert not method.shares_mutables_with(clone)
         assert method.shares_mutables_with(shallow)
         
@@ -122,33 +122,33 @@ class Test(unittest.TestCase):
 
     def testExact_caching(self):
         """Setting instance data with set and add methods overwrites cache"""
-        self.assertRaises(AssertionError, self.method.as_string)  # name=None
+        self.assertRaises(AssertionError, self.method.as_list)  # name=None
         
         # A method initialized with a cache is represented by it
         method = jpyang.JavaMethod(exact='bogus')
-        assert method.as_string() == 'bogus'
+        assert method.as_list() == 'bogus'
         
         # If we change the indentation, the cache is discarded
         assert method.indent == '    ', 'default indent should be 4 spaces'
         method.set_indent(2)
         assert method.indent == '  ', 'the indentation level should change'
         assert method.exact is None, 'cache should be discarded'
-        self.assertRaises(AssertionError, method.as_string)  # since name=None
+        self.assertRaises(AssertionError, method.as_list)  # since name=None
         
         # If we set the name, the method can be represented once again
         method.set_name('name')
-        res = method.as_string()
-        expected = '\n'.join(['', '  name() {', '  }', ''])
+        res = '\n'.join(method.as_list())
+        expected = '\n'.join(['  name() {', '  }'])
         assert res == expected, '\nwas: ' + res + '\nnot: ' + expected
         
         # Shadow the true representation by assigning a value to the cache
         method.exact = 'bogus'
-        assert method.as_string() == 'bogus'
+        assert method.as_list() == 'bogus'
         
         # Adding a modifiers invalidates the cache again
         method.add_modifier('public')
-        res = method.as_string()
-        expected = '\n'.join(['', '  public name() {', '  }', ''])
+        res = '\n'.join(method.as_list())
+        expected = '\n'.join(['  public name() {', '  }'])
         assert res == expected, '\nwas: ' + res + '\nnot: ' + expected
 
 
