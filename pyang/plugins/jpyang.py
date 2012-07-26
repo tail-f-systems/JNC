@@ -1262,6 +1262,7 @@ class JavaClass(object):
             for i, method in enumerate(self.body):
                 if hasattr(method, 'as_string'):
                     self.body[i] = method.as_string()
+            self.body.append('')
             self.body.append('}')
         return self.body
 
@@ -1308,7 +1309,8 @@ class JavaClass(object):
         header.append(' '.join(['public class',
                                 self.filename.split('.')[0],
                                 self.modifiers,
-                                '{']))
+                                '{',
+                                '']))
         return '\n'.join(header + self.get_body())
 
 
