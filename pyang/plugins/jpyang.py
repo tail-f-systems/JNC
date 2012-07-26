@@ -850,7 +850,6 @@ class ClassGenerator(object):
             self.java_class.modifiers = ' extends ' + super_type
             base_type = get_base_type(stmt)
             primitive = get_types(base_type, self.ctx)[1]
-#            self.java_class.add_constructor('string', typedef_constructor(stmt))
             spec = ', using a string value'
             arg = 'String ' + stmt.arg + 'Value'
             body = 'super.setValue(' + stmt.arg + '''Value);
@@ -861,8 +860,6 @@ class ClassGenerator(object):
             self.java_class.append_access_method('string', 
                 set_value(stmt, spec1=spec, argument=arg, body=body))
             if primitive != 'String':
-#                self.java_class.add_constructor('primitive', 
-#                    typedef_constructor(stmt, primitive))
                 spec = ', using ' + primitive + ' value'
                 arg = primitive + ' ' + stmt.arg + 'Value'
                 self.java_class.append_access_method('primitive', set_value(stmt,
@@ -1777,20 +1774,6 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
         inserts + setters + '''
     }
 ''')
-
-
-def typedef_constructor(stmt, arg='String'):
-    return '''
-    /**
-     * Constructor for ''' + stmt.arg + ' object from a ' + arg.lower() + '''.
-     * @param value Value to construct the ''' + stmt.arg + ''' from.
-     */
-    public ''' + capitalize_first(stmt.arg) + '(' + arg + ''' value)
-        throws ConfMException {
-        super(value);
-        check();
-    }
-'''
 
 
 def clone(class_name, key_names=None, shallow='False'):
