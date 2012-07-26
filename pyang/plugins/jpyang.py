@@ -1793,8 +1793,7 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
     public ''' + name + '(' + arguments + ')' + throws + ''' {
         super(''' + root + '.NAMESPACE, "' + stmt.arg + '");' +
         inserts + setters + '''
-    }
-''')
+    }''')
 
 
 def clone(class_name, key_names=None, shallow='False'):
@@ -1874,8 +1873,7 @@ def key_names(stmt):
      */
     public String[] keyNames() {
         ''' + res + ''';
-    }
-'''  # TODO: Add support for multiple keys
+    }'''  # TODO: Add support for multiple keys
 
 
 def children_names(stmt):
@@ -1903,15 +1901,13 @@ def children_names(stmt):
         return new String[] {
             ''' + names + '''
         };
-    }
-'''  # FIXME: What if there are no children?
+    }'''  # FIXME: What if there are no children?
 
 
 def static_string(identifier, value):
     """Returns a string representing java code for two fields"""
     return '''
-    public static final String ''' + identifier + ' = "' + value + '''";
-'''
+    public static final String ''' + identifier + ' = "' + value + '";'
 
 
 def enable(prefix_name):
@@ -1930,8 +1926,7 @@ def enable(prefix_name):
     public static void enable() throws INMException {
         Container.setPackage(NAMESPACE, PREFIX);
         ''' + prefix_name + '''.registerSchema();
-    }
-'''
+    }'''
 
 
 def register_schema(prefix_name):
@@ -1960,8 +1955,7 @@ def register_schema(prefix_name):
             parser.readFile("''' + prefix_name + '''.schema", h);
         else
             parser.readFile(schemaUrl, h);
-    }
-''')
+    }''')
 
 
 def access_methods_comment(stmt, optional=False):
@@ -1976,8 +1970,7 @@ def access_methods_comment(stmt, optional=False):
      * Access methods for ''' + opt + stmt.keyword +
      ' child: "' + stmt.arg + '''".
      * -------------------------------------------------------
-     */
-''')
+     */''')
 
 
 def child_field(stmt):
@@ -1986,8 +1979,7 @@ def child_field(stmt):
     /**
      * Field for child ''' + stmt.keyword + ' "' + stmt.arg + '''".
      */
-    public ''' + capitalize_first(stmt.arg) + ' ' + stmt.arg + ''' = null;
-'''
+    public ''' + capitalize_first(stmt.arg) + ' ' + stmt.arg + ''' = null;'''
 
 
 def get_stmt(stmt, keys, string=False):
@@ -2021,8 +2013,7 @@ def get_stmt(stmt, keys, string=False):
         throws INMException {
         String path = "''' + stmt.arg + xpath + '''";
         return (''' + name + ''')getListContainer(path);
-    }
-''')
+    }''')
 
 
 def get_value(stmt, ret_type='com.tailf.confm.xs.String'):
@@ -2042,8 +2033,7 @@ def get_value(stmt, ret_type='com.tailf.confm.xs.String'):
     public ''' + ret_type + ' get' + name + '''Value()
         throws INMException {
         return (''' + ret_type + ')getValue("' + stmt.arg + '''");
-    }
-'''
+    }'''
 
 
 def set_leaf_value(stmt, prefix='', arg_type='', confm_type=''):
@@ -2121,8 +2111,7 @@ def set_value(stmt, nameID='', spec1='', spec2='', argument='', body=''):
     public void set''' + nameID + 'Value(' + argument + ''')
         throws INMException {
         ''' + body + '''
-    }
-''')
+    }''')
 
 
 def unset_value(stmt):
@@ -2134,8 +2123,7 @@ def unset_value(stmt):
     public void unset''' + capitalize_first(stmt.arg) + '''Value()
         throws INMException {
         delete("''' + stmt.arg + '''");
-    }
-'''
+    }'''
 
 
 def add_value(stmt, prefix):
@@ -2164,8 +2152,7 @@ def add_value(stmt, prefix):
             "''' + stmt.arg + '''",
             null,
             childrenNames());
-    }
-''')
+    }''')
 
 
 def mark(stmt, op, arg_type='String'):
@@ -2197,8 +2184,7 @@ def mark(stmt, op, arg_type='String'):
         '(' + argument + ''')
         throws INMException {
         markLeaf''' + capitalize_first(op) + '("' + path + '''");
-    }
-''')
+    }''')
 
 
 def child_iterator(substmt):
@@ -2217,8 +2203,7 @@ def child_iterator(substmt):
         '''Iterator() {
         return new Element''' + iterator_type + 'Iterator(children, "' +
         substmt.arg + '''");
-    }
-''')
+    }''')
 
 
 def add_stmt(stmt, args=None, field=False, string=False):
@@ -2284,8 +2269,7 @@ def add_stmt(stmt, args=None, field=False, string=False):
         throws INMException {''' + spec3 + '''
         insertChild(''' + stmt.arg + ''', childrenNames());
         return ''' + stmt.arg + ''';
-    }
-'''
+    }'''
 
 
 def delete_stmt(stmt, args=None, string=False, keys=True):
@@ -2338,8 +2322,7 @@ def delete_stmt(stmt, args=None, string=False, keys=True):
         throws INMException {
         ''' + spec2 + 'String path = "' + stmt.arg + spec3 + '''";
         delete(path);
-    }
-'''
+    }'''
 
 
 def check(regexp=''):
@@ -2349,8 +2332,7 @@ def check(regexp=''):
      */
     public void check()
         ''' + regexp + '''throws ConfMException {
-    }
-'''
+    }'''
 
 
 def support_add(fields=None):
@@ -2380,5 +2362,4 @@ def support_add(fields=None):
     public void addChild(Element $child) {
         super.addChild($child);
         ''' + assignments + '''
-    }
-'''  # TODO: '$' should be removed unless it is actually needed
+    }'''  # TODO: '$' should be removed unless it is actually needed
