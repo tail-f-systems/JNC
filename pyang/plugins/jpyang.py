@@ -357,6 +357,8 @@ def flatten(l):
     Example: flatten([['12', '34'], ['56', ['7']]]) = ['12', '34', '56', '7']
     """
     res = []
+    while hasattr(l, 'values'):
+        l = l.values()
     for item in l:
         try:
             assert not isinstance(item, basestring)
@@ -1253,7 +1255,7 @@ class JavaClass(object):
                      self.enablers, self.schema_registrators,
                      self.name_getters, self.access_methods, 
                      self.support_methods]
-            methods = flatten(map(lambda x: x.values(), attrs))
+            methods = flatten(attrs)
             for i, method in enumerate(methods):
                 try:
                     methods[i] = method.as_string()
