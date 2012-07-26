@@ -749,7 +749,6 @@ class ClassGenerator(object):
         stmt = self.stmt
         (self.filename, name) = extract_names(stmt.arg)
         fields = []
-        mods = ' extends Container'
 
         self.java_class = JavaClass(filename=self.filename, package=self.package,
                 imports=['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
@@ -758,7 +757,7 @@ class ClassGenerator(object):
                 description='This class represents a "' + self.path + stmt.arg +
                 '" element\n * from the namespace ' + self.ns,
                 source=self.src,
-                modifiers=mods) 
+                modifiers=' extends Container') 
 
         i_children_exists = (hasattr(stmt, 'i_children')
             and stmt.i_children is not None
@@ -843,12 +842,17 @@ class ClassGenerator(object):
                     typedef_generator.generate()
                     self.yang_types.add(type_stmt.i_typedef.arg)
 
+            # Use Typedef MethodGenerator to generate constructor methods
+            gen = TypedefMethodGenerator(stmt, self.ctx)
+            for i, method in enumerate(gen.constructors()):
+                self.java_class.add_constructor(str(i), method)
+
             # Extract types to use in constructors, etc.
             super_type = get_types(type_stmt, self.ctx)[0]
-            mods = ' extends ' + super_type
+            self.java_class.modifiers = ' extends ' + super_type
             base_type = get_base_type(stmt)
             primitive = get_types(base_type, self.ctx)[1]
-            self.java_class.add_constructor('string', typedef_constructor(stmt))
+#            self.java_class.add_constructor('string', typedef_constructor(stmt))
             spec = ', using a string value'
             arg = 'String ' + stmt.arg + 'Value'
             body = 'super.setValue(' + stmt.arg + '''Value);
@@ -859,8 +863,8 @@ class ClassGenerator(object):
             self.java_class.append_access_method('string', 
                 set_value(stmt, spec1=spec, argument=arg, body=body))
             if primitive != 'String':
-                self.java_class.add_constructor('primitive', 
-                    typedef_constructor(stmt, primitive))
+#                self.java_class.add_constructor('primitive', 
+#                    typedef_constructor(stmt, primitive))
                 spec = ', using ' + primitive + ' value'
                 arg = primitive + ' ' + stmt.arg + 'Value'
                 self.java_class.append_access_method('primitive', set_value(stmt,
@@ -1233,17 +1237,29 @@ class JavaClass(object):
         """Returns self.body. If it is None, fields and methods are added to it
         before it is returned."""
         if not self.body:
-            code = []
-            code.extend(self.fields.values())
-            code.extend(self.constructors.values())
-            code.extend(self.cloners.values())
-            code.extend(self.enablers.values())
-            code.extend(self.schema_registrators.values())
-            code.extend(self.name_getters.values())
-            for methods in self.access_methods.values():
-                code.extend(methods)
-            code.extend(self.support_methods.values())
-            self.body = ''.join(code)
+            attrs = [self.fields, self.constructors, self.cloners,
+                     self.enablers, self.schema_registrators,
+                     self.name_getters, self.access_methods, 
+                     self.support_methods]
+            def flatten(l):
+                res = []
+                for item in l:
+                    try:
+                        assert not isinstance(item, basestring)
+                        iter(item)
+                    except (AssertionError, TypeError):
+                        res.append(item)
+                    else:
+                        res.extend(flatten(item))
+                return res
+
+            methods = flatten(map(lambda x: x.values(), attrs))
+            for i, method in enumerate(methods):
+                try:
+                    methods[i] = method.as_string()
+                except AttributeError:
+                    pass
+            self.body = ''.join(methods)
         return self.body
 
     def java_class(self):
@@ -1529,7 +1545,9 @@ class TypedefMethodGenerator(MethodGenerator):
         super(TypedefMethodGenerator, self).__init__(stmt, ctx)
         assert self.is_typedef, 'This class is only valid for typedef stmts'
         self.stmt_type = stmt.search_one('type')
-        self.is_string = self.stmt_type and self.stmt_type.arg == 'string'
+        self.is_string = False
+        if self.stmt_type is not None:
+            self.is_string = self.stmt_type.arg in ('string', 'enumeration')
 
     def constructors(self):
         """Returns a list containing a single or a pair of constructors"""
@@ -1559,6 +1577,7 @@ class TypedefMethodGenerator(MethodGenerator):
             constructor.add_line('super(value);')
             constructor.add_line('check();')  # TODO: Add only if needed
             constructors.append(constructor)
+        print len(constructors)
         return constructors
 
     def setters(self):
