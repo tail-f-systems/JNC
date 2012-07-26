@@ -34,16 +34,16 @@ class Test(unittest.TestCase):
         util.test_statement_tree(self)
         util.test_method_generators(self)
 
-    def testRoot_namespace(self):
-        """Joining root_namespace return value yields (RootM.NAMESPACE, "c")"""
-        res = self.cgen.root_namespace(self.cgen.stmt.arg)
+    def test_root_namespace(self):
+        """Joining _root_namespace return value yields (RootM.NAMESPACE, "c")"""
+        res = self.cgen._root_namespace(self.cgen.stmt.arg)
         expected = ['(', self.cgen.root, '.NAMESPACE, "']
         expected.extend([self.cgen.stmt.arg, '");'])
         assert ''.join(expected) == '(RootM.NAMESPACE, "c");'
         assert res == expected, 'was: ' + str(res) + '\nnot: ' + str(expected)
         
         # 
-        res = self.lgen.root_namespace(self.my.arg)
+        res = self.lgen._root_namespace(self.my.arg)
         expected = ['(', self.lgen.root, '.NAMESPACE, "']
         expected.extend([self.my.arg, '");'])
         assert ''.join(expected) == '(RootM.NAMESPACE, "my");'
