@@ -1456,8 +1456,6 @@ class MethodGenerator(object):
         self.is_list = stmt.keyword == 'list'
         self.is_config = is_config(stmt)
         self.is_typedef = stmt.keyword == 'typedef'
-        self.stmt_type = stmt.search_one('type')
-        self.is_string = self.stmt_type and self.stmt_type.arg == 'string'
         self.ctx = ctx
 
     def root_namespace(self, stmt_arg):
@@ -1481,36 +1479,6 @@ class MethodGenerator(object):
             setPrefix = ['setPrefix(', self.root, '.PREFIX);']
             constructor.add_line(''.join(setPrefix))
         return constructor
-
-    def typedef_constructors(self):
-        """Returns a list containing a single or a pair of constructors"""
-        assert self.is_typedef, 'This method is only called with typedef stmts'
-        constructors = []
-        primitive = get_types(self.stmt_type, self.ctx)[1]
-        javadoc = ['@param value Value to construct the ']
-        javadoc.append(self.n)
-        javadoc.append(' from.')
-
-        # Iterate once if string, twice otherwise
-        for i in range(1 + (not self.is_string)):
-            constructor = JavaMethod(modifiers=['public'], name=self.n)
-            javadoc2 = ['Constructor for ']
-            javadoc2.append(self.n)
-            if i == 0:
-                # String constructor
-                javadoc2.append(' object from a string.')
-                constructor.add_parameter('String value')
-            else:
-                # i == 1, Primitive constructor
-                javadoc2.extend([' object from a ', primitive, '.'])
-                constructor.add_parameter(primitive + ' value')
-            constructor.add_javadoc(''.join(javadoc2))
-            constructor.add_javadoc(''.join(javadoc))
-            constructor.add_exception('ConfMException')  # TODO: Add only if needed
-            constructor.add_line('super(value);')
-            constructor.add_line('check();')  # TODO: Add only if needed
-            constructors.append(constructor)
-        return constructors
 
     def value_constructors(self):
         """Returns a list of constructors for configuration data lists"""
@@ -1579,8 +1547,10 @@ class MethodGenerator(object):
                 # Number of constructors depends on the type of the key
                 constructors.extend(self.value_constructors())
         else:
-            # Number of constructors depends on the type
-            constructors.extend(self.typedef_constructors())
+            # Number of constructors depends on if type is string or not
+            typedef_gen = TypedefMethodGenerator(self.stmt, self.ctx)
+            # XXX: Infinite loop unless subclass overrides constructors method
+            constructors.extend(typedef_gen.constructors())
         return constructors
 
     def cloners(self):
@@ -1598,7 +1568,60 @@ class MethodGenerator(object):
             cloner.add_line('return clone%sContent(new %s());' % (c[i], self.n))
         return cloners
 
-    def typedef_setters(self):
+    def setters(self):
+        """Returns a list of JavaMethods representing setters to include
+        in generated class of self.stmt
+
+        """
+        setters = []
+        if not self.is_typedef:
+            return NotImplemented
+        else:
+            typedef_gen = TypedefMethodGenerator(self.stmt, self.ctx)
+            setters.extend(typedef_gen.setters())
+        return setters
+
+
+class TypedefMethodGenerator(MethodGenerator):
+    """Method generator specific to typedef classes"""
+    
+    def __init__(self, stmt, ctx=None):
+        super(TypedefMethodGenerator, self).__init__(stmt, ctx)
+        assert self.is_typedef, 'This class is only valid for typedef stmts'
+        self.stmt_type = stmt.search_one('type')
+        self.is_string = self.stmt_type and self.stmt_type.arg == 'string'
+
+    def constructors(self):
+        """Returns a list containing a single or a pair of constructors"""
+        assert self.is_typedef, 'This method is only called with typedef stmts'
+        constructors = []
+        primitive = get_types(self.stmt_type, self.ctx)[1]
+        javadoc = ['@param value Value to construct the ']
+        javadoc.append(self.n)
+        javadoc.append(' from.')
+
+        # Iterate once if string, twice otherwise
+        for i in range(1 + (not self.is_string)):
+            constructor = JavaMethod(modifiers=['public'], name=self.n)
+            javadoc2 = ['Constructor for ']
+            javadoc2.append(self.n)
+            if i == 0:
+                # String constructor
+                javadoc2.append(' object from a string.')
+                constructor.add_parameter('String value')
+            else:
+                # i == 1, Primitive constructor
+                javadoc2.extend([' object from a ', primitive, '.'])
+                constructor.add_parameter(primitive + ' value')
+            constructor.add_javadoc(''.join(javadoc2))
+            constructor.add_javadoc(''.join(javadoc))
+            constructor.add_exception('ConfMException')  # TODO: Add only if needed
+            constructor.add_line('super(value);')
+            constructor.add_line('check();')  # TODO: Add only if needed
+            constructors.append(constructor)
+        return constructors
+
+    def setters(self):
         """Returns a list of set_value JavaMethods"""
         assert self.is_typedef, 'This method is only called with typedef stmts'
         setters = []
@@ -1624,26 +1647,6 @@ class MethodGenerator(object):
             setter.add_line('check();')  # TODO: Add only if needed
             setters.append(setter)
         return setters
-
-    def setters(self):
-        """Returns a list of JavaMethods representing setters to include
-        in generated class of self.stmt
-
-        """
-        setters = []
-        if not self.is_typedef:
-            return NotImplemented
-        else:
-            setters.extend(self.typedef_setters())
-        return setters
-
-
-class TypedefMethodGenerator(MethodGenerator):
-    """Method generator specific to typedef classes"""
-    
-    def __init__(self, stmt, ctx=None):
-        super(TypedefMethodGenerator, self).__init__(stmt, ctx)
-        assert self.is_typedef, 'This class is only valid for typedef stmts'
 
 
 def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
