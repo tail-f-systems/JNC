@@ -1785,8 +1785,7 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
                 MAX_COLS -= len(tmp)
             arguments += tmp
         arguments = arguments[:-2]  # Skip the last ', '
-    return ('''
-    /**
+    return ('''    /**
      * Constructor for an ''' + obj_status + name + ' object.' + docstring +
      '''
      */
@@ -1837,8 +1836,7 @@ def clone(class_name, key_names=None, shallow='False'):
         children = ' Children are not included.'
         signature = 'Element cloneShallow()'
         method = 'cloneShallowContent'
-    return ('''
-    /**
+    return ('''    /**
      * Clones this object, returning a''' + copy + ''' copy.
      * @return A clone of the object.''' + children + '''
      */
@@ -1866,8 +1864,7 @@ def key_names(stmt):
             for key in key_str.arg.split(' '):
                 res += ' ' * 12 + '"' + key + '",\n'
         res = res[:-2] + '\n' + ' ' * 8 + '}'
-    return '''
-    /**
+    return '''    /**
      * Structure information which specifies
      * the keys for the list entries.
      */
@@ -1892,8 +1889,7 @@ def children_names(stmt):
             ',\n' + ' ' * 12)
     else:
         names = ''
-    return '''
-    /**
+    return '''    /**
      * Structure information with the names of the children.
      * Makes it possible to order the children.
      */
@@ -1906,8 +1902,7 @@ def children_names(stmt):
 
 def static_string(identifier, value):
     """Returns a string representing java code for two fields"""
-    return '''
-    public static final String ''' + identifier + ' = "' + value + '";'
+    return '''    public static final String ''' + identifier + ' = "' + value + '";'
 
 
 def enable(prefix_name):
@@ -1918,8 +1913,7 @@ def enable(prefix_name):
     prefix_name -- The name of the class containing the registerSchema method
 
     """
-    return '''
-    /**
+    return '''    /**
      * Enable the elements in this namespace to be aware
      * of the data model and use the generated classes.
      */
@@ -1938,8 +1932,7 @@ def register_schema(prefix_name):
     prefix_name -- The name of the class containing the registerSchema method
 
     """
-    return ('''
-    /**
+    return ('''    /**
      * Register the schema for this namespace in the global
      * schema table (CsTree) making it possible to lookup
      * CsNode entries for all tagpaths
@@ -1964,8 +1957,7 @@ def access_methods_comment(stmt, optional=False):
         opt = 'optional '
     else:
         opt = ''
-    return ('''
-    /**
+    return ('''    /**
      * -------------------------------------------------------
      * Access methods for ''' + opt + stmt.keyword +
      ' child: "' + stmt.arg + '''".
@@ -1975,8 +1967,7 @@ def access_methods_comment(stmt, optional=False):
 
 def child_field(stmt):
     """Returns a string representing java code for a field"""
-    return '''
-    /**
+    return '''    /**
      * Field for child ''' + stmt.keyword + ' "' + stmt.arg + '''".
      */
     public ''' + capitalize_first(stmt.arg) + ' ' + stmt.arg + ''' = null;'''
@@ -2002,8 +1993,7 @@ def get_stmt(stmt, keys, string=False):
         else:
             arguments += key_type + ' ' + key_name + ', '
         xpath += '[' + key_name + '=\'" + ' + key_name + ' + "\']'
-    return ('''
-    /**
+    return ('''    /**
      * Get method for ''' + stmt.keyword + ' entry: "' + stmt.arg + '''".
      * Return the child with the specified keys ''' +
      '(if any).' + spec + '''
@@ -2025,8 +2015,7 @@ def get_value(stmt, ret_type='com.tailf.confm.xs.String'):
 
     """
     name = capitalize_first(stmt.arg)
-    return '''
-    /**
+    return '''    /**
      * Return the value for child ''' + stmt.keyword + ' "' + stmt.arg + '''".
      * @return The value of the ''' + stmt.keyword + '''.
      */
@@ -2103,8 +2092,7 @@ def set_value(stmt, nameID='', spec1='', spec2='', argument='', body=''):
     if argument:
         spec1 += '''.
      * @param ''' + stmt.arg + 'Value The ' + spec2 + 'value to set'
-    return ('''
-    /**
+    return ('''    /**
      * Sets the value for child ''' + stmt.keyword + ' "' + stmt.arg + '"' +
         spec1 + '''.
      */
@@ -2116,8 +2104,7 @@ def set_value(stmt, nameID='', spec1='', spec2='', argument='', body=''):
 
 def unset_value(stmt):
     """unset<Identifier> method generator"""
-    return '''
-    /**
+    return '''    /**
      * Unsets the value for child ''' + stmt.keyword + ' "' + stmt.arg + '''".
      */
     public void unset''' + capitalize_first(stmt.arg) + '''Value()
@@ -2140,8 +2127,7 @@ def add_value(stmt, prefix):
         name = 'Empty'
         value_type = 'List'
     name += capitalize_first(stmt.arg)
-    return ('''
-    /**
+    return ('''    /**
      * This method is used for creating a subtree filter.
      * The added "''' + stmt.arg + '" ' + stmt.keyword +
         ''' will not have a value.
@@ -2175,8 +2161,7 @@ def mark(stmt, op, arg_type='String'):
             spec += ', given as a String'
         argument = arg_type + ' ' + stmt.arg + 'Value'
         path += '[name=\'" + ' + stmt.arg + 'Value+"\']'
-    return ('''
-    /**
+    return ('''    /**
      * Marks the "''' + stmt.arg + '" ' + stmt.keyword +
         ' with operation "' + spec + '''.
      */
@@ -2193,8 +2178,7 @@ def child_iterator(substmt):
         iterator_type = 'LeafListValue'
     else:
         iterator_type = 'Children'
-    return ('''
-    /**
+    return ('''    /**
      * Iterator method for the ''' + substmt.keyword + ' "' + substmt.arg +
         '''".
      * @return An iterator for the ''' + substmt.keyword + '''.
@@ -2260,8 +2244,7 @@ def add_stmt(stmt, args=None, field=False, string=False):
             spec3 = spec3[:-2] + ');'
     if field:
         spec3 += '\n' + ' ' * 8 + 'this.' + stmt.arg + ' = ' + stmt.arg + ';'
-    return '''
-    /**
+    return '''    /**
      * Adds ''' + stmt.keyword + ' entry "' + stmt.arg + '"' + spec1 + '''.
      * @return The added child.
      */
@@ -2314,8 +2297,7 @@ def delete_stmt(stmt, args=None, string=False, keys=True):
     else:
         spec1 = ''
         spec2 = 'this.' + stmt.arg + ' = null;\n        '
-    return '''
-    /**
+    return '''    /**
      * Deletes ''' + stmt.keyword + ' entry "' + stmt.arg + spec1 + '''"
      */
     public void delete''' + capitalize_first(stmt.arg) + '(' + arguments[:-2] + ''')
@@ -2326,8 +2308,7 @@ def delete_stmt(stmt, args=None, string=False, keys=True):
 
 
 def check(regexp=''):
-    return '''
-    /**
+    return '''    /**
      * Checks all restrictions (if any).
      */
     public void check()
@@ -2349,8 +2330,7 @@ def support_add(fields=None):
             ') ' + fields[i] + ' = (' + capitalize_first(fields[i]) + ')$child;')
         if i > 0:
             assignments += '\n        else '
-    return '''
-    /**
+    return '''    /**
      * -------------------------------------------------------
      * Support method for addChild.
      * -------------------------------------------------------
@@ -2361,5 +2341,4 @@ def support_add(fields=None):
      */
     public void addChild(Element $child) {
         super.addChild($child);
-        ''' + assignments + '''
-    }'''  # TODO: '$' should be removed unless it is actually needed
+        ''' + assignments + '''    }'''  # TODO: '$' should be removed unless it is actually needed
