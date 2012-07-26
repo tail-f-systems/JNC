@@ -118,6 +118,15 @@ class Test(unittest.TestCase):
             i += 1
         assert i == len(l), '#iterations (should be ' + len(l) + '): ' + str(i)
 
+    def testFlatten(self):
+        """Able to flatten list structures"""
+        res = jpyang.flatten([['12', '34'], ['56', ['7']]])
+        assert res == ['12', '34', '56', '7'], 'was: ' + res
+        res = jpyang.flatten([[[[], []]], [[]]])
+        assert res == [], 'was: ' + res
+        res = jpyang.flatten([[1, 2], 3])
+        assert res == [1, 2, 3], 'was: ' + res
+
     def testMake_valid_identifier(self):
         """Statement arguments converts to valid Java identifiers
         
