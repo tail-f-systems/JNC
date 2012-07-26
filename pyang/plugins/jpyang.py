@@ -1448,21 +1448,26 @@ class MethodGenerator(object):
         """Constructor. Context must be supplied for some methods to work."""
         self.stmt = stmt
         self.n = extract_names(stmt.arg)[1]
-        prefix = self.stmt.top.search_one('prefix')
+        prefix = None
+        if self.stmt.top is not None:
+            prefix = self.stmt.top.search_one('prefix')
         self.root = None
         if prefix is not None:
             self.root = extract_names(prefix.arg)[1]
         self.is_container = stmt.keyword == 'container'
         self.is_list = stmt.keyword == 'list'
-        self.is_config = is_config(stmt)
         self.is_typedef = stmt.keyword == 'typedef'
         self.ctx = ctx
         self.gen = self
         if type(self) is MethodGenerator:
             if self.is_typedef:
                 self.gen = TypedefMethodGenerator(stmt, ctx)
+            if self.is_container:
+                self.gen = ContainerMethodGenerator(stmt, ctx)
+            if self.is_list:
+                self.gen = ListMethodGenerator(stmt, ctx)
 
-    def root_namespace(self, stmt_arg):
+    def _root_namespace(self, stmt_arg):
         """Returns '([Root].NAMESPACE, "[stmt.arg]");'"""
         return ['(', self.root, '.NAMESPACE, "', stmt_arg, '");']
 
@@ -1475,7 +1480,7 @@ class MethodGenerator(object):
         javadoc.append(' object.')
         constructor.add_javadoc(''.join(javadoc))
         call = ['super']
-        call.extend(self.root_namespace(self.stmt.arg))
+        call.extend(self._root_namespace(self.stmt.arg))
         constructor.add_line(''.join(call))
         if self.stmt.parent == self.stmt.top:
             # Top level statement
@@ -1484,77 +1489,13 @@ class MethodGenerator(object):
             constructor.add_line(''.join(setPrefix))
         return constructor
 
-    def value_constructors(self):
-        """Returns a list of constructors for configuration data lists"""
-        assert not self.is_typedef, 'Not called with typedef stmts'
-        assert not self.is_container, 'Not called with container stmts'
-        assert self.is_list, 'Only called with list stmts'
-        assert self.is_config, 'Only called with configuration data stmts'
-
-        keys = self.stmt.search_one('key').arg.split(' ')
-        key_stmts = map(lambda k: self.stmt.search_one('leaf', k), keys)
-        constructors = []
-
-        # Determine number of constructors
-        number_of_value_constructors = 2
-        javadoc1 = ['Constructor for an initialized ', self.n, ' object,']
-        javadoc2 = ['', 'with Strings for the keys.']
-        if filter(lambda k: k.arg != 'string', key_stmts):
-            number_of_value_constructors += 1
-            javadoc2.append('with primitive Java types.')
-
-        # Create constructors in a loop
-        for i in range(number_of_value_constructors):
-            constructor = JavaMethod(modifiers=['public'], name=self.n)
-            constructor.add_javadoc(''.join(javadoc1))
-            constructor.add_javadoc(javadoc2[i])
-            constructor.add_exception('INMException')  # TODO: Add only if needed
-            call = ['super']
-            call.extend(self.root_namespace(self.stmt.arg))
-            constructor.add_line(''.join(call))
-            for key in key_stmts:
-                javadoc = ['@param ', key.arg, 'Value Key argument of child.']
-                confm, primitive = get_types(key, self.ctx)
-                setValue = [key.arg, '.setValue(']
-                if i == 0:
-                    # Default constructor
-                    parameter = [confm, ' ', key.arg, 'Value']
-                    setValue.extend([key.arg, 'Value);'])
-                else:
-                    # String or primitive constructor
-                    setValue.extend(['new ', confm, '(', key.arg, 'Value));'])
-                    if i == 1:
-                        parameter = ['String ', key.arg, 'Value']
-                    else:
-                        parameter = [primitive, ' ', key.arg, 'Value']
-                newLeaf = ['Leaf ', key.arg, ' = new Leaf']
-                newLeaf.extend(self.root_namespace(key.arg))
-                insertChild = ['insertChild(', key.arg, ', childrenNames());']
-                constructor.add_javadoc(''.join(javadoc))
-                constructor.add_parameter(''.join(parameter))
-                constructor.add_line(''.join(newLeaf))
-                constructor.add_line(''.join(setValue))
-                constructor.add_line(''.join(insertChild))
-            constructors.append(constructor)
-
-        return constructors
-
     def constructors(self):
         """Returns a list of JavaMethods representing constructors to include
         in generated class of self.stmt
 
         """
-        constructors = []
-        if not self.is_typedef:
-            constructors.append(self.empty_constructor())
-            if self.is_list and self.is_config:
-                # Number of constructors depends on the type of the key
-                constructors.extend(self.value_constructors())
-        else:
-            # Number of constructors depends on if type is string or not
-            # XXX: Infinite loop unless subclass overrides constructors method
-            constructors.extend(self.gen.constructors())
-        return constructors
+        assert self.gen is not self, 'Avoid infinite recursion'
+        return self.gen.constructors()
 
     def cloners(self):
         assert not self.is_typedef, "Typedefs don't have clone methods"
@@ -1576,11 +1517,8 @@ class MethodGenerator(object):
         in generated class of self.stmt
 
         """
-        if not self.is_typedef:
-            return NotImplemented
-        else:
-            # XXX: Infinite loop unless subclass overrides setters method
-            return self.gen.setters()
+        assert self.gen is not self, 'Avoid infinite recursion'
+        return self.gen.setters()
 
 
 class TypedefMethodGenerator(MethodGenerator):
@@ -1648,6 +1586,88 @@ class TypedefMethodGenerator(MethodGenerator):
             setter.add_line('check();')  # TODO: Add only if needed
             setters.append(setter)
         return setters
+
+
+class ContainerMethodGenerator(MethodGenerator):
+    """Method generator specific to classes generated from container stmts"""
+    
+    def __init__(self, stmt, ctx=None):
+        super(ContainerMethodGenerator, self).__init__(stmt, ctx)
+        assert self.is_container, 'Only valid for container stmts'
+
+    def constructors(self):
+        return [self.empty_constructor()]
+
+    def setters(self):
+        return NotImplemented
+
+
+class ListMethodGenerator(MethodGenerator):
+    """Method generator specific to classes generated from list stmts"""
+    
+    def __init__(self, stmt, ctx=None):
+        super(ListMethodGenerator, self).__init__(stmt, ctx)
+        assert self.is_list, 'Only valid for list stmts'
+        self.is_config = is_config(stmt)
+
+    def value_constructors(self):
+        """Returns a list of constructors for configuration data lists"""
+        assert self.is_config, 'Only called with configuration data stmts'
+
+        keys = self.stmt.search_one('key').arg.split(' ')
+        key_stmts = map(lambda k: self.stmt.search_one('leaf', k), keys)
+        constructors = []
+
+        # Determine number of constructors
+        number_of_value_constructors = 2
+        javadoc1 = ['Constructor for an initialized ', self.n, ' object,']
+        javadoc2 = ['', 'with Strings for the keys.']
+        if filter(lambda k: k.arg != 'string', key_stmts):
+            number_of_value_constructors += 1
+            javadoc2.append('with primitive Java types.')
+
+        # Create constructors in a loop
+        for i in range(number_of_value_constructors):
+            constructor = JavaMethod(modifiers=['public'], name=self.n)
+            constructor.add_javadoc(''.join(javadoc1))
+            constructor.add_javadoc(javadoc2[i])
+            constructor.add_exception('INMException')  # TODO: Add only if needed
+            call = ['super']
+            call.extend(self._root_namespace(self.stmt.arg))
+            constructor.add_line(''.join(call))
+            for key in key_stmts:
+                javadoc = ['@param ', key.arg, 'Value Key argument of child.']
+                confm, primitive = get_types(key, self.ctx)
+                setValue = [key.arg, '.setValue(']
+                if i == 0:
+                    # Default constructor
+                    parameter = [confm, ' ', key.arg, 'Value']
+                    setValue.extend([key.arg, 'Value);'])
+                else:
+                    # String or primitive constructor
+                    setValue.extend(['new ', confm, '(', key.arg, 'Value));'])
+                    if i == 1:
+                        parameter = ['String ', key.arg, 'Value']
+                    else:
+                        parameter = [primitive, ' ', key.arg, 'Value']
+                newLeaf = ['Leaf ', key.arg, ' = new Leaf']
+                newLeaf.extend(self._root_namespace(key.arg))
+                insertChild = ['insertChild(', key.arg, ', childrenNames());']
+                constructor.add_javadoc(''.join(javadoc))
+                constructor.add_parameter(''.join(parameter))
+                constructor.add_line(''.join(newLeaf))
+                constructor.add_line(''.join(setValue))
+                constructor.add_line(''.join(insertChild))
+            constructors.append(constructor)
+
+        return constructors
+
+    def constructors(self):
+        # Number of constructors depends on the type of the key
+        return [self.empty_constructor()] + self.value_constructors()
+
+    def setters(self):
+        return NotImplemented
 
 
 def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
