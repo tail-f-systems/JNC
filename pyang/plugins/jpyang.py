@@ -392,7 +392,7 @@ def get_types(yang_type, ctx):
     confm = 'com.tailf.confm.xs.'
     primitive = 'String'
     alt = ''
-    if yang_type.arg == 'string':
+    if yang_type.arg in ('string', 'enumeration'):
         pass  # String is the default
     elif yang_type in ('binary', 'instance-identifier', 'empty'):
         primitive, alt = alt, primitive
@@ -429,7 +429,6 @@ def get_types(yang_type, ctx):
         # TODO: Maybe this should be com.tailf.confm.confd.Decimal64
     elif yang_type.arg == 'boolean':
         primitive = 'boolean'
-#    elif yang_type.arg == 'enumeration':  # Handled by else clause
 #    elif yang_type.arg == 'bits':  # Handled by else clause
 #    TODO: add support for built-in datatypes bits, empty, identityref,
 #    instance-identifier, leafref and union
@@ -690,6 +689,8 @@ class ClassGenerator(object):
         self.prefix_name = prefix_name
         self.top_level = top_level
         self.yang_types = yang_types
+        if yang_types is None:
+            self.yang_types = YangType()
         if parent is not None:
             for attr in ['package', 'src', 'ctx', 'path', 'ns', 'prefix_name', 'yang_types']:
                 if getattr(self, attr) is None:
@@ -1664,7 +1665,10 @@ class ListMethodGenerator(MethodGenerator):
 
     def constructors(self):
         # Number of constructors depends on the type of the key
-        return [self.empty_constructor()] + self.value_constructors()
+        constructors = [self.empty_constructor()]
+        if self.is_config or self.stmt.search_one('key') is not None:
+            constructors.extend(self.value_constructors())
+        return constructors
 
     def setters(self):
         return NotImplemented
