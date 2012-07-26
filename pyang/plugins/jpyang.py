@@ -1260,8 +1260,8 @@ class JavaClass(object):
         if self.body is None:
             self.body = []
             for method in flatten(self.attrs):
-                if hasattr(method, 'as_string'):
-                    self.body.append(method.as_string())
+                if hasattr(method, 'as_list'):
+                    self.body.extend(method.as_list())
                 else:
                     self.body.append(method)
                 self.body.append('')
@@ -1311,8 +1311,8 @@ class JavaClass(object):
         header.append(' '.join(['public class',
                                 self.filename.split('.')[0],
                                 self.modifiers,
-                                '{',
-                                '']))
+                                '{']))
+        header.append('')
         return '\n'.join(header + self.get_body())
 
 
@@ -1376,7 +1376,7 @@ class JavaValue(object):
         self._set_instance_data('name', name)
 
     def set_indent(self, indent=4):
-        """Sets indentation used in the as_string methods"""
+        """Sets indentation used in the as_list methods"""
         self._set_instance_data('indent', ' ' * indent)
 
     def add_modifier(self, modifier):
@@ -1395,20 +1395,17 @@ class JavaValue(object):
             lines.append( self.indent + ' */' )
         return lines
 
-    def as_string(self):
-        """String representation of this Java value"""
+    def as_list(self):
+        """String list of code lines that this Java value consists of"""
         if self.exact is None:
             assert self.name is not None
             assert self.indent is not None
-            lines = ['']
-            lines.extend(self.javadoc_as_string())
+            self.exact = self.javadoc_as_string()
             declaration = self.modifiers + [self.name]
             if self.value is not None:
                 declaration.append('=')
                 declaration.append(self.value)
-            lines.append(''.join([self.indent, ' '.join(declaration), ';']))
-            lines.append('')
-            self.exact = '\n'.join(lines)  # Cache the string representation
+            self.exact.append(''.join([self.indent, ' '.join(declaration), ';']))
         return self.exact
 
 
@@ -1448,15 +1445,16 @@ class JavaMethod(JavaValue):
         """Adds line to method body"""
         self._set_instance_data('body', self.indent + ' ' * 4 + line)
 
-    def as_string(self):
-        """String representation of method. Overrides JavaValue.as_string()."""
+    def as_list(self):
+        """String list of code lines that this Java method consists of. 
+        Overrides JavaValue.as_list().
+        
+        """
         if self.exact is None:
             assert self.name is not None
             assert self.indent is not None
-            lines = ['']
-            lines.extend(self.javadoc_as_string())
-            header = []
-            header.extend(self.modifiers)
+            self.exact = self.javadoc_as_string()
+            header = self.modifiers[:]
             if self.return_type is not None:
                 header.append(self.return_type)
             header.append(self.name)
@@ -1469,11 +1467,9 @@ class JavaMethod(JavaValue):
                 signature.append(' throws ')
                 signature.append(', '.join(self.exceptions))
             signature.append(' {')
-            lines.append(''.join(signature))
-            lines.extend(self.body)
-            lines.append(self.indent + '}')
-            lines.append('')
-            self.exact = '\n'.join(lines)  # Cache the string representation
+            self.exact.append(''.join(signature))
+            self.exact.extend(self.body)
+            self.exact.append(self.indent + '}')
         return self.exact
 
 
