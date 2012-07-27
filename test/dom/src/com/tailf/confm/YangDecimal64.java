@@ -16,10 +16,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
-* Implements the built-in YANG data type "decimal64".
+ * Implements the built-in YANG data type "decimal64".
  * 
  * @author emil@tail-f.com
-*/
+ */
 public class YangDecimal64 implements Serializable {
 
     /**
@@ -250,6 +250,9 @@ public class YangDecimal64 implements Serializable {
      * @return true if the value of this object is equal to the value of s and
      *         the fractionDigits value of this object is equal to the 
      *         fractionDigits argument; false otherwise.
+     * @throws NumberFormatException If s is not a valid representation of a 
+     *                               java.math.BigDecimal.
+     * @see java.math.BigDecimal
      */
     public boolean equals(String s, int fractionDigits) {
         return equals(new BigDecimal(s), fractionDigits);
@@ -261,6 +264,9 @@ public class YangDecimal64 implements Serializable {
      * @param s The String object to compare with.
      * @return true if the value of this object is equal to the value of s;
      *         false otherwise.
+     * @throws NumberFormatException If s is not a valid representation of a 
+     *                               java.math.BigDecimal.
+     * @see java.math.BigDecimal
      */
     public boolean equals(String s) {
         return equals(s, fractionDigits);
@@ -274,6 +280,7 @@ public class YangDecimal64 implements Serializable {
      * @return true if the value of this object is equal to d and the
      *         fractionDigits value of this object is equal to the
      *         fractionDigits argument; false otherwise.
+     * @throws NumberFormatException If d is infinite or NaN.
      */
     public boolean equals(double d, int fractionDigits) {
         return equals(new BigDecimal(d), fractionDigits);
@@ -284,6 +291,7 @@ public class YangDecimal64 implements Serializable {
      * 
      * @param d The double to compare with.
      * @return true if the value of this object is equal to d; false otherwise.
+     * @throws NumberFormatException If d is infinite or NaN.
      */
     public boolean equals(double d) {
         return equals(d, fractionDigits);
@@ -298,6 +306,7 @@ public class YangDecimal64 implements Serializable {
      * @return true if the value of this object is equal to the value of d and
      *         the fractionDigits value of this object is equal to the 
      *         fractionDigits argument; false otherwise.
+     * @throws NumberFormatException If value of d is infinite or NaN.
      */
     public boolean equals(Double d, int fractionDigits) {
         return equals(Double.valueOf(d), fractionDigits);
@@ -309,6 +318,7 @@ public class YangDecimal64 implements Serializable {
      * @param d The Double object to compare with.
      * @return true if the value of this object is equal to the value of d;
      *         false otherwise.
+     * @throws NumberFormatException If value of d is infinite or NaN.
      */
     public boolean equals(Double d) {
         return equals(d, fractionDigits);
@@ -336,7 +346,12 @@ public class YangDecimal64 implements Serializable {
      * 
      * @param obj The object to compare with
      * @return true if the value of this object is equal to the value of obj;
-     *         false otherwise. 
+     *         false otherwise.
+     * @throws NumberFormatException If obj can be cast to String but is not a
+     *                               valid representation of a 
+     *                               java.math.BigDecimal, or if obj can be
+     *                               cast to Double but is infinite or NaN.
+     * @see java.math.BigDecimal
      */
     @Override
     public boolean equals(Object obj) {
