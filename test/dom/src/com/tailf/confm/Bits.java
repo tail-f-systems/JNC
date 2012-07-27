@@ -15,7 +15,7 @@ import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
- * Implements the bits built-in YANG type.
+ * Implements the built-in YANG data type "bits".
  *
  * @author Emil Wall
  * @serial 5882382456815438844L
@@ -23,12 +23,14 @@ import java.math.BigInteger;
 public abstract class Bits implements Serializable {
 
     /**
-     * Serial version ID
+     * Generated serial version UID, to be changed if this class is modified in
+     * a way which affects serialization. Please see:
+     * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
      */
     private static final long serialVersionUID = 5882382456815438844L;
 
     /**
-     * Value space
+     * Value space of this object
      */
     private BigInteger value;
 
