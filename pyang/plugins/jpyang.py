@@ -16,10 +16,11 @@
 
 For complete functionality, invoke with:
 > pyang \
-    --path <yang search path>
+    --path <yang search path> \
     --format java \
     --java-package <package.name> \
     --jpyang-verbose \
+    --jpyang-ignore-errors \
     --jpyang-javadoc <javadoc directory path> \
     <file.yang>
 
@@ -116,7 +117,6 @@ class JPyangPlugin(plugin.PyangPlugin):
                 dest='verbose',
                 action='store_true',
                 help='Verbose mode: Print detailed debug messages.'),
-            ]
         g = optparser.add_option_group('JPyang output specific options')
         g.add_options(optlist)
         self.o = optparser.parse_args()[0]
@@ -151,7 +151,7 @@ class JPyangPlugin(plugin.PyangPlugin):
         fd      -- File descriptor ignored.
 
         """
-        for (epos, etag) in ctx.errors[:1]:
+        for (epos, etag, _) in ctx.errors:
             if (error.is_error(error.err_level(etag)) and
                 etag in ('MODULE_NOT_FOUND', 'MODULE_NOT_FOUND_REV')):
                 self.fatal("%s contains errors" % epos.top.arg)
@@ -1546,8 +1546,14 @@ class TypedefMethodGenerator(MethodGenerator):
         assert self.is_typedef, 'This class is only valid for typedef stmts'
         self.stmt_type = stmt.search_one('type')
         self.is_string = False
+        self.needs_check = True  # Set to False to avoid redundant checks
         if self.stmt_type is not None:
             self.is_string = self.stmt_type.arg in ('string', 'enumeration')
+            for s in ('length', 'path', 'range', 'require_instance'):
+                setattr(self, s, self.stmt_type.search_one(s))
+            for s in ('bit', 'enum', 'pattern'):
+                setattr(self, s, self.stmt_type.search(s))
+            self.needs_check = self.enum or self.pattern
 
     def constructors(self):
         """Returns a list containing a single or a pair of constructors"""
@@ -1572,9 +1578,10 @@ class TypedefMethodGenerator(MethodGenerator):
                 constructor.add_parameter(primitive + ' value')
             constructor.add_javadoc(''.join(javadoc2))
             constructor.add_javadoc(''.join(javadoc))
-            constructor.add_exception('ConfMException')  # TODO: Add only if needed
             constructor.add_line('super(value);')
-            constructor.add_line('check();')  # TODO: Add only if needed
+            if self.needs_check:
+                constructor.add_line('check();')
+                constructor.add_exception('ConfMException')
             constructors.append(constructor)
         return constructors
 
@@ -1598,23 +1605,35 @@ class TypedefMethodGenerator(MethodGenerator):
                 setter.add_parameter(primitive + ' value')
             setter.add_javadoc(''.join(javadoc2))
             setter.add_javadoc(javadoc)
-            setter.add_exception('ConfMException')  # TODO: Add only if needed
             setter.add_line('super.setValue(value);')
-            setter.add_line('check();')  # TODO: Add only if needed
+            if self.needs_check:
+                setter.add_line('check();')
+                setter.add_exception('ConfMException')
             setters.append(setter)
         return setters
     
-    def checker(self, regexp=''):
+    def checker(self):
         """Returns a 'check' JavaMethod, which checks regexp constraints"""
-        res = JavaMethod()
-        res.exact = ['    /**',
-                     '     * Checks all restrictions (if any).',
-                     '     */',
-                     '    public void check() throws ConfMException {']
-        if regexp:
-            res.exact.append(' ' * 8 + regexp)
-        res.exact.append('    }')
-        return res
+        if self.needs_check:
+            checker = JavaMethod(modifiers=['public', 'void'], name='check')
+            checker.add_javadoc('Checks all restrictions (if any).')
+            checker.add_exception('ConfMException')
+            if self.enum:
+                checker.add_line('boolean e = false;')
+                for e in self.enum:
+                    checker.add_line('e = e || enumeration("' + e.arg + '");')
+                checker.add_line('throwException( !e );')
+            if self.pattern:
+                if len(self.pattern) == 1:
+                    checker.add_line('pattern("' + self.pattern[0].arg + '");')
+                else:
+                    checker.add_line('java.lang.String[] regexs = {')
+                    for p in self.pattern:
+                        checker.add_line('    "' + p.arg + '",')
+                    checker.add_line('};')
+                    checker.add_line('pattern(regexs);')
+            return [checker]
+        return []
 
 
 class ContainerMethodGenerator(MethodGenerator):
