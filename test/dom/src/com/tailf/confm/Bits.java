@@ -17,7 +17,7 @@ import java.math.BigInteger;
 /**
  * Implements the built-in YANG data type "bits".
  *
- * @author Emil Wall
+ * @author emil@tail-f.com
  * @serial 5882382456815438844L
  */
 public abstract class Bits implements Serializable {
@@ -102,6 +102,7 @@ public abstract class Bits implements Serializable {
     /**
      * @return A string representation of the value space
      */
+    @Override
     public String toString() {
         return value.toString();
     }
@@ -167,6 +168,7 @@ public abstract class Bits implements Serializable {
      *         otherwise.
      * @throws NumberFormatException If value is a String not valid as a number
      */
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof BigInteger)
             return equals((BigInteger) obj);
