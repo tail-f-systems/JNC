@@ -97,7 +97,7 @@ public class YangString implements Serializable {
      * Compares this object with another object for equality
      * 
      * @param obj The object to compare with
-     * @return true if obj can be cast to a YangString of a java.lang.String
+     * @return true if obj can be cast to a YangString or a java.lang.String
      *         and the value of this object is equal to the value of obj;
      *         false otherwise
      */
