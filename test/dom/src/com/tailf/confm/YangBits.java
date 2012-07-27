@@ -20,7 +20,7 @@ import java.math.BigInteger;
  * @author emil@tail-f.com
  * @serial 5882382456815438844L
  */
-public abstract class Bits implements Serializable {
+public abstract class YangBits implements Serializable {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
@@ -41,7 +41,7 @@ public abstract class Bits implements Serializable {
      * @throws ConfMException If value does not match mask
      * @throws NumberFormatException If value or mask are not valid as numbers
      */
-    public Bits(String value, String mask)
+    public YangBits(String value, String mask)
             throws ConfMException {
         this(new BigInteger(value), new BigInteger(mask));
     }
@@ -52,7 +52,7 @@ public abstract class Bits implements Serializable {
      * @param mask The bit mask
      * @throws ConfMException If value does not match mask
      */
-    public Bits(BigInteger value, BigInteger mask)
+    public YangBits(BigInteger value, BigInteger mask)
             throws ConfMException {
         this.value = value;
         check(mask);
@@ -111,7 +111,7 @@ public abstract class Bits implements Serializable {
      * Performs arithmetic or assignment: this.value &= v.value
      * @param v Bits instance to fetch value from
      */
-    public void AND(Bits v) {
+    public void AND(YangBits v) {
         this.value = this.value.and(v.getValue());
     }
 
@@ -119,7 +119,7 @@ public abstract class Bits implements Serializable {
      * Performs arithmetic or assignment: this.value |= v.value
      * @param v Bits instance to fetch value from
      */
-    public void OR(Bits v) {
+    public void OR(YangBits v) {
         this.value = this.value.or(v.getValue());
     }
 
@@ -127,7 +127,7 @@ public abstract class Bits implements Serializable {
      * Performs arithmetic or assignment: this.value ^= v.value
      * @param v Bits instance to fetch value from
      */
-    public void XOR(Bits v) {
+    public void XOR(YangBits v) {
         this.value = this.value.xor(v.getValue());
     }
 
@@ -156,7 +156,7 @@ public abstract class Bits implements Serializable {
      * @return true if this object's value space is equal to the value space of
      *         bits; false otherwise.
      */
-    public boolean equals(Bits bits) {
+    public boolean equals(YangBits bits) {
         return equals(bits.getValue());
     }
 
@@ -174,8 +174,8 @@ public abstract class Bits implements Serializable {
             return equals((BigInteger) obj);
         else if (obj instanceof String)
             return equals((String) obj);
-        else if (obj instanceof Bits)
-            return equals((Bits) obj);
+        else if (obj instanceof YangBits)
+            return equals((YangBits) obj);
         return false;
     }
 
