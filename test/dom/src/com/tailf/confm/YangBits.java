@@ -29,16 +29,19 @@ public abstract class YangBits implements Serializable {
     private static final long serialVersionUID = 5882382456815438844L;
 
     /**
-     * Value space of this object
+     * The value of this object, of which this class is a wrapper for.
+     * 
+     * @serial
      */
     private BigInteger value;
 
     /**
-     * Constructor using string arguments
-     * @param value The value space as a string
-     * @param mask The bit mask as a string
-     * @throws ConfMException If value does not match mask
-     * @throws NumberFormatException If value or mask are not valid as numbers
+     * Constructor using string arguments.
+     * 
+     * @param value The value to initialize the object with, as a string.
+     * @param mask The bit mask as a string.
+     * @throws ConfMException If value does not match mask.
+     * @throws NumberFormatException If value or mask are not valid as numbers.
      */
     public YangBits(String value, String mask)
             throws ConfMException {
@@ -46,10 +49,11 @@ public abstract class YangBits implements Serializable {
     }
 
     /**
-     * Constructor using BigInteger arguments
-     * @param value The value space
-     * @param mask The bit mask
-     * @throws ConfMException If value does not match mask
+     * Constructor using BigInteger arguments.
+     * 
+     * @param value The value to initialize the object with.
+     * @param mask The bit mask to initialize the object with.
+     * @throws ConfMException If value does not match mask.
      */
     public YangBits(BigInteger value, BigInteger mask)
             throws ConfMException {
@@ -58,11 +62,12 @@ public abstract class YangBits implements Serializable {
     }
 
     /**
-     * Value setter using string arguments
-     * @param value The value space to set, as a string
-     * @param mask The bit mask as a string
-     * @throws ConfMException If value does not match mask
-     * @throws NumberFormatException If value or mask are not valid as numbers
+     * Value setter using string arguments.
+     * 
+     * @param value The value to set this object's value to, as a string.
+     * @param mask The bit mask to use, as a string.
+     * @throws ConfMException If value does not match mask.
+     * @throws NumberFormatException If value or mask are not valid as numbers.
      */
     public void setValue(String value, String mask)
             throws ConfMException {
@@ -70,10 +75,11 @@ public abstract class YangBits implements Serializable {
     }
 
     /**
-     * Value setter using BigInteger arguments
-     * @param value The value space to set
-     * @param mask The bit mask
-     * @throws ConfMException If value does not match mask
+     * Value setter using BigInteger arguments.
+     * 
+     * @param value The value to set this object's value to.
+     * @param mask The bit mask to use.
+     * @throws ConfMException If value does not match mask.
      */
     public void setValue(BigInteger value, BigInteger mask)
             throws ConfMException {
@@ -82,16 +88,17 @@ public abstract class YangBits implements Serializable {
     }
 
     /**
-     * @return The value space as a BigInteger
+     * @return The value of this object, as a BigInteger.
+     * @see java.math.BigInteger
      */
     public BigInteger getValue() {
         return value;
     }
 
     /**
-     * Checks that the value space matches mask
-     * @param mask Bit mask
-     * @throws ConfMException if value space does not match mask
+     * Checks that the value space matches mask.
+     * @param mask Bit mask.
+     * @throws ConfMException if value space does not match mask.
      */
     public void check(BigInteger mask) throws ConfMException {
         boolean fail = mask.or(value).compareTo(mask) == 0;
@@ -99,7 +106,7 @@ public abstract class YangBits implements Serializable {
     }
 
     /**
-     * @return A string representation of the value space
+     * @return A string representation of the value of this object.
      */
     @Override
     public String toString() {
@@ -107,24 +114,27 @@ public abstract class YangBits implements Serializable {
     }
 
     /**
-     * Performs arithmetic or assignment: this.value &= v.value
-     * @param v Bits instance to fetch value from
+     * Performs arithmetic or assignment: this.value &= v.value.
+     * 
+     * @param v Bits instance to fetch value from.
      */
     public void AND(YangBits v) {
         this.value = this.value.and(v.getValue());
     }
 
     /**
-     * Performs arithmetic or assignment: this.value |= v.value
-     * @param v Bits instance to fetch value from
+     * Performs arithmetic or assignment: this.value |= v.value.
+     * 
+     * @param v Bits instance to fetch value from.
      */
     public void OR(YangBits v) {
         this.value = this.value.or(v.getValue());
     }
 
     /**
-     * Performs arithmetic or assignment: this.value ^= v.value
-     * @param v Bits instance to fetch value from
+     * Performs arithmetic or assignment: this.value ^= v.value.
+     * 
+     * @param v Bits instance to fetch value from.
      */
     public void XOR(YangBits v) {
         this.value = this.value.xor(v.getValue());
@@ -132,8 +142,9 @@ public abstract class YangBits implements Serializable {
 
     /**
      * Compares against a BigInteger.
-     * @param value The value space to compare against
-     * @return true if equal, else false
+     * 
+     * @param value The value space to compare against.
+     * @return true if equal; false otherwise.
      */
     public boolean equals(BigInteger value) {
         return this.value.compareTo(value) == 0;
@@ -141,9 +152,10 @@ public abstract class YangBits implements Serializable {
 
     /**
      * Compares against a String.
-     * @param value The value space to compare against, as a string
-     * @return true if equal, else false
-     * @throws NumberFormatException If value is not valid as a number
+     * 
+     * @param value The value space to compare against, as a string.
+     * @return true if equal; false otherwise.
+     * @throws NumberFormatException If value is not valid as a number.
      */
     public boolean equals(String value) {
         return equals(new BigInteger(value));
@@ -151,7 +163,8 @@ public abstract class YangBits implements Serializable {
 
     /**
      * Compares against another Bits instance.
-     * @param bits The Bits intance to compare against
+     * 
+     * @param bits The Bits intance to compare against.
      * @return true if this object's value space is equal to the value space of
      *         bits; false otherwise.
      */
@@ -161,11 +174,12 @@ public abstract class YangBits implements Serializable {
 
     /**
      * Compares against an arbitrary object.
-     * @param obj The object to compare against
+     * 
+     * @param obj The object to compare against.
      * @return true if obj can be interpreted as a Bits instance or a value
      *         space, and this object's value space is equal to that; false
      *         otherwise.
-     * @throws NumberFormatException If value is a String not valid as a number
+     * @throws NumberFormatException If value is a String not valid as a number.
      */
     @Override
     public boolean equals(Object obj) {
