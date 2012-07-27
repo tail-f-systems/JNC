@@ -1551,7 +1551,6 @@ class TypedefMethodGenerator(MethodGenerator):
 
     def constructors(self):
         """Returns a list containing a single or a pair of constructors"""
-        assert self.is_typedef, 'This method is only called with typedef stmts'
         constructors = []
         primitive = get_types(self.stmt_type, self.ctx)[1]
         javadoc = ['@param value Value to construct the ']
@@ -1581,7 +1580,6 @@ class TypedefMethodGenerator(MethodGenerator):
 
     def setters(self):
         """Returns a list of set_value JavaMethods"""
-        assert self.is_typedef, 'This method is only called with typedef stmts'
         setters = []
         primitive = get_types(self.stmt_type, self.ctx)[1]
         javadoc = '@param value The value to set.'
