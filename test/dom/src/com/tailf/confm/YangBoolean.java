@@ -28,7 +28,7 @@ public class YangBoolean implements Serializable {
     private static final long serialVersionUID = -3460008208874981651L;
 
     /**
-     * The value of this object, of which this class is a wrapper for
+     * The value of this object, of which this class is a wrapper for.
      * 
      * @serial
      */
@@ -37,8 +37,8 @@ public class YangBoolean implements Serializable {
     /**
      * Creates a YangBoolean object from a String.
      *
-     * @param s The string
-     * @throws ConfMException If value is not one of "true" or "false"
+     * @param s The string.
+     * @throws ConfMException If value is not one of "true" or "false".
      */
     public YangBoolean(String s) throws ConfMException {
         setValue(s);
@@ -56,8 +56,8 @@ public class YangBoolean implements Serializable {
     /**
      * Sets the value of this object using a String.
      *
-     * @param s The string
-     * @throws ConfMException If value is not one of "true" or "false"
+     * @param s The string.
+     * @throws ConfMException If value is not one of "true" or "false".
      */
     public void setValue(String s) throws ConfMException {
         s = YangString.wsCollapse(s);
@@ -79,14 +79,14 @@ public class YangBoolean implements Serializable {
     }
 
     /**
-     * @return value of this object
+     * @return value of this object.
      */
     public boolean getValue() {
         return value;
     }
 
     /**
-     * @return The value of this object, as a java.lang.String
+     * @return The value of this object, as a String.
      */
     @Override
     public String toString() {
@@ -94,44 +94,44 @@ public class YangBoolean implements Serializable {
     }
 
     /**
-     * Compares this object with a boolean for equality
+     * Compares this object with a boolean for equality.
      * 
-     * @param b The boolean object to compare with
-     * @return true if value of this object is equal to s; false otherwise
+     * @param b The boolean object to compare with.
+     * @return true if value of this object is equal to s; false otherwise.
      */
     public boolean equals(boolean b) {
         return value == b;
     }
 
     /**
-     * Compares this object with an other instance of YangBoolean for equality
+     * Compares this object with an other instance of YangBoolean for equality.
      * 
-     * @param yb The YangBoolean object to compare with
+     * @param yb The YangBoolean object to compare with.
      * @return true if the value of this object is equal to the value of yb;
-     *         false otherwise
+     *         false otherwise.
      */
     public boolean equals(YangBoolean yb) {
         return equals(yb.getValue());
     }
 
     /**
-     * Compares this object with an instance of Boolean for equality
+     * Compares this object with an instance of Boolean for equality.
      * 
-     * @param b The Boolean object to compare with
+     * @param b The Boolean object to compare with.
      * @return true if the value of this object is equal to the value of b;
-     *         false otherwise
+     *         false otherwise.
      */
     public boolean equals(Boolean b) {
         return equals(b.booleanValue());
     }
 
     /**
-     * Compares this object with another object for equality
+     * Compares this object with another object for equality.
      * 
-     * @param obj The object to compare with
+     * @param obj The object to compare with.
      * @return true if obj can be cast to a Boolean or a YangBoolean
      *         and the value of this object is equal to the value of obj;
-     *         false otherwise
+     *         false otherwise.
      */
     @Override
     public boolean equals(Object obj) {
