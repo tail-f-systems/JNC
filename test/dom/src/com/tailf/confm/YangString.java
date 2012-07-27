@@ -33,39 +33,39 @@ public class YangString implements Serializable {
     private static final long serialVersionUID = -4524001592063916576L;
 
     /**
-     * The value of this object, of which this class is a wrapper for
+     * The value of this object, of which this class is a wrapper for.
      * 
      * @serial
      */
     private String value;
 
     /**
-     * Creates a YangString object from a java.lang.String
+     * Creates a YangString object from a java.lang.String.
      * 
-     * @param value The Java String
+     * @param value The Java String.
      */
     public YangString(String value) {
         this.value = value;
     }
 
     /**
-     * Sets the value of this object using a java.lang.String
+     * Sets the value of this object using a java.lang.String.
      * 
-     * @param value The Java String
+     * @param value The Java String.
      */
     public void setValue(String value) {
         this.value = value;
     }
 
     /**
-     * @return The value of this object
+     * @return The value of this object.
      */
     public String getValue() {
         return value;
     }
 
     /**
-     * @return The value of this object, as a java.lang.String
+     * @return The value of this object, as a java.lang.String.
      */
     @Override
     public String toString() {
@@ -73,33 +73,33 @@ public class YangString implements Serializable {
     }
 
     /**
-     * Compares this object with a java.lang.String for equality
+     * Compares this object with a java.lang.String for equality.
      * 
-     * @param s The java.lang.String object to compare with
-     * @return true if value of this object is equal to s; false otherwise
+     * @param s The java.lang.String object to compare with.
+     * @return true if value of this object is equal to s; false otherwise.
      */
     public boolean equals(String s) {
         return value.equals(s);
     }
 
     /**
-     * Compares this object with an other instance of YangString for equality
+     * Compares this object with an other instance of YangString for equality.
      * 
-     * @param ys The YangString object to compare with
+     * @param ys The YangString object to compare with.
      * @return true if the value of this object is equal to the value of ys;
-     *         false otherwise
+     *         false otherwise.
      */
     public boolean equals(com.tailf.confm.YangString ys) {
         return equals(ys.value);
     }
 
     /**
-     * Compares this object with another object for equality
+     * Compares this object with another object for equality.
      * 
      * @param obj The object to compare with
      * @return true if obj can be cast to a YangString or a java.lang.String
      *         and the value of this object is equal to the value of obj;
-     *         false otherwise
+     *         false otherwise.
      */
     @Override
     public boolean equals(Object obj) {
@@ -114,10 +114,10 @@ public class YangString implements Serializable {
     /* ---------- Restrictions ---------- */
 
     /**
-     * Checks that a regular expression matches the value of this object
+     * Checks that a regular expression matches the value of this object.
      * 
-     * @param regex The regular expression
-     * @throws ConfMException If regexp has a syntax error or does not match
+     * @param regex The regular expression.
+     * @throws ConfMException If regexp has a syntax error or does not match.
      */
     protected void pattern(String regex) throws ConfMException {
         String[] regexes = {regex};
@@ -125,11 +125,11 @@ public class YangString implements Serializable {
     }
 
     /**
-     * Checks that a set of regular expressions match the value of this object
+     * Checks that a set of regular expressions match the value of this object.
      * 
-     * @param regexes The regular expressions
+     * @param regexes The regular expressions.
      * @throws ConfMException If any regexp in regexes has a syntax error or
-     *         does not match
+     *         does not match.
      */
     protected void pattern(String[] regexes) throws ConfMException {
         Object opaqueData = this;
@@ -146,30 +146,30 @@ public class YangString implements Serializable {
     }
 
     /**
-     * Checks that the value of this object has specified length
+     * Checks that the value of this object has specified length.
      * 
-     * @param len The length to check for
-     * @throws ConfMException if value does not have len
+     * @param len The length to check for.
+     * @throws ConfMException if value does not have len.
      */
     protected void length(int len) throws ConfMException {
         ConfMException.throwException(value.length() != len, this);
     }
 
     /**
-     * Checks that the value of this object is longer than specified length
+     * Checks that the value of this object is longer than specified length.
      * 
-     * @param len The length to compare against
-     * @throws ConfMException if value is not longer than len
+     * @param len The length to compare against.
+     * @throws ConfMException if value is not longer than len.
      */
     protected void minLength(int len) throws ConfMException {
         ConfMException.throwException(value.length() < len, this);
     }
 
     /**
-     * Checks that the value of this object is shorter than specified length
+     * Checks that the value of this object is shorter than specified length.
      * 
-     * @param len The length to compare against
-     * @throws ConfMException if value is not shorter than len
+     * @param len The length to compare against.
+     * @throws ConfMException if value is not shorter than len.
      */
     protected void maxLength(int len) throws ConfMException {
         ConfMException.throwException(value.length() > len, this);
@@ -192,10 +192,10 @@ public class YangString implements Serializable {
     }
 
     /**
-     * Checks if value is equal to this object's value, interpreted as an enum
+     * Checks if value is equal to this object's value, interpreted as an enum.
      * 
-     * @param value An enum value candidate, as a String
-     * @return true if value of this object is equal to value; false otherwise
+     * @param value An enum value candidate, as a String.
+     * @return true if value of this object is equal to value; false otherwise.
      */
     protected boolean enumeration(String value) {
         return this.value.equals(value);
@@ -210,8 +210,8 @@ public class YangString implements Serializable {
      * This method is used by most other data types to collapse Strings from
      * the XML parser.
      *
-     * @param value The string to collapse
-     * @return The collapsed string
+     * @param value The string to collapse.
+     * @return The collapsed string.
      */
     public static String wsCollapse(String value) {
         // Collapse multiple spaces into single spaces
