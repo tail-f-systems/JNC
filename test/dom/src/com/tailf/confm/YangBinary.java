@@ -69,7 +69,7 @@ public class YangBinary implements Serializable {
     /**
      * Sets the value of this object by copying a base 64 encoded byte buffer.
      * 
-     * @param value The base 64 encoded byte buffer
+     * @param value The base 64 encoded byte buffer.
      */
     public void setValue(byte[] value) {
         this.value = new byte[value.length];
@@ -77,14 +77,14 @@ public class YangBinary implements Serializable {
     }
 
     /**
-     * @return The value buffer of this object
+     * @return The value buffer of this object.
      */
     public byte[] getValue() {
         return value;
     }
 
     /**
-     * @return The decoded value of this object, as a String
+     * @return The decoded value of this object, as a String.
      */
     @Override
     public String toString() {
@@ -97,9 +97,9 @@ public class YangBinary implements Serializable {
      * Checks that the value buffer of this object has the specified number of
      * octets/bytes.
      * 
-     * @param len The number of octets/bytes to check for
+     * @param len The number of octets/bytes to check for.
      * @throws ConfMException If value buffer does not have len number of
-     *         octets/bytes
+     *         octets/bytes.
      */
     protected void length(int len) throws ConfMException {
         ConfMException.throwException(value.length != len, this);
@@ -109,9 +109,9 @@ public class YangBinary implements Serializable {
      * Checks that the value buffer of this object has less than the specified 
      * number of octets/bytes.
      * 
-     * @param len The number of octets/bytes to compare against
+     * @param len The number of octets/bytes to compare against.
      * @throws ConfMException If value buffer does not have less than len
-     *         number of octets/bytes
+     *         number of octets/bytes.
      */
     protected void minLength(int len) throws ConfMException {
         ConfMException.throwException(value.length < len, this);
@@ -121,9 +121,9 @@ public class YangBinary implements Serializable {
      * Checks that the value buffer of this object has more than the specified 
      * number of octets/bytes.
      * 
-     * @param len The number of octets/bytes to compare against
+     * @param len The number of octets/bytes to compare against.
      * @throws ConfMException If value buffer does not have more than len
-     *         number of octets/bytes
+     *         number of octets/bytes.
      */
     protected void maxLength(int len) throws ConfMException {
         ConfMException.throwException(value.length > len, this);
