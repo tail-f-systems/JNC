@@ -117,6 +117,12 @@ class JPyangPlugin(plugin.PyangPlugin):
                 dest='verbose',
                 action='store_true',
                 help='Verbose mode: Print detailed debug messages.'),
+            optparse.make_option(
+                '--jpyang-ignore-errors',
+                dest='ignore',
+                action='store_true',
+                help='Ignore errors from validation.'),
+            ]
         g = optparser.add_option_group('JPyang output specific options')
         g.add_options(optlist)
         self.o = optparser.parse_args()[0]
@@ -151,14 +157,18 @@ class JPyangPlugin(plugin.PyangPlugin):
         fd      -- File descriptor ignored.
 
         """
-        for (epos, etag, _) in ctx.errors:
-            if (error.is_error(error.err_level(etag)) and
-                etag in ('MODULE_NOT_FOUND', 'MODULE_NOT_FOUND_REV')):
-                self.fatal("%s contains errors" % epos.top.arg)
-            if (etag in ('TYPE_NOT_FOUND', 'FEATURE_NOT_FOUND',
-                'IDENTITY_NOT_FOUND', 'GROUPING_NOT_FOUND')):
-                print_warning(msg=(etag.lower() + ', generated class ' + 
-                    'hierarchy might be incomplete.'), key=etag)
+        if not ctx.opts.ignore:
+            for (epos, etag, _) in ctx.errors:
+                if (error.is_error(error.err_level(etag)) and
+                    etag in ('MODULE_NOT_FOUND', 'MODULE_NOT_FOUND_REV')):
+                    self.fatal("%s contains errors" % epos.top.arg)
+                if (etag in ('TYPE_NOT_FOUND', 'FEATURE_NOT_FOUND',
+                    'IDENTITY_NOT_FOUND', 'GROUPING_NOT_FOUND')):
+                    print_warning(msg=(etag.lower() + ', generated class ' + 
+                        'hierarchy might be incomplete.'), key=etag)
+                else:
+                    print_warning(msg=(etag.lower() + ', aborting.'), key=etag)
+                    self.fatal("%s contains errors" % epos.top.arg)
         directory = ctx.opts.directory
         d = directory.replace('.', '/')
         for module in modules:
