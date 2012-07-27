@@ -851,6 +851,8 @@ class ClassGenerator(object):
                 map(capitalize_first, key.arg.split(' ')), shallow=True))
         elif stmt.keyword == 'typedef':
             type_stmt = stmt.search_one('type')
+            super_type = get_types(type_stmt, self.ctx)[0]
+            self.java_class.modifiers = 'extends ' + super_type
 
             # If supertype is derived, make sure a class for it is generated
             if type_stmt.i_typedef:
@@ -861,33 +863,16 @@ class ClassGenerator(object):
                         prefix_name=None, parent=self)
                     typedef_generator.generate()
                     self.yang_types.add(type_stmt.i_typedef.arg)
+            self.yang_types.add(stmt.arg)
 
             # Use Typedef MethodGenerator to generate constructor methods
             gen = TypedefMethodGenerator(stmt, self.ctx)
             for i, method in enumerate(gen.constructors()):
                 self.java_class.add_constructor(str(i), method)
+            for i, method in enumerate(gen.setters()):
+                self.java_class.append_access_method(str(i), method)
 
-            # Extract types to use in constructors, etc.
-            super_type = get_types(type_stmt, self.ctx)[0]
-            self.java_class.modifiers = 'extends ' + super_type
-            base_type = get_base_type(stmt)
-            primitive = get_types(base_type, self.ctx)[1]
-            spec = ', using a string value'
-            arg = 'String ' + stmt.arg + 'Value'
-            body = 'super.setValue(' + stmt.arg + '''Value);
-            check();'''
-
-            # XXX: Intentionally overwrite access_methods
-            self.java_class.access_methods.clear()
-            self.java_class.append_access_method('string', 
-                set_value(stmt, spec1=spec, argument=arg, body=body))
-            if primitive != 'String':
-                spec = ', using ' + primitive + ' value'
-                arg = primitive + ' ' + stmt.arg + 'Value'
-                self.java_class.append_access_method('primitive', set_value(stmt,
-                    spec1=spec, argument=arg, body=body))
             self.java_class.append_access_method('check', check())
-            self.yang_types.add(stmt.arg)
         self.write_to_file()
 
     def generate_child(self, sub):
