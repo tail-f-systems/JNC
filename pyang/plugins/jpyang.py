@@ -872,7 +872,7 @@ class ClassGenerator(object):
             for i, method in enumerate(gen.setters()):
                 self.java_class.append_access_method(str(i), method)
 
-            self.java_class.append_access_method('check', check())
+            self.java_class.append_access_method('check', gen.checker())
         self.write_to_file()
 
     def generate_child(self, sub):
@@ -1603,6 +1603,18 @@ class TypedefMethodGenerator(MethodGenerator):
             setter.add_line('check();')  # TODO: Add only if needed
             setters.append(setter)
         return setters
+    
+    def checker(self, regexp=''):
+        """Returns a 'check' JavaMethod, which checks regexp constraints"""
+        res = JavaMethod()
+        res.exact = ['    /**',
+                     '     * Checks all restrictions (if any).',
+                     '     */',
+                     '    public void check() throws ConfMException {']
+        if regexp:
+            res.exact.append(' ' * 8 + regexp)
+        res.exact.append('    }')
+        return res
 
 
 class ContainerMethodGenerator(MethodGenerator):
@@ -2285,15 +2297,6 @@ def delete_stmt(stmt, args=None, string=False, keys=True):
         throws INMException {
         ''' + spec2 + 'String path = "' + stmt.arg + spec3 + '''";
         delete(path);
-    }'''
-
-
-def check(regexp=''):
-    return '''    /**
-     * Checks all restrictions (if any).
-     */
-    public void check()
-        ''' + regexp + '''throws ConfMException {
     }'''
 
 
