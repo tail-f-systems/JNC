@@ -18,7 +18,6 @@ import java.math.BigInteger;
  * Implements the built-in YANG data type "bits".
  *
  * @author emil@tail-f.com
- * @serial 5882382456815438844L
  */
 public abstract class YangBits implements Serializable {
 

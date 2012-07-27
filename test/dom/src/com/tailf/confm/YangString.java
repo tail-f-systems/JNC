@@ -22,7 +22,6 @@ import java.util.regex.PatternSyntaxException;
  * enumeration checker method and length assertion methods are provided.
  * 
  * @author emil@tail-f.com
- * @serial -4524001592063916576L
  */
 public class YangString implements Serializable {
 
@@ -35,11 +34,14 @@ public class YangString implements Serializable {
 
     /**
      * The value of this object, of which this class is a wrapper for
+     * 
+     * @serial
      */
     private String value;
 
     /**
      * Creates a YangString object from a java.lang.String
+     * 
      * @param value The Java String
      */
     public YangString(String value) {
@@ -48,6 +50,7 @@ public class YangString implements Serializable {
 
     /**
      * Sets the value of this object using a java.lang.String
+     * 
      * @param value The Java String
      */
     public void setValue(String value) {
@@ -71,6 +74,7 @@ public class YangString implements Serializable {
 
     /**
      * Compares this object with a java.lang.String for equality
+     * 
      * @param s The java.lang.String object to compare with
      * @return true if value of this object is equal to s; false otherwise
      */
@@ -80,6 +84,7 @@ public class YangString implements Serializable {
 
     /**
      * Compares this object with an other instance of YangString for equality
+     * 
      * @param ys The YangString object to compare with
      * @return true if the value of this object is equal to the value of ys;
      *         false otherwise
@@ -90,6 +95,7 @@ public class YangString implements Serializable {
 
     /**
      * Compares this object with another object for equality
+     * 
      * @param obj The object to compare with
      * @return true if obj can be cast to a YangString of a java.lang.String
      *         and the value of this object is equal to the value of obj;
@@ -109,6 +115,7 @@ public class YangString implements Serializable {
 
     /**
      * Checks that a regular expression matches the value of this object
+     * 
      * @param regex The regular expression
      * @throws ConfMException If regexp has a syntax error or does not match
      */
@@ -119,6 +126,7 @@ public class YangString implements Serializable {
 
     /**
      * Checks that a set of regular expressions match the value of this object
+     * 
      * @param regexes The regular expressions
      * @throws ConfMException If any regexp in regexes has a syntax error or
      *         does not match
@@ -139,6 +147,7 @@ public class YangString implements Serializable {
 
     /**
      * Checks that the value of this object has specified length
+     * 
      * @param len The length to check for
      * @throws ConfMException if value does not have len
      */
@@ -148,6 +157,7 @@ public class YangString implements Serializable {
 
     /**
      * Checks that the value of this object is longer than specified length
+     * 
      * @param len The length to compare against
      * @throws ConfMException if value is not longer than len
      */
@@ -157,6 +167,7 @@ public class YangString implements Serializable {
 
     /**
      * Checks that the value of this object is shorter than specified length
+     * 
      * @param len The length to compare against
      * @throws ConfMException if value is not shorter than len
      */
