@@ -51,14 +51,6 @@ public class YangString extends YangType<String> {
     }
 
     /**
-     * @return The value of this object, as a java.lang.String.
-     */
-    @Override
-    public String toString() {
-        return getValue();
-    }
-
-    /**
      * Identity method provided because this class extends the YangType class.
      * 
      * @param s A string.
@@ -73,7 +65,7 @@ public class YangString extends YangType<String> {
      * Nop method provided because this class extends the YangType class.
      */
     @Override
-    public void check() {
+    public void check() throws ConfMException {
     }
 
     /**
@@ -90,9 +82,10 @@ public class YangString extends YangType<String> {
      * Compares this object with another object for equality.
      * 
      * @param obj The object to compare with
-     * @return false, since any object which can be equal to this object should
-     *         call either the equals(String) method or the 
-     *         equals(YangType<String>) method.
+     * @return true if obj can be cast to a String and is equal to the value of
+     *         this object; false otherwise, since any other object which can
+     *         be equal to this object should call the
+     *         equals(YangType&lt;String&gt;) method.
      */
     @Override
     public boolean equals(Object obj) {
@@ -103,6 +96,13 @@ public class YangString extends YangType<String> {
         return false;
     }
 
+    /**
+     * Compares type of obj with this object to see if they can be equal.
+     * 
+     * @param obj Object to compare type with.
+     * @return true if obj is an instance of YangString or java.lang.String;
+     *         false otherwise.
+     */
     @Override
     public boolean canEqual(Object obj) {
         return obj instanceof YangString || obj instanceof String;

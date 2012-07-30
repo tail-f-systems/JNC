@@ -11,21 +11,19 @@
 
 package com.tailf.confm;
 
-import java.io.Serializable;
-
 /**
  * Implements the built-in YANG data type "boolean".
  * 
  * @author emil@tail-f.com
  */
-public abstract class YangBoolean extends YangType<Boolean> {
+public class YangBoolean extends YangType<Boolean> {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
      * a way which affects serialization. Please see:
      * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
      */
-    private static final long serialVersionUID = -3460008208874981651L;
+    private static final long serialVersionUID = 6260020042145069756L;
 
     /**
      * Creates a YangBoolean object from a String.
@@ -38,29 +36,31 @@ public abstract class YangBoolean extends YangType<Boolean> {
     }
 
     /**
-     * Sets the value of this object using a boolean.
+     * Creates a YangBoolean object from a boolean.
      * 
-     * @param b The boolean value to set the value of this object to.
+     * @param b The boolean to set the value of the new YangBoolean to.
+     * @throws ConfMException Never.
      */
-    public void setValue(boolean b) {
-        value = b;
+    public YangBoolean(boolean b) throws ConfMException {
+        super(b);
+    }
+
+    @Override
+    protected Boolean fromString(String s) throws ConfMException {
+        s = YangString.wsCollapse(s);
+        if (s.equals("true"))
+            return true;
+        else if (s.equals("false"))
+            return false;
+        else
+            throw new ConfMException(ConfMException.BAD_VALUE, this);
     }
 
     /**
-     * @return value of this object.
+     * Nop method provided because this class extends the YangType class.
      */
     @Override
-    public Boolean getValue() {
-        return value;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.tailf.confm.YangType#toString()
-     */
-    @Override
-    public String toString() {
-        return Boolean.valueOf(value).toString();
+    public void check() throws ConfMException {
     }
 
     /**
@@ -74,17 +74,6 @@ public abstract class YangBoolean extends YangType<Boolean> {
     }
 
     /**
-     * Compares this object with an instance of Boolean for equality.
-     * 
-     * @param b The Boolean object to compare with.
-     * @return true if the value of this object is equal to the value of b;
-     *         false otherwise.
-     */
-    public boolean equals(Boolean b) {
-        return equals(b.booleanValue());
-    }
-
-    /**
      * Compares this object with another object for equality.
      * 
      * @param obj The object to compare with.
@@ -94,30 +83,15 @@ public abstract class YangBoolean extends YangType<Boolean> {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof YangBoolean)
-            return equals((YangBoolean) obj);
-        else if (obj instanceof Boolean)
-            return equals((Boolean) obj);
+        if (obj instanceof Boolean)
+            return equals(((Boolean) obj).booleanValue());
+        assert !canEqual(obj): "obj: " + obj.getClass() + obj;
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.tailf.confm.YangType#check()
-     */
     @Override
-    public void check() throws ConfMException {
-    }
-
-    @Override
-    protected Boolean fromString(String s) throws ConfMException {
-        s = YangString.wsCollapse(s);
-        if (s.equals("true"))
-            return true;
-        else if (s.equals("false"))
-            return false;
-        else
-            throw new ConfMException(ConfMException.BAD_VALUE, this);
+    public boolean canEqual(Object obj) {
+        return obj instanceof YangBoolean || obj instanceof Boolean;
     }
 
 }

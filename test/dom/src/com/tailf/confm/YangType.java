@@ -81,6 +81,7 @@ public abstract class YangType<T extends Comparable<T>> implements Serializable 
      * @throws ConfMException If an invariant was broken during assignment.
      */
     public void setValue(T value) throws ConfMException {
+        assert !(value instanceof YangType): "Avoid circular value chain";
         this.value = value;
         check();
     }
@@ -104,9 +105,15 @@ public abstract class YangType<T extends Comparable<T>> implements Serializable 
      * @return The value of this object, as a String.
      */
     @Override
-    public abstract String toString();
+    public String toString() {
+        return value.toString();
+    }
 
     /**
+     * Returns a value of type T given a String. No implementation should use
+     * this.value - this method would be static if Java allowed for abstract
+     * static classes.
+     * 
      * @param s A string representation of a value of type T.
      * @return A T value parsed from s.
      * @throws ConfMException If s does not contain a parsable T.
@@ -134,6 +141,12 @@ public abstract class YangType<T extends Comparable<T>> implements Serializable 
     @Override
     public abstract boolean equals(Object obj);
     
+    /**
+     * Compares type of obj with this object to see if they can be equal.
+     * 
+     * @param obj Object to compare type with.
+     * @return true if obj type is compatible; false otherwise.
+     */
     public abstract boolean canEqual(Object obj);
 
     @Override
