@@ -40,16 +40,15 @@ public abstract class YangType<T extends Comparable<T>> implements Serializable 
      */
     public YangType() {
     }
-    
+
     /**
      * Creates a YangType object from a String.
      * 
      * @param s The string.
-     * @throws ConfMException If an invariant was broken during initialization.
-     * @throws IllegalArgumentException if value could not be parsed from s.
+     * @throws ConfMException If an invariant was broken during initialization,
+     *                        or if value could not be parsed from s.
      */
-    public YangType(String s) 
-            throws ConfMException, IllegalArgumentException {
+    public YangType(String s) throws ConfMException {
         setValue(s);
     }
 
@@ -67,11 +66,10 @@ public abstract class YangType<T extends Comparable<T>> implements Serializable 
      * Sets the value of this object using a String.
      * 
      * @param s A string containing the new value to set.
-     * @throws ConfMException If an invariant was broken during assignment.
-     * @throws IllegalArgumentException if value could not be parsed from s.
+     * @throws ConfMException If an invariant was broken during assignment, or
+     *                        if value could not be parsed from s.
      */
-    public void setValue(String s) 
-            throws ConfMException, IllegalArgumentException {
+    public void setValue(String s) throws ConfMException {
         s = wsCollapse(s);
         setValue(fromString(s));
     }
@@ -110,10 +108,10 @@ public abstract class YangType<T extends Comparable<T>> implements Serializable 
 
     /**
      * @param s A string representation of a value of type T.
-     * @throws NumberFormatException If s does not contain a parsable T.
      * @return A T value parsed from s.
+     * @throws ConfMException If s does not contain a parsable T.
      */
-    protected abstract T fromString(String s);
+    protected abstract T fromString(String s) throws ConfMException;
 
     /**
      * Compares this object with an other instance of YangType for equality.
@@ -135,6 +133,15 @@ public abstract class YangType<T extends Comparable<T>> implements Serializable 
      */
     @Override
     public abstract boolean equals(Object obj);
+    
+    public abstract boolean canEqual(Object obj);
+
+    @Override
+    public int hashCode() {
+        if (value == null) 
+            return 0;
+        return value.hashCode();
+    }
 
     /** ---------- Restrictions ---------- */
 
