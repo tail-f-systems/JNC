@@ -11,7 +11,6 @@
 
 package com.tailf.confm;
 
-import java.io.Serializable;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -23,21 +22,14 @@ import java.util.regex.PatternSyntaxException;
  * 
  * @author emil@tail-f.com
  */
-public class YangString implements Serializable {
+public abstract class YangString extends YangType<String> {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
      * a way which affects serialization. Please see:
      * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
      */
-    private static final long serialVersionUID = -4524001592063916576L;
-
-    /**
-     * The value of this object, of which this class is a wrapper for.
-     * 
-     * @serial
-     */
-    private String value;
+    private static final long serialVersionUID = -7382018276731616249L;
 
     /**
      * Creates a YangString object from a java.lang.String.
@@ -45,7 +37,7 @@ public class YangString implements Serializable {
      * @param value The Java String.
      */
     public YangString(String value) {
-        this.value = value;
+        setValue(value);
     }
 
     /**
@@ -53,15 +45,9 @@ public class YangString implements Serializable {
      * 
      * @param value The Java String.
      */
+    @Override
     public void setValue(String value) {
         this.value = value;
-    }
-
-    /**
-     * @return The value of this object.
-     */
-    public String getValue() {
-        return value;
     }
 
     /**
@@ -69,7 +55,18 @@ public class YangString implements Serializable {
      */
     @Override
     public String toString() {
-        return value;
+        return getValue();
+    }
+
+    /**
+     * Identity method provided because this class extends the YangType class.
+     * 
+     * @param s A string.
+     * @return s.
+     */
+    @Override
+    protected String fromString(String s) {
+        return s;
     }
 
     /**
@@ -89,7 +86,7 @@ public class YangString implements Serializable {
      * @return true if the value of this object is equal to the value of ys;
      *         false otherwise.
      */
-    public boolean equals(com.tailf.confm.YangString ys) {
+    public boolean equals(YangString ys) {
         return equals(ys.value);
     }
 
@@ -103,8 +100,8 @@ public class YangString implements Serializable {
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof com.tailf.confm.YangString) {
-            return equals((com.tailf.confm.YangString) obj);
+        if (obj instanceof YangString) {
+            return equals((YangString) obj);
         } else if (obj instanceof String) {
             return equals((String) obj);
         }
@@ -160,7 +157,7 @@ public class YangString implements Serializable {
      * @param len The length to compare against.
      * @throws ConfMException if value is not longer than len.
      */
-    protected void minLength(int len) throws ConfMException {
+    protected void min(int len) throws ConfMException {
         ConfMException.throwException(value.length() < len, this);
     }
 
@@ -170,8 +167,32 @@ public class YangString implements Serializable {
      * @param len The length to compare against.
      * @throws ConfMException if value is not shorter than len.
      */
-    protected void maxLength(int len) throws ConfMException {
+    protected void max(int len) throws ConfMException {
         ConfMException.throwException(value.length() > len, this);
+    }
+
+    /**
+     * Raises a ConfMException regardless of what min is, since the min value
+     * of a string is generally undefined.
+     * 
+     * @param min Ignored.
+     * @throws ConfMException always.
+     */
+    @Override
+    protected void min(String min) throws ConfMException {
+        ConfMException.throwException(true, this);
+    }
+
+    /**
+     * Raises a ConfMException regardless of what max is, since the max value
+     * of a string is generally undefined.
+     * 
+     * @param max Ignored.
+     * @throws ConfMException always.
+     */
+    @Override
+    protected void max(String max) throws ConfMException {
+        ConfMException.throwException(true, this);
     }
 
     /**
@@ -198,39 +219,6 @@ public class YangString implements Serializable {
      */
     protected boolean enumeration(String value) {
         return equals(value);
-    }
-    
-    /* ---------- static methods ---------- */
-
-    /**
-     * Whitespace collapse. Contiguous sequences of 0x20 are collapsed into a
-     * single #x20, and initial and/or final #x20s are deleted.
-     * <p>
-     * This method is used by most other data types to collapse Strings from
-     * the XML parser.
-     *
-     * @param value The string to collapse.
-     * @return The collapsed string.
-     */
-    public static String wsCollapse(String value) {
-        // Collapse multiple spaces into single spaces
-        String res = value.replaceAll(" +", " ");
-        
-        // Remove any leading and/or trailing space
-        int startOffset = res.startsWith(" ") ? 1 : 0;
-        int stopOffset = res.length() > 1 && res.endsWith(" ") ? -1 : 0;
-        return res.substring(startOffset, res.length() + stopOffset);
-    }
-
-    /**
-     * Whitespace replace. Replaces whitespaces with spaces.
-     *
-     * @param value The String to replace whitespaces in.
-     * @return a copy of value with all characters matching "[\t\n\r]"
-     *         replaced by " " (a blank).
-     */
-    public static String wsReplace(String value) {
-        return value.replaceAll("[\t\n\r]", " ");
     }
 
 }
