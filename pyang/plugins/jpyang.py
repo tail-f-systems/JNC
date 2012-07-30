@@ -1631,7 +1631,7 @@ class TypedefMethodGenerator(MethodGenerator):
             if self.enum:
                 checker.add_line('boolean e = false;')
                 for e in self.enum:
-                    checker.add_line('e = e || enumeration("' + e.arg + '");')
+                    checker.add_line('e |= enumeration("' + e.arg + '");')
                 checker.add_line('throwException( !e );')
             if self.pattern:
                 if len(self.pattern) == 1:
