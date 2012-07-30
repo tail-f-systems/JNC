@@ -22,7 +22,7 @@ import java.util.regex.PatternSyntaxException;
  * 
  * @author emil@tail-f.com
  */
-public abstract class YangString extends YangType<String> {
+public class YangString extends YangType<String> {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
@@ -70,6 +70,13 @@ public abstract class YangString extends YangType<String> {
     }
 
     /**
+     * Nop method provided because this class extends the YangType class.
+     */
+    @Override
+    public void check() {
+    }
+
+    /**
      * Compares this object with a java.lang.String for equality.
      * 
      * @param s The java.lang.String object to compare with.
@@ -80,32 +87,35 @@ public abstract class YangString extends YangType<String> {
     }
 
     /**
-     * Compares this object with an other instance of YangString for equality.
-     * 
-     * @param ys The YangString object to compare with.
-     * @return true if the value of this object is equal to the value of ys;
-     *         false otherwise.
-     */
-    public boolean equals(YangString ys) {
-        return equals(ys.value);
-    }
-
-    /**
      * Compares this object with another object for equality.
      * 
      * @param obj The object to compare with
-     * @return true if obj can be cast to a YangString or a java.lang.String
-     *         and the value of this object is equal to the value of obj;
-     *         false otherwise.
+     * @return false, since any object which can be equal to this object should
+     *         call either the equals(String) method or the 
+     *         equals(YangType<String>) method.
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof YangString) {
-            return equals((YangString) obj);
-        } else if (obj instanceof String) {
+        if (obj instanceof String) {
             return equals((String) obj);
         }
+        assert !canEqual(obj): "obj: " + obj.getClass() + obj;
         return false;
+    }
+
+    @Override
+    public boolean canEqual(Object obj) {
+        return obj instanceof YangString || obj instanceof String;
+    }
+
+    /**
+     * Checks if value is equal to this object's value, interpreted as an enum.
+     * 
+     * @param value An enum value candidate, as a String.
+     * @return true if value of this object is equal to value; false otherwise.
+     */
+    protected boolean enumeration(String value) {
+        return equals(value);
     }
 
     /* ---------- Restrictions ---------- */
@@ -209,16 +219,6 @@ public abstract class YangString extends YangType<String> {
      */
     protected void wsCollapse() {
         value = wsCollapse(value);
-    }
-
-    /**
-     * Checks if value is equal to this object's value, interpreted as an enum.
-     * 
-     * @param value An enum value candidate, as a String.
-     * @return true if value of this object is equal to value; false otherwise.
-     */
-    protected boolean enumeration(String value) {
-        return equals(value);
     }
 
 }

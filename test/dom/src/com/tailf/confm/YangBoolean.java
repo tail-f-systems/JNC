@@ -18,7 +18,7 @@ import java.io.Serializable;
  * 
  * @author emil@tail-f.com
  */
-public class YangBoolean implements Serializable {
+public abstract class YangBoolean extends YangType<Boolean> {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
@@ -28,45 +28,13 @@ public class YangBoolean implements Serializable {
     private static final long serialVersionUID = -3460008208874981651L;
 
     /**
-     * The value of this object, of which this class is a wrapper for.
-     * 
-     * @serial
-     */
-    private boolean value;
-
-    /**
      * Creates a YangBoolean object from a String.
      *
      * @param s The string.
      * @throws ConfMException If value is not one of "true" or "false".
      */
     public YangBoolean(String s) throws ConfMException {
-        setValue(s);
-    }
-
-    /**
-     * Creates a YangBoolean object from a boolean.
-     * 
-     * @param b The boolean to set the value of the new YangBoolean to.
-     */
-    public YangBoolean(boolean b) {
-        setValue(b);
-    }
-
-    /**
-     * Sets the value of this object using a String.
-     *
-     * @param s The string.
-     * @throws ConfMException If value is not one of "true" or "false".
-     */
-    public void setValue(String s) throws ConfMException {
-        s = YangString.wsCollapse(s);
-        if (s.equals("true"))
-            value = true;
-        else if (s.equals("false"))
-            value = false;
-        else
-            throw new ConfMException(ConfMException.BAD_VALUE, this);
+        super(s);
     }
 
     /**
@@ -81,12 +49,14 @@ public class YangBoolean implements Serializable {
     /**
      * @return value of this object.
      */
-    public boolean getValue() {
+    @Override
+    public Boolean getValue() {
         return value;
     }
 
-    /**
-     * @return The value of this object, as a String.
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.confm.YangType#toString()
      */
     @Override
     public String toString() {
@@ -101,17 +71,6 @@ public class YangBoolean implements Serializable {
      */
     public boolean equals(boolean b) {
         return value == b;
-    }
-
-    /**
-     * Compares this object with an other instance of YangBoolean for equality.
-     * 
-     * @param yb The YangBoolean object to compare with.
-     * @return true if the value of this object is equal to the value of yb;
-     *         false otherwise.
-     */
-    public boolean equals(YangBoolean yb) {
-        return equals(yb.getValue());
     }
 
     /**
@@ -140,6 +99,25 @@ public class YangBoolean implements Serializable {
         else if (obj instanceof Boolean)
             return equals((Boolean) obj);
         return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.confm.YangType#check()
+     */
+    @Override
+    public void check() throws ConfMException {
+    }
+
+    @Override
+    protected Boolean fromString(String s) throws ConfMException {
+        s = YangString.wsCollapse(s);
+        if (s.equals("true"))
+            return true;
+        else if (s.equals("false"))
+            return false;
+        else
+            throw new ConfMException(ConfMException.BAD_VALUE, this);
     }
 
 }
