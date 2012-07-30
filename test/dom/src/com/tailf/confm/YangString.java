@@ -120,8 +120,7 @@ public class YangString implements Serializable {
      * @throws ConfMException If regexp has a syntax error or does not match.
      */
     protected void pattern(String regex) throws ConfMException {
-        String[] regexes = {regex};
-        pattern(regexes);
+        pattern(new String[] {regex});
     }
 
     /**
@@ -198,7 +197,7 @@ public class YangString implements Serializable {
      * @return true if value of this object is equal to value; false otherwise.
      */
     protected boolean enumeration(String value) {
-        return this.value.equals(value);
+        return equals(value);
     }
     
     /* ---------- static methods ---------- */
