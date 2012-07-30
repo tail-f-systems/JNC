@@ -45,6 +45,15 @@ public class YangBoolean extends YangType<Boolean> {
         super(b);
     }
 
+    /**
+     * Works much like Boolean.parseBoolean, except that case matters, s is
+     * trimmed with wsCollapse prior to parsing, and an exception is thrown if
+     * the trimmed string is neither "true" nor "false".
+     * 
+     * @param s The String.
+     * @return true if s matches " *true *", false if s matches " *false *".
+     * @throws ConfMException if s does not match a valid boolean value
+     */
     @Override
     protected Boolean fromString(String s) throws ConfMException {
         s = YangString.wsCollapse(s);
@@ -89,6 +98,13 @@ public class YangBoolean extends YangType<Boolean> {
         return false;
     }
 
+    /**
+     * Compares type of obj with this object to see if they can be equal.
+     * 
+     * @param obj Object to compare type with.
+     * @return true if obj is an instance of YangBoolean or java.lang.Boolean;
+     *         false otherwise.
+     */
     @Override
     public boolean canEqual(Object obj) {
         return obj instanceof YangBoolean || obj instanceof Boolean;
