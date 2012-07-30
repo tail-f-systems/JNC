@@ -1569,15 +1569,12 @@ class TypedefMethodGenerator(MethodGenerator):
         """Returns a list containing a single or a pair of constructors"""
         constructors = []
         primitive = get_types(self.stmt_type, self.ctx)[1]
-        javadoc = ['@param value Value to construct the ']
-        javadoc.append(self.n)
-        javadoc.append(' from.')
+        javadoc = ['@param value Value to construct the ', self.n, ' from.']
 
         # Iterate once if string, twice otherwise
         for i in range(1 + (not self.is_string)):
             constructor = JavaMethod(modifiers=['public'], name=self.n)
-            javadoc2 = ['Constructor for ']
-            javadoc2.append(self.n)
+            javadoc2 = ['Constructor for ', self.n]
             if i == 0:
                 # String constructor
                 javadoc2.append(' object from a string.')
