@@ -1563,7 +1563,7 @@ class TypedefMethodGenerator(MethodGenerator):
                 setattr(self, s, self.stmt_type.search_one(s))
             for s in ('bit', 'enum', 'pattern'):
                 setattr(self, s, self.stmt_type.search(s))
-            self.needs_check = self.enum or self.pattern
+            # self.needs_check = self.enum or self.pattern
 
     def constructors(self):
         """Returns a list containing a single or a pair of constructors"""
