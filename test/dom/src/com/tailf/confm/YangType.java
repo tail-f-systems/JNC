@@ -11,14 +11,16 @@
 
 package com.tailf.confm;
 
-import java.io.Serializable;
+import java.math.BigDecimal;
+
+import static com.tailf.confm.YangTypeUtil.*;
 
 /**
  * Represents a built-in YANG data type.
  * 
  * @author emil@tail-f.com
  */
-public abstract class YangType<T extends Comparable<T>> implements Serializable {
+abstract class YangType<T> implements java.io.Serializable {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
@@ -94,12 +96,16 @@ public abstract class YangType<T extends Comparable<T>> implements Serializable 
     }
 
     /**
-     * Called in constructors and value setters.
+     * Checks that the value of this object is not null. Called in constructors
+     * and value setters. Subclasses that have state invariants should extend
+     * this method and throw a ConfMException if such an invariant has been
+     * violated.
      * 
-     * @throws ConfMException If an invariant has been violated by assigning to
-     *                        the value of this object.
+     * @throws ConfMException If the value of this object is null.
      */
-    public abstract void check() throws ConfMException;
+    public void check() throws ConfMException {
+        ConfMException.throwException(getValue() == null, this);
+    }
 
     /**
      * @return The value of this object, as a String.
@@ -110,9 +116,10 @@ public abstract class YangType<T extends Comparable<T>> implements Serializable 
     }
 
     /**
-     * Returns a value of type T given a String. No implementation should use
-     * this.value - this method would be static if Java allowed for abstract
-     * static classes.
+     * Returns a value of type T given a String.
+     * <p>
+     * Note: No implementation should use this.value - this method would be
+     * static if Java allowed for abstract static classes.
      * 
      * @param s A string representation of a value of type T.
      * @return A T value parsed from s.
@@ -121,25 +128,30 @@ public abstract class YangType<T extends Comparable<T>> implements Serializable 
     protected abstract T fromString(String s) throws ConfMException;
 
     /**
-     * Compares this object with an other instance of YangType for equality.
-     * 
-     * @param yt The YangType object to compare with.
-     * @return true if the value of this object is equal to the value of yt;
-     *         false otherwise.
-     */
-    public boolean equals(YangType<T> yt) {
-        return equals(yt.getValue());
-    }
-
-    /**
      * Compares this object with another object for equality.
      * 
-     * @param obj The object to compare with
-     * @return true if obj can be cast to a comparable class and the value of
+     * @param obj The object to compare with.
+     * @return true if obj can be cast to a comparable type and the value of
      *         this object is equal to the value of obj; false otherwise.
      */
     @Override
-    public abstract boolean equals(Object obj);
+    public boolean equals(Object obj) {
+        if (value == null || !canEqual(obj)) {
+            return false;
+        }
+        if (obj instanceof YangType<?>) {
+            YangType<?> other = (YangType<?>) obj;
+            if (!other.canEqual(this))
+                return false;
+            obj = other.getValue();
+        }
+        if (value instanceof Number && obj instanceof Number) {
+            BigDecimal valueNumber = bigDecimalValueOf((Number) value);
+            BigDecimal objNumber = bigDecimalValueOf((Number) obj);
+            return valueNumber.compareTo(objNumber) == 0;
+        }
+        return value.equals(obj);
+    }
     
     /**
      * Compares type of obj with this object to see if they can be equal.
@@ -159,6 +171,19 @@ public abstract class YangType<T extends Comparable<T>> implements Serializable 
     /** ---------- Restrictions ---------- */
 
     /**
+     * Checks that the value of this object equals or has the same length as
+     * the provided other value.
+     * 
+     * @param other The integer value to compare against.
+     * @throws ConfMException If the comparison does not evaluate to true.
+     * @throws ClassCastException If type of value prevents it from being
+     *                            compared to the value of this object.
+     */
+    protected void exact(int other) throws ConfMException {
+        restrict(this.value, other, Operator.EQ);
+    }
+
+    /**
      * Checks that the value of this object is not smaller than the min-value.
      * 
      * @param min The min-value to compare against.
@@ -166,8 +191,8 @@ public abstract class YangType<T extends Comparable<T>> implements Serializable 
      * @throws ClassCastException If type of min prevents it from being
      *                            compared to the value of this object.
      */
-    protected void min(T min) throws ConfMException {
-        ConfMException.throwException(value.compareTo(min) > 0, this);
+    protected void min(int min) throws ConfMException {
+        restrict(value, min, Operator.GR);
     }
 
     /**
@@ -178,41 +203,8 @@ public abstract class YangType<T extends Comparable<T>> implements Serializable 
      * @throws ClassCastException If type of max prevents it from being
      *                            compared to the value of this object.
      */
-    protected void max(T max) throws ConfMException {
-        ConfMException.throwException(value.compareTo(max) < 0, this);
-    }
-    
-    /* ---------- static methods ---------- */
-
-    /**
-     * Whitespace collapse. Contiguous sequences of 0x20 are collapsed into a
-     * single #x20, and initial and/or final #x20s are deleted.
-     * <p>
-     * This method is used by most other data types to collapse Strings from
-     * the XML parser.
-     *
-     * @param value The string to collapse.
-     * @return The collapsed string.
-     */
-    public static String wsCollapse(String value) {
-        // Collapse multiple spaces into single spaces
-        String res = value.replaceAll(" +", " ");
-        
-        // Remove any leading and/or trailing space
-        int startOffset = res.startsWith(" ") ? 1 : 0;
-        int stopOffset = res.length() > 1 && res.endsWith(" ") ? -1 : 0;
-        return res.substring(startOffset, res.length() + stopOffset);
-    }
-
-    /**
-     * Whitespace replace. Replaces whitespaces with spaces.
-     *
-     * @param value The String to replace whitespaces in.
-     * @return a copy of value with all characters matching "[\t\n\r]"
-     *         replaced by " " (a blank).
-     */
-    public static String wsReplace(String value) {
-        return value.replaceAll("[\t\n\r]", " ");
+    protected void max(int max) throws ConfMException {
+        restrict(value, max, Operator.LT);
     }
 
 }
