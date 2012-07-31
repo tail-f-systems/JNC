@@ -69,34 +69,6 @@ public class YangString extends YangType<String> {
     }
 
     /**
-     * Compares this object with a java.lang.String for equality.
-     * 
-     * @param s The java.lang.String object to compare with.
-     * @return true if value of this object is equal to s; false otherwise.
-     */
-    public boolean equals(String s) {
-        return value.equals(s);
-    }
-
-    /**
-     * Compares this object with another object for equality.
-     * 
-     * @param obj The object to compare with
-     * @return true if obj can be cast to a String and is equal to the value of
-     *         this object; false otherwise, since any other object which can
-     *         be equal to this object should call the
-     *         equals(YangType&lt;String&gt;) method.
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof String) {
-            return equals((String) obj);
-        }
-        assert !canEqual(obj): "obj: " + obj.getClass() + obj;
-        return false;
-    }
-
-    /**
      * Compares type of obj with this object to see if they can be equal.
      * 
      * @param obj Object to compare type with.
@@ -152,65 +124,11 @@ public class YangString extends YangType<String> {
     }
 
     /**
-     * Checks that the value of this object has specified length.
-     * 
-     * @param len The length to check for.
-     * @throws ConfMException if value does not have len.
-     */
-    protected void length(int len) throws ConfMException {
-        ConfMException.throwException(value.length() != len, this);
-    }
-
-    /**
-     * Checks that the value of this object is longer than specified length.
-     * 
-     * @param len The length to compare against.
-     * @throws ConfMException if value is not longer than len.
-     */
-    protected void min(int len) throws ConfMException {
-        ConfMException.throwException(value.length() < len, this);
-    }
-
-    /**
-     * Checks that the value of this object is shorter than specified length.
-     * 
-     * @param len The length to compare against.
-     * @throws ConfMException if value is not shorter than len.
-     */
-    protected void max(int len) throws ConfMException {
-        ConfMException.throwException(value.length() > len, this);
-    }
-
-    /**
-     * Raises a ConfMException regardless of what min is, since the min value
-     * of a string is generally undefined.
-     * 
-     * @param min Ignored.
-     * @throws ConfMException always.
-     */
-    @Override
-    protected void min(String min) throws ConfMException {
-        ConfMException.throwException(true, this);
-    }
-
-    /**
-     * Raises a ConfMException regardless of what max is, since the max value
-     * of a string is generally undefined.
-     * 
-     * @param max Ignored.
-     * @throws ConfMException always.
-     */
-    @Override
-    protected void max(String max) throws ConfMException {
-        ConfMException.throwException(true, this);
-    }
-
-    /**
      * Whitespace replace. Replaces all occurrences of #x9 (tab), #xA (line
      * feed), and #xD (CR) with #x20 (space).
      */
     protected void wsReplace() {
-        value = wsReplace(value);
+        value = YangTypeUtil.wsReplace(value);
     }
 
     /**
@@ -218,7 +136,7 @@ public class YangString extends YangType<String> {
      * single 0x20, and initial and/or final 0x20s are deleted.
      */
     protected void wsCollapse() {
-        value = wsCollapse(value);
+        value = YangTypeUtil.wsCollapse(value);
     }
 
 }
