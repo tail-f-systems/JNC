@@ -11,7 +11,6 @@
 
 package com.tailf.confm;
 
-import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
@@ -19,21 +18,15 @@ import java.math.BigInteger;
  *
  * @author emil@tail-f.com
  */
-public abstract class YangBits implements Serializable {
+public abstract class YangBits extends YangType<BigInteger> {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
      * a way which affects serialization. Please see:
      * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
      */
-    private static final long serialVersionUID = 5882382456815438844L;
+    private static final long serialVersionUID = -5416295585642658104L;
 
-    /**
-     * The value of this object, of which this class is a wrapper for.
-     * 
-     * @serial
-     */
-    private BigInteger value;
 
     /**
      * Constructor using string arguments.
@@ -57,7 +50,7 @@ public abstract class YangBits implements Serializable {
      */
     public YangBits(BigInteger value, BigInteger mask)
             throws ConfMException {
-        this.value = value;
+        super(value);
         check(mask);
     }
 
@@ -83,16 +76,17 @@ public abstract class YangBits implements Serializable {
      */
     public void setValue(BigInteger value, BigInteger mask)
             throws ConfMException {
-        this.value = value;
+        super.setValue(value);
         check(mask);
     }
 
-    /**
-     * @return The value of this object, as a BigInteger.
-     * @see java.math.BigInteger
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.confm.YangType#fromString(java.lang.String)
      */
-    public BigInteger getValue() {
-        return value;
+    @Override
+    protected BigInteger fromString(String s) throws ConfMException {
+        return new BigInteger(s);
     }
 
     /**
@@ -103,14 +97,7 @@ public abstract class YangBits implements Serializable {
     public void check(BigInteger mask) throws ConfMException {
         boolean fail = mask.or(value).compareTo(mask) == 0;
         ConfMException.throwException(fail, this);
-    }
-
-    /**
-     * @return A string representation of the value of this object.
-     */
-    @Override
-    public String toString() {
-        return value.toString();
+        check();
     }
 
     /**
@@ -162,17 +149,6 @@ public abstract class YangBits implements Serializable {
     }
 
     /**
-     * Compares against another Bits instance.
-     * 
-     * @param bits The Bits intance to compare against.
-     * @return true if this object's value space is equal to the value space of
-     *         bits; false otherwise.
-     */
-    public boolean equals(YangBits bits) {
-        return equals(bits.getValue());
-    }
-
-    /**
      * Compares against an arbitrary object.
      * 
      * @param obj The object to compare against.
@@ -187,9 +163,18 @@ public abstract class YangBits implements Serializable {
             return equals((BigInteger) obj);
         else if (obj instanceof String)
             return equals((String) obj);
-        else if (obj instanceof YangBits)
-            return equals((YangBits) obj);
         return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.confm.YangType#canEqual(java.lang.Object)
+     */
+    @Override
+    public boolean canEqual(Object obj) {
+        return (obj instanceof YangBits
+                || obj instanceof BigInteger
+                || obj instanceof String);
     }
 
 }
