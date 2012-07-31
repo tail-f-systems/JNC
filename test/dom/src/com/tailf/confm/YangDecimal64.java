@@ -26,7 +26,7 @@ public class YangDecimal64 extends YangType<BigDecimal> {
      * a way which affects serialization. Please see:
      * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
      */
-    private static final long serialVersionUID = 4461074766110277807L;
+    private static final long serialVersionUID = 8133945767119450970L;
     
     /**
      * The number of decimals allowed in value.
