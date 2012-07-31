@@ -11,7 +11,6 @@
 
 package com.tailf.confm;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
@@ -20,7 +19,7 @@ import java.math.BigInteger;
  * 
  * @author emil@tail-f.com
  */
-public class YangDecimal64 implements Serializable {
+public class YangDecimal64 extends YangType<BigDecimal> {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
@@ -28,13 +27,6 @@ public class YangDecimal64 implements Serializable {
      * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
      */
     private static final long serialVersionUID = 4461074766110277807L;
-
-    /**
-     * The value of this object, of which this class is a wrapper for.
-     * 
-     * @serial
-     */
-    private BigDecimal value;
     
     /**
      * The number of decimals allowed in value.
@@ -114,7 +106,7 @@ public class YangDecimal64 implements Serializable {
      */
     public void setValue(String value, int fractionDigits)
             throws ConfMException {
-        setValue(value, fractionDigits);
+        setValue(new BigDecimal(value), fractionDigits);
     }
 
     /**
@@ -130,7 +122,7 @@ public class YangDecimal64 implements Serializable {
      */
     public void setValue(double value, int fractionDigits)
             throws ConfMException {
-        setValue(value, fractionDigits);
+        setValue(new BigDecimal(value), fractionDigits);
     }
 
     /**
@@ -152,25 +144,28 @@ public class YangDecimal64 implements Serializable {
     }
 
     /**
-     * @return value of this object.
-     */
-    public BigDecimal getValue() {
-        return value;
-    }
-
-    /**
      * @return The fractionDigits value of this object.
      */
     public int getFractionDigits() {
         return fractionDigits;
     }
 
-    /**
-     * @return The value of this object, as a String.
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.confm.YangType#toString()
      */
     @Override
     public String toString() {
         return value.toPlainString();
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.confm.YangType#fromString(java.lang.String)
+     */
+    @Override
+    protected BigDecimal fromString(String s) throws ConfMException {
+        return new BigDecimal(s);
     }
 
     /**
@@ -179,7 +174,8 @@ public class YangDecimal64 implements Serializable {
      * @throws ConfMException If fractionDigits is not in [1, 18] or if value
      *                        of this object is not in [minValue, maxValue].
      */
-    private void check() throws ConfMException {
+    @Override
+    public void check() throws ConfMException {
         // Check that the fraction-digits arguments value is within bounds
         boolean withinBounds = fractionDigits < 1 || fractionDigits > 18;
         ConfMException.throwException(withinBounds, this);
@@ -271,31 +267,6 @@ public class YangDecimal64 implements Serializable {
     public boolean equals(String s) {
         return equals(s, fractionDigits);
     }
-    /**
-     * Compares this object with a double for equality, taking a fractionDigits
-     * integer argument into account.
-     * 
-     * @param d The double to compare with.
-     * @param fractionDigits Number of decimals allowed in value.
-     * @return true if the value of this object is equal to d and the
-     *         fractionDigits value of this object is equal to the
-     *         fractionDigits argument; false otherwise.
-     * @throws NumberFormatException If d is infinite or NaN.
-     */
-    public boolean equals(double d, int fractionDigits) {
-        return equals(new BigDecimal(d), fractionDigits);
-    }
-
-    /**
-     * Compares this object with a double for equality.
-     * 
-     * @param d The double to compare with.
-     * @return true if the value of this object is equal to d; false otherwise.
-     * @throws NumberFormatException If d is infinite or NaN.
-     */
-    public boolean equals(double d) {
-        return equals(d, fractionDigits);
-    }
 
     /**
      * Compares this object with an instance of Double for equality, taking
@@ -308,8 +279,8 @@ public class YangDecimal64 implements Serializable {
      *         fractionDigits argument; false otherwise.
      * @throws NumberFormatException If value of d is infinite or NaN.
      */
-    public boolean equals(Double d, int fractionDigits) {
-        return equals(Double.valueOf(d), fractionDigits);
+    public boolean equals(Number n, int fractionDigits) {
+        return equals(new BigDecimal(n.doubleValue()), fractionDigits);
     }
 
     /**
@@ -320,8 +291,8 @@ public class YangDecimal64 implements Serializable {
      *         false otherwise.
      * @throws NumberFormatException If value of d is infinite or NaN.
      */
-    public boolean equals(Double d) {
-        return equals(d, fractionDigits);
+    public boolean equals(Number n) {
+        return equals(n, fractionDigits);
     }
 
     /**
@@ -361,12 +332,23 @@ public class YangDecimal64 implements Serializable {
             return equals((BigDecimal) obj);
         } else if (obj instanceof BigInteger) {
             return equals((BigInteger) obj);
+        } else if (obj instanceof Number) {
+            return equals((Number) obj);
         } else if (obj instanceof String) {
             return equals((String) obj);
-        } else if (obj instanceof Double) {
-            return equals((Double) obj);
         }
         return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.confm.YangType#canEqual(java.lang.Object)
+     */
+    @Override
+    public boolean canEqual(Object obj) {
+        return (obj instanceof YangDecimal64
+                || obj instanceof Number
+                || obj instanceof String);
     }
 
     /** ---------- Restrictions ---------- */
