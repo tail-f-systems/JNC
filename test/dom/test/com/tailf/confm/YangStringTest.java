@@ -100,13 +100,13 @@ public class YangStringTest {
 
     @Test
     public void testLength() throws ConfMException {
-        ys1.length(str1.length());
-        ys3.length(str3.length());
+        ys1.exact(str1.length());
+        ys3.exact(str3.length());
     }
 
     @Test(expected=ConfMException.class)
     public void testLengthException() throws ConfMException {
-        ys1.length(str3.length());
+        ys1.exact(str3.length());
     }
 
     @Test
@@ -117,16 +117,6 @@ public class YangStringTest {
     @Test
     public void testMaxInt() throws ConfMException {
         ys1.max(str1.length()+1);
-    }
-
-    @Test(expected=ConfMException.class)
-    public void testMinString() throws ConfMException {
-        ys1.min(str1);
-    }
-
-    @Test(expected=ConfMException.class)
-    public void testMaxString() throws ConfMException {
-        ys1.max(str1);
     }
 
     @Test
