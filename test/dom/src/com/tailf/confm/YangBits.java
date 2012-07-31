@@ -18,14 +18,14 @@ import java.math.BigInteger;
  *
  * @author emil@tail-f.com
  */
-public abstract class YangBits extends YangType<BigInteger> {
+public abstract class YangBits extends YangInt<BigInteger> {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
      * a way which affects serialization. Please see:
      * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
      */
-    private static final long serialVersionUID = -5416295585642658104L;
+    private static final long serialVersionUID = -1772892028531610059L;
 
 
     /**
@@ -82,10 +82,10 @@ public abstract class YangBits extends YangType<BigInteger> {
 
     /*
      * (non-Javadoc)
-     * @see com.tailf.confm.YangType#fromString(java.lang.String)
+     * @see com.tailf.confm.YangInt#parse(java.lang.String)
      */
     @Override
-    protected BigInteger fromString(String s) throws ConfMException {
+    protected BigInteger parse(String s) {
         return new BigInteger(s);
     }
 
@@ -98,6 +98,26 @@ public abstract class YangBits extends YangType<BigInteger> {
         boolean fail = mask.or(value).compareTo(mask) == 0;
         ConfMException.throwException(fail, this);
         check();
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.confm.YangType#canEqual(java.lang.Object)
+     */
+    @Override
+    public boolean canEqual(Object obj) {
+        return (obj instanceof YangBits
+                || obj instanceof BigInteger
+                || obj instanceof String);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.confm.YangInt#valid(java.lang.Number)
+     */
+    @Override
+    protected boolean valid(Number n) {
+        return n instanceof BigInteger;
     }
 
     /**
@@ -125,56 +145,6 @@ public abstract class YangBits extends YangType<BigInteger> {
      */
     public void XOR(YangBits v) {
         this.value = this.value.xor(v.getValue());
-    }
-
-    /**
-     * Compares against a BigInteger.
-     * 
-     * @param value The value space to compare against.
-     * @return true if equal; false otherwise.
-     */
-    public boolean equals(BigInteger value) {
-        return this.value.compareTo(value) == 0;
-    }
-
-    /**
-     * Compares against a String.
-     * 
-     * @param value The value space to compare against, as a string.
-     * @return true if equal; false otherwise.
-     * @throws NumberFormatException If value is not valid as a number.
-     */
-    public boolean equals(String value) {
-        return equals(new BigInteger(value));
-    }
-
-    /**
-     * Compares against an arbitrary object.
-     * 
-     * @param obj The object to compare against.
-     * @return true if obj can be interpreted as a Bits instance or a value
-     *         space, and this object's value space is equal to that; false
-     *         otherwise.
-     * @throws NumberFormatException If value is a String not valid as a number.
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof BigInteger)
-            return equals((BigInteger) obj);
-        else if (obj instanceof String)
-            return equals((String) obj);
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.tailf.confm.YangType#canEqual(java.lang.Object)
-     */
-    @Override
-    public boolean canEqual(Object obj) {
-        return (obj instanceof YangBits
-                || obj instanceof BigInteger
-                || obj instanceof String);
     }
 
 }

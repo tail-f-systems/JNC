@@ -56,7 +56,7 @@ public class YangBoolean extends YangType<Boolean> {
      */
     @Override
     protected Boolean fromString(String s) throws ConfMException {
-        s = YangString.wsCollapse(s);
+        s = YangTypeUtil.wsCollapse(s);
         if (s.equals("true"))
             return true;
         else if (s.equals("false"))
@@ -70,32 +70,6 @@ public class YangBoolean extends YangType<Boolean> {
      */
     @Override
     public void check() throws ConfMException {
-    }
-
-    /**
-     * Compares this object with a boolean for equality.
-     * 
-     * @param b The boolean object to compare with.
-     * @return true if value of this object is equal to s; false otherwise.
-     */
-    public boolean equals(boolean b) {
-        return value == b;
-    }
-
-    /**
-     * Compares this object with another object for equality.
-     * 
-     * @param obj The object to compare with.
-     * @return true if obj can be cast to a Boolean or a YangBoolean
-     *         and the value of this object is equal to the value of obj;
-     *         false otherwise.
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof Boolean)
-            return equals(((Boolean) obj).booleanValue());
-        assert !canEqual(obj): "obj: " + obj.getClass() + obj;
-        return false;
     }
 
     /**
