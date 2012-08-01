@@ -20,58 +20,43 @@ import com.tailf.netconfmanager.Tagpath;
  */
 public class SchemaTree {
 
-    private static ArrayList<Hashtable<Tagpath, SchemaNode>> namespaces =
-            new ArrayList<Hashtable<Tagpath, SchemaNode>>();
-    static {
-        for(int i=0; i<32; i++) {
-            namespaces.add(new Hashtable<Tagpath, SchemaNode>());
-        }
-    }
-    private static String nsnames[] = new String[32];
-    private static int size = 0;
+    private static HashMap<String, HashMap<Tagpath, SchemaNode>> namespaces =
+               new HashMap<String, HashMap<Tagpath, SchemaNode>>();
 
     /*
      * This static method is used by the generated code to populate a new
-     * hashtable for a module
+     * hashmap for a module
      */
-    public static Hashtable<Tagpath, SchemaNode> create(String namespace) {
-        Hashtable<Tagpath, SchemaNode> h;
-        if ((h = getHashtable(namespace)) != null)
+    public static HashMap<Tagpath, SchemaNode> create(String namespace) {
+        HashMap<Tagpath, SchemaNode> h;
+        if ((h = getHashMap(namespace)) != null) {
             return h;
-        ;
-        h = new Hashtable<Tagpath, SchemaNode>();
-        namespaces.set(size, h);
-        nsnames[size++] = namespace;
+        }
+        h = new HashMap<Tagpath, SchemaNode>();
+        namespaces.put(namespace, h);
         return h;
     }
 
     /*
-     * Return a hash table for a given namespace
+     * Return a hashmap for a given namespace
      */
-    public static Hashtable<Tagpath, SchemaNode> getHashtable(String namespace) {
-        for (int i = 0; i < size; i++) {
-            if (nsnames[i].compareTo(namespace) == 0)
-                return namespaces.get(i);
-        }
-        return null;
+    public static HashMap<Tagpath, SchemaNode> getHashMap(String namespace) {
+        return namespaces.get(namespace);
     }
 
     /*
-     * Return an array of all loaded namespaces
+     * Return a set of all loaded namespaces
      */
-    public static String[] getLoadedNamespaces() {
-        return nsnames;
+    public static Set<String> getLoadedNamespaces() {
+        return namespaces.keySet();
     }
 
     /*
      * Find the SchemaNode for e specific schema entry returns null if not found
      */
     public static SchemaNode lookup(String namespace, Tagpath tp) {
-        Hashtable<Tagpath, SchemaNode> t = getHashtable(namespace);
-        if (t == null) {
-            return null;
-        }
-        return t.get(tp);
+        HashMap<Tagpath, SchemaNode> t = getHashMap(namespace);
+        return t == null ? null : t.get(tp);
     }
 
 }
