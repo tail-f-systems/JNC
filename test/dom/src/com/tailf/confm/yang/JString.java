@@ -9,10 +9,12 @@
  *
  */
 
-package com.tailf.confm;
+package com.tailf.confm.yang;
 
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
+import com.tailf.confm.ConfMException;
 
 /**
  * Implements the built-in YANG data type "string".
@@ -22,7 +24,7 @@ import java.util.regex.PatternSyntaxException;
  * 
  * @author emil@tail-f.com
  */
-public class YangString extends YangType<String> {
+public class JString extends Type<String> {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
@@ -36,7 +38,7 @@ public class YangString extends YangType<String> {
      * 
      * @param value The Java String.
      */
-    public YangString(String value) {
+    public JString(String value) {
         setValue(value);
     }
 
@@ -77,7 +79,7 @@ public class YangString extends YangType<String> {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return obj instanceof YangString || obj instanceof String;
+        return obj instanceof JString || obj instanceof String;
     }
 
     /**
@@ -128,7 +130,7 @@ public class YangString extends YangType<String> {
      * feed), and #xD (CR) with #x20 (space).
      */
     protected void wsReplace() {
-        value = YangTypeUtil.wsReplace(value);
+        value = TypeUtil.wsReplace(value);
     }
 
     /**
@@ -136,7 +138,7 @@ public class YangString extends YangType<String> {
      * single 0x20, and initial and/or final 0x20s are deleted.
      */
     protected void wsCollapse() {
-        value = YangTypeUtil.wsCollapse(value);
+        value = TypeUtil.wsCollapse(value);
     }
 
 }

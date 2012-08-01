@@ -1,22 +1,26 @@
-package com.tailf.confm;
+package com.tailf.confm.yang;
 
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
-public class YangStringTest {
+import com.tailf.confm.ConfMException;
+import com.tailf.confm.yang.Int16;
+import com.tailf.confm.yang.JString;
+
+public class JStringTest {
 
     private String str1;
     private String str2;
     private String str3;
     private String str4;
     private int intVal;
-    private YangString ys1;
-    private YangString ys2;
-    private YangString ys3;
-    private YangString ys4;
-    private YangInt16 yi16;
+    private JString ys1;
+    private JString ys2;
+    private JString ys3;
+    private JString ys4;
+    private Int16 yi16;
 
 
     @Before
@@ -26,11 +30,11 @@ public class YangStringTest {
         str3 = "Another \n string";
         str4 = "  Hi   there ";
         intVal = 7;
-        ys1 = new YangString(str1);
-        ys2 = new YangString(str1);
-        ys3 = new YangString(str3);
-        ys4 = new YangString(str4);
-        yi16 = new YangInt16(intVal);
+        ys1 = new JString(str1);
+        ys2 = new JString(str1);
+        ys3 = new JString(str3);
+        ys4 = new JString(str4);
+        yi16 = new Int16(intVal);
     }
 
     @Test

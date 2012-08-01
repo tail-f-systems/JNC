@@ -9,9 +9,11 @@
  *
  */
 
-package com.tailf.confm;
+package com.tailf.confm.yang;
 
 import java.math.BigDecimal;
+
+import com.tailf.confm.ConfMException;
 
 /**
  * Extended by implementations of the Integer, decimal64 and binary built-in
@@ -19,7 +21,7 @@ import java.math.BigDecimal;
  * 
  * @author emil@tail-f.com
  */
-abstract class YangInt<T extends Number> extends YangType<T> {
+abstract class Int<T extends Number> extends Type<T> {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
@@ -52,7 +54,7 @@ abstract class YangInt<T extends Number> extends YangType<T> {
      *                        if value could not be parsed from s, or if
      *                        minValue is larger than maxValue.
      */
-    public YangInt(String s)
+    public Int(String s)
             throws ConfMException {
         super(s);
     }
@@ -64,7 +66,7 @@ abstract class YangInt<T extends Number> extends YangType<T> {
      * @throws ConfMException If an invariant was broken during initialization,
      *                        or if minValue is larger than maxValue.
      */
-    public YangInt(T value)
+    public Int(T value)
             throws ConfMException {
         super(value);
         ConfMException.throwException(!valid(value.longValue()), this);
@@ -79,8 +81,8 @@ abstract class YangInt<T extends Number> extends YangType<T> {
      */
     protected void setMinMax(Number minValue, Number maxValue)
             throws ConfMException {
-        MIN_VALUE = YangTypeUtil.bigDecimalValueOf(minValue);
-        MAX_VALUE = YangTypeUtil.bigDecimalValueOf(maxValue);
+        MIN_VALUE = TypeUtil.bigDecimalValueOf(minValue);
+        MAX_VALUE = TypeUtil.bigDecimalValueOf(maxValue);
         if (MIN_VALUE == null || MAX_VALUE == null) {
             return;
         }
@@ -95,7 +97,7 @@ abstract class YangInt<T extends Number> extends YangType<T> {
         if (MIN_VALUE == null && MAX_VALUE == null) {
             return true;
         }
-        BigDecimal bd = YangTypeUtil.bigDecimalValueOf(n);
+        BigDecimal bd = TypeUtil.bigDecimalValueOf(n);
         boolean res = true;
         if (MIN_VALUE != null) {
             res &= bd.compareTo(MIN_VALUE) >= 0;
@@ -109,7 +111,7 @@ abstract class YangInt<T extends Number> extends YangType<T> {
     /**
      * Checks that the value of this object is not null and valid. Called in 
      * constructors and value setters. Subclasses that have state invariants
-     * in addition to those handled by the {@link YangInt#valid} method should
+     * in addition to those handled by the {@link Int#valid} method should
      * override this method and throw a ConfMException if such an invariant has
      * been violated.
      * 
@@ -151,7 +153,7 @@ abstract class YangInt<T extends Number> extends YangType<T> {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return (obj instanceof YangInt
+        return (obj instanceof Int
                 || obj instanceof Number);
     }
 
@@ -162,7 +164,7 @@ abstract class YangInt<T extends Number> extends YangType<T> {
      * 
      * @param value The value to compare against.
      * @throws ConfMException If comparison does not evaluate to true or if the
-     *                        value argument is not {@link YangInt#valid}.
+     *                        value argument is not {@link Int#valid}.
      */
     @Override
     protected void exact(int value) throws ConfMException {

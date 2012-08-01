@@ -9,18 +9,18 @@
  *
  */
 
-package com.tailf.confm;
+package com.tailf.confm.yang;
 
 import java.math.BigDecimal;
 
-import static com.tailf.confm.YangTypeUtil.*;
+import com.tailf.confm.ConfMException;
 
 /**
  * Represents a built-in YANG data type.
  * 
  * @author emil@tail-f.com
  */
-abstract class YangType<T> implements java.io.Serializable {
+abstract class Type<T> implements java.io.Serializable {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
@@ -40,7 +40,7 @@ abstract class YangType<T> implements java.io.Serializable {
      * Empty constructor for a YangType object. The value will not be
      * initialized when calling this method.
      */
-    public YangType() {
+    public Type() {
     }
 
     /**
@@ -50,7 +50,7 @@ abstract class YangType<T> implements java.io.Serializable {
      * @throws ConfMException If an invariant was broken during initialization,
      *                        or if value could not be parsed from s.
      */
-    public YangType(String s) throws ConfMException {
+    public Type(String s) throws ConfMException {
         setValue(s);
     }
 
@@ -60,7 +60,7 @@ abstract class YangType<T> implements java.io.Serializable {
      * @param value The initial value of the new YangType object.
      * @throws ConfMException If an invariant was broken during initialization.
      */
-    public YangType(T value) throws ConfMException {
+    public Type(T value) throws ConfMException {
         setValue(value);
     }
 
@@ -72,7 +72,7 @@ abstract class YangType<T> implements java.io.Serializable {
      *                        if value could not be parsed from s.
      */
     public void setValue(String s) throws ConfMException {
-        s = wsCollapse(s);
+        s = TypeUtil.wsCollapse(s);
         setValue(fromString(s));
     }
 
@@ -83,7 +83,7 @@ abstract class YangType<T> implements java.io.Serializable {
      * @throws ConfMException If an invariant was broken during assignment.
      */
     public void setValue(T value) throws ConfMException {
-        assert !(value instanceof YangType): "Avoid circular value chain";
+        assert !(value instanceof Type): "Avoid circular value chain";
         this.value = value;
         check();
     }
@@ -139,15 +139,15 @@ abstract class YangType<T> implements java.io.Serializable {
         if (value == null || !canEqual(obj)) {
             return false;
         }
-        if (obj instanceof YangType<?>) {
-            YangType<?> other = (YangType<?>) obj;
+        if (obj instanceof Type<?>) {
+            Type<?> other = (Type<?>) obj;
             if (!other.canEqual(this))
                 return false;
             obj = other.getValue();
         }
         if (value instanceof Number && obj instanceof Number) {
-            BigDecimal valueNumber = bigDecimalValueOf((Number) value);
-            BigDecimal objNumber = bigDecimalValueOf((Number) obj);
+            BigDecimal valueNumber = TypeUtil.bigDecimalValueOf((Number) value);
+            BigDecimal objNumber = TypeUtil.bigDecimalValueOf((Number) obj);
             return valueNumber.compareTo(objNumber) == 0;
         }
         return value.equals(obj);
@@ -180,7 +180,7 @@ abstract class YangType<T> implements java.io.Serializable {
      *                            compared to the value of this object.
      */
     protected void exact(int other) throws ConfMException {
-        restrict(this.value, other, Operator.EQ);
+        TypeUtil.restrict(this.value, other, TypeUtil.Operator.EQ);
     }
 
     /**
@@ -192,7 +192,7 @@ abstract class YangType<T> implements java.io.Serializable {
      *                            compared to the value of this object.
      */
     protected void min(int min) throws ConfMException {
-        restrict(value, min, Operator.GR);
+        TypeUtil.restrict(value, min, TypeUtil.Operator.GR);
     }
 
     /**
@@ -204,7 +204,7 @@ abstract class YangType<T> implements java.io.Serializable {
      *                            compared to the value of this object.
      */
     protected void max(int max) throws ConfMException {
-        restrict(value, max, Operator.LT);
+        TypeUtil.restrict(value, max, TypeUtil.Operator.LT);
     }
 
 }

@@ -9,14 +9,16 @@
  *
  */
 
-package com.tailf.confm;
+package com.tailf.confm.yang;
+
+import com.tailf.confm.ConfMException;
 
 /**
  * Implements the built-in YANG data type "boolean".
  * 
  * @author emil@tail-f.com
  */
-public class YangBoolean extends YangType<Boolean> {
+public class JBoolean extends Type<Boolean> {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
@@ -31,7 +33,7 @@ public class YangBoolean extends YangType<Boolean> {
      * @param s The string.
      * @throws ConfMException If value is not one of "true" or "false".
      */
-    public YangBoolean(String s) throws ConfMException {
+    public JBoolean(String s) throws ConfMException {
         super(s);
     }
 
@@ -41,7 +43,7 @@ public class YangBoolean extends YangType<Boolean> {
      * @param b The boolean to set the value of the new YangBoolean to.
      * @throws ConfMException Never.
      */
-    public YangBoolean(boolean b) throws ConfMException {
+    public JBoolean(boolean b) throws ConfMException {
         super(b);
     }
 
@@ -56,7 +58,7 @@ public class YangBoolean extends YangType<Boolean> {
      */
     @Override
     protected Boolean fromString(String s) throws ConfMException {
-        s = YangTypeUtil.wsCollapse(s);
+        s = TypeUtil.wsCollapse(s);
         if (s.equals("true"))
             return true;
         else if (s.equals("false"))
@@ -81,7 +83,7 @@ public class YangBoolean extends YangType<Boolean> {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return obj instanceof YangBoolean || obj instanceof Boolean;
+        return obj instanceof JBoolean || obj instanceof Boolean;
     }
 
 }

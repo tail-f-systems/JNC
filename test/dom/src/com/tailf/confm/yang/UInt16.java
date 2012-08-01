@@ -9,14 +9,16 @@
  *
  */
 
-package com.tailf.confm;
+package com.tailf.confm.yang;
+
+import com.tailf.confm.ConfMException;
 
 /**
  * Implements the built-in YANG data type "uint16".
  * 
  * @author emil@tail-f.com
  */
-public class YangUInt16 extends YangInt32 {
+public class UInt16 extends Int32 {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
@@ -32,7 +34,7 @@ public class YangUInt16 extends YangInt32 {
      * @throws ConfMException If value could not be parsed from s or if the
      *                        parsed value is negative or larger than 0xffff.
      */
-    public YangUInt16(String s) throws ConfMException {
+    public UInt16(String s) throws ConfMException {
         super(s);
         setMinMax(0, 0xffff);
         check();
@@ -45,7 +47,7 @@ public class YangUInt16 extends YangInt32 {
      * @param value The initial value of the new YangUInt16 object.
      * @throws ConfMException If value is negative or larger than 0xffff.
      */
-    public YangUInt16(Number value) throws ConfMException {
+    public UInt16(Number value) throws ConfMException {
         super(value);
         setMinMax(0, 0xffff);
         check();

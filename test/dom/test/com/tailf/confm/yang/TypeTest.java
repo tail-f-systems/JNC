@@ -1,19 +1,23 @@
-package com.tailf.confm;
+package com.tailf.confm.yang;
 
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
-public class YangTypeTest {
+import com.tailf.confm.ConfMException;
+import com.tailf.confm.yang.Int16;
+import com.tailf.confm.yang.Type;
 
-    private YangType<Object> objType;
-    private YangType<String> strType;
-    private YangType<Short> shortType1;
-    private YangType<Short> shortType2;
-    private YangType<Long> longType;
+public class TypeTest {
+
+    private Type<Object> objType;
+    private Type<String> strType;
+    private Type<Short> shortType1;
+    private Type<Short> shortType2;
+    private Type<Long> longType;
     
-    private class YangTypeDummy<T> extends YangType<T> {
+    private class YangTypeDummy<T> extends Type<T> {
         private static final long serialVersionUID = 1L;
         public YangTypeDummy() {}
         public YangTypeDummy(String s) throws ConfMException { super(s); }
@@ -28,7 +32,7 @@ public class YangTypeTest {
         objType = new YangTypeDummy<Object>("7");
         strType = new YangTypeDummy<String>();
         shortType1 = new YangTypeDummy<Short>((short)7);
-        shortType2 = new YangInt16("7");
+        shortType2 = new Int16("7");
         longType = new YangTypeDummy<Long>(7L);
     }
 

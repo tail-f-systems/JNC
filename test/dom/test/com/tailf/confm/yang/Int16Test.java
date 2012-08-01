@@ -1,27 +1,30 @@
-package com.tailf.confm;
+package com.tailf.confm.yang;
 
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
-public class YangInt16Test {
+import com.tailf.confm.ConfMException;
+import com.tailf.confm.yang.Int16;
+
+public class Int16Test {
 
     private int iv1;
     private int iv2;
     private String iv3;
-    private YangInt16 i1;
-    private YangInt16 i2;
-    private YangInt16 i3;
+    private Int16 i1;
+    private Int16 i2;
+    private Int16 i3;
 
     @Before
     public void setUp() throws Exception {
         iv1 = 7;
         iv2 = 13;
         iv3 = "13";
-        i1 = new YangInt16(iv1);
-        i2 = new YangInt16(iv2);
-        i3 = new YangInt16(iv3);
+        i1 = new Int16(iv1);
+        i2 = new Int16(iv2);
+        i3 = new Int16(iv3);
     }
 
     @Test

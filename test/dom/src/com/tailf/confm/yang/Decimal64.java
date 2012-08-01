@@ -9,16 +9,18 @@
 *
 */
 
-package com.tailf.confm;
+package com.tailf.confm.yang;
 
 import java.math.BigDecimal;
+
+import com.tailf.confm.ConfMException;
 
 /**
  * Implements the built-in YANG data type "decimal64".
  * 
  * @author emil@tail-f.com
  */
-public class YangDecimal64 extends YangInt<BigDecimal> {
+public class Decimal64 extends Int<BigDecimal> {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
@@ -45,7 +47,7 @@ public class YangDecimal64 extends YangInt<BigDecimal> {
      *                               a java.math.BigDecimal.
      * @see java.math.BigDecimal
      */
-    public YangDecimal64(String s, int fractionDigits)
+    public Decimal64(String s, int fractionDigits)
             throws ConfMException {
         super(s);
         this.fractionDigits = fractionDigits;
@@ -60,8 +62,8 @@ public class YangDecimal64 extends YangInt<BigDecimal> {
      * @throws ConfMException If n is too small or too large with regard to
      *                        the fractionDigits argument.
      */
-    public YangDecimal64(Number n, int fractionDigits) throws ConfMException {
-        super(YangTypeUtil.bigDecimalValueOf(n));
+    public Decimal64(Number n, int fractionDigits) throws ConfMException {
+        super(TypeUtil.bigDecimalValueOf(n));
         this.fractionDigits = fractionDigits;
         setMinMax();
     }
@@ -91,7 +93,7 @@ public class YangDecimal64 extends YangInt<BigDecimal> {
      *                        the fractionDigits argument.
      */
     public void setValue(Number n, int fractionDigits) throws ConfMException {
-        BigDecimal value = YangTypeUtil.bigDecimalValueOf(n);
+        BigDecimal value = TypeUtil.bigDecimalValueOf(n);
         super.setValue(value);
         this.fractionDigits = fractionDigits;
         setMinMax();

@@ -9,17 +9,19 @@
  *
  */
 
-package com.tailf.confm;
+package com.tailf.confm.yang;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
+import com.tailf.confm.ConfMException;
 
 /**
  * Implements the built-in YANG data type "uint64".
  * 
  * @author emil@tail-f.com
  */
-public class YangUInt64 extends YangInt<BigInteger> {
+public class UInt64 extends Int<BigInteger> {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
@@ -35,7 +37,7 @@ public class YangUInt64 extends YangInt<BigInteger> {
      * @throws ConfMException If value could not be parsed from s or if it is
      *                        negative or larger than 18446744073709551615.
      */
-    public YangUInt64(String s) throws ConfMException {
+    public UInt64(String s) throws ConfMException {
         super(s);
         setMinMax(0, new BigInteger("18446744073709551615"));
         check();
@@ -49,8 +51,8 @@ public class YangUInt64 extends YangInt<BigInteger> {
      * @throws ConfMException If value is negative or if it is larger than
      *                        18446744073709551615.
      */
-    public YangUInt64(Number n) throws ConfMException {
-        super(YangTypeUtil.bigDecimalValueOf(n).toBigInteger());
+    public UInt64(Number n) throws ConfMException {
+        super(TypeUtil.bigDecimalValueOf(n).toBigInteger());
         setMinMax(0, new BigInteger("18446744073709551615"));
         check();
     }
@@ -63,7 +65,7 @@ public class YangUInt64 extends YangInt<BigInteger> {
      *                        if the number has a non-zero fractional part.
      */
     public void setValue(Number n) throws ConfMException {
-        BigDecimal bd = YangTypeUtil.bigDecimalValueOf(n);
+        BigDecimal bd = TypeUtil.bigDecimalValueOf(n);
         try {
             super.setValue(bd.toBigIntegerExact());
         } catch (ArithmeticException e) {

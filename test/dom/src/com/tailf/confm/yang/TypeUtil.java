@@ -1,9 +1,11 @@
-package com.tailf.confm;
+package com.tailf.confm.yang;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-final class YangTypeUtil {
+import com.tailf.confm.ConfMException;
+
+final class TypeUtil {
 
     /**
      * Converts a number into its BigDecimal equivalent. Useful for comparisons

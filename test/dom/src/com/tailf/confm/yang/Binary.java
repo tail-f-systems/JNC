@@ -9,14 +9,16 @@
  *
  */
 
-package com.tailf.confm;
+package com.tailf.confm.yang;
+
+import com.tailf.confm.ConfMException;
 
 /**
  * Implements the built-in YANG data type "binary".
  * 
  * @author emil@tail-f.com
  */
-public class YangBinary extends YangType<String> {
+public class Binary extends Type<String> {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
@@ -31,7 +33,7 @@ public class YangBinary extends YangType<String> {
      * 
      * @param value the String
      */
-    public YangBinary(String value) {
+    public Binary(String value) {
         setValue(value);
     }
 
@@ -41,7 +43,7 @@ public class YangBinary extends YangType<String> {
      * 
      * @param buffer The base 64 encoded byte buffer
      */
-    public YangBinary(byte[] buffer) {
+    public Binary(byte[] buffer) {
         setValue(buffer);
     }
 
@@ -53,7 +55,7 @@ public class YangBinary extends YangType<String> {
      */
     @Override
     public void setValue(String value) {
-        value = YangTypeUtil.wsCollapse(value);
+        value = TypeUtil.wsCollapse(value);
         this.value = Base64Coder.encodeString(value);
     }
 
@@ -102,7 +104,7 @@ public class YangBinary extends YangType<String> {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return obj instanceof YangBinary;
+        return obj instanceof Binary;
     }
 
     /* ---------- Restrictions ---------- */
