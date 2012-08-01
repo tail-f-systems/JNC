@@ -28,11 +28,11 @@ public class Identityref extends Type<Statement> {
     private static final long serialVersionUID = -482307288484824804L;
     
     /**
-     * Creates a YangType object from a String.
+     * Creates a YangType object from a String, formatted as described in
+     * {@link Identityref#fromString(String)}.
      * 
      * @param s The string.
-     * @throws ConfMException If an invariant was broken during initialization,
-     *                        or if value could not be parsed from s.
+     * @throws ConfMException If s is improperly formatted.
      */
     public Identityref(String s) throws ConfMException {
         super(s);
@@ -44,19 +44,42 @@ public class Identityref extends Type<Statement> {
      * @param value The initial value of the new YangType object.
      * @throws ConfMException If an invariant was broken during initialization.
      */
-    public Identityref(Statement stmt) throws ConfMException {
-        super(stmt);
+    public Identityref(Statement identity) throws ConfMException {
+        super(identity);
+    }
+    
+    /**
+     * Creates a YangType object from three strings: identity
+     * argument/identifier and the identity module namespace and prefix.
+     *
+     * @param id identity argument/identifier
+     * @param ns identity module namespace
+     * @param prefix identity module prefix
+     * @throws ConfMException If an invariant was broken during initialization.
+     */
+    public Identityref(String id, String ns, String prefix)
+            throws ConfMException {
+        super(id + " " + ns + " " + prefix);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.tailf.confm.yang.Type#fromString(java.lang.String)
+    /**
+     * Returns a Statement from a String.
+     * <p>
+     * The string should contain space separated tokens, ordered as follows:
+     * identity argument/identifier, identity namespace uri, prefix
+     * 
+     * @param s A string representation of a value of type T.
+     * @return A T value parsed from s.
+     * @throws ConfMException If s does not contain a parsable T.
      */
     @Override
     protected Statement fromString(String s) throws ConfMException {
         String[] ss = s.split(" ");
-        if (ss.length == 2) {
-            return new Statement(ss[0], ss[1]);
+        if (ss.length == 3) {
+            Statement module = new Statement("module", "<unknown>");
+            module.addChild(new Statement("namespace", ss[1]));
+            module.addChild(new Statement("prefix", ss[2]));
+            return new Statement("Identity", ss[0], module, module, null);
         } else {
             throw new ConfMException(ConfMException.BAD_VALUE, s);
         }

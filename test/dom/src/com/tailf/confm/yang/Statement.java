@@ -11,6 +11,7 @@
 
 package com.tailf.confm.yang;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -40,19 +41,19 @@ final class Statement {
     private String arg;
 
     /**
-     * The top level statement, if any.
+     * The top level statement, this if module.
      */
-    private Statement top = null;
+    private Statement top;
 
     /**
-     * The statement that this object is a sub-statement of, if any.
+     * The statement that this object is a sub-statement of, this if module.
      */
-    private Statement parent = null;
+    private Statement parent;
 
     /**
      * The statement's sub-statements
      */
-    private Statement[] substmts = {};
+    private ArrayList<Statement> substmts;
 
     /**
      * Main contructor.
@@ -64,7 +65,7 @@ final class Statement {
      * @param substmts
      */
     public Statement(String keyword, String arg, Statement top,
-            Statement parent, Statement[] substmts) {
+            Statement parent, ArrayList<Statement> substmts) {
         if (keyword == null || arg == null) {
             System.err.println("Error: keyword or arg null in Statement " +
             		"constructor");
@@ -101,16 +102,15 @@ final class Statement {
 
         // Assign sub-statements
         if (substmts == null) {
-            substmts = new Statement[0];
+            substmts = new ArrayList<Statement>();
         }
         if ((keyword == "module" || keyword == "submodule" || keyword == "leaf"
                 || keyword == "leaf-list" || keyword == "typedef")
-                && substmts.length == 0) {
+                && substmts.size() == 0) {
             System.err.println("Warning: Mandatory child statements missing" +
             		"from statement: " + keyword + " " + arg);
         }
-        this.substmts = new Statement[substmts.length];
-        System.arraycopy(substmts, 0, this.substmts, 0, substmts.length);
+        this.substmts = new ArrayList<Statement>(substmts);
     }
 
     /**
@@ -122,27 +122,88 @@ final class Statement {
      * @param arg
      */
     public Statement(String keyword, String arg) {
-        this(keyword, arg, null, null, new Statement[0]);
+        this(keyword, arg, null, null, null);
     }
     
+    /**
+     * @return Statement keyword
+     */
     public String getKeyword() {
         return keyword;
     }
-    
+
+    /**
+     * @return Statement argument/identifier.
+     */
     public String getArg() {
         return arg;
     }
     
+    /**
+     * @return The top level statement.
+     */
     public Statement getTop() {
         return top;
     }
     
+    /**
+     * @return The statement that this object is a sub-statement of, or this
+     *         statement if module.
+     */
     public Statement getParent() {
         return parent;
     }
     
-    public Statement[] getSubstmts() {
+    /**
+     * @return List of sub-statements.
+     */
+    public ArrayList<Statement> getSubstmts() {
         return substmts;
+    }
+    
+    /**
+     * Adds a statement as a sub-statement. The parent and top of stmt are
+     * changed to this statement, and the top of this statement, respectively.
+     * 
+     * @param stmt The statement to add as child to this statement.
+     */
+    public void addChild(Statement stmt) {
+        stmt.top = this.top;
+        stmt.parent = this;
+        substmts.add(stmt);
+    }
+    
+    /**
+     * Searches non-recursively among the sub-statements of stmt after a
+     * statement with specified keyword.
+     * 
+     * @param keyword To search for.
+     * @param stmt To search in.
+     * @return The argument/identifier of the first sub-statement of stmt that
+     *         has the specified keyword, null if no such statement was found.
+     */
+    private static String searchOne(String keyword, Statement stmt) {
+        for (Statement substmt : stmt.substmts) {
+            if (substmt.keyword.equalsIgnoreCase(keyword))
+                return substmt.arg;
+        }
+        return null;
+    }
+    
+    /**
+     * @return The prefix of the module containing this statement, null if no
+     *         prefix can be found.
+     */
+    public String getPrefix() {
+        return searchOne("prefix", this.top);
+    }
+    
+    /**
+     * @return The namespace of the module containing this statement, null if
+     *         no namespace can be found.
+     */
+    public String getNamespace() {
+        return searchOne("namespace", this.top);
     }
 
 }
