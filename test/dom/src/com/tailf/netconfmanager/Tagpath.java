@@ -15,7 +15,7 @@ import java.util.*;
 
 /**
  * The Tagpath class is used to represent the name of individual schema nodes.
- * Each ConfM CsNode is identified by a Tagpath. This class really belongs to
+ * Each ConfM SchemaNode is identified by a Tagpath. This class really belongs to
  * the ConfM package, but resides here nevertheless.
  */
 

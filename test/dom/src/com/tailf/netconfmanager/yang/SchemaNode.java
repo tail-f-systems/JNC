@@ -15,13 +15,13 @@ import com.tailf.netconfmanager.Element;
 import com.tailf.netconfmanager.Tagpath;
 
 /**
- * The CsNode class is used to represent individual nodes in the schema tree.
- * Each generated ConfM namespace gets its schema, as a set of CsNode objects
- * generated in its top class All the CsNode's for a namespace are put into
- * hashtable that is held by the CsTree class.
+ * The SchemaNode class is used to represent individual nodes in the schema tree.
+ * Each generated ConfM namespace gets its schema, as a set of SchemaNode objects
+ * generated in its top class All the SchemaNode's for a namespace are put into
+ * hashtable that is held by the SchemaTree class.
  */
 
-public class CsNode {
+public class SchemaNode {
 
     public Tagpath tagpath;
     public String namespace;
@@ -83,21 +83,21 @@ public class CsNode {
     public static int C_IPV4PREFIX = 40; // (confd:ipv4Prefix)
     public static int C_IPV6PREFIX = 41; // (confd:ipv6Prefix)
 
-    public CsNode() {
+    public SchemaNode() {
     }
 
     // print as /foo/bar style
     public String toString() {
-        return "CsNode{" + tagpath + "}";
+        return "SchemaNode{" + tagpath + "}";
     }
 
     /*
-     * Given an Element, find the CsNode, i.e. the schema class for the data
+     * Given an Element, find the SchemaNode, i.e. the schema class for the data
      * element
      */
 
-    public static CsNode get(Element e) {
-        return CsTree.lookup(e.namespace, e.tagpath());
+    public static SchemaNode get(Element e) {
+        return SchemaTree.lookup(e.namespace, e.tagpath());
     }
 
 }

@@ -16,10 +16,10 @@ import java.util.*;
 import com.tailf.netconfmanager.Tagpath;
 
 /**
- * The CsTree class is used to represent the schemas of all namespaces
+ * The SchemaTree class is used to represent the schemas of all namespaces
  */
 
-public class CsTree {
+public class SchemaTree {
 
     private static Hashtable namespaces[] = new Hashtable[32];
     private static String nsnames[] = new String[32];
@@ -61,14 +61,14 @@ public class CsTree {
     }
 
     /*
-     * Find the CsNode for e specific schema entry returns null if not found
+     * Find the SchemaNode for e specific schema entry returns null if not found
      */
 
-    public static CsNode lookup(String namespace, Tagpath tp) {
+    public static SchemaNode lookup(String namespace, Tagpath tp) {
         Hashtable t = getHashtable(namespace);
         if (t == null) {
             return null;
         }
-        return (CsNode) t.get(tp);
+        return (SchemaNode) t.get(tp);
     }
 }

@@ -934,9 +934,9 @@ public abstract class Container extends Element {
         return p.readFile(filename);
     }
 
-    // cache the Tagpath and the CsNode
+    // cache the Tagpath and the SchemaNode
     private Tagpath tp = null;
-    private CsNode n = null;
+    private SchemaNode n = null;
 
     protected void encode(Transport out, boolean newline_at_end,
             Capabilities capas) throws NetconfException {
@@ -945,7 +945,7 @@ public abstract class Container extends Element {
                 tp = tagpath();
             String actualNamespace = getRootElement().namespace;
             if (n == null)
-                n = CsTree.lookup(actualNamespace, tp);
+                n = SchemaTree.lookup(actualNamespace, tp);
             String rev = capas.getRevision(actualNamespace);
             if (n.revInfo != null) {
                 for (int i = 0; i < n.revInfo.length; i++) {

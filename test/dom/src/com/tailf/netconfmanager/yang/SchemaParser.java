@@ -41,7 +41,7 @@ import com.tailf.netconfmanager.*;
  *     </node>
  * <schema>
  * 
- * into a hashtable with {@link CsNode} elements.
+ * into a hashtable with {@link SchemaNode} elements.
  * 
  */
 public class SchemaParser {
@@ -65,7 +65,7 @@ public class SchemaParser {
 
     private class SchemaHandler extends DefaultHandler {
         protected Hashtable h;
-        protected CsNode node;
+        protected SchemaNode node;
         protected RevisionInfo ri;
         protected ArrayList riArrayList;
         protected String value = null;
@@ -78,7 +78,7 @@ public class SchemaParser {
         public void startElement(String uri, String localName, String qName,
                 Attributes attributes) throws SAXException {
             if (localName.equals("node")) {
-                node = new CsNode();
+                node = new SchemaNode();
                 value = null;
             } else if (localName.equals("rev")) {
                 riArrayList = new ArrayList();
@@ -154,7 +154,7 @@ public class SchemaParser {
     }
 
     /**
-     * Read in an XML file and parse it and return a hashtable with CsNode
+     * Read in an XML file and parse it and return a hashtable with SchemaNode
      * objects.
      */
     public void readFile(String filename, Hashtable h) throws NetconfException {

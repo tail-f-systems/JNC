@@ -37,9 +37,9 @@ public class Leaf extends Element {
         super(ns, name);
     }
 
-    // cache the Tagpath and the CsNode
+    // cache the Tagpath and the SchemaNode
     private Tagpath tp = null;
-    private CsNode n = null;
+    private SchemaNode n = null;
 
     protected void encode(Transport out, boolean newline_at_end,
             Capabilities capas) throws NetconfException {
@@ -47,7 +47,7 @@ public class Leaf extends Element {
             if (tp == null)
                 tp = tagpath();
             if (n == null)
-                n = CsTree.lookup(namespace, tp);
+                n = SchemaTree.lookup(namespace, tp);
             String rev = capas.getRevision(namespace);
             if (n != null && n.revInfo != null) {
                 for (int i = 0; i < n.revInfo.length; i++) {
