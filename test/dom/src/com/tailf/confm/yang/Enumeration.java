@@ -14,12 +14,11 @@ package com.tailf.confm.yang;
 /**
  * Implements the built-in YANG data type "enumeration".
  * <p>
- * White space collapse and replace methods, regexp pattern matchers, an
- * enumeration checker method and length assertion methods are provided.
+ * An enumeration checker method is provided.
  * 
  * @author emil@tail-f.com
  */
-public class Enumeration extends YangString {
+public class Enumeration extends BaseString {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
@@ -29,7 +28,7 @@ public class Enumeration extends YangString {
     private static final long serialVersionUID = -2361951707621016957L;
 
     /**
-     * Creates a YangString object from a java.lang.String.
+     * Creates an Enumeration object from a java.lang.String.
      * 
      * @param value The Java String.
      */

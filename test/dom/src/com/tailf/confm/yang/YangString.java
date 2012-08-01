@@ -11,27 +11,19 @@
 
 package com.tailf.confm.yang;
 
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-
-import com.tailf.confm.ConfMException;
-
 /**
  * Implements the built-in YANG data type "string".
- * <p>
- * White space collapse and replace methods, regexp pattern matchers, and
- * length assertion methods are provided.
  * 
  * @author emil@tail-f.com
  */
-public class YangString extends Type<String> {
+public class YangString extends BaseString {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
      * a way which affects serialization. Please see:
      * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
      */
-    private static final long serialVersionUID = -7382018276731616249L;
+    private static final long serialVersionUID = 7197127324640511939L;
 
     /**
      * Creates a YangString object from a java.lang.String.
@@ -39,35 +31,7 @@ public class YangString extends Type<String> {
      * @param value The Java String.
      */
     public YangString(String value) {
-        setValue(value);
-    }
-
-    /**
-     * Sets the value of this object using a java.lang.String.
-     * 
-     * @param value The Java String.
-     */
-    @Override
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    /**
-     * Identity method provided because this class extends the YangType class.
-     * 
-     * @param s A string.
-     * @return s.
-     */
-    @Override
-    protected String fromString(String s) {
-        return s;
-    }
-
-    /**
-     * Nop method provided because this class extends the YangType class.
-     */
-    @Override
-    public void check() throws ConfMException {
+        super(value);
     }
 
     /**
@@ -80,55 +44,6 @@ public class YangString extends Type<String> {
     @Override
     public boolean canEqual(Object obj) {
         return obj instanceof YangString || obj instanceof String;
-    }
-
-    /* ---------- Restrictions ---------- */
-
-    /**
-     * Checks that a regular expression matches the value of this object.
-     * 
-     * @param regex The regular expression.
-     * @throws ConfMException If regexp has a syntax error or does not match.
-     */
-    protected void pattern(String regex) throws ConfMException {
-        pattern(new String[] {regex});
-    }
-
-    /**
-     * Checks that a set of regular expressions match the value of this object.
-     * 
-     * @param regexes The regular expressions.
-     * @throws ConfMException If any regexp in regexes has a syntax error or
-     *         does not match.
-     */
-    protected void pattern(String[] regexes) throws ConfMException {
-        Object opaqueData = this;
-        boolean matches = true;
-        try {
-            for (int i = 0; i < regexes.length; i++)
-                if (!(matches = Pattern.matches(regexes[i], value)))
-                    break;
-        } catch (PatternSyntaxException e) {
-            opaqueData = e;
-            matches = false;
-        }
-        ConfMException.throwException(!matches, opaqueData);
-    }
-
-    /**
-     * Whitespace replace. Replaces all occurrences of #x9 (tab), #xA (line
-     * feed), and #xD (CR) with #x20 (space).
-     */
-    protected void wsReplace() {
-        value = TypeUtil.wsReplace(value);
-    }
-
-    /**
-     * Whitespace replace. Contiguous sequences of 0x20 are collapsed into a
-     * single 0x20, and initial and/or final 0x20s are deleted.
-     */
-    protected void wsCollapse() {
-        value = TypeUtil.wsCollapse(value);
     }
 
 }

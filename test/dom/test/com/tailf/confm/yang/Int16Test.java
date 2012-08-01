@@ -6,7 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.tailf.confm.ConfMException;
-import com.tailf.confm.yang.Int16;
 
 public class Int16Test {
 
