@@ -1,6 +1,6 @@
 /*    -*- Java -*-
  *
- *  Copyright 2007 Tail-F Systems AB. All rights reserved.
+ *  Copyright 2012 Tail-F Systems AB. All rights reserved.
  *
  *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
