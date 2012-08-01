@@ -20,10 +20,7 @@ import com.tailf.netconfmanager.*;
  */
 public class YangException extends NetconfException {
 
-    /**
-     * Serial version ID
-     */
-    private static final long serialVersionUID = 250948942800232698L;
+    private static final long serialVersionUID = 1L;
 
     public YangException() {
         super(NOT_SET, null);

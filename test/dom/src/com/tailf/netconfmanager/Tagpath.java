@@ -11,8 +11,6 @@
 
 package com.tailf.netconfmanager;
 
-import java.util.*;
-
 /**
  * The Tagpath class is used to represent the name of individual schema nodes.
  * Each ConfM SchemaNode is identified by a Tagpath. This class really belongs to

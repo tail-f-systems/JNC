@@ -15,10 +15,7 @@ import com.tailf.netconfmanager.*;
 
 class DummyContainer extends Container {
 
-    /**
-     * Serial version ID
-     */
-    private static final long serialVersionUID = 1845929281638908573L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Structure information. An array of the children names.

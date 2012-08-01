@@ -22,12 +22,7 @@ import com.tailf.netconfmanager.yang.YangException;
  */
 public class Decimal64 extends Int<BigDecimal> {
 
-    /**
-     * Generated serial version UID, to be changed if this class is modified in
-     * a way which affects serialization. Please see:
-     * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
-     */
-    private static final long serialVersionUID = 8486689004714954100L;
+    private static final long serialVersionUID = 1L;
     
     /**
      * The number of decimals allowed in value.

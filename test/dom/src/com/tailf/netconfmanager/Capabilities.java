@@ -293,8 +293,8 @@ public class Capabilities {
         return urlSchemes;
     }
 
-    private ArrayList capas;
-    private ArrayList data_capas;
+    private ArrayList<Capa> capas;
+    private ArrayList<Capa> data_capas;
 
     static private class Capa {
         String uri;
@@ -308,8 +308,8 @@ public class Capabilities {
 
     protected Capabilities(Element e) throws NetconfException {
         NodeSet caps = e.get("capability");
-        capas = new ArrayList(caps.size());
-        data_capas = new ArrayList(caps.size());
+        capas = new ArrayList<Capa>(caps.size());
+        data_capas = new ArrayList<Capa>(caps.size());
 
         for (int i = 0; i < caps.size(); i++) {
             Element cap = caps.getElement(i);

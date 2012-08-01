@@ -27,10 +27,7 @@ import java.io.*;
  */
 public class DeviceUser implements Serializable {
 
-    /**
-     * Serial version ID
-     */
-    private static final long serialVersionUID = 390467087897211197L;
+    private static final long serialVersionUID = 1L;
     
     String localUser;
     String remoteUser;

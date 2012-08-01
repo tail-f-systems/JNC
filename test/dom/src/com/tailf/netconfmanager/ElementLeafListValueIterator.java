@@ -28,8 +28,8 @@ import java.util.*;
  * </pre>
  * 
  */
-public class ElementLeafListValueIterator implements Iterator {
-    private Iterator childrenIterator;
+public class ElementLeafListValueIterator implements Iterator<Object> {
+    private Iterator<Element> childrenIterator;
     private Element nextChild;
     private boolean hasNextChild = false;
     private String name;

@@ -20,12 +20,7 @@ package com.tailf.netconfmanager.yang.type;
  */
 public class Enumeration extends BaseString {
 
-    /**
-     * Generated serial version UID, to be changed if this class is modified in
-     * a way which affects serialization. Please see:
-     * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
-     */
-    private static final long serialVersionUID = -2361951707621016957L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Creates an Enumeration object from a java.lang.String.

@@ -20,6 +20,9 @@ package com.tailf.netconfmanager;
  * an appropriate error string describing the error.
  */
 public class NetconfException extends Exception {
+
+    private static final long serialVersionUID = 1L;
+
     public NetconfException() {
         this(NOT_SET, null);
     }

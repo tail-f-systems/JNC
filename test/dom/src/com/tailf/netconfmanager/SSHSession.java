@@ -18,11 +18,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.ChannelCondition;
 import java.util.ArrayList;
-import java.io.File;
 
 /**
  * A SSH NETCONF transport. Can be used whenever {@link NetconfSession} intends
@@ -48,7 +46,7 @@ public class SSHSession implements Transport {
 
     private BufferedReader in = null;
     private PrintWriter out = null;
-    private ArrayList ioSubscribers;
+    private ArrayList<IOSubscriber> ioSubscribers;
     protected long readTimeout = 0; // millisecs
 
     /**
@@ -84,7 +82,7 @@ public class SSHSession implements Transport {
         OutputStream os = session.getStdin();
         in = new BufferedReader(new InputStreamReader(is));
         out = new PrintWriter(os, false);
-        ioSubscribers = new ArrayList();
+        ioSubscribers = new ArrayList<IOSubscriber>();
         // hello will be done by NetconfSession
     }
 

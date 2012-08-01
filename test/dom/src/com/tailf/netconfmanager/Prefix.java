@@ -26,6 +26,8 @@ import java.io.Serializable;
 
 public class Prefix extends Attribute implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     /**
      * The namespace the "xmlns" attribute belongs to:
      * "http://www.w3.org/2000/xmlns/".
@@ -78,19 +80,6 @@ public class Prefix extends Attribute implements Serializable {
         out.print("=\"");
         out.print(value);
         out.print("\"");
-    }
-
-    /**
-     * ------------------------------------------------------------ help
-     * functions
-     */
-
-    /**
-     * Printouts a trace if 'debug'-flag is enabled.
-     */
-    private void trace(String s) {
-        if (Element.debugLevel >= Element.DEBUG_LEVEL_PREFIX)
-            System.err.println("*Prefix: " + s);
     }
 
 }

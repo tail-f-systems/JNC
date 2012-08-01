@@ -11,7 +11,6 @@
 
 package com.tailf.netconfmanager;
 
-import java.util.ArrayList;
 import java.io.IOException;
 
 /**

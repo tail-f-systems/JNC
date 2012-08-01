@@ -10,8 +10,6 @@
 
 package com.tailf.netconfmanager;
 
-import java.util.ArrayList;
-
 /**
  * A "path create" expression.
  * <p>

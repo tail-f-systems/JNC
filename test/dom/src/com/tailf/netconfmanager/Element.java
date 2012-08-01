@@ -49,6 +49,8 @@ import java.io.*;
 // @SuppressWarnings({ "rawtypes", "serial", "unchecked" })
 public class Element implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     /**
      * The NETCONF namespace. "urn:ietf:params:xml:ns:netconf:base:1.0".
      */
@@ -72,7 +74,7 @@ public class Element implements Serializable {
     /**
      * Attributes on the node. ArrayList of Attribute.
      */
-    ArrayList attrs;
+    ArrayList<Attribute> attrs;
 
     /**
      * Prefix map are really xmlns attributes. For example:
@@ -589,10 +591,9 @@ public class Element implements Serializable {
         while (true)
             if (pos == children.size())
                 break;
-            // FIXME String comparisons here use '==' instead of '.compareTo'
-            else if (children.getElement(pos).name == childrenNames[i])
+            else if (children.getElement(pos).name.compareTo(childrenNames[i]) == 0)
                 ++pos;
-            else if (child.name == childrenNames[i])
+            else if (child.name.compareTo(childrenNames[i]) == 0)
                 break;
             else
                 ++i;
@@ -699,7 +700,7 @@ public class Element implements Serializable {
      */
     public void addAttr(Attribute attr) {
         if (attrs == null)
-            attrs = new ArrayList();
+            attrs = new ArrayList<Attribute>();
         attrs.add(attr);
     }
 
@@ -771,7 +772,7 @@ public class Element implements Serializable {
             setPrefix(p);
             return p;
         } else if (attrs == null) {
-            attrs = new ArrayList();
+            attrs = new ArrayList<Attribute>();
             Attribute attr = new Attribute(namespace, name, value);
             addAttr(attr);
             return attr;
@@ -805,7 +806,7 @@ public class Element implements Serializable {
         if (name.startsWith("xmlns") && ns.startsWith(Prefix.XMLNS_NAMESPACE))
             return setAttr(name, value);
         if (attrs == null)
-            attrs = new ArrayList();
+            attrs = new ArrayList<Attribute>();
         else
             for (int i = 0; i < attrs.size(); i++) {
                 Attribute attr = (Attribute) attrs.get(i);
@@ -1304,7 +1305,7 @@ public class Element implements Serializable {
     protected Element cloneAttrs(Element copy) {
         // copy attrs
         if (attrs != null) {
-            copy.attrs = new ArrayList();
+            copy.attrs = new ArrayList<Attribute>();
             for (int i = 0; i < attrs.size(); i++) {
                 Attribute attr = (Attribute) attrs.get(i);
                 Attribute copy_attr = (Attribute) attr.clone();

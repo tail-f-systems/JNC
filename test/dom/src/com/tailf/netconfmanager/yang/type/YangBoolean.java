@@ -20,12 +20,7 @@ import com.tailf.netconfmanager.yang.YangException;
  */
 public class YangBoolean extends Type<Boolean> {
 
-    /**
-     * Generated serial version UID, to be changed if this class is modified in
-     * a way which affects serialization. Please see:
-     * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
-     */
-    private static final long serialVersionUID = 6260020042145069756L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Creates a YangBoolean object from a String.

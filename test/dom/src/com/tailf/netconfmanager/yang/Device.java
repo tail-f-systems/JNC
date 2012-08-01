@@ -55,10 +55,7 @@ import com.tailf.netconfmanager.*;
 
 public class Device implements Serializable {
 
-    /**
-     * Serial version ID
-     */
-    private static final long serialVersionUID = 8163973317662854759L;
+    private static final long serialVersionUID = 1L;
 
     // named session specific connection data
     static private class SessionConnData {

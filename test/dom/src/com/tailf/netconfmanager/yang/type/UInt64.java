@@ -22,12 +22,7 @@ import com.tailf.netconfmanager.yang.YangException;
  */
 public class UInt64 extends Int<BigInteger> {
 
-    /**
-     * Generated serial version UID, to be changed if this class is modified in
-     * a way which affects serialization. Please see:
-     * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
-     */
-    private static final long serialVersionUID = 3163973134001880140L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Creates a YangUInt64 object from a String.

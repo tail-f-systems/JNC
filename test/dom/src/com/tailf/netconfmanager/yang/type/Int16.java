@@ -20,12 +20,7 @@ import com.tailf.netconfmanager.yang.YangException;
  */
 public class Int16 extends Int<Short> {
 
-    /**
-     * Generated serial version UID, to be changed if this class is modified in
-     * a way which affects serialization. Please see:
-     * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
-     */
-    private static final long serialVersionUID = -4230578488815093538L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Creates a YangInt16 object from a String.

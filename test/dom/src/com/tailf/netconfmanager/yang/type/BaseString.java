@@ -26,12 +26,7 @@ import com.tailf.netconfmanager.yang.YangException;
  */
 public class BaseString extends Type<String> {
 
-    /**
-     * Generated serial version UID, to be changed if this class is modified in
-     * a way which affects serialization. Please see:
-     * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
-     */
-    private static final long serialVersionUID = -7382018276731616249L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Creates a BaseString object from a java.lang.String.

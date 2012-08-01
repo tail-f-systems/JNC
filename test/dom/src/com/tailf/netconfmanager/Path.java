@@ -11,7 +11,6 @@
 package com.tailf.netconfmanager;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * A path expression. This is a small subset of the W3C recommendations of XPath
@@ -111,7 +110,7 @@ public class Path {
     /**
      * The list of location steps (LocationStep).
      */
-    ArrayList locationSteps;
+    ArrayList<LocationStep> locationSteps;
 
     /**
      * The original path string.
@@ -138,7 +137,7 @@ public class Path {
         int axis;
         String name;
         String prefix;
-        ArrayList predicates; // list of Expr (Predicates)
+        ArrayList<Expr> predicates; // list of Expr (Predicates)
 
         LocationStep(int axis) {
             this.axis = axis;
@@ -492,18 +491,6 @@ public class Path {
             return false;
         }
 
-        private boolean isString(Object x) {
-            if (x instanceof String)
-                return true;
-            return false;
-        }
-
-        private boolean isNodeSet(Object x) {
-            if (x instanceof NodeSet)
-                return true;
-            return false;
-        }
-
         /** boolean() function */
         private Boolean f_boolean(Object x) throws NetconfException {
             if (x instanceof Float)
@@ -529,10 +516,6 @@ public class Path {
                 return null;
             throw new NetconfException(NetconfException.PATH_ERROR,
                     "badarg to function boolean(): " + x);
-        }
-
-        private Boolean f_boolean(boolean x) {
-            return new Boolean(x);
         }
 
         /** number() function. */
@@ -688,7 +671,6 @@ public class Path {
          * Returns a string representation of this Expr.
          */
         public String toString() {
-            String s = "";
             switch (op) {
             case AND:
                 return "AND(" + lvalue + "," + rvalue + ")";
@@ -785,8 +767,8 @@ public class Path {
      * Returns a list of LocationSteps for a path expression.
      * 
      */
-    ArrayList parse(TokenList tokens) throws NetconfException {
-        ArrayList steps = new ArrayList();
+    ArrayList<LocationStep> parse(TokenList tokens) throws NetconfException {
+        ArrayList<LocationStep> steps = new ArrayList<LocationStep>();
         try {
             Token tok1, tok2, tok3, tok4, tok5;
             LocationStep step;
@@ -915,7 +897,7 @@ public class Path {
                             "unmatched '[' in expression");
                 }
                 if (step.predicates == null)
-                    step.predicates = new ArrayList();
+                    step.predicates = new ArrayList<Expr>();
                 /* search for sequence */
                 int start = 1;
                 for (int j = 1; (j + 1) < i; j++) {
@@ -1079,7 +1061,9 @@ public class Path {
     /**
      * A list of Tokens
      */
-    class TokenList extends ArrayList {
+    class TokenList extends ArrayList<Token> {
+
+        private static final long serialVersionUID = 1L;
 
         public Token getToken(int i) {
             return (Token) super.get(i);

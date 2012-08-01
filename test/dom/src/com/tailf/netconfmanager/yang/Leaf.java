@@ -28,10 +28,7 @@ import com.tailf.netconfmanager.Transport;
  */
 public class Leaf extends Element {
 
-    /**
-     * Serial version ID
-     */
-    private static final long serialVersionUID = 4805751827179916291L;
+    private static final long serialVersionUID = 1L;
 
     public Leaf(String ns, String name) {
         super(ns, name);

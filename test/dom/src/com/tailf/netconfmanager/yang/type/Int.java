@@ -23,12 +23,7 @@ import com.tailf.netconfmanager.yang.YangException;
  */
 abstract class Int<T extends Number> extends Type<T> {
 
-    /**
-     * Generated serial version UID, to be changed if this class is modified in
-     * a way which affects serialization. Please see:
-     * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
-     */
-    private static final long serialVersionUID = 7931417205809145479L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * A lower bound for the value of this object, or null if none.

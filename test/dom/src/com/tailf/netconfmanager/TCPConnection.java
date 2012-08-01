@@ -13,7 +13,6 @@ package com.tailf.netconfmanager;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringWriter;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -126,4 +125,19 @@ public class TCPConnection {
         if (Element.debugLevel >= Element.DEBUG_LEVEL_TRANSPORT)
             System.err.println("*TCPConnection: " + s);
     }
+    
+    /**
+     * @return The external host address as a String.
+     */
+    public String getHost() {
+        return host;
+    }
+    
+    /**
+     * @return The external host port number of this connection.
+     */
+    public int getPort() {
+        return port;
+    }
+    
 }

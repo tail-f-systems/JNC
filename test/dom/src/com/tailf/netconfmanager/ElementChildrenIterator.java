@@ -28,9 +28,9 @@ import java.util.*;
  * </pre>
  * 
  */
-public class ElementChildrenIterator implements Iterator {
+public class ElementChildrenIterator implements Iterator<Element> {
 
-    private Iterator childrenIterator;
+    private Iterator<Element> childrenIterator;
     private Element nextChild;
     private boolean hasNextChild = false;
     private String name;
@@ -104,7 +104,7 @@ public class ElementChildrenIterator implements Iterator {
     /**
      * Return next child or null.
      */
-    public Object next() {
+    public Element next() {
         return nextElement();
     }
 

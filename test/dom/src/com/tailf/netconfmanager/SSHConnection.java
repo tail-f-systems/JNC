@@ -11,17 +11,8 @@
 
 package com.tailf.netconfmanager;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.Session;
-import ch.ethz.ssh2.ChannelCondition;
-import java.util.ArrayList;
 import java.io.File;
 
 /**

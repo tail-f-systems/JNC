@@ -1534,7 +1534,7 @@ public class NetconfSession {
      */
     protected void setCapability(String capability) {
         if (proprietaryClientCaps == null)
-            proprietaryClientCaps = new ArrayList();
+            proprietaryClientCaps = new ArrayList<String>();
         for (int i = 0; i < proprietaryClientCaps.size(); i++) {
             String cap = (String) proprietaryClientCaps.get(i);
             if (cap.equals(capability))
@@ -1543,7 +1543,7 @@ public class NetconfSession {
         proprietaryClientCaps.add(capability);
     }
 
-    private ArrayList proprietaryClientCaps;
+    private ArrayList<String> proprietaryClientCaps;
 
     /**
      * Used by ConfDSession to set the withDefaults Attribute. Will be included
@@ -2284,10 +2284,9 @@ public class NetconfSession {
     int encode_createSubscription(Transport out, String stream,
             NodeSet eventFilter, String startTime, String stopTime)
             throws NetconfException {
-        String prefix = Element.defaultPrefixes
-                .nsToPrefix(Capabilities.NS_NOTIFICATION);
+        String noNotification = Capabilities.NS_NOTIFICATION;
+        String prefix = Element.defaultPrefixes.nsToPrefix(noNotification);
         String ncn = mk_prefix_colon(prefix);
-        String xmlnsAttr = mk_xmlns_attr(prefix, Capabilities.NS_NOTIFICATION);
 
         int mid = encode_rpc_begin(out);
         out.println("<" + ncn + "create-subscription>");

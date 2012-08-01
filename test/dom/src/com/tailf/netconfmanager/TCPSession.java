@@ -48,7 +48,7 @@ public class TCPSession implements Transport {
     private BufferedReader in = null;
     private PrintWriter out = null;
 
-    private ArrayList ioSubscribers;
+    private ArrayList<IOSubscriber> ioSubscribers;
 
     /**
      * Creates a new TCP session object. This only works towards ConfD agent
@@ -71,7 +71,7 @@ public class TCPSession implements Transport {
                 + ";" + suplgids + ";" + dir + ";" + groups + ";]";
         trace("sending: " + header);
         out.println(header);
-        ioSubscribers = new ArrayList();
+        ioSubscribers = new ArrayList<IOSubscriber>();
         // hello will be done by NetconfSession
     }
 
@@ -92,7 +92,7 @@ public class TCPSession implements Transport {
 
         in = conn.in;
         out = conn.out;
-        ioSubscribers = new ArrayList();
+        ioSubscribers = new ArrayList<IOSubscriber>();
         // hello will be done by NetconfSession
     }
 

@@ -13,7 +13,6 @@ package com.tailf.netconfmanager;
 
 import java.lang.Exception;
 import java.lang.StringBuffer;
-import java.io.*;
 
 /**
  * The IO subscriber is used for tracing, auditing, and logging of messages

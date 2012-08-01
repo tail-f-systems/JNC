@@ -17,7 +17,9 @@ import java.util.ArrayList;
  * A set of {@link Element} nodes.
  * 
  */
-public class NodeSet extends ArrayList {
+public class NodeSet extends ArrayList<Element> {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * Construct a new NodeSet which contains the given element.

@@ -18,12 +18,7 @@ package com.tailf.netconfmanager.yang.type;
  */
 public class YangString extends BaseString {
 
-    /**
-     * Generated serial version UID, to be changed if this class is modified in
-     * a way which affects serialization. Please see:
-     * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
-     */
-    private static final long serialVersionUID = 7197127324640511939L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Creates a YangString object from a java.lang.String.

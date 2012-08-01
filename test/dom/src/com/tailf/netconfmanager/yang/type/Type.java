@@ -22,12 +22,7 @@ import com.tailf.netconfmanager.yang.YangException;
  */
 abstract class Type<T> implements java.io.Serializable {
 
-    /**
-     * Generated serial version UID, to be changed if this class is modified in
-     * a way which affects serialization. Please see:
-     * http://docs.oracle.com/javase/6/docs/platform/serialization/spec/version.html#6678
-     */
-    private static final long serialVersionUID = 1283676367920670186L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * The value of this object, of which this class is a wrapper for.

@@ -45,10 +45,7 @@ import java.lang.Class;
 // @SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class Container extends Element {
 
-    /**
-     * Serial version ID
-     */
-    private static final long serialVersionUID = -8039032425967560491L;
+    private static final long serialVersionUID = 1L;
 
     private static final String reservedWords[] = { "abstract", "boolean", "break",
             "byte", "case", "catch", "char", "class", "const", "continue",

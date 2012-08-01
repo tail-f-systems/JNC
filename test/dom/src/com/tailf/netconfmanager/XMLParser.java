@@ -12,7 +12,6 @@ package com.tailf.netconfmanager;
 import java.io.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
-import java.util.Hashtable;
 
 /**
  * A simple SAX parser, for parsing NETCONF messages, into a simple
@@ -56,7 +55,6 @@ public class XMLParser {
 
         public void startElement(String uri, String localName, String qName,
                 Attributes attributes) throws SAXException {
-            Element parent = current;
             Element child = new Element(uri, localName);
             child.prefixes = prefixes;
             prefixes = null;
