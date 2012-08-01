@@ -82,7 +82,7 @@ public class Nokey extends Container {
      * @param llValue The value to set.
      */
     public void setLlValue(gen.Mytype llValue)
-        throws INMException {
+        throws NetconfException {
         setLeafListValue(Mini.NAMESPACE,
             "ll",
             llValue,
@@ -94,7 +94,7 @@ public class Nokey extends Container {
      * @param llValue The string representation of the value to set.
      */
     public void setLlValue(String llValue)
-        throws INMException {
+        throws NetconfException {
         setLlValue(new gen.Mytype(llValue));
     }
 
@@ -103,7 +103,7 @@ public class Nokey extends Container {
      * @param llValue Child to be removed."
      */
     public void deleteLl(gen.Mytype llValue)
-        throws INMException {
+        throws NetconfException {
         String path = "ll[name='" + llValue + "']";
         delete(path);
     }
@@ -114,7 +114,7 @@ public class Nokey extends Container {
      * @param llValue Child to be removed."
      */
     public void deleteLl(String llValue)
-        throws INMException {
+        throws NetconfException {
         String path = "ll[name='" + llValue + "']";
         delete(path);
     }
@@ -124,7 +124,7 @@ public class Nokey extends Container {
      * The added "ll" leaf-list will not have a value.
      */
     public void addEmptyLl()
-        throws INMException {
+        throws NetconfException {
         setLeafListValue(Mini.NAMESPACE,
             "ll",
             null,
@@ -136,7 +136,7 @@ public class Nokey extends Container {
      * @param llValue The value to mark.
      */
     public void markLlReplace(gen.Mytype llValue)
-        throws INMException {
+        throws NetconfException {
         markLeafReplace("ll[name='" + llValue+"']");
     }
 
@@ -145,7 +145,7 @@ public class Nokey extends Container {
      * @param llValue The value to mark, given as a String.
      */
     public void markLlReplace(String llValue)
-        throws INMException {
+        throws NetconfException {
         markLeafReplace("ll[name='" + llValue+"']");
     }
 
@@ -154,7 +154,7 @@ public class Nokey extends Container {
      * @param llValue The value to mark.
      */
     public void markLlMerge(gen.Mytype llValue)
-        throws INMException {
+        throws NetconfException {
         markLeafMerge("ll[name='" + llValue+"']");
     }
 
@@ -163,7 +163,7 @@ public class Nokey extends Container {
      * @param llValue The value to mark, given as a String.
      */
     public void markLlMerge(String llValue)
-        throws INMException {
+        throws NetconfException {
         markLeafMerge("ll[name='" + llValue+"']");
     }
 
@@ -172,7 +172,7 @@ public class Nokey extends Container {
      * @param llValue The value to mark.
      */
     public void markLlCreate(gen.Mytype llValue)
-        throws INMException {
+        throws NetconfException {
         markLeafCreate("ll[name='" + llValue+"']");
     }
 
@@ -181,7 +181,7 @@ public class Nokey extends Container {
      * @param llValue The value to mark, given as a String.
      */
     public void markLlCreate(String llValue)
-        throws INMException {
+        throws NetconfException {
         markLeafCreate("ll[name='" + llValue+"']");
     }
 
@@ -190,7 +190,7 @@ public class Nokey extends Container {
      * @param llValue The value to mark.
      */
     public void markLlDelete(gen.Mytype llValue)
-        throws INMException {
+        throws NetconfException {
         markLeafDelete("ll[name='" + llValue+"']");
     }
 
@@ -199,7 +199,7 @@ public class Nokey extends Container {
      * @param llValue The value to mark, given as a String.
      */
     public void markLlDelete(String llValue)
-        throws INMException {
+        throws NetconfException {
         markLeafDelete("ll[name='" + llValue+"']");
     }
 

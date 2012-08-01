@@ -24,7 +24,7 @@ public class L extends Container {
      * Constructor for an empty L object.
      */
     public L()
-        throws INMException {
+        throws NetconfException {
         super(Mini.NAMESPACE, "l");
         setDefaultPrefix();
         setPrefix(Mini.PREFIX);
@@ -35,7 +35,7 @@ public class L extends Container {
      * @param kValue Key argument of child.
      */
     public L(com.tailf.confm.xs.String kValue)
-        throws INMException {
+        throws NetconfException {
         super(Mini.NAMESPACE, "l");
         // Set key element: k
         Leaf k = new Leaf(Mini.NAMESPACE, "k");
@@ -51,7 +51,7 @@ public class L extends Container {
      * @param kValue Key argument of child.
      */
     public L(String kValue)
-        throws INMException {
+        throws NetconfException {
         super(Mini.NAMESPACE, "l");
         // Set key element: k
         Leaf k = new Leaf(Mini.NAMESPACE, "k");
@@ -68,7 +68,7 @@ public class L extends Container {
     public Object clone() {
         try {
             return (L)cloneContent(new L(getKValue()));
-        } catch (INMException e) { return null; }
+        } catch (NetconfException e) { return null; }
     }
 
     /**
@@ -78,7 +78,7 @@ public class L extends Container {
     public Element cloneShallow() {
         try {
             return cloneShallowContent(new L(getKValue()));
-        } catch (INMException e) { return null; }
+        } catch (NetconfException e) { return null; }
     }
 
     /**
@@ -112,7 +112,7 @@ public class L extends Container {
      * @return The value of the leaf.
      */
     public com.tailf.confm.xs.String getKValue()
-        throws INMException {
+        throws NetconfException {
         return (com.tailf.confm.xs.String)getValue("k");
     }
 
@@ -121,7 +121,7 @@ public class L extends Container {
      * @param kValue The value to set.
      */
     public void setKValue(com.tailf.confm.xs.String kValue)
-        throws INMException {
+        throws NetconfException {
         setLeafValue(Mini.NAMESPACE,
             "k",
             kValue,
@@ -133,7 +133,7 @@ public class L extends Container {
      * @param kValue The string representation of the value to set.
      */
     public void setKValue(String kValue)
-        throws INMException {
+        throws NetconfException {
         setKValue(new com.tailf.confm.xs.String(kValue));
     }
 
@@ -142,7 +142,7 @@ public class L extends Container {
      * The added "k" leaf will not have a value.
      */
     public void addK()
-        throws INMException {
+        throws NetconfException {
         setLeafValue(Mini.NAMESPACE,
             "k",
             null,

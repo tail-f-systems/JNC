@@ -28,7 +28,7 @@ public class Mini {
      * Enable the elements in this namespace to be aware
      * of the data model and use the generated classes.
      */
-    public static void enable() throws INMException {
+    public static void enable() throws NetconfException {
         Container.setPackage(NAMESPACE, PREFIX);
         Mini.registerSchema();
     }
@@ -38,7 +38,7 @@ public class Mini {
      * schema table (CsTree) making it possible to lookup
      * CsNode entries for all tagpaths
      */
-    public static void registerSchema() throws INMException {
+    public static void registerSchema() throws NetconfException {
         StackTraceElement[] sTrace = (new Exception()).getStackTrace();
         ClassLoader loader = sTrace[0].getClass().getClassLoader();
         java.net.URL schemaUrl = loader.getSystemResource("Mini.schema");

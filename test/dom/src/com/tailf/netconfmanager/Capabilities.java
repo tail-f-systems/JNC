@@ -306,7 +306,7 @@ public class Capabilities {
         }
     }
 
-    protected Capabilities(Element e) throws INMException {
+    protected Capabilities(Element e) throws NetconfException {
         NodeSet caps = e.get("capability");
         capas = new ArrayList(caps.size());
         data_capas = new ArrayList(caps.size());

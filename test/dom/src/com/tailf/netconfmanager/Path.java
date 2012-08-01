@@ -35,7 +35,7 @@ public class Path {
     /**
      * Constructor for a Path from a path expression string.
      */
-    public Path(String pathStr) throws INMException {
+    public Path(String pathStr) throws NetconfException {
         create = false;
         this.pathStr = pathStr;
         locationSteps = parse(tokenize(pathStr));
@@ -57,7 +57,7 @@ public class Path {
      *            The context node to evaluate expressions on
      * @return A nodeSet of elements
      */
-    public NodeSet eval(Element contextNode) throws INMException {
+    public NodeSet eval(Element contextNode) throws NetconfException {
         trace("eval(): " + this);
         NodeSet nodeSet = new NodeSet();
         nodeSet.add(contextNode);
@@ -74,9 +74,9 @@ public class Path {
      * Makes a selection by traversing ONE locationStep. Returns an updated
      * NodeSet of Element nodes.
      */
-    NodeSet evalStep(NodeSet nodeSet, int step) throws INMException {
+    NodeSet evalStep(NodeSet nodeSet, int step) throws NetconfException {
         if (step < 0 || step >= locationSteps.size())
-            throw new INMException(INMException.PATH_ERROR,
+            throw new NetconfException(NetconfException.PATH_ERROR,
                     "cannot eval location step: " + step + " in path");
         LocationStep locStep = (LocationStep) locationSteps.get(step);
         trace("evalStep(): step=" + step + ", " + locStep);
@@ -158,7 +158,7 @@ public class Path {
         /**
          * Step down
          */
-        NodeSet step(NodeSet nodes) throws INMException {
+        NodeSet step(NodeSet nodes) throws NetconfException {
             NodeSet result = new NodeSet();
             for (int i = 0; i < nodes.size(); i++) {
                 Element node = nodes.getElement(i);
@@ -185,7 +185,7 @@ public class Path {
          * perform nodeTest on nodeSet. (only NameTest) since all nodes are
          * simplified to be Elements
          */
-        private NodeSet nodeTest(NodeSet nodeSet) throws INMException {
+        private NodeSet nodeTest(NodeSet nodeSet) throws NetconfException {
             NodeSet result = new NodeSet();
             /**
              * A simple "NameTest" Filter away those with wrong name
@@ -234,7 +234,7 @@ public class Path {
          * PathCreate.eval() to build a structure of elements.
          */
         Element createElem(PrefixMap prefixMap, Element parent)
-                throws INMException {
+                throws NetconfException {
             trace("createElem() from " + this);
             switch (axis) {
             case AXIS_ROOT:
@@ -249,7 +249,7 @@ public class Path {
                 else
                     ns = prefixMap.prefixToNs(prefix);
                 if (ns == null)
-                    throw new INMException(INMException.PATH_CREATE_ERROR,
+                    throw new NetconfException(NetconfException.PATH_CREATE_ERROR,
                             "missing namespace for prefix: \"" + prefix + "\"");
                 Element elem = new Element(ns, name);
                 /* need to do createElem on predicates as well */
@@ -263,7 +263,7 @@ public class Path {
 
             case AXIS_PARENT:
             default:
-                throw new INMException(INMException.PATH_CREATE_ERROR,
+                throw new NetconfException(NetconfException.PATH_CREATE_ERROR,
                         "unknown axis in create path");
             }
         }
@@ -333,12 +333,12 @@ public class Path {
         }
 
         public Boolean eval(Element node, NodeSet contextSet)
-                throws INMException {
+                throws NetconfException {
             return f_boolean(eval2(node, contextSet));
         }
 
         private Object eval2(Element node, NodeSet contextSet)
-                throws INMException {
+                throws NetconfException {
             Object lval, rval; // results
             lval = lvalue;
             rval = rvalue;
@@ -448,13 +448,13 @@ public class Path {
                 return plus(f_number(lval), f_number(rval));
 
             default:
-                throw new INMException(INMException.PATH_ERROR,
+                throw new NetconfException(NetconfException.PATH_ERROR,
                         "illegal operator: " + op);
             }
         }
 
         /** compare */
-        private int compare(Object x, Object y) throws INMException {
+        private int compare(Object x, Object y) throws NetconfException {
             if ((x instanceof Boolean) && (y instanceof Boolean))
                 if (((Boolean) x).booleanValue() == ((Boolean) y)
                         .booleanValue())
@@ -474,7 +474,7 @@ public class Path {
                 return -1;
             if (y == null)
                 return +1;
-            throw new INMException(INMException.PATH_ERROR,
+            throw new NetconfException(NetconfException.PATH_ERROR,
                     "badarg to compare (not of same type): " + x + ", " + y);
         }
 
@@ -505,7 +505,7 @@ public class Path {
         }
 
         /** boolean() function */
-        private Boolean f_boolean(Object x) throws INMException {
+        private Boolean f_boolean(Object x) throws NetconfException {
             if (x instanceof Float)
                 if (((Float) x).floatValue() > 0
                         || ((Float) x).floatValue() < 0)
@@ -527,7 +527,7 @@ public class Path {
                 return (Boolean) x;
             if (x == null)
                 return null;
-            throw new INMException(INMException.PATH_ERROR,
+            throw new NetconfException(NetconfException.PATH_ERROR,
                     "badarg to function boolean(): " + x);
         }
 
@@ -536,7 +536,7 @@ public class Path {
         }
 
         /** number() function. */
-        private Number f_number(Object x) throws INMException {
+        private Number f_number(Object x) throws NetconfException {
             if (x instanceof Float)
                 return (Float) x;
             if (x instanceof Integer)
@@ -562,32 +562,32 @@ public class Path {
                 return f_number(f_string(x));
             if (x == null)
                 return null;
-            throw new INMException(INMException.PATH_ERROR,
+            throw new NetconfException(NetconfException.PATH_ERROR,
                     "badarg to function number(): " + x);
         }
 
         /** nodeset() function */
-        private NodeSet f_nodeSet(Object x) throws INMException {
+        private NodeSet f_nodeSet(Object x) throws NetconfException {
             if (x instanceof NodeSet)
                 return (NodeSet) x;
             if (x == null)
                 return null;
-            throw new INMException(INMException.PATH_ERROR,
+            throw new NetconfException(NetconfException.PATH_ERROR,
                     "badarg to function nodeset(): " + x);
         }
 
         /** neg. Unary minus "-x" */
-        private Number neg(Object x) throws INMException {
+        private Number neg(Object x) throws NetconfException {
             if (x instanceof Integer)
                 return new Integer(-((Integer) x).intValue());
             if (x instanceof Float)
                 return new Float(-((Float) x).floatValue());
-            throw new INMException(INMException.PATH_ERROR,
+            throw new NetconfException(NetconfException.PATH_ERROR,
                     "badarg to function neg(): " + x);
         }
 
         /** minus "x - y" */
-        private Number minus(Number x, Number y) throws INMException {
+        private Number minus(Number x, Number y) throws NetconfException {
             if ((x instanceof Integer) && (y instanceof Integer))
                 return new Integer(((Integer) x).intValue()
                         - ((Integer) y).intValue());
@@ -597,7 +597,7 @@ public class Path {
         }
 
         /** plus "x + y" */
-        private Number plus(Number x, Number y) throws INMException {
+        private Number plus(Number x, Number y) throws NetconfException {
             if ((x instanceof Integer) && (y instanceof Integer))
                 return new Integer(((Integer) x).intValue()
                         + ((Integer) y).intValue());
@@ -607,19 +607,19 @@ public class Path {
         }
 
         /** the float() function. */
-        private Float f_float(Object x) throws INMException {
+        private Float f_float(Object x) throws NetconfException {
             if (x instanceof Float)
                 return (Float) x;
             if (x instanceof Integer)
                 return new Float(((Integer) x).floatValue());
             if (x == null)
                 return null;
-            throw new INMException(INMException.PATH_ERROR,
+            throw new NetconfException(NetconfException.PATH_ERROR,
                     "badarg to function float(): " + x);
         }
 
         /** the string() function. */
-        private String f_string(Object x) throws INMException {
+        private String f_string(Object x) throws NetconfException {
             if (x instanceof Integer)
                 return ((Integer) x).toString();
             if (x instanceof Float)
@@ -640,7 +640,7 @@ public class Path {
          * evalCreate will create attributes and values on the Elementent that
          * is being created.
          */
-        Object evalCreate(Element node) throws INMException {
+        Object evalCreate(Element node) throws NetconfException {
             trace("evalCreate(): Expr= " + this);
             Object lval, rval; // results
             lval = lvalue;
@@ -676,10 +676,10 @@ public class Path {
                     attr.setValue(f_string(rval));
                     return attr;
                 }
-                throw new INMException(INMException.PATH_CREATE_ERROR,
+                throw new NetconfException(NetconfException.PATH_CREATE_ERROR,
                         "illegal path create expr: " + this);
             default:
-                throw new INMException(INMException.PATH_CREATE_ERROR,
+                throw new NetconfException(NetconfException.PATH_CREATE_ERROR,
                         "illegal path create expr:" + this);
             }
         }
@@ -785,7 +785,7 @@ public class Path {
      * Returns a list of LocationSteps for a path expression.
      * 
      */
-    ArrayList parse(TokenList tokens) throws INMException {
+    ArrayList parse(TokenList tokens) throws NetconfException {
         ArrayList steps = new ArrayList();
         try {
             Token tok1, tok2, tok3, tok4, tok5;
@@ -873,11 +873,11 @@ public class Path {
                 // trace("parse(): sz= "+tokens.size());
                 sz = tokens.size();
             }
-        } catch (INMException conf_exception) {
+        } catch (NetconfException conf_exception) {
             throw conf_exception;
         } catch (Exception e) {
             // trace("got exception: "+e);
-            throw new INMException(INMException.PATH_ERROR, "parse error: " + e);
+            throw new NetconfException(NetconfException.PATH_ERROR, "parse error: " + e);
         }
         trace("parse() -> " + steps);
         return steps;
@@ -886,12 +886,12 @@ public class Path {
     /**
      * check axis
      */
-    int parseAxis(String str) throws INMException {
+    int parseAxis(String str) throws NetconfException {
         if (str.equals("child"))
             return AXIS_CHILD;
         if (str.equals("self"))
             return AXIS_SELF;
-        throw new INMException(INMException.PATH_ERROR,
+        throw new NetconfException(NetconfException.PATH_ERROR,
                 "unsupported or unknown axis: " + str);
     }
 
@@ -899,7 +899,7 @@ public class Path {
      * parse out predicates
      */
     void parsePredicates(TokenList tokens, LocationStep step)
-            throws INMException {
+            throws NetconfException {
         trace("parsePredicates(): " + tokens);
         int sz = tokens.size();
         if (sz >= 1) {
@@ -911,7 +911,7 @@ public class Path {
                     while ((tokens.getToken(i)).type != RPRED)
                         i++;
                 } catch (Exception e) {
-                    throw new INMException(INMException.PATH_ERROR,
+                    throw new NetconfException(NetconfException.PATH_ERROR,
                             "unmatched '[' in expression");
                 }
                 if (step.predicates == null)
@@ -947,7 +947,7 @@ public class Path {
      * Parses a predicate expression. must consume all tokens from 'from' to
      * 'to'.
      */
-    Expr parsePredicate(TokenList tokens, int from, int to) throws INMException {
+    Expr parsePredicate(TokenList tokens, int from, int to) throws NetconfException {
         Token tok1, tok2, tok3;
         int i = from;
         while (i < to) {
@@ -989,7 +989,7 @@ public class Path {
      * from 'from' to 'to'.
      */
     Object parsePredicate_rvalue(TokenList tokens, int from, int to)
-            throws INMException {
+            throws NetconfException {
         Token tok1, tok2, tok3;
         int i = from;
         while (i < to) {
@@ -1034,12 +1034,12 @@ public class Path {
      * Throws a parse error exception.
      * 
      */
-    void parseError(TokenList tokens) throws INMException {
+    void parseError(TokenList tokens) throws NetconfException {
         /* show 5 next tokens */
         parseError(tokens, 0, 5);
     }
 
-    void parseError(TokenList tokens, int from, int to) throws INMException {
+    void parseError(TokenList tokens, int from, int to) throws NetconfException {
         String errStr = "parse error: \"";
         int sz = tokens.size();
         for (int i = from; i < to; i++) {
@@ -1049,7 +1049,7 @@ public class Path {
                 break;
         }
         errStr = errStr + "...\"";
-        throw new INMException(INMException.PATH_ERROR, errStr);
+        throw new NetconfException(NetconfException.PATH_ERROR, errStr);
     }
 
     /**
@@ -1178,7 +1178,7 @@ public class Path {
     /**
      * Returns a TokenList (ArrayList) of Tokens.
      */
-    TokenList tokenize(String s) throws INMException {
+    TokenList tokenize(String s) throws NetconfException {
         TokenList tokens = new TokenList();
         byte[] buf = s.getBytes();
         byte curr, next = 0;
@@ -1232,7 +1232,7 @@ public class Path {
                 while (j < buf.length && buf[j] != '\'')
                     j++;
                 if (j == buf.length)
-                    throw new INMException(INMException.PATH_ERROR,
+                    throw new NetconfException(NetconfException.PATH_ERROR,
                             "unterminated value: "
                                     + new String(buf, i, buf.length - i));
                 tokens.add(new Token(STRING, new String(buf, i, j - i)));
@@ -1243,7 +1243,7 @@ public class Path {
                 while (j < buf.length && buf[j] != '\"')
                     j++;
                 if (j == buf.length)
-                    throw new INMException(INMException.PATH_ERROR,
+                    throw new NetconfException(NetconfException.PATH_ERROR,
                             "unterminated value: "
                                     + new String(buf, i, buf.length - i));
                 tokens.add(new Token(STRING, new String(buf, i, j - i)));
@@ -1332,7 +1332,7 @@ public class Path {
                         tokens.add(new Token(COMPARE, LT, "="));
                     break;
                 default:
-                    throw new INMException(INMException.PATH_ERROR,
+                    throw new NetconfException(NetconfException.PATH_ERROR,
                             "illegal character in expression: " + curr);
                 }
                 i++;

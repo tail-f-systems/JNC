@@ -49,7 +49,7 @@ public class SSHConnection {
      *            Host or IP address to connect to
      */
 
-    public SSHConnection(String host) throws IOException, INMException {
+    public SSHConnection(String host) throws IOException, NetconfException {
         this(host, 830, 0);
     }
 
@@ -63,7 +63,7 @@ public class SSHConnection {
      *            Port number to connect to.
      */
     public SSHConnection(String host, int port) throws IOException,
-            INMException {
+            NetconfException {
         this(host, port, 0);
     }
 
@@ -78,7 +78,7 @@ public class SSHConnection {
      * @param connectTimeout
      */
     public SSHConnection(String host, int port, int connectTimeout)
-            throws IOException, INMException {
+            throws IOException, NetconfException {
 
         connection = new Connection(host, port);
         connection.connect(null, connectTimeout, 0);
@@ -111,7 +111,7 @@ public class SSHConnection {
      *             without having called {@link #close()} first.
      */
     public SSHConnection(String host, int port, int connectTimeout,
-            int kexTimeout) throws IOException, INMException {
+            int kexTimeout) throws IOException, NetconfException {
         connection = new Connection(host, port);
         connection.connect(null, connectTimeout, kexTimeout);
     }
@@ -148,9 +148,9 @@ public class SSHConnection {
      * 
      **/
     public void authenticateWithPassword(String user, String password)
-            throws IOException, INMException {
+            throws IOException, NetconfException {
         if (!connection.authenticateWithPassword(user, password))
-            throw new INMException(INMException.AUTH_FAILED);
+            throw new NetconfException(NetconfException.AUTH_FAILED);
     }
 
     /**
@@ -166,15 +166,15 @@ public class SSHConnection {
      *            Password.
      **/
     public void authenticateWithPublicKeyFile(String user, File pemFile,
-            String password) throws IOException, INMException {
+            String password) throws IOException, NetconfException {
         try {
             if (!connection.authenticateWithPublicKey(user, pemFile, password)) {
-                throw new INMException(INMException.AUTH_FAILED);
+                throw new NetconfException(NetconfException.AUTH_FAILED);
             }
         } catch (IOException e) {
             throw e;
         } catch (Exception e) {
-            throw new INMException(INMException.AUTH_FAILED);
+            throw new NetconfException(NetconfException.AUTH_FAILED);
         }
     }
 
@@ -190,9 +190,9 @@ public class SSHConnection {
      *            Passphrase.
      **/
     public void authenticateWithPublicKey(String user, char[] pemPrivateKey,
-            String pass) throws IOException, INMException {
+            String pass) throws IOException, NetconfException {
         if (!connection.authenticateWithPublicKey(user, pemPrivateKey, pass)) {
-            throw new INMException(INMException.AUTH_FAILED);
+            throw new NetconfException(NetconfException.AUTH_FAILED);
         }
     }
 

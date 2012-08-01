@@ -27,7 +27,7 @@ public class XMLParser {
     /**
      * Constructor. Initializes the parser instance.
      */
-    public XMLParser() throws INMException {
+    public XMLParser() throws NetconfException {
         try {
             String javaVersion = System.getProperty("java.version");
             if (javaVersion.startsWith("1.4")) {
@@ -37,7 +37,7 @@ public class XMLParser {
                 parser = XMLReaderFactory.createXMLReader();
             }
         } catch (Exception e) {
-            throw new INMException(INMException.PARSER_ERROR,
+            throw new NetconfException(NetconfException.PARSER_ERROR,
                     "failed to initialize parser: " + e);
         }
 
@@ -111,7 +111,7 @@ public class XMLParser {
     /**
      * Read in an XML file and parse it and return an element tree.
      */
-    public Element readFile(String filename) throws INMException {
+    public Element readFile(String filename) throws NetconfException {
         try {
             ConfHandler handler = new ConfHandler();
             parser.setContentHandler(handler);
@@ -120,7 +120,7 @@ public class XMLParser {
             // } catch (INMException e) {
             // throw e;
         } catch (Exception e) {
-            throw new INMException(INMException.PARSER_ERROR, "parse file: "
+            throw new NetconfException(NetconfException.PARSER_ERROR, "parse file: "
                     + filename + " error: " + e);
         }
     }
@@ -131,7 +131,7 @@ public class XMLParser {
      * @param is
      *            Inputsource (byte stream) where the XML text is read from
      */
-    public Element parse(InputSource is) throws INMException {
+    public Element parse(InputSource is) throws NetconfException {
         try {
             ConfHandler handler = new ConfHandler();
             parser.setContentHandler(handler);
@@ -140,7 +140,7 @@ public class XMLParser {
             // } catch (INMException e) {
             // throw e;
         } catch (Exception e) {
-            throw new INMException(INMException.PARSER_ERROR, "parse error: "
+            throw new NetconfException(NetconfException.PARSER_ERROR, "parse error: "
                     + e);
         }
     }
@@ -152,7 +152,7 @@ public class XMLParser {
      * @param str
      *            String containing the XML text to parse
      */
-    public Element parse(String str) throws INMException {
+    public Element parse(String str) throws NetconfException {
         ByteArrayInputStream istream = new ByteArrayInputStream(str.getBytes());
         InputSource is = new InputSource(istream);
         return parse(is);

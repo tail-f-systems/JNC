@@ -60,7 +60,7 @@ public class TCPSession implements Transport {
      */
     public TCPSession(String host, int port, String username, String uid,
             String gid, String suplgids, String dir, String groups)
-            throws IOException, UnknownHostException, INMException {
+            throws IOException, UnknownHostException, NetconfException {
         socket = new Socket(host, port);
         // initStreams
         InputStream is = socket.getInputStream();
@@ -84,7 +84,7 @@ public class TCPSession implements Transport {
      * 
      */
     public TCPSession(TCPConnection conn) throws IOException,
-            UnknownHostException, INMException {
+            UnknownHostException, NetconfException {
         if (conn.hasSession == true)
             throw new IOException("multiple session not supported");
         conn.hasSession = true;

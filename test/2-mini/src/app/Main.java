@@ -28,36 +28,36 @@ public class Main {
         } catch (IOException e0) {
             System.err.println("Can't connect");
             System.exit(1);
-        } catch (INMException e1) {
+        } catch (NetconfException e1) {
             System.err.println("Can't authenticate" + e1);
             System.exit(1);
         }
     }
     
-    NodeSet editConfig(Element config) throws IOException,INMException {
+    NodeSet editConfig(Element config) throws IOException,NetconfException {
         return editConfig(dev, config);
     }
 
-    private NodeSet editConfig(Device d, Element config) throws IOException,INMException {
+    private NodeSet editConfig(Device d, Element config) throws IOException,NetconfException {
         d.getSession("cfg").editConfig(config);
         // Inspect the updated RUNNING configuration
         return getConfig(d);
     }
     
-    private NodeSet getConfig(Device d) throws IOException, INMException {
+    private NodeSet getConfig(Device d) throws IOException, NetconfException {
         ConfDSession session = d.getSession("cfg");
         NodeSet reply = session.getConfig(NetconfSession.RUNNING);
         return reply;
     }
     
-    public NodeSet getConfig() throws IOException,INMException{
+    public NodeSet getConfig() throws IOException,NetconfException{
         return getConfig(dev);
     }
     
     public int run() {
         try {
             Mini.enable();
-        } catch (INMException e) {
+        } catch (NetconfException e) {
             System.err.println("Schema file not found.");
             return -1;
         }
@@ -66,10 +66,10 @@ public class Main {
 
     /**
      * @param args Ignored
-     * @throws INMException 
+     * @throws NetconfException 
      * @throws IOException 
      */
-    public static void main(String[] args) throws IOException, INMException {
+    public static void main(String[] args) throws IOException, NetconfException {
         Main main = new Main();
         Mini.enable();
         main.init();

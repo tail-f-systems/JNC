@@ -77,7 +77,7 @@ class ConfHandler extends DefaultHandler {
             prefixes = null;
             addOtherAttributes(attributes, child);
             current = child; // step down
-        } catch (INMException e) {
+        } catch (NetconfException e) {
             e.printStackTrace();
             throw new SAXException(e.toString());
         }
@@ -142,7 +142,7 @@ class ConfHandler extends DefaultHandler {
                     current.value = null;
                 }
             }
-        } catch (INMException e) {
+        } catch (NetconfException e) {
             e.printStackTrace();
             throw new SAXException(e.toString());
         }

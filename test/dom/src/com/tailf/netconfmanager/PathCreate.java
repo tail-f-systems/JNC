@@ -39,7 +39,7 @@ public class PathCreate extends Path {
      * @param pathStr
      *            A "path create" string
      */
-    public PathCreate(String pathStr) throws INMException {
+    public PathCreate(String pathStr) throws NetconfException {
         create = true;
         locationSteps = parse(tokenize(pathStr));
     }
@@ -51,7 +51,7 @@ public class PathCreate extends Path {
      *            Prefix mappings
      * @return A new element tree
      */
-    public Element eval(PrefixMap prefixMap) throws INMException {
+    public Element eval(PrefixMap prefixMap) throws NetconfException {
         trace("eval(): " + this);
         Element top = null, parent = null;
         for (int i = 0; i < locationSteps.size(); i++) {
@@ -71,9 +71,9 @@ public class PathCreate extends Path {
      * node.
      */
     Element evalStep(PrefixMap prefixMap, int step, Element parent)
-            throws INMException {
+            throws NetconfException {
         if (step < 0 || step >= locationSteps.size())
-            throw new INMException(INMException.PATH_CREATE_ERROR,
+            throw new NetconfException(NetconfException.PATH_CREATE_ERROR,
                     "cannot eval location step: " + step + " in create path");
         LocationStep locStep = (LocationStep) locationSteps.get(step);
         trace("evalStep(): step=" + step + ", " + locStep);

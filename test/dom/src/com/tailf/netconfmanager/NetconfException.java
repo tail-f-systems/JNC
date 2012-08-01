@@ -19,16 +19,16 @@ package com.tailf.netconfmanager;
  * describing the error. The toString method uses both of these fields to print
  * an appropriate error string describing the error.
  */
-public class INMException extends Exception {
-    public INMException() {
+public class NetconfException extends Exception {
+    public NetconfException() {
         this(NOT_SET, null);
     }
 
-    public INMException(int errorCode) {
+    public NetconfException(int errorCode) {
         this(errorCode, null);
     }
 
-    public INMException(int errorCode, Object opaqueData) {
+    public NetconfException(int errorCode, Object opaqueData) {
         this.errorCode = errorCode;
         this.opaqueData = opaqueData;
         if (errorCode == RPC_REPLY_ERROR) {

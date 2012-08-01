@@ -18,7 +18,7 @@ import com.tailf.netconfmanager.*;
  * 
  * 
  */
-public class ConfMException extends INMException {
+public class ConfMException extends NetconfException {
 
     /**
      * Serial version ID

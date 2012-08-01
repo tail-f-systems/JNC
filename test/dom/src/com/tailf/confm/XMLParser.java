@@ -26,21 +26,21 @@ public class XMLParser extends com.tailf.netconfmanager.XMLParser {
     /**
      * Constructor. Initializes the parser instance.
      */
-    public XMLParser() throws INMException {
+    public XMLParser() throws NetconfException {
         super();
     }
 
     /**
      * Read in an XML file and parse it and return an element tree.
      */
-    public Element readFile(String filename) throws INMException {
+    public Element readFile(String filename) throws NetconfException {
         try {
             ConfHandler handler = new ConfHandler();
             parser.setContentHandler(handler);
             parser.parse(filename);
             return (Container) handler.top;
         } catch (Exception e) {
-            throw new INMException(INMException.PARSER_ERROR, "parse file: "
+            throw new NetconfException(NetconfException.PARSER_ERROR, "parse file: "
                     + filename + " error: " + e);
         }
     }
@@ -51,7 +51,7 @@ public class XMLParser extends com.tailf.netconfmanager.XMLParser {
      * @param is
      *            Inputsource (byte stream) where the XML text is read from
      */
-    public Element parse(InputSource is) throws INMException {
+    public Element parse(InputSource is) throws NetconfException {
         try {
             ConfHandler handler = new ConfHandler();
             parser.setContentHandler(handler);
@@ -59,7 +59,7 @@ public class XMLParser extends com.tailf.netconfmanager.XMLParser {
             return handler.top;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new INMException(INMException.PARSER_ERROR, "parse error: "
+            throw new NetconfException(NetconfException.PARSER_ERROR, "parse error: "
                     + e);
 
         }

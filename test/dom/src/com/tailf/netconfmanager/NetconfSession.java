@@ -211,7 +211,7 @@ public class NetconfSession {
      *            Transport object
      */
 
-    public NetconfSession(Transport transport) throws INMException, IOException {
+    public NetconfSession(Transport transport) throws NetconfException, IOException {
         this.out = transport;
         this.in = transport; // same
         parser = new XMLParser();
@@ -250,7 +250,7 @@ public class NetconfSession {
      **/
 
     public NetconfSession(Transport transport, XMLParser parser)
-            throws INMException, IOException {
+            throws NetconfException, IOException {
         this.out = transport;
         this.in = transport; // same
         this.parser = parser;
@@ -263,7 +263,7 @@ public class NetconfSession {
      * to be sent to advertise capabilities.
      * 
      */
-    public NetconfSession() throws INMException {
+    public NetconfSession() throws NetconfException {
         parser = new XMLParser();
     }
 
@@ -299,7 +299,7 @@ public class NetconfSession {
      * <p>
      * Used from the constructor {@link #NetconfSession(Transport)}.
      */
-    protected void hello() throws INMException, IOException {
+    protected void hello() throws NetconfException, IOException {
         trace("hello: ");
         encode_hello(out);
         out.flush();
@@ -308,19 +308,19 @@ public class NetconfSession {
         Element t = parser.parse(reply.toString());
         Element capatree = t.getFirst("self::hello/capabilities");
         if (capatree == null)
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "hello contains no capabilities");
         trace("capabilities: \n" + capatree.toXMLString());
 
         capabilities = new Capabilities(capatree);
         if (!capabilities.baseCapability)
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "server does not support NETCONF base capability: "
                             + Capabilities.NETCONF_BASE_CAPABILITY);
         // lookup session id
         Element sess = t.getFirst("self::hello/session-id");
         if (sess == null)
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "hello contains no session identifier");
         sessionId = Integer.parseInt((String) sess.value);
         trace("sessionId = " + sessionId);
@@ -340,7 +340,7 @@ public class NetconfSession {
      * @param request
      *            XML encoded NETCONF request
      */
-    public Element rpc(String request) throws IOException, INMException {
+    public Element rpc(String request) throws IOException, NetconfException {
         out.print(request);
         out.flush();
         StringBuffer reply = in.readOne();
@@ -361,7 +361,7 @@ public class NetconfSession {
      * @param request
      *            XML element tree
      */
-    public Element rpc(Element request) throws IOException, INMException {
+    public Element rpc(Element request) throws IOException, NetconfException {
         // print, but no newline at the end
         request.encode(out, false, capabilities);
         out.flush();
@@ -400,7 +400,7 @@ public class NetconfSession {
      * @param request
      *            Element tree
      */
-    public int sendRequest(Element request) throws IOException, INMException {
+    public int sendRequest(Element request) throws IOException, NetconfException {
         // print, but no newline at the end
         request.encode(out, false, capabilities);
         out.flush();
@@ -414,7 +414,7 @@ public class NetconfSession {
      * 
      * @see #sendRequest(Element)
      */
-    public Element readReply() throws IOException, INMException {
+    public Element readReply() throws IOException, NetconfException {
         StringBuffer reply = in.readOne();
         return parser.parse(reply.toString());
     }
@@ -425,7 +425,7 @@ public class NetconfSession {
      * @param subtreeFilter
      *            A subtree filter
      */
-    public NodeSet getConfig(Element subtreeFilter) throws INMException,
+    public NodeSet getConfig(Element subtreeFilter) throws NetconfException,
             IOException {
         return getConfig(RUNNING, subtreeFilter);
     }
@@ -434,7 +434,7 @@ public class NetconfSession {
      * Gets the device configuration data.
      * 
      */
-    public NodeSet getConfig() throws INMException, IOException {
+    public NodeSet getConfig() throws NetconfException, IOException {
         return getConfig(RUNNING);
     }
 
@@ -442,7 +442,7 @@ public class NetconfSession {
      * Gets the device configuration data.
      * 
      */
-    public NodeSet getConfig(int datastore) throws INMException, IOException {
+    public NodeSet getConfig(int datastore) throws NetconfException, IOException {
         trace("getConfig: " + datastoreToString(datastore));
         int mid = encode_getConfig(out, encode_datastore(datastore));
         out.flush();
@@ -453,7 +453,7 @@ public class NetconfSession {
      * Calls rpc method.
      * 
      */
-    public NodeSet callRpc(Element data) throws INMException, IOException {
+    public NodeSet callRpc(Element data) throws NetconfException, IOException {
         trace("call: " + data.toXMLString());
         int mid = encode_rpc(out, data);
         out.flush();
@@ -467,7 +467,7 @@ public class NetconfSession {
      * @param xpath
      *            XPath expression
      */
-    public NodeSet getConfig(String xpath) throws INMException, IOException {
+    public NodeSet getConfig(String xpath) throws NetconfException, IOException {
         return getConfig(RUNNING, xpath);
     }
 
@@ -481,7 +481,7 @@ public class NetconfSession {
      *            A subtree filter
      */
     public NodeSet getConfig(int datastore, Element subtreeFilter)
-            throws INMException, IOException {
+            throws NetconfException, IOException {
         trace("getConfig: " + datastoreToString(datastore) + "\n"
                 + subtreeFilter.toXMLString());
         int mid = encode_getConfig(out, encode_datastore(datastore),
@@ -499,12 +499,12 @@ public class NetconfSession {
      * @param xpath
      *            XPath expression
      */
-    public NodeSet getConfig(int datastore, String xpath) throws INMException,
+    public NodeSet getConfig(int datastore, String xpath) throws NetconfException,
             IOException {
         trace("getConfig: " + datastoreToString(datastore) + " \"" + xpath
                 + "\"");
         if (!capabilities.xpathCapability)
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "the :xpath capability is not supported by server");
         int mid = encode_getConfig(out, encode_datastore(datastore), xpath);
         out.flush();
@@ -514,7 +514,7 @@ public class NetconfSession {
     /**
      * Retrieves running configuration and device state information.
      */
-    public NodeSet get() throws INMException, IOException {
+    public NodeSet get() throws NetconfException, IOException {
         trace("get: \"\"");
         int mid = encode_get(out, "");
         out.flush();
@@ -527,7 +527,7 @@ public class NetconfSession {
      * @param subtreeFilter
      *            A subtree filter
      */
-    public NodeSet get(Element subtreeFilter) throws INMException, IOException {
+    public NodeSet get(Element subtreeFilter) throws NetconfException, IOException {
         trace("get: " + subtreeFilter.toXMLString());
         int mid = encode_get(out, subtreeFilter);
         out.flush();
@@ -541,10 +541,10 @@ public class NetconfSession {
      * @param xpath
      *            An xpath epxression.
      */
-    public NodeSet get(String xpath) throws INMException, IOException {
+    public NodeSet get(String xpath) throws NetconfException, IOException {
         trace("get: \"" + xpath + "\"");
         if (!capabilities.hasXPath())
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "the :xpath capability is not supported by server");
         int mid = encode_get(out, xpath);
         out.flush();
@@ -559,7 +559,7 @@ public class NetconfSession {
      * @param configTree
      *            Configuration tree
      */
-    public void editConfig(Element configTree) throws INMException, IOException {
+    public void editConfig(Element configTree) throws NetconfException, IOException {
         editConfig(RUNNING, configTree);
     }
 
@@ -569,7 +569,7 @@ public class NetconfSession {
      * Element to the device
      */
 
-    public void editConfig(NodeSet configTrees) throws INMException,
+    public void editConfig(NodeSet configTrees) throws NetconfException,
             IOException {
         editConfig(RUNNING, configTrees);
     }
@@ -586,7 +586,7 @@ public class NetconfSession {
      *            The config tree to edit.
      */
     public void editConfig(int datastore, Element configTree)
-            throws INMException, IOException {
+            throws NetconfException, IOException {
         trace("editConfig: target=" + datastoreToString(datastore) + "\n"
                 + configTree.toXMLString());
         int mid = encode_editConfig(out, encode_datastore(datastore),
@@ -596,7 +596,7 @@ public class NetconfSession {
     }
 
     public void editConfig(int datastore, NodeSet configTrees)
-            throws INMException, IOException {
+            throws NetconfException, IOException {
         trace("editConfig: target=" + datastoreToString(datastore) + "\n"
                 + configTrees.toXMLString());
         int mid = encode_editConfig(out, encode_datastore(datastore),
@@ -615,7 +615,7 @@ public class NetconfSession {
      * @param url
      *            The source url.
      */
-    public void editConfig(int datastore, String url) throws INMException,
+    public void editConfig(int datastore, String url) throws NetconfException,
             IOException {
         trace("editConfig: target=" + datastoreToString(datastore) + " source="
                 + url);
@@ -807,7 +807,7 @@ public class NetconfSession {
      * @param target
      *            The target datastore
      */
-    public void copyConfig(Element sourceTree, int target) throws INMException,
+    public void copyConfig(Element sourceTree, int target) throws NetconfException,
             IOException {
         copyConfig(new NodeSet(sourceTree), target);
     }
@@ -817,7 +817,7 @@ public class NetconfSession {
      */
 
     public void copyConfig(NodeSet sourceTrees, int target)
-            throws INMException, IOException {
+            throws NetconfException, IOException {
 
         trace("copyConfig: target=" + datastoreToString(target) + "\n"
                 + sourceTrees.toXMLString());
@@ -836,12 +836,12 @@ public class NetconfSession {
      *            The target URL.
      */
     public void copyConfig(Element sourceTree, String targetUrl)
-            throws INMException, IOException {
+            throws NetconfException, IOException {
         copyConfig(new NodeSet(sourceTree), targetUrl);
     }
 
     public void copyConfig(NodeSet sourceTrees, String targetUrl)
-            throws INMException, IOException {
+            throws NetconfException, IOException {
 
         trace("copyConfig: target=" + targetUrl + "\n"
                 + sourceTrees.toXMLString());
@@ -860,7 +860,7 @@ public class NetconfSession {
      * @param target
      *            The target datastore
      */
-    public void copyConfig(int source, int target) throws INMException,
+    public void copyConfig(int source, int target) throws NetconfException,
             IOException {
         trace("copyConfig: " + datastoreToString(source) + " "
                 + datastoreToString(target));
@@ -879,7 +879,7 @@ public class NetconfSession {
      * @param targetUrl
      *            The target URL.
      */
-    public void copyConfig(int source, String targetUrl) throws INMException,
+    public void copyConfig(int source, String targetUrl) throws NetconfException,
             IOException {
         trace("copyConfig: source=" + datastoreToString(source) + " target="
                 + targetUrl);
@@ -898,7 +898,7 @@ public class NetconfSession {
      *            The target URL.
      */
     public void copyConfig(String sourceUrl, String targetUrl)
-            throws INMException, IOException {
+            throws NetconfException, IOException {
         trace("copyConfig: source=" + sourceUrl + " target=" + targetUrl);
         encode_copyConfig(out, encode_url(sourceUrl), encode_url(targetUrl));
         out.flush();
@@ -914,7 +914,7 @@ public class NetconfSession {
      * @param target
      *            The target datastore
      */
-    public void copyConfig(String sourceUrl, int target) throws INMException,
+    public void copyConfig(String sourceUrl, int target) throws NetconfException,
             IOException {
         trace("copyConfig: source=" + sourceUrl + " target="
                 + datastoreToString(target));
@@ -930,7 +930,7 @@ public class NetconfSession {
      * @param datastore
      *            Datastore to be deleted
      */
-    public void deleteConfig(int datastore) throws INMException, IOException {
+    public void deleteConfig(int datastore) throws NetconfException, IOException {
         trace("deleteConfig: " + datastoreToString(datastore));
         encode_deleteConfig(out, encode_datastore(datastore));
         out.flush();
@@ -943,7 +943,7 @@ public class NetconfSession {
      * @param targetUrl
      *            Name of configuration target url to be deleted.
      */
-    public void deleteConfig(String targetUrl) throws INMException, IOException {
+    public void deleteConfig(String targetUrl) throws NetconfException, IOException {
         trace("deleteConfig: " + targetUrl);
         encode_deleteConfig(out, encode_url(targetUrl));
         out.flush();
@@ -963,7 +963,7 @@ public class NetconfSession {
      * @param datastore
      *            The datastore to lock
      */
-    public void lock(int datastore) throws INMException, IOException {
+    public void lock(int datastore) throws NetconfException, IOException {
         trace("lock: " + datastoreToString(datastore));
         encode_lock(out, encode_datastore(datastore));
         out.flush();
@@ -977,7 +977,7 @@ public class NetconfSession {
      * @param datastore
      *            The target datastore to unlock
      */
-    public void unlock(int datastore) throws INMException, IOException {
+    public void unlock(int datastore) throws NetconfException, IOException {
         trace("unlock: " + datastoreToString(datastore));
         encode_unlock(out, encode_datastore(datastore));
         out.flush();
@@ -1020,10 +1020,10 @@ public class NetconfSession {
      * @return A unique lock reference which should be used to unlockPartial()
      * 
      */
-    public int lockPartial(String[] select) throws INMException, IOException {
+    public int lockPartial(String[] select) throws NetconfException, IOException {
         trace("lockPartial");
         if (!capabilities.hasPartialLock())
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "capability :partial-lock is not supported by server");
         // Allow simple paths to instance identifiers also
         // if (!xpathCapability)
@@ -1036,7 +1036,7 @@ public class NetconfSession {
             Element t = reply.first().getFirst("self::lock-id");
             return Integer.parseInt((String) t.value);
         } catch (Exception e) {
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "bad lock-id returned from partial-lock: "
                             + reply.toXMLString());
         }
@@ -1048,7 +1048,7 @@ public class NetconfSession {
      * 
      * @see #lockPartial(int,String[])
      */
-    public int lockPartial(String select) throws INMException, IOException {
+    public int lockPartial(String select) throws NetconfException, IOException {
         return lockPartial(new String[] { select });
     }
 
@@ -1060,13 +1060,13 @@ public class NetconfSession {
      *            Previously received lock identifier from
      *            {@link #lockPartial(int,String[])}
      */
-    public void unlockPartial(int lockId) throws INMException, IOException {
+    public void unlockPartial(int lockId) throws NetconfException, IOException {
         trace("partialUnlock: " + lockId);
         if (!capabilities.hasPartialLock())
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "capability :partial-lock is not supported by server");
         if (!capabilities.hasXPath())
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "capability :xpath is not supported by server");
         int mid = encode_unlockPartial(out, lockId);
         out.flush();
@@ -1095,10 +1095,10 @@ public class NetconfSession {
      * 
      * 
      */
-    public void commit() throws INMException, IOException {
+    public void commit() throws NetconfException, IOException {
         trace("commit");
         if (!capabilities.hasCandidate())
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "the :candidate capability is not supported by server");
         int mid = encode_commit(out);
         out.flush();
@@ -1143,13 +1143,13 @@ public class NetconfSession {
      *            reverting config
      * 
      */
-    public void confirmedCommit(int timeout) throws INMException, IOException {
+    public void confirmedCommit(int timeout) throws NetconfException, IOException {
         trace("confirmedCommit: " + timeout);
         if (!capabilities.hasCandidate())
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "the :candidate capability is not supported by server");
         if (!capabilities.hasConfirmedCommit())
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "the :confirmed-commit capability is not supported by server");
         int mid = encode_confirmedCommit(out, timeout);
         out.flush();
@@ -1162,10 +1162,10 @@ public class NetconfSession {
      * candidate configuration to the current running configuration.
      * 
      */
-    public void discardChanges() throws INMException, IOException {
+    public void discardChanges() throws NetconfException, IOException {
         trace("discardChanges");
         if (!capabilities.hasCandidate())
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "the :candidate capability is not supported by server");
         int mid = encode_discardChanges(out);
         out.flush();
@@ -1180,7 +1180,7 @@ public class NetconfSession {
      * resources associated with the session and gracefully close any associated
      * connections.
      */
-    public void closeSession() throws INMException, IOException {
+    public void closeSession() throws NetconfException, IOException {
         trace("closeSession");
         int mid = encode_closeSession(out);
         out.flush();
@@ -1201,10 +1201,10 @@ public class NetconfSession {
      * @param sessionId
      *            The id of the session to terminate
      */
-    public void killSession(int sessionId) throws INMException, IOException {
+    public void killSession(int sessionId) throws NetconfException, IOException {
         trace("killSession: " + sessionId);
         if (sessionId == this.sessionId)
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "illegal to use kill-session on own session id");
         int mid = encode_killSession(out, sessionId);
         out.flush();
@@ -1218,10 +1218,10 @@ public class NetconfSession {
      * @param configTree
      *            configuration tree to validate
      */
-    public void validate(Element configTree) throws INMException, IOException {
+    public void validate(Element configTree) throws NetconfException, IOException {
         trace("validate: " + configTree.toXMLString());
         if (!capabilities.hasValidate())
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "capability :validate is not supported by server");
         int mid = encode_validate(out, configTree);
         out.flush();
@@ -1235,10 +1235,10 @@ public class NetconfSession {
      * @param datastore
      *            The datastore to validate
      */
-    public void validate(int datastore) throws IOException, INMException {
+    public void validate(int datastore) throws IOException, NetconfException {
         trace("validate: " + datastoreToString(datastore));
         if (!capabilities.hasValidate())
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "capability :validate is not supported by server");
         int mid = encode_validate(out, encode_datastore(datastore));
         out.flush();
@@ -1253,10 +1253,10 @@ public class NetconfSession {
      * @param url
      *            The source url to validate
      */
-    public void validate(String url) throws IOException, INMException {
+    public void validate(String url) throws IOException, NetconfException {
         trace("validate: " + url);
         if (!capabilities.hasValidate())
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "capability :validate is not supported by server");
         int mid = encode_validate(out, encode_url(url));
         out.flush();
@@ -1271,7 +1271,7 @@ public class NetconfSession {
      * @see #createSubscription(String,String,String,String)
      * 
      */
-    public void createSubscription() throws IOException, INMException {
+    public void createSubscription() throws IOException, NetconfException {
         createSubscription(null, (String) null, null, null);
     }
 
@@ -1289,7 +1289,7 @@ public class NetconfSession {
      * 
      */
     public void createSubscription(String stream) throws IOException,
-            INMException {
+            NetconfException {
         createSubscription(stream, (String) null, null, null);
     }
 
@@ -1333,12 +1333,12 @@ public class NetconfSession {
      * @see #receiveNotification()
      */
     public void createSubscription(String streamName, NodeSet eventFilter,
-            String startTime, String stopTime) throws IOException, INMException {
+            String startTime, String stopTime) throws IOException, NetconfException {
         trace("createSubscription: stream=" + streamName + " filter="
                 + eventFilter.toXMLString() + " from=" + startTime + " to="
                 + stopTime);
         if (!capabilities.hasNotification())
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "capability :notification is not supported by server");
         int mid = encode_createSubscription(out, streamName, eventFilter,
                 startTime, stopTime);
@@ -1361,14 +1361,14 @@ public class NetconfSession {
      * @see #receiveNotification()
      */
     public void createSubscription(String streamName, String eventFilter,
-            String startTime, String stopTime) throws IOException, INMException {
+            String startTime, String stopTime) throws IOException, NetconfException {
         trace("createSubscription: stream=" + streamName + " filter="
                 + eventFilter + " from=" + startTime + " to=" + stopTime);
         if (!capabilities.hasNotification())
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "capability :notification is not supported by server");
         if (!capabilities.hasXPath())
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "capability :xpath is not supported by server");
         int mid = encode_createSubscription(out, streamName, eventFilter,
                 startTime, stopTime);
@@ -1387,7 +1387,7 @@ public class NetconfSession {
      * 
      * The available streams are returned.
      */
-    public NodeSet getStreams() throws INMException, IOException {
+    public NodeSet getStreams() throws NetconfException, IOException {
         Element filter = Element
                 .create("urn:ietf:params:xml:ns:netmod:notification",
                         "netconf/streams");
@@ -1402,17 +1402,17 @@ public class NetconfSession {
      * 
      */
 
-    public Element receiveNotification() throws IOException, INMException {
+    public Element receiveNotification() throws IOException, NetconfException {
         StringBuffer notification = in.readOne();
         trace("notification= " + notification);
         if (notification.length() == 0)
-            throw new INMException(INMException.PARSER_ERROR, "empty input");
+            throw new NetconfException(NetconfException.PARSER_ERROR, "empty input");
         Element t = parser.parse(notification.toString());
         Element test = t.getFirst("self::notification");
         if (test != null)
             return t;
         /* rpc-error */
-        throw new INMException(INMException.NOTIFICATION_ERROR, t);
+        throw new NetconfException(NetconfException.NOTIFICATION_ERROR, t);
     }
 
     /**
@@ -1424,19 +1424,19 @@ public class NetconfSession {
      * Reads one rpc-reply from session and parse an <ok/>. If not ok then throw
      * RCP_REPLY_ERROR exception.
      */
-    void recv_rpc_reply_ok() throws INMException, IOException {
+    void recv_rpc_reply_ok() throws NetconfException, IOException {
         recv_rpc_reply_ok(null);
     }
 
-    void recv_rpc_reply_ok(int mid) throws INMException, IOException {
+    void recv_rpc_reply_ok(int mid) throws NetconfException, IOException {
         recv_rpc_reply_ok(Integer.toString(mid));
     }
 
-    void recv_rpc_reply_ok(String mid) throws INMException, IOException {
+    void recv_rpc_reply_ok(String mid) throws NetconfException, IOException {
         StringBuffer reply = in.readOne();
         trace("reply= " + reply);
         if (reply.length() == 0)
-            throw new INMException(INMException.PARSER_ERROR, "empty input");
+            throw new NetconfException(NetconfException.PARSER_ERROR, "empty input");
         Element t = parser.parse(reply.toString());
         Element rep = t.getFirst("self::rpc-reply");
         if (rep != null) {
@@ -1448,35 +1448,35 @@ public class NetconfSession {
         }
 
         /* rpc-error */
-        throw new INMException(INMException.RPC_REPLY_ERROR, t);
+        throw new NetconfException(NetconfException.RPC_REPLY_ERROR, t);
     }
 
     /**
      * Reads one rpc-reply from session and parse the <data>. Returns the
      * NodeSet contained in the data tag.
      */
-    NodeSet recv_rpc_reply_data(int mid) throws INMException, IOException {
+    NodeSet recv_rpc_reply_data(int mid) throws NetconfException, IOException {
         return recv_rpc_reply("/data", parser, Integer.toString(mid));
     }
 
-    NodeSet recv_rpc_reply_lockPartial(int mid) throws INMException,
+    NodeSet recv_rpc_reply_lockPartial(int mid) throws NetconfException,
             IOException {
         return recv_rpc_reply("", parser, Integer.toString(mid));
     }
 
-    NodeSet recv_call_rpc_reply(Element e, int mid) throws INMException,
+    NodeSet recv_call_rpc_reply(Element e, int mid) throws NetconfException,
             IOException {
         XMLParser parser = new XMLParser(); 
         // XXX Why new parser?
         return recv_rpc_reply("", parser, Integer.toString(mid));
     }
 
-    NodeSet recv_rpc_reply(String path) throws INMException, IOException {
+    NodeSet recv_rpc_reply(String path) throws NetconfException, IOException {
         return recv_rpc_reply(path, parser, null);
     }
 
     NodeSet recv_rpc_reply(String path, XMLParser parser, String mid)
-            throws INMException, IOException {
+            throws NetconfException, IOException {
         StringBuffer reply = in.readOne();
         trace("reply= " + reply);
 
@@ -1516,7 +1516,7 @@ public class NetconfSession {
             return new NodeSet();
         }
         /* rpc-error */
-        throw new INMException(INMException.RPC_REPLY_ERROR, t);
+        throw new NetconfException(NetconfException.RPC_REPLY_ERROR, t);
     }
 
     /**
@@ -1646,7 +1646,7 @@ public class NetconfSession {
      * </get-config> </rpc>
      */
     int encode_getConfig(Transport out, String source, Element subtreeFilter)
-            throws INMException {
+            throws NetconfException {
         int mid = encode_rpc_begin(out, withDefaultsAttr);
         out.println("<" + nc + "get-config>");
         out.print("<" + nc + "source>");
@@ -1666,7 +1666,7 @@ public class NetconfSession {
      * xmlns="http://example.com/math"> <add> <operand>2</operand>
      * <operand>3</operand> </add> </math> </rpc>
      */
-    int encode_rpc(Transport out, Element data) throws INMException {
+    int encode_rpc(Transport out, Element data) throws NetconfException {
         int mid = encode_rpc_begin(out);
         data.encode(out);
         encode_rpc_end(out);
@@ -1730,7 +1730,7 @@ public class NetconfSession {
     /**
      * Encode datastore
      */
-    String encode_datastore(int datastore) throws INMException {
+    String encode_datastore(int datastore) throws NetconfException {
         String prefix = Element.defaultPrefixes
                 .nsToPrefix(Element.NETCONF_NAMESPACE);
         nc = mk_prefix_colon(prefix);
@@ -1743,16 +1743,16 @@ public class NetconfSession {
         case STARTUP:
             return "<" + nc + "startup/>";
         }
-        throw new INMException(INMException.SESSION_ERROR,
+        throw new NetconfException(NetconfException.SESSION_ERROR,
                 "unknown datastore: " + datastore);
     }
 
     /**
      * Encode URL
      */
-    String encode_url(String url) throws INMException {
+    String encode_url(String url) throws NetconfException {
         if (!isUrlOK(url))
-            throw new INMException(INMException.SESSION_ERROR, "the url: \""
+            throw new NetconfException(NetconfException.SESSION_ERROR, "the url: \""
                     + url + "\" is not a supported :url scheme");
         return "<url>" + url + "</url>";
     }
@@ -1782,7 +1782,7 @@ public class NetconfSession {
      * type="subtree"> <top xmlns="http://example.com/schema/1.2/config">
      * <users/> </top> </filter> </get> </rpc>
      */
-    int encode_get(Transport out, Element subtreeFilter) throws INMException {
+    int encode_get(Transport out, Element subtreeFilter) throws NetconfException {
         int mid = encode_rpc_begin(out, withDefaultsAttr);
         out.println("<" + nc + "get>");
         out.println("<" + nc + "filter " + nc + "type=\"subtree\">");
@@ -1822,12 +1822,12 @@ public class NetconfSession {
      * 
      */
     int encode_editConfig(Transport out, String target, Element configTree)
-            throws INMException {
+            throws NetconfException {
         return encode_editConfig(out, target, new NodeSet(configTree));
     }
 
     int encode_editConfig(Transport out, String target, NodeSet configTrees)
-            throws INMException {
+            throws NetconfException {
 
         int mid = encode_rpc_begin(out);
         out.println("<" + nc + "edit-config>");
@@ -1853,7 +1853,7 @@ public class NetconfSession {
      * 
      */
     int encode_editConfig(Transport out, String target, String url)
-            throws INMException {
+            throws NetconfException {
         int mid = encode_rpc_begin(out);
         out.println("<" + nc + "edit-config>");
         out.print("<" + nc + "target>");
@@ -1871,7 +1871,7 @@ public class NetconfSession {
     /**
      * Encode default-operation for editConfig.
      */
-    void encode_defaultOperation(Transport out) throws INMException {
+    void encode_defaultOperation(Transport out) throws NetconfException {
         switch (defaultOperation) {
         case NOT_SET:
             return;
@@ -1888,7 +1888,7 @@ public class NetconfSession {
                     + "default-operation>");
             return;
         default:
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "unknown default-operation value: " + defaultOperation);
         }
     }
@@ -1896,20 +1896,20 @@ public class NetconfSession {
     /**
      * Encode test-option for editConfig
      */
-    void encode_testOption(Transport out) throws INMException {
+    void encode_testOption(Transport out) throws NetconfException {
         switch (testOption) {
         case NOT_SET:
             return;
         case SET:
             if (!capabilities.hasValidate())
-                throw new INMException(INMException.SESSION_ERROR,
+                throw new NetconfException(NetconfException.SESSION_ERROR,
                         "test-option is given but the :validate "
                                 + "capability is not supported by server");
             out.println("<" + nc + "test-option>set</" + nc + "test-option>");
             return;
         case TEST_THEN_SET:
             if (!capabilities.hasValidate())
-                throw new INMException(INMException.SESSION_ERROR,
+                throw new NetconfException(NetconfException.SESSION_ERROR,
                         "test-option is given but the :validate "
                                 + "capability is not supported by server");
             out.println("<" + nc + "test-option>test-then-set</" + nc
@@ -1917,14 +1917,14 @@ public class NetconfSession {
             return;
         case TEST_ONLY:
             if (!capabilities.hasValidate())
-                throw new INMException(INMException.SESSION_ERROR,
+                throw new NetconfException(NetconfException.SESSION_ERROR,
                         "test-option is given but the :validate "
                                 + "capability is not supported by server");
             out.println("<" + nc + "test-option>test-only</" + nc
                     + "test-option>");
             return;
         default:
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "unknown test-option value: " + testOption);
         }
     }
@@ -1932,7 +1932,7 @@ public class NetconfSession {
     /**
      * Encode error-option for editConfig
      */
-    void encode_errorOption(Transport out) throws INMException {
+    void encode_errorOption(Transport out) throws NetconfException {
         switch (errorOption) {
         case NOT_SET:
             return;
@@ -1946,14 +1946,14 @@ public class NetconfSession {
             return;
         case ROLLBACK_ON_ERROR:
             if (!capabilities.hasRollbackOnError())
-                throw new INMException(INMException.SESSION_ERROR,
+                throw new NetconfException(NetconfException.SESSION_ERROR,
                         "the :rollback-on-error capability "
                                 + "is used but not supported by server");
             out.println("<" + nc + "error-option>rollback-on-error</" + nc
                     + "error-option>");
             return;
         default:
-            throw new INMException(INMException.SESSION_ERROR,
+            throw new NetconfException(NetconfException.SESSION_ERROR,
                     "unknown error-option value: " + errorOption);
         }
     }
@@ -1968,7 +1968,7 @@ public class NetconfSession {
      * 
      */
     int encode_copyConfig(Transport out, Element sourceTree, String target)
-            throws INMException {
+            throws NetconfException {
         return encode_copyConfig(out, new NodeSet(sourceTree), target);
     }
 
@@ -1978,7 +1978,7 @@ public class NetconfSession {
      */
 
     int encode_copyConfig(Transport out, NodeSet sourceTrees, String target)
-            throws INMException {
+            throws NetconfException {
         int mid = encode_rpc_begin(out);
         out.println("<" + nc + "copy-config>");
         out.print("<" + nc + "target>");
@@ -2004,7 +2004,7 @@ public class NetconfSession {
      * 
      */
     int encode_copyConfig(Transport out, String source, String target)
-            throws INMException {
+            throws NetconfException {
         int mid = encode_rpc_begin(out, withDefaultsAttr);
         out.println("<" + nc + "copy-config>");
         out.print("<" + nc + "target>");
@@ -2203,7 +2203,7 @@ public class NetconfSession {
      * </source> </validate> </rpc>
      * 
      */
-    int encode_validate(Transport out, Element configTree) throws INMException {
+    int encode_validate(Transport out, Element configTree) throws NetconfException {
         int mid = encode_rpc_begin(out);
         out.println("<" + nc + "validate>");
         out.println("<" + nc + "source>");
@@ -2283,7 +2283,7 @@ public class NetconfSession {
      */
     int encode_createSubscription(Transport out, String stream,
             NodeSet eventFilter, String startTime, String stopTime)
-            throws INMException {
+            throws NetconfException {
         String prefix = Element.defaultPrefixes
                 .nsToPrefix(Capabilities.NS_NOTIFICATION);
         String ncn = mk_prefix_colon(prefix);
@@ -2355,13 +2355,13 @@ public class NetconfSession {
             System.err.println("*NetconfSession: " + s);
     }
 
-    void check_mid(Element t, String mid) throws INMException {
+    void check_mid(Element t, String mid) throws NetconfException {
         if (mid == null) {
             return;
         }
         String returned_id = t.getAttrValue("message-id");
         if (returned_id == null || (!returned_id.equals(mid))) {
-            throw new INMException(INMException.MESSAGE_ID_MISMATCH,
+            throw new NetconfException(NetconfException.MESSAGE_ID_MISMATCH,
                     "After sending rpc with message-id=" + mid
                             + ", received rpc-reply with message-id="
                             + returned_id);

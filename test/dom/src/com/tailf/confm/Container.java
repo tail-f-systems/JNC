@@ -213,7 +213,7 @@ public abstract class Container extends Element {
      * 
      */
     public void setLeafValue(String ns, String name, String value)
-            throws ConfMException, INMException {
+            throws ConfMException, NetconfException {
 
         // Aware
         String methodName = "set" + normalize(name) + "Value";
@@ -345,7 +345,7 @@ public abstract class Container extends Element {
     // ------------------------------------------------------------
 
     protected void setLeafValue(String ns, String path, Object value,
-            String[] childrenNames) throws INMException {
+            String[] childrenNames) throws NetconfException {
         NodeSet nodes = get(path);
 
         if (nodes.isEmpty()) {
@@ -359,18 +359,18 @@ public abstract class Container extends Element {
     }
 
     protected void setLeafListValue(String ns, String path, Object value,
-            String[] childrenNames) throws INMException {
+            String[] childrenNames) throws NetconfException {
         Leaf leaf = new Leaf(ns, path);
         leaf.setValue(value);
         insertChild(leaf, childrenNames);
     }
 
-    protected boolean isLeafDefault(String path) throws INMException {
+    protected boolean isLeafDefault(String path) throws NetconfException {
         NodeSet nodes = get(path);
         return (nodes.isEmpty());
     }
 
-    protected void markLeafReplace(String path) throws INMException {
+    protected void markLeafReplace(String path) throws NetconfException {
         NodeSet nodes = get(path);
 
         if (nodes.isEmpty()) {
@@ -379,7 +379,7 @@ public abstract class Container extends Element {
         } else nodes.first().markReplace();
     }
 
-    protected void markLeafMerge(String path) throws INMException {
+    protected void markLeafMerge(String path) throws NetconfException {
         NodeSet nodes = get(path);
         if (nodes.isEmpty()) {
             throw new ConfMException(ConfMException.ELEMENT_MISSING,
@@ -387,7 +387,7 @@ public abstract class Container extends Element {
         } else nodes.first().markMerge();
     }
 
-    protected void markLeafCreate(String path) throws INMException {
+    protected void markLeafCreate(String path) throws NetconfException {
         NodeSet nodes = get(path);
 
         if (nodes.isEmpty()) {
@@ -396,7 +396,7 @@ public abstract class Container extends Element {
         } else nodes.first().markCreate();
     }
 
-    protected void markLeafDelete(String path) throws INMException {
+    protected void markLeafDelete(String path) throws NetconfException {
         NodeSet nodes = get(path);
 
         if (nodes.isEmpty()) {
@@ -408,7 +408,7 @@ public abstract class Container extends Element {
     /**
      *
      */
-    protected Container getListContainer(String path) throws INMException {
+    protected Container getListContainer(String path) throws NetconfException {
         NodeSet nodes = get(path);
         if (nodes.isEmpty()) {
             throw new ConfMException(ConfMException.ELEMENT_MISSING,
@@ -633,7 +633,7 @@ public abstract class Container extends Element {
      * @return Return subtree with operations to transmute subtree A into
      *         subtree B.
      */
-    public Container sync(Container b) throws INMException {
+    public Container sync(Container b) throws NetconfException {
         return Container.sync(this, b);
     }
 
@@ -650,7 +650,7 @@ public abstract class Container extends Element {
      *         subtree B.
      */
 
-    public static Container sync(Container a, Container b) throws INMException {
+    public static Container sync(Container a, Container b) throws NetconfException {
 
         NodeSet uniqueA = new NodeSet();
         NodeSet uniqueB = new NodeSet();
@@ -686,7 +686,7 @@ public abstract class Container extends Element {
      * @return Subtrees with operations to transmute subtree A into subtree B.
      */
 
-    public static NodeSet syncMerge(NodeSet a, NodeSet b) throws INMException {
+    public static NodeSet syncMerge(NodeSet a, NodeSet b) throws NetconfException {
         DummyContainer aDummy = new DummyContainer("DUMMY", "dummy");
         DummyContainer bDummy = new DummyContainer("DUMMY", "dummy");
         int i;
@@ -857,7 +857,7 @@ public abstract class Container extends Element {
      *         subtree B.
      */
 
-    public static NodeSet sync(NodeSet a, NodeSet b) throws INMException {
+    public static NodeSet sync(NodeSet a, NodeSet b) throws NetconfException {
         DummyContainer aDummy = new DummyContainer("DUMMY", "dummy");
         DummyContainer bDummy = new DummyContainer("DUMMY", "dummy");
         int i;
@@ -929,7 +929,7 @@ public abstract class Container extends Element {
      *            File name.
      * @see #writeFile(String)
      */
-    public static Element readFile(String filename) throws INMException {
+    public static Element readFile(String filename) throws NetconfException {
         XMLParser p = new com.tailf.confm.XMLParser();
         return p.readFile(filename);
     }
@@ -939,7 +939,7 @@ public abstract class Container extends Element {
     private CsNode n = null;
 
     protected void encode(Transport out, boolean newline_at_end,
-            Capabilities capas) throws INMException {
+            Capabilities capas) throws NetconfException {
         if (RevisionInfo.olderRevisionSupportEnabled && capas != null) {
             if (tp == null)
                 tp = tagpath();
@@ -957,8 +957,8 @@ public abstract class Container extends Element {
                         case RevisionInfo.R_MAX_ELEM_RAISED:
                             int max = r.idata;
                             if (getChildren().size() > max) {
-                                throw new INMException(
-                                        INMException.REVISION_ERROR,
+                                throw new NetconfException(
+                                        NetconfException.REVISION_ERROR,
                                         tp + "too many children for old node "
                                                 + "with rev( " + rev + ")");
                             }

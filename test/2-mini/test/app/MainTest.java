@@ -56,7 +56,7 @@ public class MainTest {
     
     @BeforeClass
     public static void oneTimeSetUp() throws InterruptedException, IOException,
-            INMException {
+            NetconfException {
         Mini.enable();
         startConfD();
     }
@@ -67,7 +67,7 @@ public class MainTest {
     }
     
     @Test
-    public void testInitialConfig() throws INMException, IOException {
+    public void testInitialConfig() throws NetconfException, IOException {
         Iterator iter = main.getConfig().listIterator();
         boolean test3Found = false, test4Found = false;
         while (iter.hasNext()) {
@@ -83,7 +83,7 @@ public class MainTest {
     }
     
     @Test
-    public void testUpdateConfig() throws INMException, IOException {
+    public void testUpdateConfig() throws NetconfException, IOException {
         gen.L l = null;
         String msg = "test2 already in configuration!";
         Iterator iter = main.getConfig().listIterator();

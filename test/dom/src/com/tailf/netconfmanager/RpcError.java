@@ -140,7 +140,7 @@ public class RpcError {
             e = data.getFirst("self::rpc-error/error-path");
             if (e != null)
                 errorPath = (String) e.getValue();
-        } catch (INMException e1) {
+        } catch (NetconfException e1) {
             System.err.println("Error decoding rpc-error element: "
                     + data.toXMLString() + "\ngot exception: " + e1);
             e1.printStackTrace();
