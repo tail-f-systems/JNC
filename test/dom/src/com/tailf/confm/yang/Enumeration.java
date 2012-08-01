@@ -19,7 +19,7 @@ package com.tailf.confm.yang;
  * 
  * @author emil@tail-f.com
  */
-public class Enumeration extends JString {
+public class Enumeration extends YangString {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in

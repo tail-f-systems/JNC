@@ -24,7 +24,7 @@ import com.tailf.confm.ConfMException;
  * 
  * @author emil@tail-f.com
  */
-public class JString extends Type<String> {
+public class YangString extends Type<String> {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
@@ -38,7 +38,7 @@ public class JString extends Type<String> {
      * 
      * @param value The Java String.
      */
-    public JString(String value) {
+    public YangString(String value) {
         setValue(value);
     }
 
@@ -79,7 +79,7 @@ public class JString extends Type<String> {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return obj instanceof JString || obj instanceof String;
+        return obj instanceof YangString || obj instanceof String;
     }
 
     /* ---------- Restrictions ---------- */

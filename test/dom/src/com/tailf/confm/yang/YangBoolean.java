@@ -18,7 +18,7 @@ import com.tailf.confm.ConfMException;
  * 
  * @author emil@tail-f.com
  */
-public class JBoolean extends Type<Boolean> {
+public class YangBoolean extends Type<Boolean> {
 
     /**
      * Generated serial version UID, to be changed if this class is modified in
@@ -33,7 +33,7 @@ public class JBoolean extends Type<Boolean> {
      * @param s The string.
      * @throws ConfMException If value is not one of "true" or "false".
      */
-    public JBoolean(String s) throws ConfMException {
+    public YangBoolean(String s) throws ConfMException {
         super(s);
     }
 
@@ -43,7 +43,7 @@ public class JBoolean extends Type<Boolean> {
      * @param b The boolean to set the value of the new YangBoolean to.
      * @throws ConfMException Never.
      */
-    public JBoolean(boolean b) throws ConfMException {
+    public YangBoolean(boolean b) throws ConfMException {
         super(b);
     }
 
@@ -83,7 +83,7 @@ public class JBoolean extends Type<Boolean> {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return obj instanceof JBoolean || obj instanceof Boolean;
+        return obj instanceof YangBoolean || obj instanceof Boolean;
     }
 
 }
