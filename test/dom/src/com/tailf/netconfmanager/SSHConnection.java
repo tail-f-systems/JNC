@@ -141,7 +141,7 @@ public class SSHConnection {
     public void authenticateWithPassword(String user, String password)
             throws IOException, NetconfException {
         if (!connection.authenticateWithPassword(user, password))
-            throw new NetconfException(NetconfException.AUTH_FAILED);
+            throw new NetconfException(NetconfException.AUTH_FAILED, this);
     }
 
     /**
@@ -160,12 +160,12 @@ public class SSHConnection {
             String password) throws IOException, NetconfException {
         try {
             if (!connection.authenticateWithPublicKey(user, pemFile, password)) {
-                throw new NetconfException(NetconfException.AUTH_FAILED);
+                throw new NetconfException(NetconfException.AUTH_FAILED, this);
             }
         } catch (IOException e) {
             throw e;
         } catch (Exception e) {
-            throw new NetconfException(NetconfException.AUTH_FAILED);
+            throw new NetconfException(NetconfException.AUTH_FAILED, this);
         }
     }
 
@@ -183,7 +183,7 @@ public class SSHConnection {
     public void authenticateWithPublicKey(String user, char[] pemPrivateKey,
             String pass) throws IOException, NetconfException {
         if (!connection.authenticateWithPublicKey(user, pemPrivateKey, pass)) {
-            throw new NetconfException(NetconfException.AUTH_FAILED);
+            throw new NetconfException(NetconfException.AUTH_FAILED, this);
         }
     }
 

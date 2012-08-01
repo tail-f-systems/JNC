@@ -23,14 +23,6 @@ public class NetconfException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
-    public NetconfException() {
-        this(NOT_SET, null);
-    }
-
-    public NetconfException(int errorCode) {
-        this(errorCode, null);
-    }
-
     public NetconfException(int errorCode, Object opaqueData) {
         this.errorCode = errorCode;
         this.opaqueData = opaqueData;
@@ -57,9 +49,7 @@ public class NetconfException extends Exception {
      * An error code indicating what went wrong. This field may take any of
      * these values:
      * <ul>
-     * <li> {@link #NOT_SET}
      * <li> {@link #AUTH_FAILED}
-     * <li> {@link #NODE_ERROR}
      * <li> {@link #PATH_ERROR}
      * <li> {@link #PATH_CREATE_ERROR}
      * <li> {@link #PARSER_ERROR}
@@ -75,23 +65,21 @@ public class NetconfException extends Exception {
      * Depending on the value the opaqueData field may be set accordingly. If so
      * this is described below for each possible value.
      */
-    public int errorCode = NOT_SET;
+    protected int errorCode;
 
     /**
      * Contextual information describing the error. The meaning of this field as
      * is described for each possible errorCode value.
      */
-    public Object opaqueData = null;
+    protected Object opaqueData = null;
 
     /**
      * If errorCode is RPC_REPLY_ERROR the rpc-error is parsed and the rpcErrors
      * array will contain the returned error information.
      */
-    public RpcError[] rpcErrors;
+    private RpcError[] rpcErrors;
 
-    public static final int NOT_SET = 0;
     public static final int AUTH_FAILED = -1;
-    public static final int NODE_ERROR = -2;
     public static final int PATH_ERROR = -3;
     public static final int PATH_CREATE_ERROR = -4;
     public static final int PARSER_ERROR = -5;
@@ -155,12 +143,8 @@ public class NetconfException extends Exception {
 
     public String toString() {
         switch (errorCode) {
-        case NOT_SET:
-            return "Error reason not specified";
         case AUTH_FAILED:
             return "Authentication failed";
-        case NODE_ERROR:
-            return "Unknown error";
         case PATH_ERROR:
             return "Error in path: " + opaqueData;
         case PATH_CREATE_ERROR:
