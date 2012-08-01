@@ -13,7 +13,7 @@ package com.tailf.jpyang.type;
 
 import java.math.BigInteger;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 
 /**
  * Implements the built-in YANG data type "bits".
@@ -35,11 +35,10 @@ public abstract class Bits extends Int<BigInteger> {
      * 
      * @param value The value to initialize the object with, as a string.
      * @param mask The bit mask as a string.
-     * @throws ConfMException If value does not match mask.
+     * @throws JPyangException If value does not match mask.
      * @throws NumberFormatException If value or mask are not valid as numbers.
      */
-    public Bits(String value, String mask)
-            throws ConfMException {
+    public Bits(String value, String mask) throws JPyangException {
         this(new BigInteger(value), new BigInteger(mask));
     }
 
@@ -48,10 +47,9 @@ public abstract class Bits extends Int<BigInteger> {
      * 
      * @param value The value to initialize the object with.
      * @param mask The bit mask to initialize the object with.
-     * @throws ConfMException If value does not match mask.
+     * @throws JPyangException If value does not match mask.
      */
-    public Bits(BigInteger value, BigInteger mask)
-            throws ConfMException {
+    public Bits(BigInteger value, BigInteger mask) throws JPyangException {
         super(value);
         check(mask);
     }
@@ -61,11 +59,10 @@ public abstract class Bits extends Int<BigInteger> {
      * 
      * @param value The value to set this object's value to, as a string.
      * @param mask The bit mask to use, as a string.
-     * @throws ConfMException If value does not match mask.
+     * @throws JPyangException If value does not match mask.
      * @throws NumberFormatException If value or mask are not valid as numbers.
      */
-    public void setValue(String value, String mask)
-            throws ConfMException {
+    public void setValue(String value, String mask) throws JPyangException {
         setValue(new BigInteger(value), new BigInteger(mask));
     }
 
@@ -74,10 +71,10 @@ public abstract class Bits extends Int<BigInteger> {
      * 
      * @param value The value to set this object's value to.
      * @param mask The bit mask to use.
-     * @throws ConfMException If value does not match mask.
+     * @throws JPyangException If value does not match mask.
      */
-    public void setValue(BigInteger value, BigInteger mask)
-            throws ConfMException {
+    public void setValue(BigInteger value, BigInteger mask) 
+            throws JPyangException {
         super.setValue(value);
         check(mask);
     }
@@ -94,11 +91,11 @@ public abstract class Bits extends Int<BigInteger> {
     /**
      * Checks that the value space matches mask.
      * @param mask Bit mask.
-     * @throws ConfMException if value space does not match mask.
+     * @throws JPyangException if value space does not match mask.
      */
-    public void check(BigInteger mask) throws ConfMException {
+    public void check(BigInteger mask) throws JPyangException {
         boolean fail = mask.or(value).compareTo(mask) == 0;
-        ConfMException.throwException(fail, this);
+        JPyangException.throwException(fail, this);
         check();
     }
 

@@ -11,7 +11,7 @@
 
 package com.tailf.jpyang.type;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 
 /**
  * Implements the built-in YANG data type "uint32".
@@ -31,10 +31,10 @@ public class UInt32 extends Int64 {
      * Creates a YangUInt32 object from a String.
      * 
      * @param s The string.
-     * @throws ConfMException If value could not be parsed from s or if it is
+     * @throws JPyangException If value could not be parsed from s or if it is
      *                        negative or larger than 0xffffffffL.
      */
-    public UInt32(String s) throws ConfMException {
+    public UInt32(String s) throws JPyangException {
         super(s);
         setMinMax(0L, 0xffffffffL);
         check();
@@ -45,9 +45,9 @@ public class UInt32 extends Int64 {
      * truncation.
      * 
      * @param n The initial value of the new YangUInt32 object.
-     * @throws ConfMException If value is negative or larger than 0xffffffffL.
+     * @throws JPyangException If value is negative or larger than 0xffffffffL.
      */
-    public UInt32(Number n) throws ConfMException {
+    public UInt32(Number n) throws JPyangException {
         super(n);
         setMinMax(0L, 0xffffffffL);
         check();
@@ -60,7 +60,7 @@ public class UInt32 extends Int64 {
      * @see com.tailf.jpyang.type.Int#min(int)
      */
     @Override
-    protected void min(int min) throws ConfMException {
+    protected void min(int min) throws JPyangException {
         TypeUtil.restrict(value & 0xffffffffL, min & 0xffffffffL,
                 TypeUtil.Operator.GR);
     }
@@ -70,7 +70,7 @@ public class UInt32 extends Int64 {
      * @see com.tailf.jpyang.type.Int#max(int)
      */
     @Override
-    protected void max(int max) throws ConfMException {
+    protected void max(int max) throws JPyangException {
         TypeUtil.restrict(value & 0xffffffffL, max & 0xffffffffL,
                 TypeUtil.Operator.LT);
     }

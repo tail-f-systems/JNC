@@ -11,7 +11,7 @@
 
 package com.tailf.jpyang.type;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 
 /**
  * Implements the built-in YANG data type "int32".
@@ -31,9 +31,9 @@ public class Int32 extends Int<Integer> {
      * Creates a YangInt32 object from a String.
      * 
      * @param s The string.
-     * @throws ConfMException If value could not be parsed from s.
+     * @throws JPyangException If value could not be parsed from s.
      */
-    public Int32(String s) throws ConfMException {
+    public Int32(String s) throws JPyangException {
         super(s);
         setMinMax(Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
@@ -43,13 +43,13 @@ public class Int32 extends Int<Integer> {
      * truncation.
      * 
      * @param value The initial value of the new YangInt32 object.
-     * @throws ConfMException If value does not fit in 8 bits.
+     * @throws JPyangException If value does not fit in 8 bits.
      */
-    public Int32(Number value) throws ConfMException {
+    public Int32(Number value) throws JPyangException {
         super(value.intValue());
         setMinMax(Integer.MIN_VALUE, Integer.MAX_VALUE);
         if (!(value instanceof Integer)) {
-            ConfMException.throwException(!valid(value), this);
+            JPyangException.throwException(!valid(value), this);
         }
     }
 

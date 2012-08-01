@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 import com.tailf.jpyang.type.Int16;
 
 public class Int16Test {
@@ -28,7 +28,7 @@ public class Int16Test {
     }
 
     @Test
-    public void testCheck() throws ConfMException {
+    public void testCheck() throws JPyangException {
         i1.check();
         i2.check();
         i3.check();

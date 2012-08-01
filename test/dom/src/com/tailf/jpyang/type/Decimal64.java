@@ -13,7 +13,7 @@ package com.tailf.jpyang.type;
 
 import java.math.BigDecimal;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 
 /**
  * Implements the built-in YANG data type "decimal64".
@@ -41,14 +41,14 @@ public class Decimal64 extends Int<BigDecimal> {
      * 
      * @param s The string.
      * @param fractionDigits Number of decimals allowed.
-     * @throws ConfMException If value is too small or too large with regard to
+     * @throws JPyangException If value is too small or too large with regard to
      *                        the fractionDigits argument.
      * @throws NumberFormatException If value is not a valid representation of
      *                               a java.math.BigDecimal.
      * @see java.math.BigDecimal
      */
     public Decimal64(String s, int fractionDigits)
-            throws ConfMException {
+            throws JPyangException {
         super(s);
         this.fractionDigits = fractionDigits;
         setMinMax();
@@ -59,10 +59,10 @@ public class Decimal64 extends Int<BigDecimal> {
      * 
      * @param n The Number to initialize the value of this object with.
      * @param fractionDigits Number of decimals allowed in value.
-     * @throws ConfMException If n is too small or too large with regard to
+     * @throws JPyangException If n is too small or too large with regard to
      *                        the fractionDigits argument.
      */
-    public Decimal64(Number n, int fractionDigits) throws ConfMException {
+    public Decimal64(Number n, int fractionDigits) throws JPyangException {
         super(TypeUtil.bigDecimalValueOf(n));
         this.fractionDigits = fractionDigits;
         setMinMax();
@@ -73,14 +73,14 @@ public class Decimal64 extends Int<BigDecimal> {
      * 
      * @param value The string.
      * @param fractionDigits Number of decimals allowed.
-     * @throws ConfMException If value is too small or too large with regard to
+     * @throws JPyangException If value is too small or too large with regard to
      *                        the fractionDigits argument.
      * @throws NumberFormatException If value is not a valid representation of
      *                               a java.math.BigDecimal.
      * @see java.math.BigDecimal
      */
     public void setValue(String value, int fractionDigits)
-            throws ConfMException {
+            throws JPyangException {
         setValue(new BigDecimal(value), fractionDigits);
     }
 
@@ -89,10 +89,10 @@ public class Decimal64 extends Int<BigDecimal> {
      * 
      * @param value The BigDecimal.
      * @param fractionDigits Number of decimals allowed.
-     * @throws ConfMException If value is too small or too large with regard to
+     * @throws JPyangException If value is too small or too large with regard to
      *                        the fractionDigits argument.
      */
-    public void setValue(Number n, int fractionDigits) throws ConfMException {
+    public void setValue(Number n, int fractionDigits) throws JPyangException {
         BigDecimal value = TypeUtil.bigDecimalValueOf(n);
         super.setValue(value);
         this.fractionDigits = fractionDigits;
@@ -103,10 +103,10 @@ public class Decimal64 extends Int<BigDecimal> {
     /**
      * Sets the MIN_VALUE and MAX_VALUE fields of this object.
      * 
-     * @throws ConfMException If the fractionDigits field is not set.
+     * @throws JPyangException If the fractionDigits field is not set.
      */
-    private void setMinMax() throws ConfMException {
-        ConfMException.throwException(fractionDigits == null, this);
+    private void setMinMax() throws JPyangException {
+        JPyangException.throwException(fractionDigits == null, this);
         BigDecimal pow63 = new BigDecimal("2.0").pow(63);
         BigDecimal minValue = pow63.negate().movePointLeft(fractionDigits);
         pow63 = pow63.add(BigDecimal.ONE);
@@ -133,14 +133,14 @@ public class Decimal64 extends Int<BigDecimal> {
     /**
      * Checks that the value of this object does not violate any invariants.
      * 
-     * @throws ConfMException If fractionDigits is not in [1, 18] or if value
+     * @throws JPyangException If fractionDigits is not in [1, 18] or if value
      *                        of this object is not in [minValue, maxValue].
      */
     @Override
-    public void check() throws ConfMException {
+    public void check() throws JPyangException {
         // Check that the fraction-digits arguments value is within bounds
         boolean withinBounds = fractionDigits < 1 || fractionDigits > 18;
-        ConfMException.throwException(withinBounds, this);
+        JPyangException.throwException(withinBounds, this);
         
         // Check value bounds using parent check method
         super.check();

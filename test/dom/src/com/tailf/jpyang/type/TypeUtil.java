@@ -3,7 +3,7 @@ package com.tailf.jpyang.type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 
 final class TypeUtil {
 
@@ -75,16 +75,16 @@ final class TypeUtil {
      * @param value A Number or String to be compared.
      * @param arg The integer value to compare against.
      * @param op The operator to use (EQ: ==, GR: &gt;, LT: &lt;).
-     * @throws ConfMException If the comparison does not evaluate to true.
+     * @throws JPyangException If the comparison does not evaluate to true.
      */
-    public static void restrict(Object value, long arg, Operator op) throws ConfMException {
+    public static void restrict(Object value, long arg, Operator op) throws JPyangException {
         boolean fail = true;
         if (value instanceof Number) {
             fail = !op.cmp(((Number) value).intValue(), arg);
         } else if (value instanceof String) {
             fail = !op.cmp(((String) value).length(), arg);
         }
-        ConfMException.throwException(fail, value);
+        JPyangException.throwException(fail, value);
     }
 
     /**

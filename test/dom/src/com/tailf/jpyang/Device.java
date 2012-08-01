@@ -440,7 +440,7 @@ public class Device implements Serializable {
      * 
      */
     public void newSession(String sessionName) throws NetconfException,
-            IOException, ConfMException {
+            IOException, JPyangException {
         newSession(null, sessionName);
     }
 
@@ -455,7 +455,7 @@ public class Device implements Serializable {
      *            symbolic Name of the session
      */
     public void newSession(IOSubscriber sub, String sessionName)
-            throws NetconfException, IOException, ConfMException {
+            throws NetconfException, IOException, JPyangException {
         SessionConnData data = getConnData(sessionName);
         // always create the configTree
         newSessionConfigTree(sessionName);
@@ -463,7 +463,7 @@ public class Device implements Serializable {
         // Check that we don't already have a session with
         // that name
         if (data != null)
-            throw new ConfMException(ConfMException.BAD_SESSION_NAME,
+            throw new JPyangException(JPyangException.BAD_SESSION_NAME,
                     sessionName);
 
         XMLParser parser = new com.tailf.jpyang.XMLParser();
@@ -516,7 +516,7 @@ public class Device implements Serializable {
         System.out.println("Running backlog ");
         SessionConnData data = getConnData(sessionName);
         if (data == null)
-            throw new ConfMException(ConfMException.BAD_SESSION_NAME,
+            throw new JPyangException(JPyangException.BAD_SESSION_NAME,
                     sessionName);
         for (int i = 0; i < backlog.size(); i++) {
             Element e = (Element) backlog.get(i);

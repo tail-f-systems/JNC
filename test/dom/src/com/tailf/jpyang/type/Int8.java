@@ -11,7 +11,7 @@
 
 package com.tailf.jpyang.type;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 
 /**
  * Implements the built-in YANG data type "int8".
@@ -31,9 +31,9 @@ public class Int8 extends Int<Byte> {
      * Creates a YangInt8 object from a String.
      * 
      * @param s The string.
-     * @throws ConfMException If value could not be parsed from s.
+     * @throws JPyangException If value could not be parsed from s.
      */
-    public Int8(String s) throws ConfMException {
+    public Int8(String s) throws JPyangException {
         super(s);
         setMinMax(Byte.MIN_VALUE, Byte.MAX_VALUE);
     }
@@ -43,13 +43,13 @@ public class Int8 extends Int<Byte> {
      * truncation.
      * 
      * @param value The initial value of the new YangInt8 object.
-     * @throws ConfMException If value does not fit in 8 bits.
+     * @throws JPyangException If value does not fit in 8 bits.
      */
-    public Int8(Number value) throws ConfMException {
+    public Int8(Number value) throws JPyangException {
         super(value.byteValue());
         setMinMax(Byte.MIN_VALUE, Byte.MAX_VALUE);
         if (!(value instanceof Byte)) {
-            ConfMException.throwException(!valid(value), this);
+            JPyangException.throwException(!valid(value), this);
         }
     }
 

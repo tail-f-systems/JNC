@@ -11,7 +11,7 @@
 
 package com.tailf.jpyang.type;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 
 /**
  * Implements the built-in YANG data type "uint8".
@@ -31,10 +31,10 @@ public class UInt8 extends Int16 {
      * Creates a YangUInt8 object from a String.
      * 
      * @param s The string.
-     * @throws ConfMException If value could not be parsed from s or if the
+     * @throws JPyangException If value could not be parsed from s or if the
      *                        parsed value is negative or larger than 0xff.
      */
-    public UInt8(String s) throws ConfMException {
+    public UInt8(String s) throws JPyangException {
         super(s);
         setMinMax(0, 0xff);
         check();
@@ -45,9 +45,9 @@ public class UInt8 extends Int16 {
      * truncation.
      * 
      * @param value The initial value of the new YangUInt8 object.
-     * @throws ConfMException If value is negative or larger than 0xff.
+     * @throws JPyangException If value is negative or larger than 0xff.
      */
-    public UInt8(Number value) throws ConfMException {
+    public UInt8(Number value) throws JPyangException {
         super(value);
         setMinMax(0, 0xff);
         check();
@@ -60,7 +60,7 @@ public class UInt8 extends Int16 {
      * @see com.tailf.jpyang.type.Int#min(int)
      */
     @Override
-    protected void min(int min) throws ConfMException {
+    protected void min(int min) throws JPyangException {
         TypeUtil.restrict(value & 0xffffffffL, min & 0xffffffffL,
                 TypeUtil.Operator.GR);
     }
@@ -70,7 +70,7 @@ public class UInt8 extends Int16 {
      * @see com.tailf.jpyang.type.Int#max(int)
      */
     @Override
-    protected void max(int max) throws ConfMException {
+    protected void max(int max) throws JPyangException {
         TypeUtil.restrict(value & 0xffffffffL, max & 0xffffffffL,
                 TypeUtil.Operator.LT);
     }

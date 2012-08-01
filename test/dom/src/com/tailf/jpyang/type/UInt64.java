@@ -13,7 +13,7 @@ package com.tailf.jpyang.type;
 
 import java.math.BigInteger;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 
 /**
  * Implements the built-in YANG data type "uint64".
@@ -33,10 +33,10 @@ public class UInt64 extends Int<BigInteger> {
      * Creates a YangUInt64 object from a String.
      * 
      * @param s The string.
-     * @throws ConfMException If value could not be parsed from s or if it is
+     * @throws JPyangException If value could not be parsed from s or if it is
      *                        negative or larger than 18446744073709551615.
      */
-    public UInt64(String s) throws ConfMException {
+    public UInt64(String s) throws JPyangException {
         super(s);
         setMinMax(0, new BigInteger("18446744073709551615"));
         check();
@@ -47,10 +47,10 @@ public class UInt64 extends Int<BigInteger> {
      * truncation.
      * 
      * @param n The initial value of the new YangUInt64 object.
-     * @throws ConfMException If value is negative or if it is larger than
+     * @throws JPyangException If value is negative or if it is larger than
      *                        18446744073709551615.
      */
-    public UInt64(Number n) throws ConfMException {
+    public UInt64(Number n) throws JPyangException {
         super(TypeUtil.bigDecimalValueOf(n).toBigInteger());
         setMinMax(0, new BigInteger("18446744073709551615"));
         check();
@@ -60,14 +60,14 @@ public class UInt64 extends Int<BigInteger> {
      * Sets the value of this object using a Number.
      * 
      * @param n The new value to set.
-     * @throws ConfMException If an invariant was broken during assignment or
+     * @throws JPyangException If an invariant was broken during assignment or
      *                        if the number has a non-zero fractional part.
      */
-    public void setValue(Number n) throws ConfMException {
+    public void setValue(Number n) throws JPyangException {
         try {
             super.setValue(TypeUtil.bigDecimalValueOf(n).toBigIntegerExact());
         } catch (ArithmeticException e) {
-            ConfMException.throwException(true, e);
+            JPyangException.throwException(true, e);
         }
     }
 
@@ -87,9 +87,9 @@ public class UInt64 extends Int<BigInteger> {
      * @see com.tailf.jpyang.type.Int#exact(int)
      */
     @Override
-    protected void exact(int other) throws ConfMException {
+    protected void exact(int other) throws JPyangException {
         BigInteger b = BigInteger.valueOf(other);
-        ConfMException.throwException(!value.equals(b), this);
+        JPyangException.throwException(!value.equals(b), this);
     }
 
     /*
@@ -97,9 +97,9 @@ public class UInt64 extends Int<BigInteger> {
      * @see com.tailf.jpyang.type.Int#min(int)
      */
     @Override
-    protected void min(int min) throws ConfMException {
+    protected void min(int min) throws JPyangException {
         BigInteger b = BigInteger.valueOf(min);
-        ConfMException.throwException(value.compareTo(b) < 0, this);
+        JPyangException.throwException(value.compareTo(b) < 0, this);
     }
 
     /*
@@ -107,9 +107,9 @@ public class UInt64 extends Int<BigInteger> {
      * @see com.tailf.jpyang.type.Int#max(int)
      */
     @Override
-    protected void max(int max) throws ConfMException {
+    protected void max(int max) throws JPyangException {
         BigInteger b = BigInteger.valueOf(max);
-        ConfMException.throwException(value.compareTo(b) > 0, this);
+        JPyangException.throwException(value.compareTo(b) > 0, this);
     }
 
 }

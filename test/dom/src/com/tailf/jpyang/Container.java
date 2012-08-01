@@ -131,7 +131,7 @@ public abstract class Container extends Element {
      * @return The created element or null if no container was created.
      */
     static Element createInstance(ConfHandler parser, Element parent,
-            String ns, String name) throws ConfMException {
+            String ns, String name) throws JPyangException {
         String pkg = hasPackage(ns);
         if (parent == null) {
             // ROOT
@@ -141,11 +141,11 @@ public abstract class Container extends Element {
                 return instantiate(null, name);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
-                throw new ConfMException(ConfMException.ELEMENT_MISSING,
+                throw new JPyangException(JPyangException.ELEMENT_MISSING,
                         name + ": Unexpected element");
             } catch (Exception e2) {
                 e2.printStackTrace();
-                throw new ConfMException(ConfMException.ELEMENT_MISSING,
+                throw new JPyangException(JPyangException.ELEMENT_MISSING,
                         name + ": Unexpected element");
             }
         } else {
@@ -176,14 +176,14 @@ public abstract class Container extends Element {
                     // It's an unknown container or child
                     // FIXME - check capabilities
                     if (!RevisionInfo.newerRevisionSupportEnabled) {
-                        throw new ConfMException(
-                                ConfMException.ELEMENT_MISSING,
+                        throw new JPyangException(
+                                JPyangException.ELEMENT_MISSING,
                                 parent.getPath(name) + ": Unexpected element");
                     }
                     parser.unknownLevel = 1;
                     return null;
                 } catch (Exception e2) {
-                    throw new ConfMException(ConfMException.ELEMENT_MISSING,
+                    throw new JPyangException(JPyangException.ELEMENT_MISSING,
                             parent.getPath(name) + ": Unexpected element");
                 }
             } else { // Container is aware but parent is not
@@ -196,11 +196,11 @@ public abstract class Container extends Element {
                     return child;
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
-                    throw new ConfMException(ConfMException.ELEMENT_MISSING,
+                    throw new JPyangException(JPyangException.ELEMENT_MISSING,
                             parent.getPath(name) + ": Unexpected element");
                 } catch (Exception e2) {
                     e2.printStackTrace();
-                    throw new ConfMException(ConfMException.ELEMENT_MISSING,
+                    throw new JPyangException(JPyangException.ELEMENT_MISSING,
                             parent.getPath(name) + ": Unexpected element");
                 }
             }
@@ -213,7 +213,7 @@ public abstract class Container extends Element {
      * 
      */
     public void setLeafValue(String ns, String name, String value)
-            throws ConfMException, NetconfException {
+            throws JPyangException, NetconfException {
 
         // Aware
         String methodName = "set" + normalize(name) + "Value";
@@ -225,7 +225,7 @@ public abstract class Container extends Element {
         } catch (NoSuchMethodException e) {
             if (!RevisionInfo.newerRevisionSupportEnabled) {
                 // e.printStackTrace();
-                throw new ConfMException(ConfMException.ELEMENT_MISSING,
+                throw new JPyangException(JPyangException.ELEMENT_MISSING,
                         getPath(name) + ": Unexpected element");
             }
             NodeSet nodes = get(name);
@@ -240,7 +240,7 @@ public abstract class Container extends Element {
         } catch (java.lang.reflect.InvocationTargetException cm) {
             // case with added enumerations,
             if (!RevisionInfo.newerRevisionSupportEnabled) {
-                throw new ConfMException(ConfMException.BAD_VALUE,
+                throw new JPyangException(JPyangException.BAD_VALUE,
                         getPath(name) + ": " + cm.getCause().toString());
             }
 
@@ -257,7 +257,7 @@ public abstract class Container extends Element {
 
         catch (Exception invErr) {
             // type error
-            throw new ConfMException(ConfMException.BAD_VALUE, getPath(name)
+            throw new JPyangException(JPyangException.BAD_VALUE, getPath(name)
                     + ": " + invErr.getCause().toString());
         }
     }
@@ -374,7 +374,7 @@ public abstract class Container extends Element {
         NodeSet nodes = get(path);
 
         if (nodes.isEmpty()) {
-            throw new ConfMException(ConfMException.ELEMENT_MISSING,
+            throw new JPyangException(JPyangException.ELEMENT_MISSING,
                     getPath(path));
         } else nodes.first().markReplace();
     }
@@ -382,7 +382,7 @@ public abstract class Container extends Element {
     protected void markLeafMerge(String path) throws NetconfException {
         NodeSet nodes = get(path);
         if (nodes.isEmpty()) {
-            throw new ConfMException(ConfMException.ELEMENT_MISSING,
+            throw new JPyangException(JPyangException.ELEMENT_MISSING,
                     getPath(path));
         } else nodes.first().markMerge();
     }
@@ -391,7 +391,7 @@ public abstract class Container extends Element {
         NodeSet nodes = get(path);
 
         if (nodes.isEmpty()) {
-            throw new ConfMException(ConfMException.ELEMENT_MISSING,
+            throw new JPyangException(JPyangException.ELEMENT_MISSING,
                     getPath(path));
         } else nodes.first().markCreate();
     }
@@ -400,7 +400,7 @@ public abstract class Container extends Element {
         NodeSet nodes = get(path);
 
         if (nodes.isEmpty()) {
-            throw new ConfMException(ConfMException.ELEMENT_MISSING,
+            throw new JPyangException(JPyangException.ELEMENT_MISSING,
                     getPath(path));
         } else nodes.first().markDelete();
     }
@@ -411,7 +411,7 @@ public abstract class Container extends Element {
     protected Container getListContainer(String path) throws NetconfException {
         NodeSet nodes = get(path);
         if (nodes.isEmpty()) {
-            throw new ConfMException(ConfMException.ELEMENT_MISSING,
+            throw new JPyangException(JPyangException.ELEMENT_MISSING,
                     getPath(path));
         } else return (Container) nodes.first();
     }

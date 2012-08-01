@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 import com.tailf.jpyang.type.Int16;
 import com.tailf.jpyang.type.Type;
 
@@ -20,10 +20,10 @@ public class TypeTest {
     private class YangTypeDummy<T> extends Type<T> {
         private static final long serialVersionUID = 1L;
         public YangTypeDummy() {}
-        public YangTypeDummy(String s) throws ConfMException { super(s); }
-        public YangTypeDummy(T t) throws ConfMException { super(t); }
+        public YangTypeDummy(String s) throws JPyangException { super(s); }
+        public YangTypeDummy(T t) throws JPyangException { super(t); }
         @Override protected T fromString(String s) { return null; }
-        @Override public void check() throws ConfMException {}
+        @Override public void check() throws JPyangException {}
         @Override public boolean canEqual(Object obj) { return true; }
     }
 

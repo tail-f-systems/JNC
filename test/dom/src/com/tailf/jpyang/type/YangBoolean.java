@@ -11,7 +11,7 @@
 
 package com.tailf.jpyang.type;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 
 /**
  * Implements the built-in YANG data type "boolean".
@@ -31,9 +31,9 @@ public class YangBoolean extends Type<Boolean> {
      * Creates a YangBoolean object from a String.
      *
      * @param s The string.
-     * @throws ConfMException If value is not one of "true" or "false".
+     * @throws JPyangException If value is not one of "true" or "false".
      */
-    public YangBoolean(String s) throws ConfMException {
+    public YangBoolean(String s) throws JPyangException {
         super(s);
     }
 
@@ -41,9 +41,9 @@ public class YangBoolean extends Type<Boolean> {
      * Creates a YangBoolean object from a boolean.
      * 
      * @param b The boolean to set the value of the new YangBoolean to.
-     * @throws ConfMException Never.
+     * @throws JPyangException Never.
      */
-    public YangBoolean(boolean b) throws ConfMException {
+    public YangBoolean(boolean b) throws JPyangException {
         super(b);
     }
 
@@ -54,24 +54,24 @@ public class YangBoolean extends Type<Boolean> {
      * 
      * @param s The String.
      * @return true if s matches " *true *", false if s matches " *false *".
-     * @throws ConfMException if s does not match a valid boolean value
+     * @throws JPyangException if s does not match a valid boolean value
      */
     @Override
-    protected Boolean fromString(String s) throws ConfMException {
+    protected Boolean fromString(String s) throws JPyangException {
         s = TypeUtil.wsCollapse(s);
         if (s.equals("true"))
             return true;
         else if (s.equals("false"))
             return false;
         else
-            throw new ConfMException(ConfMException.BAD_VALUE, this);
+            throw new JPyangException(JPyangException.BAD_VALUE, this);
     }
 
     /**
      * Nop method provided because this class extends the YangType class.
      */
     @Override
-    public void check() throws ConfMException {
+    public void check() throws JPyangException {
     }
 
     /**

@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 import com.tailf.jpyang.type.Int16;
 import com.tailf.jpyang.type.YangString;
 
@@ -85,41 +85,41 @@ public class YangStringTest {
     }
 
     @Test
-    public void testPatternString() throws ConfMException {
+    public void testPatternString() throws JPyangException {
         ys1.pattern(str1);
         ys2.pattern(".*string");
         ys3.pattern(".*\n.*string");
         ys3.pattern("An.*\n.*");
     }
 
-    @Test(expected=ConfMException.class)
-    public void testPatternStringException() throws ConfMException {
+    @Test(expected=JPyangException.class)
+    public void testPatternStringException() throws JPyangException {
         ys1.pattern(str1+str2);
     }
 
     @Test
-    public void testPatternStringArray() throws ConfMException {
+    public void testPatternStringArray() throws JPyangException {
         ys1.pattern(new String[] {"A .*", ".*string"});
     }
 
     @Test
-    public void testLength() throws ConfMException {
+    public void testLength() throws JPyangException {
         ys1.exact(str1.length());
         ys3.exact(str3.length());
     }
 
-    @Test(expected=ConfMException.class)
-    public void testLengthException() throws ConfMException {
+    @Test(expected=JPyangException.class)
+    public void testLengthException() throws JPyangException {
         ys1.exact(str3.length());
     }
 
     @Test
-    public void testMinInt() throws ConfMException {
+    public void testMinInt() throws JPyangException {
         ys1.min(str1.length()-1);
     }
 
     @Test
-    public void testMaxInt() throws ConfMException {
+    public void testMaxInt() throws JPyangException {
         ys1.max(str1.length()+1);
     }
 

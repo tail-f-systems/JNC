@@ -11,7 +11,7 @@
 
 package com.tailf.jpyang.type;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 
 /**
  * Implements the built-in YANG data type "identityref".
@@ -32,9 +32,9 @@ public class Identityref extends Type<Statement> {
      * {@link Identityref#fromString(String)}.
      * 
      * @param s The string.
-     * @throws ConfMException If s is improperly formatted.
+     * @throws JPyangException If s is improperly formatted.
      */
-    public Identityref(String s) throws ConfMException {
+    public Identityref(String s) throws JPyangException {
         super(s);
     }
     
@@ -42,9 +42,9 @@ public class Identityref extends Type<Statement> {
      * Creates a YangType object from a Statement.
      * 
      * @param value The initial value of the new YangType object.
-     * @throws ConfMException If an invariant was broken during initialization.
+     * @throws JPyangException If an invariant was broken during initialization.
      */
-    public Identityref(Statement identity) throws ConfMException {
+    public Identityref(Statement identity) throws JPyangException {
         super(identity);
     }
     
@@ -55,10 +55,10 @@ public class Identityref extends Type<Statement> {
      * @param id identity argument/identifier
      * @param ns identity module namespace
      * @param prefix identity module prefix
-     * @throws ConfMException If an invariant was broken during initialization.
+     * @throws JPyangException If an invariant was broken during initialization.
      */
     public Identityref(String id, String ns, String prefix)
-            throws ConfMException {
+            throws JPyangException {
         super(id + " " + ns + " " + prefix);
     }
 
@@ -70,10 +70,10 @@ public class Identityref extends Type<Statement> {
      * 
      * @param s A string representation of a value of type T.
      * @return A T value parsed from s.
-     * @throws ConfMException If s does not contain a parsable T.
+     * @throws JPyangException If s does not contain a parsable T.
      */
     @Override
-    protected Statement fromString(String s) throws ConfMException {
+    protected Statement fromString(String s) throws JPyangException {
         String[] ss = s.split(" ");
         if (ss.length == 3) {
             Statement module = new Statement("module", "<unknown>");
@@ -81,7 +81,7 @@ public class Identityref extends Type<Statement> {
             module.addChild(new Statement("prefix", ss[2]));
             return new Statement("Identity", ss[0], module, module, null);
         } else {
-            throw new ConfMException(ConfMException.BAD_VALUE, s);
+            throw new JPyangException(JPyangException.BAD_VALUE, s);
         }
     }
 

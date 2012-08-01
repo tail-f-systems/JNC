@@ -13,7 +13,7 @@ package com.tailf.jpyang.type;
 
 import java.math.BigDecimal;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 
 /**
  * Represents a built-in YANG data type.
@@ -47,10 +47,10 @@ abstract class Type<T> implements java.io.Serializable {
      * Creates a YangType object from a String.
      * 
      * @param s The string.
-     * @throws ConfMException If an invariant was broken during initialization,
+     * @throws JPyangException If an invariant was broken during initialization,
      *                        or if value could not be parsed from s.
      */
-    public Type(String s) throws ConfMException {
+    public Type(String s) throws JPyangException {
         setValue(s);
     }
 
@@ -58,9 +58,9 @@ abstract class Type<T> implements java.io.Serializable {
      * Creates a YangType object from a value of type T.
      * 
      * @param value The initial value of the new YangType object.
-     * @throws ConfMException If an invariant was broken during initialization.
+     * @throws JPyangException If an invariant was broken during initialization.
      */
-    public Type(T value) throws ConfMException {
+    public Type(T value) throws JPyangException {
         setValue(value);
     }
 
@@ -68,10 +68,10 @@ abstract class Type<T> implements java.io.Serializable {
      * Sets the value of this object using a String.
      * 
      * @param s A string containing the new value to set.
-     * @throws ConfMException If an invariant was broken during assignment, or
+     * @throws JPyangException If an invariant was broken during assignment, or
      *                        if value could not be parsed from s.
      */
-    public void setValue(String s) throws ConfMException {
+    public void setValue(String s) throws JPyangException {
         s = TypeUtil.wsCollapse(s);
         setValue(fromString(s));
     }
@@ -80,9 +80,9 @@ abstract class Type<T> implements java.io.Serializable {
      * Sets the value of this object using a value of type T.
      * 
      * @param value The new value to set.
-     * @throws ConfMException If an invariant was broken during assignment.
+     * @throws JPyangException If an invariant was broken during assignment.
      */
-    public void setValue(T value) throws ConfMException {
+    public void setValue(T value) throws JPyangException {
         assert !(value instanceof Type): "Avoid circular value chain";
         this.value = value;
         check();
@@ -98,13 +98,13 @@ abstract class Type<T> implements java.io.Serializable {
     /**
      * Checks that the value of this object is not null. Called in constructors
      * and value setters. Subclasses that have state invariants should extend
-     * this method and throw a ConfMException if such an invariant has been
+     * this method and throw a JPyangException if such an invariant has been
      * violated.
      * 
-     * @throws ConfMException If the value of this object is null.
+     * @throws JPyangException If the value of this object is null.
      */
-    public void check() throws ConfMException {
-        ConfMException.throwException(getValue() == null, this);
+    public void check() throws JPyangException {
+        JPyangException.throwException(getValue() == null, this);
     }
 
     /**
@@ -123,9 +123,9 @@ abstract class Type<T> implements java.io.Serializable {
      * 
      * @param s A string representation of a value of type T.
      * @return A T value parsed from s.
-     * @throws ConfMException If s does not contain a parsable T.
+     * @throws JPyangException If s does not contain a parsable T.
      */
-    protected abstract T fromString(String s) throws ConfMException;
+    protected abstract T fromString(String s) throws JPyangException;
 
     /**
      * Compares this object with another object for equality.
@@ -175,9 +175,9 @@ abstract class Type<T> implements java.io.Serializable {
      * the provided other value.
      * 
      * @param other The integer value to compare against.
-     * @throws ConfMException If the comparison does not evaluate to true.
+     * @throws JPyangException If the comparison does not evaluate to true.
      */
-    protected void exact(int other) throws ConfMException {
+    protected void exact(int other) throws JPyangException {
         TypeUtil.restrict(this.value, other, TypeUtil.Operator.EQ);
     }
 
@@ -185,9 +185,9 @@ abstract class Type<T> implements java.io.Serializable {
      * Checks that the value of this object is not smaller than the min-value.
      * 
      * @param min The min-value to compare against.
-     * @throws ConfMException if value is smaller than min.
+     * @throws JPyangException if value is smaller than min.
      */
-    protected void min(int min) throws ConfMException {
+    protected void min(int min) throws JPyangException {
         TypeUtil.restrict(value, min, TypeUtil.Operator.GR);
     }
 
@@ -195,9 +195,9 @@ abstract class Type<T> implements java.io.Serializable {
      * Checks that the value of this object is not larger than the max-value.
      * 
      * @param max The max-value to compare against.
-     * @throws ConfMException if value is larger than max.
+     * @throws JPyangException if value is larger than max.
      */
-    protected void max(int max) throws ConfMException {
+    protected void max(int max) throws JPyangException {
         TypeUtil.restrict(value, max, TypeUtil.Operator.LT);
     }
 

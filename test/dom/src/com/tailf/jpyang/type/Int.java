@@ -13,7 +13,7 @@ package com.tailf.jpyang.type;
 
 import java.math.BigDecimal;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 
 /**
  * Extended by implementations of the Integer, decimal64 and binary built-in
@@ -50,12 +50,12 @@ abstract class Int<T extends Number> extends Type<T> {
      * @param s The string.
      * @param minValue Lower bound for the value of this object.
      * @param maxValue Upper bound for the value of this object.
-     * @throws ConfMException If an invariant was broken during initialization,
+     * @throws JPyangException If an invariant was broken during initialization,
      *                        if value could not be parsed from s, or if
      *                        minValue is larger than maxValue.
      */
     public Int(String s)
-            throws ConfMException {
+            throws JPyangException {
         super(s);
     }
 
@@ -63,13 +63,13 @@ abstract class Int<T extends Number> extends Type<T> {
      * Creates a YangInt object from a value of type T.
      * 
      * @param value The initial value of the new YangInt object.
-     * @throws ConfMException If an invariant was broken during initialization,
+     * @throws JPyangException If an invariant was broken during initialization,
      *                        or if minValue is larger than maxValue.
      */
     public Int(T value)
-            throws ConfMException {
+            throws JPyangException {
         super(value);
-        ConfMException.throwException(!valid(value.longValue()), this);
+        JPyangException.throwException(!valid(value.longValue()), this);
     }
     
     /**
@@ -77,16 +77,16 @@ abstract class Int<T extends Number> extends Type<T> {
      * 
      * @param minValue value to set MIN_VALUE to.
      * @param maxValue value to set MAX_VALUE to.
-     * @throws ConfMException If minValue is larger than maxValue.
+     * @throws JPyangException If minValue is larger than maxValue.
      */
     protected void setMinMax(Number minValue, Number maxValue)
-            throws ConfMException {
+            throws JPyangException {
         MIN_VALUE = TypeUtil.bigDecimalValueOf(minValue);
         MAX_VALUE = TypeUtil.bigDecimalValueOf(maxValue);
         if (MIN_VALUE == null || MAX_VALUE == null) {
             return;
         }
-        ConfMException.throwException(MIN_VALUE.compareTo(MAX_VALUE) > 0, this);
+        JPyangException.throwException(MIN_VALUE.compareTo(MAX_VALUE) > 0, this);
     }
 
     /**
@@ -112,15 +112,15 @@ abstract class Int<T extends Number> extends Type<T> {
      * Checks that the value of this object is not null and valid. Called in 
      * constructors and value setters. Subclasses that have state invariants
      * in addition to those handled by the {@link Int#valid} method should
-     * override this method and throw a ConfMException if such an invariant has
+     * override this method and throw a JPyangException if such an invariant has
      * been violated.
      * 
-     * @throws ConfMException If the value of this object is null or invalid.
+     * @throws JPyangException If the value of this object is null or invalid.
      */
     @Override
-    public void check() throws ConfMException {
+    public void check() throws JPyangException {
         super.check();
-        ConfMException.throwException(!valid(getValue()), this);
+        JPyangException.throwException(!valid(getValue()), this);
     }
     
     /**
@@ -139,11 +139,11 @@ abstract class Int<T extends Number> extends Type<T> {
      * @see com.tailf.jpyang.YangType#fromString(java.lang.String)
      */
     @Override
-    protected final T fromString(String s) throws ConfMException {
+    protected final T fromString(String s) throws JPyangException {
         try {
             return parse(s);
         } catch (NumberFormatException e) {
-            throw new ConfMException(ConfMException.BAD_VALUE, e);
+            throw new JPyangException(JPyangException.BAD_VALUE, e);
         }
     }
 
@@ -163,12 +163,12 @@ abstract class Int<T extends Number> extends Type<T> {
      * Checks that the value of this object equals another value.
      * 
      * @param value The value to compare against.
-     * @throws ConfMException If comparison does not evaluate to true or if the
+     * @throws JPyangException If comparison does not evaluate to true or if the
      *                        value argument is not {@link Int#valid}.
      */
     @Override
-    protected void exact(int value) throws ConfMException {
-        ConfMException.throwException(valid(value), this);
+    protected void exact(int value) throws JPyangException {
+        JPyangException.throwException(valid(value), this);
         super.exact(value);
     }
 
@@ -176,11 +176,11 @@ abstract class Int<T extends Number> extends Type<T> {
      * Checks that the value of this object is not smaller than the min-value.
      * 
      * @param min The min-value to compare against.
-     * @throws ConfMException If value is smaller than min or min is invalid.
+     * @throws JPyangException If value is smaller than min or min is invalid.
      */
     @Override
-    protected void min(int min) throws ConfMException {
-        ConfMException.throwException(valid(min), this);
+    protected void min(int min) throws JPyangException {
+        JPyangException.throwException(valid(min), this);
         super.min(min);
     }
 
@@ -188,11 +188,11 @@ abstract class Int<T extends Number> extends Type<T> {
      * Checks that the value of this object is not larger than the max-value.
      * 
      * @param max The max-value to compare against.
-     * @throws ConfMException If value is larger than max or max is invalid.
+     * @throws JPyangException If value is larger than max or max is invalid.
      */
     @Override
-    protected void max(int max) throws ConfMException {
-        ConfMException.throwException(valid(max), this);
+    protected void max(int max) throws JPyangException {
+        JPyangException.throwException(valid(max), this);
         super.min(max);
     }
 

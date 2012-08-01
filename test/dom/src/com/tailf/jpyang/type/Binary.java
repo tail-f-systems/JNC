@@ -11,7 +11,7 @@
 
 package com.tailf.jpyang.type;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 
 /**
  * Implements the built-in YANG data type "binary".
@@ -74,7 +74,7 @@ public class Binary extends Type<String> {
      * Nop method provided because this class extends the YangType class.
      */
     @Override
-    public void check() throws ConfMException {
+    public void check() throws JPyangException {
     }
 
     /**
@@ -92,7 +92,7 @@ public class Binary extends Type<String> {
      * @return s.
      */
     @Override
-    protected String fromString(String s) throws ConfMException {
+    protected String fromString(String s) throws JPyangException {
         return s;
     }
 
@@ -114,11 +114,11 @@ public class Binary extends Type<String> {
      * octets/bytes.
      * 
      * @param len The number of octets/bytes to check for.
-     * @throws ConfMException If value buffer does not have len number of
+     * @throws JPyangException If value buffer does not have len number of
      *         octets/bytes.
      */
     @Override
-    protected void exact(int len) throws ConfMException {
+    protected void exact(int len) throws JPyangException {
         super.exact(len);
     }
 
@@ -127,11 +127,11 @@ public class Binary extends Type<String> {
      * number of octets/bytes.
      * 
      * @param len The number of octets/bytes to compare against.
-     * @throws ConfMException If value buffer does not have less than len
+     * @throws JPyangException If value buffer does not have less than len
      *         number of octets/bytes.
      */
     @Override
-    protected void min(int len) throws ConfMException {
+    protected void min(int len) throws JPyangException {
         super.min(len);
     }
 
@@ -140,11 +140,11 @@ public class Binary extends Type<String> {
      * number of octets/bytes.
      * 
      * @param len The number of octets/bytes to compare against.
-     * @throws ConfMException If value buffer does not have more than len
+     * @throws JPyangException If value buffer does not have more than len
      *         number of octets/bytes.
      */
     @Override
-    protected void max(int len) throws ConfMException {
+    protected void max(int len) throws JPyangException {
         super.max(len);
     }
     

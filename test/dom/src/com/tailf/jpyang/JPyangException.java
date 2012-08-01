@@ -18,22 +18,22 @@ import com.tailf.netconfmanager.*;
  * 
  * 
  */
-public class ConfMException extends NetconfException {
+public class JPyangException extends NetconfException {
 
     /**
      * Serial version ID
      */
     private static final long serialVersionUID = 250948942800232698L;
 
-    public ConfMException() {
+    public JPyangException() {
         super(NOT_SET, null);
     }
 
-    public ConfMException(int errorCode) {
+    public JPyangException(int errorCode) {
         super(errorCode, null);
     }
 
-    public ConfMException(int errorCode, Object opaqueData) {
+    public JPyangException(int errorCode, Object opaqueData) {
         super(errorCode, opaqueData);
     }
 
@@ -73,12 +73,12 @@ public class ConfMException extends NetconfException {
      * 
      * @param fail Determines if a Bad Value ConfM exception is thrown
      * @param o Object which toString-method will be appended to exception
-     * @throws ConfMException if and only if fail is true
+     * @throws JPyangException if and only if fail is true
      */
     public static void throwException(boolean fail, Object o)
-            throws ConfMException {
+            throws JPyangException {
         if (fail)
-            throw new ConfMException(BAD_VALUE, o);
+            throw new JPyangException(BAD_VALUE, o);
     }
     
 }

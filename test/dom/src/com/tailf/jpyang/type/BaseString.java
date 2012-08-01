@@ -14,7 +14,7 @@ package com.tailf.jpyang.type;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import com.tailf.jpyang.ConfMException;
+import com.tailf.jpyang.JPyangException;
 
 /**
  * A String wrapper extended by built in String based types.
@@ -67,7 +67,7 @@ public class BaseString extends Type<String> {
      * Nop method provided because this class extends the YangType class.
      */
     @Override
-    public void check() throws ConfMException {
+    public void check() throws JPyangException {
     }
 
     /**
@@ -88,9 +88,9 @@ public class BaseString extends Type<String> {
      * Checks that a regular expression matches the value of this object.
      * 
      * @param regex The regular expression.
-     * @throws ConfMException If regexp has a syntax error or does not match.
+     * @throws JPyangException If regexp has a syntax error or does not match.
      */
-    protected void pattern(String regex) throws ConfMException {
+    protected void pattern(String regex) throws JPyangException {
         pattern(new String[] {regex});
     }
 
@@ -98,10 +98,10 @@ public class BaseString extends Type<String> {
      * Checks that a set of regular expressions match the value of this object.
      * 
      * @param regexes The regular expressions.
-     * @throws ConfMException If any regexp in regexes has a syntax error or
+     * @throws JPyangException If any regexp in regexes has a syntax error or
      *         does not match.
      */
-    protected void pattern(String[] regexes) throws ConfMException {
+    protected void pattern(String[] regexes) throws JPyangException {
         Object opaqueData = this;
         boolean matches = true;
         try {
@@ -112,7 +112,7 @@ public class BaseString extends Type<String> {
             opaqueData = e;
             matches = false;
         }
-        ConfMException.throwException(!matches, opaqueData);
+        JPyangException.throwException(!matches, opaqueData);
     }
 
     /**
