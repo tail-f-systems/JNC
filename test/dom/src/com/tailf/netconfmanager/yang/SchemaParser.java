@@ -64,13 +64,13 @@ public class SchemaParser {
     }
 
     private class SchemaHandler extends DefaultHandler {
-        protected Hashtable h;
+        protected Hashtable<Tagpath, SchemaNode> h;
         protected SchemaNode node;
         protected RevisionInfo ri;
-        protected ArrayList riArrayList;
+        protected ArrayList<RevisionInfo> riArrayList;
         protected String value = null;
 
-        SchemaHandler(Hashtable h2) {
+        SchemaHandler(Hashtable<Tagpath, SchemaNode> h2) {
             super();
             h = h2;
         }
@@ -81,7 +81,7 @@ public class SchemaParser {
                 node = new SchemaNode();
                 value = null;
             } else if (localName.equals("rev")) {
-                riArrayList = new ArrayList();
+                riArrayList = new ArrayList<RevisionInfo>();
                 value = null;
             } else if (localName.equals("info")) {
                 ri = new RevisionInfo();
@@ -138,9 +138,8 @@ public class SchemaParser {
             } else if (localName.equals("info")) {
                 riArrayList.add(ri);
             } else if (localName.equals("rev")) {
-                RevisionInfo[] riArray = (RevisionInfo[]) (riArrayList
-                        .toArray(new RevisionInfo[riArrayList.size()]));
-                node.revInfo = riArray;
+                RevisionInfo[] riArray = new RevisionInfo[riArrayList.size()];
+                node.revInfo = riArrayList.toArray(riArray);
             }
 
             value = null;
@@ -157,7 +156,7 @@ public class SchemaParser {
      * Read in an XML file and parse it and return a hashtable with SchemaNode
      * objects.
      */
-    public void readFile(String filename, Hashtable h) throws NetconfException {
+    public void readFile(String filename, Hashtable<Tagpath, SchemaNode> h) throws NetconfException {
         try {
             SchemaHandler handler = new SchemaHandler(h);
             parser.setContentHandler(handler);
@@ -169,7 +168,7 @@ public class SchemaParser {
         }
     }
 
-    public void readFile(URL schemaUrl, Hashtable h) throws NetconfException {
+    public void readFile(URL schemaUrl, Hashtable<Tagpath, SchemaNode> h) throws NetconfException {
         try {
             SchemaHandler handler = new SchemaHandler(h);
             parser.setContentHandler(handler);

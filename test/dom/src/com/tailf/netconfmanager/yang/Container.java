@@ -118,7 +118,7 @@ public abstract class Container extends Element {
         }
         className += normalize(name);
         // String className = pkg + "." + normalize(name);
-        Class rootClass = Class.forName(className);
+        Class<?> rootClass = Class.forName(className);
         return (Element) rootClass.newInstance();
     }
 
@@ -157,7 +157,7 @@ public abstract class Container extends Element {
                 // aware, a Container
                 try {
                     String methodName = "add" + normalize(name);
-                    Class[] types = new Class[] {};
+                    Class<?>[] types = new Class[] {};
                     Method addContainer = parent.getClass().getMethod(
                             methodName, types);
                     Object[] args = {};
@@ -214,7 +214,7 @@ public abstract class Container extends Element {
 
         // Aware
         String methodName = "set" + normalize(name) + "Value";
-        Class[] types = new Class[] { String.class };
+        Class<?>[] types = new Class[] { String.class };
         try {
             Method setLeafValue = getClass().getMethod(methodName, types);
             Object[] args = { value };
@@ -273,7 +273,7 @@ public abstract class Container extends Element {
      * Static list of packages.
      * 
      */
-    static ArrayList packages = new ArrayList();
+    static ArrayList<Package> packages = new ArrayList<Package>();
 
     /**
      * Locate package from Namespace.
@@ -283,7 +283,7 @@ public abstract class Container extends Element {
     public static String hasPackage(String ns) {
         if (packages == null) return null;
         for (int i = 0; i < packages.size(); i++) {
-            Package p = (Package) packages.get(i);
+            Package p = packages.get(i);
             if (p.ns.equals(ns)) return p.pkg;
         }
         return null;
@@ -293,7 +293,7 @@ public abstract class Container extends Element {
      * Assiciate a JAVA package with a namespace.
      */
     public static void setPackage(String ns, String pkg) {
-        if (packages == null) packages = new ArrayList();
+        if (packages == null) packages = new ArrayList<Package>();
         removePackage(ns);
         packages.add(new Package(ns, pkg));
     }

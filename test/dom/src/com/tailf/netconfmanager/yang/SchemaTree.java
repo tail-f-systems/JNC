@@ -18,24 +18,29 @@ import com.tailf.netconfmanager.Tagpath;
 /**
  * The SchemaTree class is used to represent the schemas of all namespaces
  */
-
 public class SchemaTree {
 
-    private static Hashtable namespaces[] = new Hashtable[32];
+    private static ArrayList<Hashtable<Tagpath, SchemaNode>> namespaces =
+            new ArrayList<Hashtable<Tagpath, SchemaNode>>();
+    static {
+        for(int i=0; i<32; i++) {
+            namespaces.add(new Hashtable<Tagpath, SchemaNode>());
+        }
+    }
     private static String nsnames[] = new String[32];
     private static int size = 0;
 
     /*
-     * This static methid is used by the generated code to populate a new
+     * This static method is used by the generated code to populate a new
      * hashtable for a module
      */
-
-    public static Hashtable create(String namespace) {
-        Hashtable h;
+    public static Hashtable<Tagpath, SchemaNode> create(String namespace) {
+        Hashtable<Tagpath, SchemaNode> h;
         if ((h = getHashtable(namespace)) != null)
             return h;
         ;
-        namespaces[size] = h = new Hashtable();
+        h = new Hashtable<Tagpath, SchemaNode>();
+        namespaces.set(size, h);
         nsnames[size++] = namespace;
         return h;
     }
@@ -43,11 +48,10 @@ public class SchemaTree {
     /*
      * Return a hash table for a given namespace
      */
-
-    public static Hashtable getHashtable(String namespace) {
+    public static Hashtable<Tagpath, SchemaNode> getHashtable(String namespace) {
         for (int i = 0; i < size; i++) {
             if (nsnames[i].compareTo(namespace) == 0)
-                return namespaces[i];
+                return namespaces.get(i);
         }
         return null;
     }
@@ -55,7 +59,6 @@ public class SchemaTree {
     /*
      * Return an array of all loaded namespaces
      */
-
     public static String[] getLoadedNamespaces() {
         return nsnames;
     }
@@ -63,12 +66,12 @@ public class SchemaTree {
     /*
      * Find the SchemaNode for e specific schema entry returns null if not found
      */
-
     public static SchemaNode lookup(String namespace, Tagpath tp) {
-        Hashtable t = getHashtable(namespace);
+        Hashtable<Tagpath, SchemaNode> t = getHashtable(namespace);
         if (t == null) {
             return null;
         }
-        return (SchemaNode) t.get(tp);
+        return t.get(tp);
     }
+
 }

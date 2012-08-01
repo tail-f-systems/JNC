@@ -97,10 +97,8 @@ public class Device implements Serializable {
     /**
      * The NETCONF sessions (channels) for this device.
      */
-    protected transient ArrayList connSessions;
-    // list of SessionConnData
-    protected transient ArrayList trees;
-    // list of SessionTree
+    protected transient ArrayList<SessionConnData> connSessions;
+    protected transient ArrayList<SessionTree> trees;
 
     /**
      * A list of configuration changes. The backlog is saved when a
@@ -108,13 +106,13 @@ public class Device implements Serializable {
      * re-sent later when the device comes up again.
      * 
      */
-    protected ArrayList backlog;
+    protected ArrayList<Element> backlog;
 
     /**
      * A list of users.
      * 
      */
-    protected ArrayList users; // list of DeviceUser
+    protected ArrayList<DeviceUser> users;
 
     String mgmt_ip; // ip address as string
     int mgmt_port;
@@ -128,13 +126,13 @@ public class Device implements Serializable {
     public Device(String name, DeviceUser user, String mgmt_ip, int mgmt_port) {
 
         this.name = name;
-        users = new ArrayList();
+        users = new ArrayList<DeviceUser>();
         users.add(user);
         this.mgmt_ip = mgmt_ip;
         this.mgmt_port = mgmt_port;
-        backlog = new ArrayList();
-        connSessions = new ArrayList();
-        trees = new ArrayList();
+        backlog = new ArrayList<Element>();
+        connSessions = new ArrayList<SessionConnData>();
+        trees = new ArrayList<SessionTree>();
     }
 
     /**
@@ -147,12 +145,12 @@ public class Device implements Serializable {
     public Device(String name, String mgmt_ip, int mgmt_port) {
 
         this.name = name;
-        users = new ArrayList();
+        users = new ArrayList<DeviceUser>();
         this.mgmt_ip = mgmt_ip;
         this.mgmt_port = mgmt_port;
-        backlog = new ArrayList();
-        connSessions = new ArrayList();
-        trees = new ArrayList();
+        backlog = new ArrayList<Element>();
+        connSessions = new ArrayList<SessionConnData>();
+        trees = new ArrayList<SessionTree>();
     }
 
     /**
@@ -162,9 +160,9 @@ public class Device implements Serializable {
      */
 
     public void initTransients() {
-        backlog = new ArrayList();
-        connSessions = new ArrayList();
-        trees = new ArrayList();
+        backlog = new ArrayList<Element>();
+        connSessions = new ArrayList<SessionConnData>();
+        trees = new ArrayList<SessionTree>();
     }
 
     /**
@@ -178,7 +176,7 @@ public class Device implements Serializable {
     /**
      * Return the list of users.
      */
-    public ArrayList getUsers() {
+    public ArrayList<DeviceUser> getUsers() {
         return users;
     }
 
@@ -315,13 +313,13 @@ public class Device implements Serializable {
 
     public void close() {
         for (int i = 0; i < connSessions.size(); i++) {
-            SessionConnData d = (SessionConnData) connSessions.get(i);
+            SessionConnData d = connSessions.get(i);
             try {
                 d.session.closeSession();
             } catch (Exception e) {
             }
         }
-        connSessions = new ArrayList();
+        connSessions = new ArrayList<SessionConnData>();
         for (int i = 0; i < trees.size(); i++) {
             SessionTree t = (SessionTree) trees.get(i);
             t.configTree = null;
@@ -394,7 +392,6 @@ public class Device implements Serializable {
 
     public void connect(String localUser, int connectTimeout)
             throws IOException, NetconfException {
-
         DeviceUser u = null;
         for (int i = 0; i < users.size(); i++) {
             DeviceUser u2 = (DeviceUser) users.get(i);
@@ -406,8 +403,6 @@ public class Device implements Serializable {
         if (u == null)
             throw new NetconfException(NetconfException.AUTH_FAILED, "No such user: "
                     + localUser);
-
-        XMLParser parser = new com.tailf.netconfmanager.yang.XMLParser();
         con = new SSHConnection(mgmt_ip, mgmt_port, connectTimeout);
         auth(u);
         return;
