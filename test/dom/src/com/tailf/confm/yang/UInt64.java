@@ -11,7 +11,6 @@
 
 package com.tailf.confm.yang;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import com.tailf.confm.ConfMException;
@@ -65,9 +64,8 @@ public class UInt64 extends Int<BigInteger> {
      *                        if the number has a non-zero fractional part.
      */
     public void setValue(Number n) throws ConfMException {
-        BigDecimal bd = TypeUtil.bigDecimalValueOf(n);
         try {
-            super.setValue(bd.toBigIntegerExact());
+            super.setValue(TypeUtil.bigDecimalValueOf(n).toBigIntegerExact());
         } catch (ArithmeticException e) {
             ConfMException.throwException(true, e);
         }
@@ -80,6 +78,38 @@ public class UInt64 extends Int<BigInteger> {
     @Override
     protected BigInteger parse(String s) throws NumberFormatException {
         return new BigInteger(s);
+    }
+
+    /** ---------- Restrictions ---------- */
+
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.confm.yang.Int#exact(int)
+     */
+    @Override
+    protected void exact(int other) throws ConfMException {
+        BigInteger b = BigInteger.valueOf(other);
+        ConfMException.throwException(!value.equals(b), this);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.confm.yang.Int#min(int)
+     */
+    @Override
+    protected void min(int min) throws ConfMException {
+        BigInteger b = BigInteger.valueOf(min);
+        ConfMException.throwException(value.compareTo(b) < 0, this);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.confm.yang.Int#max(int)
+     */
+    @Override
+    protected void max(int max) throws ConfMException {
+        BigInteger b = BigInteger.valueOf(max);
+        ConfMException.throwException(value.compareTo(b) > 0, this);
     }
 
 }

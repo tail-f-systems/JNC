@@ -53,4 +53,26 @@ public class UInt8 extends Int16 {
         check();
     }
 
+    /** ---------- Restrictions ---------- */
+
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.confm.yang.Int#min(int)
+     */
+    @Override
+    protected void min(int min) throws ConfMException {
+        TypeUtil.restrict(value & 0xffffffffL, min & 0xffffffffL,
+                TypeUtil.Operator.GR);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.confm.yang.Int#max(int)
+     */
+    @Override
+    protected void max(int max) throws ConfMException {
+        TypeUtil.restrict(value & 0xffffffffL, max & 0xffffffffL,
+                TypeUtil.Operator.LT);
+    }
+
 }

@@ -38,7 +38,7 @@ final class TypeUtil {
          * Equality operator. EQ.cmp(a, b) is equivalent to a == b.
          */
         EQ {
-            @Override public boolean cmp(int x1, int x2) {
+            @Override public boolean cmp(long x1, long x2) {
                 return x1 == x2;
             }
         },
@@ -46,7 +46,7 @@ final class TypeUtil {
          * Greater than operator. GR.cmp(a, b) is equivalent to a &gt; b.
          */
         GR {
-            @Override public boolean cmp(int x1, int x2) {
+            @Override public boolean cmp(long x1, long x2) {
                 return x1 > x2;
             }
         },
@@ -54,7 +54,7 @@ final class TypeUtil {
          * Less than operator. LT.cmp(a, b) is equivalent to a &lt; b.
          */
         LT {
-            @Override public boolean cmp(int x1, int x2) {
+            @Override public boolean cmp(long x1, long x2) {
                 return x1 < x2;
             }
         };
@@ -65,20 +65,19 @@ final class TypeUtil {
          * @param x2 Second operand
          * @return The result of the comparison
          */
-        public abstract boolean cmp(int x1, int x2);
+        public abstract boolean cmp(long x1, long x2);
     }
 
     /**
-     * Checks that a comparison between arg and the value of this object, or
-     * its length if applicable, evaluates to true.
+     * Checks that a comparison between value and arg, or between the length of
+     * value and arg if applicable, evaluates to true.
      * 
+     * @param value A Number or String to be compared.
      * @param arg The integer value to compare against.
      * @param op The operator to use (EQ: ==, GR: &gt;, LT: &lt;).
      * @throws ConfMException If the comparison does not evaluate to true.
-     * @throws ClassCastException If type of arg prevents it from being
-     *                            compared to the arg of this object.
      */
-    public static void restrict(Object value, int arg, Operator op) throws ConfMException {
+    public static void restrict(Object value, long arg, Operator op) throws ConfMException {
         boolean fail = true;
         if (value instanceof Number) {
             fail = !op.cmp(((Number) value).intValue(), arg);

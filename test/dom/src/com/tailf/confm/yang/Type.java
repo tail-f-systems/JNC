@@ -176,8 +176,6 @@ abstract class Type<T> implements java.io.Serializable {
      * 
      * @param other The integer value to compare against.
      * @throws ConfMException If the comparison does not evaluate to true.
-     * @throws ClassCastException If type of value prevents it from being
-     *                            compared to the value of this object.
      */
     protected void exact(int other) throws ConfMException {
         TypeUtil.restrict(this.value, other, TypeUtil.Operator.EQ);
@@ -188,8 +186,6 @@ abstract class Type<T> implements java.io.Serializable {
      * 
      * @param min The min-value to compare against.
      * @throws ConfMException if value is smaller than min.
-     * @throws ClassCastException If type of min prevents it from being
-     *                            compared to the value of this object.
      */
     protected void min(int min) throws ConfMException {
         TypeUtil.restrict(value, min, TypeUtil.Operator.GR);
@@ -200,8 +196,6 @@ abstract class Type<T> implements java.io.Serializable {
      * 
      * @param max The max-value to compare against.
      * @throws ConfMException if value is larger than max.
-     * @throws ClassCastException If type of max prevents it from being
-     *                            compared to the value of this object.
      */
     protected void max(int max) throws ConfMException {
         TypeUtil.restrict(value, max, TypeUtil.Operator.LT);
