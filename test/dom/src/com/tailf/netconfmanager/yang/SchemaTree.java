@@ -23,36 +23,45 @@ public class SchemaTree {
     private static HashMap<String, HashMap<Tagpath, SchemaNode>> namespaces =
                new HashMap<String, HashMap<Tagpath, SchemaNode>>();
 
-    /*
-     * This static method is used by the generated code to populate a new
-     * hashmap for a module
+    /**
+     * If no hashmap exists for namespace, it is created. Used by generated
+     * code to populate new hashmaps for YANG modules.
+     * 
+     * @param namespace The namespace of the module as a String.
+     * @return The HashMap associated with namespace.
      */
     public static HashMap<Tagpath, SchemaNode> create(String namespace) {
-        HashMap<Tagpath, SchemaNode> h;
-        if ((h = getHashMap(namespace)) != null) {
-            return h;
+        if (namespaces.containsKey(namespace)) {
+            return namespaces.get(namespace);
         }
-        h = new HashMap<Tagpath, SchemaNode>();
+        HashMap<Tagpath, SchemaNode> h = new HashMap<Tagpath, SchemaNode>();
         namespaces.put(namespace, h);
         return h;
     }
 
-    /*
-     * Return a hashmap for a given namespace
+    /**
+     * @param namespace A YANG module namespace as a String
+     * @return The HashMap associated with namespace, or null.
      */
     public static HashMap<Tagpath, SchemaNode> getHashMap(String namespace) {
         return namespaces.get(namespace);
     }
 
-    /*
-     * Return a set of all loaded namespaces
+    /**
+     * @return The set of all namespaces for which there currently is a HashMap
+     *         of TagPath/SchemaNode key/value pairs.
      */
     public static Set<String> getLoadedNamespaces() {
         return namespaces.keySet();
     }
 
-    /*
-     * Find the SchemaNode for e specific schema entry returns null if not found
+    /**
+     * Searches for a SchemaNode given a namespace and a Tagpath.
+     * 
+     * @param namespace The namespace of the module.
+     * @param tp The TagPath of the node to search for.
+     * @return The SchemaNode with Tagpath tp in module with specified
+     *         namespace, or null if not found.
      */
     public static SchemaNode lookup(String namespace, Tagpath tp) {
         HashMap<Tagpath, SchemaNode> t = getHashMap(namespace);
