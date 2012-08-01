@@ -11,7 +11,8 @@
 
 package com.tailf.netconfmanager.yang;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Set;
 
 import com.tailf.netconfmanager.Tagpath;
 
