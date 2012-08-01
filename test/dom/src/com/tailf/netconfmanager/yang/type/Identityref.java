@@ -11,6 +11,7 @@
 
 package com.tailf.netconfmanager.yang.type;
 
+import com.tailf.netconfmanager.yang.Statement;
 import com.tailf.netconfmanager.yang.YangException;
 
 /**

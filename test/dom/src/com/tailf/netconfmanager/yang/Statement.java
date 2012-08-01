@@ -9,7 +9,7 @@
  *
  */
 
-package com.tailf.netconfmanager.yang.type;
+package com.tailf.netconfmanager.yang;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +20,7 @@ import java.util.Arrays;
  * 
  * @author emil@tail-f.com
  */
-final class Statement {
+public final class Statement {
 
     public static final String[] keywords = { "anyxml", "augment", "choice",
             "contact", "container", "description", "deviation", "extension",
