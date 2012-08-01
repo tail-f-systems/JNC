@@ -19,8 +19,8 @@ import com.tailf.confm.ConfMException;
 /**
  * Implements the built-in YANG data type "string".
  * <p>
- * White space collapse and replace methods, regexp pattern matchers, an
- * enumeration checker method and length assertion methods are provided.
+ * White space collapse and replace methods, regexp pattern matchers, and
+ * length assertion methods are provided.
  * 
  * @author emil@tail-f.com
  */
@@ -80,16 +80,6 @@ public class JString extends Type<String> {
     @Override
     public boolean canEqual(Object obj) {
         return obj instanceof JString || obj instanceof String;
-    }
-
-    /**
-     * Checks if value is equal to this object's value, interpreted as an enum.
-     * 
-     * @param value An enum value candidate, as a String.
-     * @return true if value of this object is equal to value; false otherwise.
-     */
-    protected boolean enumeration(String value) {
-        return equals(value);
     }
 
     /* ---------- Restrictions ---------- */
