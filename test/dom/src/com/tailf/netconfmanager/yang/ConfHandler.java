@@ -9,10 +9,8 @@
  */
 package com.tailf.netconfmanager.yang;
 
-import java.io.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
-import java.util.*;
 
 import com.tailf.netconfmanager.*;
 
@@ -85,7 +83,6 @@ class ConfHandler extends DefaultHandler {
 
     private void unkownStartElement(String uri, String localName, String qName,
             Attributes attributes) throws SAXException {
-        Element parent = current;
         Element child = new Element(uri, localName);
         child.prefixes = prefixes;
         prefixes = null;

@@ -13,11 +13,13 @@ package com.tailf.netconfmanager;
 import java.util.ArrayList;
 
 /**
- * This class implements a list of prefix mappings, which provides mappings from
- * namespaces to prefixes.
+ * This class implements a list of prefix mappings, which provides mappings
+ * from namespaces to prefixes.
  * 
  **/
-public class PrefixMap extends ArrayList {
+public class PrefixMap extends ArrayList<Prefix> {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * Creates an empty prefix map object.
@@ -112,7 +114,7 @@ public class PrefixMap extends ArrayList {
      * @return Prefix mapping
      */
     public Prefix getPrefix(int i) {
-        return (Prefix) super.get(i);
+        return super.get(i);
     }
 
     /**
