@@ -12,13 +12,15 @@
 package com.tailf.confm;
 
 import java.util.*;
-import com.tailf.inm.*;
+
+import com.tailf.netconfmanager.*;
+
 import java.lang.reflect.*;
 import java.lang.Class;
 
 /**
  * The Container is a configuration sub-tree like the
- * {@link com.tailf.inm.Element Element}. It is an extension of the Element
+ * {@link com.tailf.netconfmanager.Element Element}. It is an extension of the Element
  * class to make the configuration sub-tree data model aware. Classes generated
  * from the ConfM compiler are either Containers, Leafs, or derived data types.
  * <p>

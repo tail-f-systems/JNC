@@ -13,7 +13,8 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 import java.util.*;
 import java.net.*;
-import com.tailf.inm.*;
+
+import com.tailf.netconfmanager.*;
 
 /**
  * A simple SAX parser, for parsing ConfD schema files with the following

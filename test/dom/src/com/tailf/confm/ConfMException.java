@@ -11,7 +11,7 @@
 
 package com.tailf.confm;
 
-import com.tailf.inm.*;
+import com.tailf.netconfmanager.*;
 
 /**
  * This is the class of exceptions that are thrown from the ConfM classes.

@@ -9,7 +9,7 @@
  *
  */
 
-package com.tailf.inm;
+package com.tailf.netconfmanager;
 
 /**
  * Exception class for errors produced by this library.

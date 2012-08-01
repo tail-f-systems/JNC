@@ -13,7 +13,8 @@ import java.io.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 import java.util.*;
-import com.tailf.inm.*;
+
+import com.tailf.netconfmanager.*;
 
 /**
  * A SAX parser, for parsing for example NETCONF messages,

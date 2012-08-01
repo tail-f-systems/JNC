@@ -10,7 +10,8 @@
 package com.tailf.confm;
 
 import org.xml.sax.*;
-import com.tailf.inm.*;
+
+import com.tailf.netconfmanager.*;
 
 /**
  * A SAX parser, for parsing for example NETCONF messages, into a simple
@@ -20,7 +21,7 @@ import com.tailf.inm.*;
  * generated with the ConfM compiler.
  * <p>
  */
-public class XMLParser extends com.tailf.inm.XMLParser {
+public class XMLParser extends com.tailf.netconfmanager.XMLParser {
 
     /**
      * Constructor. Initializes the parser instance.

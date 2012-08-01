@@ -12,7 +12,8 @@ package com.tailf.confm;
 
 import java.util.ArrayList;
 import java.io.*;
-import com.tailf.inm.*;
+
+import com.tailf.netconfmanager.*;
 
 /**
  * This is a help class to provide features for managing a device with NETCONF.

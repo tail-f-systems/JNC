@@ -12,7 +12,8 @@
 package com.tailf.confm;
 
 import java.util.*;
-import com.tailf.inm.Tagpath;
+
+import com.tailf.netconfmanager.Tagpath;
 
 /**
  * The CsTree class is used to represent the schemas of all namespaces

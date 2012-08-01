@@ -9,7 +9,7 @@
  *
  */
 
-package com.tailf.inm;
+package com.tailf.netconfmanager;
 
 /**
  * Class for 'rpc-error' elements returned in NETCONF 'rpc-reply' messages.

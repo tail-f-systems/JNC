@@ -9,10 +9,9 @@
  *
  */
 
-package com.tailf.inm;
+package com.tailf.netconfmanager;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * A set of {@link Element} nodes.
@@ -88,7 +87,7 @@ public class NodeSet extends ArrayList {
 
     /**
      * Checks if an element is a member of the NodeSet. Elements are compared
-     * with {@link com.tailf.inm.Element#equals(Element) Element.equals} method.
+     * with {@link Element#equals(Element) Element.equals} method.
      * 
      * @param x
      *            Check if x is a member of the NodeSet.
@@ -104,7 +103,7 @@ public class NodeSet extends ArrayList {
 
     /**
      * Checks if an element is a member of the NodeSet. Elements are compared
-     * with {@link com.tailf.inm.Element#equals(Element) Element.equals} method.
+     * with {@link Element#equals(Element) Element.equals} method.
      * 
      * @param x
      *            Check if x is a member of the NodeSet
@@ -121,7 +120,7 @@ public class NodeSet extends ArrayList {
 
     /**
      * Removes a member element from the NodeSet. Members are compared with
-     * {@link com.tailf.inm.Element#equals(Element) Element.equals} method.
+     * {@link Element#equals(Element) Element.equals} method.
      * 
      * @param x
      *            Removes an element equals to element x.

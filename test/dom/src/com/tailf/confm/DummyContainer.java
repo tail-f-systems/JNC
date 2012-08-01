@@ -11,7 +11,7 @@
 
 package com.tailf.confm;
 
-import com.tailf.inm.*;
+import com.tailf.netconfmanager.*;
 
 class DummyContainer extends Container {
 

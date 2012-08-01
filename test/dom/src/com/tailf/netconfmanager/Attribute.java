@@ -8,7 +8,7 @@
  *
  */
 
-package com.tailf.inm;
+package com.tailf.netconfmanager;
 
 import java.io.Serializable;
 

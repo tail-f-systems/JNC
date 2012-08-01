@@ -9,10 +9,7 @@
  *
  */
 
-package com.tailf.inm;
-
-import java.io.*;
-import com.tailf.inm.*;
+package com.tailf.netconfmanager;
 
 /**
  * This is a default IO subscriber that can be used for tracing, auditing, and

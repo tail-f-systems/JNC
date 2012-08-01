@@ -9,7 +9,7 @@
  *
  */
 
-package com.tailf.inm;
+package com.tailf.netconfmanager;
 
 import java.util.ArrayList;
 import java.io.IOException;
@@ -1466,7 +1466,7 @@ public class NetconfSession {
 
     NodeSet recv_call_rpc_reply(Element e, int mid) throws INMException,
             IOException {
-        com.tailf.inm.XMLParser parser = new com.tailf.inm.XMLParser(); 
+        XMLParser parser = new XMLParser(); 
         // XXX Why new parser?
         return recv_rpc_reply("", parser, Integer.toString(mid));
     }

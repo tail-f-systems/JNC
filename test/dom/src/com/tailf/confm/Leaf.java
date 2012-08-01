@@ -11,11 +11,11 @@
 
 package com.tailf.confm;
 
-import com.tailf.inm.Element;
-import com.tailf.inm.Capabilities;
-import com.tailf.inm.Transport;
-import com.tailf.inm.Tagpath;
-import com.tailf.inm.INMException;
+import com.tailf.netconfmanager.Capabilities;
+import com.tailf.netconfmanager.Element;
+import com.tailf.netconfmanager.INMException;
+import com.tailf.netconfmanager.Tagpath;
+import com.tailf.netconfmanager.Transport;
 
 /**
  * The Leaf is the leaf of a sub-tree.

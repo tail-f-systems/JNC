@@ -11,8 +11,8 @@
 
 package com.tailf.confm;
 
-import com.tailf.inm.Element;
-import com.tailf.inm.Tagpath;
+import com.tailf.netconfmanager.Element;
+import com.tailf.netconfmanager.Tagpath;
 
 /**
  * The CsNode class is used to represent individual nodes in the schema tree.
