@@ -850,19 +850,19 @@ class ClassGenerator(object):
         elif stmt.keyword == 'list':
             key, only_strings, confm_keys, primitive_keys = extract_keys(stmt, self.ctx)
             self.java_class.add_constructor('0', constructor(stmt, self.ctx, root=self.prefix_name,
-                set_prefix=self.top_level, throws="\n        throws INMException"))
+                set_prefix=self.top_level, throws="\n        throws NetconfException"))
             self.java_class.add_constructor('1', constructor(stmt, self.ctx, 
                 root=self.prefix_name, set_prefix=self.top_level,
                 mode=1, args=confm_keys, throws='''
-            throws INMException'''))
+            throws NetconfException'''))
             self.java_class.add_constructor('2', constructor(stmt, self.ctx, 
                 root=self.prefix_name, set_prefix=self.top_level,
                 mode=2, args=primitive_keys, throws='''
-            throws INMException'''))
+            throws NetconfException'''))
             if not only_strings:
                 self.java_class.add_constructor('3', constructor(stmt, self.ctx, root=self.prefix_name,
                     set_prefix=self.top_level, mode=3, args=primitive_keys, throws='''
-            throws INMException'''))
+            throws NetconfException'''))
             self.java_class.add_cloner('deep', clone(name, map(capitalize_first,
                 key.arg.split(' ')), shallow=False))
             self.java_class.add_cloner('shallow', clone(name,
@@ -1694,7 +1694,7 @@ class ListMethodGenerator(MethodGenerator):
             constructor = JavaMethod(modifiers=['public'], name=self.n)
             constructor.add_javadoc(''.join(javadoc1))
             constructor.add_javadoc(javadoc2[i])
-            constructor.add_exception('INMException')  # TODO: Add only if needed
+            constructor.add_exception('NetconfException')  # TODO: Add only if needed
             call = ['super']
             call.extend(self._root_namespace(self.stmt.arg))
             constructor.add_line(''.join(call))
@@ -1755,7 +1755,7 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
                    argument name(s) should be supplied without the 'Value'
                    suffix. Typically used as a (set of) key(s) in the method.
                    Note that mode must be > 0 for this to have an effect.
-    throws      -- Typically 'throws INMException', prepended with a newline
+    throws      -- Typically 'throws NetconfException', prepended with a newline
                    and spaces for indentation.
 
     """
@@ -1825,7 +1825,7 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
 def clone(class_name, key_names=None, shallow='False'):
     """Returns a string representing a Java clone method. Iff key_names is
     empty, get<key_name>Value() methods are called to fetch constructor
-    arguments and null is returned if an INMException is raised. If shallow is
+    arguments and null is returned if an NetconfException is raised. If shallow is
     set, the cloneShallowContent method is invoked instead of cloneContent.
 
     class_name -- The name of the class to clone instances of
@@ -1849,7 +1849,7 @@ def clone(class_name, key_names=None, shallow='False'):
                 MAX_COLS -= len(tmp)
             catch_stmt += tmp
         catch_stmt = catch_stmt[:-2] + '''));
-        } catch (INMException e) { return null; }
+        } catch (NetconfException e) { return null; }
     }\n'''
     else:
         catch_stmt = '());\n    }\n'
@@ -1944,7 +1944,7 @@ def enable(prefix_name):
      * Enable the elements in this namespace to be aware
      * of the data model and use the generated classes.
      */
-    public static void enable() throws INMException {
+    public static void enable() throws NetconfException {
         Container.setPackage(NAMESPACE, PREFIX);
         ''' + prefix_name + '''.registerSchema();
     }'''
@@ -1964,7 +1964,7 @@ def register_schema(prefix_name):
      * schema table (CsTree) making it possible to lookup
      * CsNode entries for all tagpaths
      */
-    public static void registerSchema() throws INMException {
+    public static void registerSchema() throws NetconfException {
         StackTraceElement[] sTrace = (new Exception()).getStackTrace();
         ClassLoader loader = sTrace[0].getClass().getClassLoader();
         java.net.URL schemaUrl = loader.getSystemResource("''' +
@@ -2027,7 +2027,7 @@ def get_stmt(stmt, keys, string=False):
      * @return The ''' + stmt.keyword + ''' entry with the specified keys.
      */
     public ''' + name + ' get' + name + '(' + arguments[:-2] + ''')
-        throws INMException {
+        throws NetconfException {
         String path = "''' + stmt.arg + xpath + '''";
         return (''' + name + ''')getListContainer(path);
     }''')
@@ -2047,7 +2047,7 @@ def get_value(stmt, ret_type='com.tailf.confm.xs.String'):
      * @return The value of the ''' + stmt.keyword + '''.
      */
     public ''' + ret_type + ' get' + name + '''Value()
-        throws INMException {
+        throws NetconfException {
         return (''' + ret_type + ')getValue("' + stmt.arg + '''");
     }'''
 
@@ -2124,7 +2124,7 @@ def set_value(stmt, nameID='', spec1='', spec2='', argument='', body=''):
         spec1 + '''.
      */
     public void set''' + nameID + 'Value(' + argument + ''')
-        throws INMException {
+        throws NetconfException {
         ''' + body + '''
     }''')
 
@@ -2135,7 +2135,7 @@ def unset_value(stmt):
      * Unsets the value for child ''' + stmt.keyword + ' "' + stmt.arg + '''".
      */
     public void unset''' + capitalize_first(stmt.arg) + '''Value()
-        throws INMException {
+        throws NetconfException {
         delete("''' + stmt.arg + '''");
     }'''
 
@@ -2160,7 +2160,7 @@ def add_value(stmt, prefix):
         ''' will not have a value.
      */
     public void add''' + name + '''()
-        throws INMException {
+        throws NetconfException {
         setLeaf''' + value_type + 'Value(' + prefix + '''.NAMESPACE,
             "''' + stmt.arg + '''",
             null,
@@ -2194,7 +2194,7 @@ def mark(stmt, op, arg_type='String'):
      */
     public void mark''' + capitalize_first(stmt.arg) + capitalize_first(op) +
         '(' + argument + ''')
-        throws INMException {
+        throws NetconfException {
         markLeaf''' + capitalize_first(op) + '("' + path + '''");
     }''')
 
@@ -2276,7 +2276,7 @@ def add_stmt(stmt, args=None, field=False, string=False):
      * @return The added child.
      */
     public ''' + name + ' add' + name + '(' + spec2[:-2] + ''')
-        throws INMException {''' + spec3 + '''
+        throws NetconfException {''' + spec3 + '''
         insertChild(''' + stmt.arg + ''', childrenNames());
         return ''' + stmt.arg + ''';
     }'''
@@ -2328,7 +2328,7 @@ def delete_stmt(stmt, args=None, string=False, keys=True):
      * Deletes ''' + stmt.keyword + ' entry "' + stmt.arg + spec1 + '''"
      */
     public void delete''' + capitalize_first(stmt.arg) + '(' + arguments[:-2] + ''')
-        throws INMException {
+        throws NetconfException {
         ''' + spec2 + 'String path = "' + stmt.arg + spec3 + '''";
         delete(path);
     }'''
