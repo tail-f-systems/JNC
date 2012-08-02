@@ -200,13 +200,13 @@ class JPyangPlugin(plugin.PyangPlugin):
                         schema_nodes.extend(aug_module_root.as_list())
                     schema_generator = SchemaGenerator(stmts, '/', ctx)
                     schema_nodes.extend(schema_generator.schema_nodes())
-                    schema_nodes.append('</schema>')
                     for i in range(1, len(schema_nodes)):
                         # Indent all but the first and last line
                         if schema_nodes[i] in ('<node>', '</node>'):
                             schema_nodes[i] = ' ' * 4 + schema_nodes[i]
                         else:
                             schema_nodes[i] = ' ' * 8 + schema_nodes[i]
+                    schema_nodes.append('</schema>')
 
                     name = capitalize_first(module.search_one('prefix').arg)
                     write_file(d, name + '.schema', '\n'.join(schema_nodes), ctx)
@@ -2350,4 +2350,5 @@ def support_add(fields=None):
      */
     public void addChild(Element $child) {
         super.addChild($child);
-        ''' + assignments + '''    }'''  # TODO: '$' should be removed unless it is actually needed
+        ''' + assignments + '''
+    }'''  # TODO: '$' should be removed unless it is actually needed
