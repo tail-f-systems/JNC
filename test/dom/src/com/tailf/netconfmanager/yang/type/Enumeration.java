@@ -11,6 +11,8 @@
 
 package com.tailf.netconfmanager.yang.type;
 
+import com.tailf.netconfmanager.yang.YangException;
+
 /**
  * Implements the built-in YANG data type "enumeration".
  * <p>
@@ -26,8 +28,9 @@ public class Enumeration extends BaseString {
      * Creates an Enumeration object from a java.lang.String.
      * 
      * @param value The Java String.
+     * @throws YangException If an invariant was broken during assignment.
      */
-    public Enumeration(String value) {
+    public Enumeration(String value) throws YangException {
         super(value);
     }
 

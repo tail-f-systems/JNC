@@ -32,8 +32,9 @@ public class BaseString extends Type<String> {
      * Creates a BaseString object from a java.lang.String.
      * 
      * @param value The Java String.
+     * @throws YangException If an invariant was broken during assignment.
      */
-    public BaseString(String value) {
+    public BaseString(String value) throws YangException {
         setValue(value);
     }
 
@@ -41,10 +42,12 @@ public class BaseString extends Type<String> {
      * Sets the value of this object using a java.lang.String.
      * 
      * @param value The Java String.
+     * @throws YangException If an invariant was broken during assignment.
      */
     @Override
-    public void setValue(String value) {
+    public void setValue(String value) throws YangException {
         this.value = value;
+        check();
     }
 
     /**

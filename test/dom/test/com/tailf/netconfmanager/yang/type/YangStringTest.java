@@ -38,7 +38,7 @@ public class YangStringTest {
     }
 
     @Test
-    public void testSetValueString() {
+    public void testSetValueString() throws YangException {
         assertTrue(ys1.value.equals(str1));
         assertTrue(ys1.value.equals(str2));
         assertFalse(ys1.value.equals(str3));

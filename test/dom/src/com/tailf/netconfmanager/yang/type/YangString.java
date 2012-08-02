@@ -11,6 +11,8 @@
 
 package com.tailf.netconfmanager.yang.type;
 
+import com.tailf.netconfmanager.yang.YangException;
+
 /**
  * Implements the built-in YANG data type "string".
  * 
@@ -24,8 +26,9 @@ public class YangString extends BaseString {
      * Creates a YangString object from a java.lang.String.
      * 
      * @param value The Java String.
+     * @throws YangException If an invariant was broken during assignment.
      */
-    public YangString(String value) {
+    public YangString(String value) throws YangException {
         super(value);
     }
 
