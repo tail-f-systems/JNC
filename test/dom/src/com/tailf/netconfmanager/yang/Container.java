@@ -127,47 +127,28 @@ public abstract class Container extends Element {
      * 
      * @return The created element or null if no container was created.
      */
-    static Element createInstance(ConfHandler parser, Element parent,
+    protected static Element createInstance(ConfHandler parser, Element parent,
             String ns, String name) throws YangException {
-        String pkg = hasPackage(ns);
-        if (parent == null) {
-            // ROOT
-            if (pkg == null) return new Element(ns, name); // not aware
-
-            try {
-                return instantiate(null, name);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-                throw new YangException(YangException.ELEMENT_MISSING,
-                        name + ": Unexpected element");
-            } catch (Exception e2) {
-                e2.printStackTrace();
-                throw new YangException(YangException.ELEMENT_MISSING,
-                        name + ": Unexpected element");
+        if (getPackage(ns) == null) {
+            Element elem = new Element(ns, name);
+            if (parent != null) {
+                parent.addChild(elem);
             }
-        } else {
-            // CHILD
-            if (pkg == null) {
-                // not aware
-                Element child = new Element(ns, name);
-                parent.addChild(child);
-                return child;
-            }
-            if (parent instanceof Container) {
-                // aware, a Container
+            return elem; // not aware
+        }
+        try {
+            if (parent == null) {
+                return instantiate(null, name); // Root
+            } else if (parent instanceof Container) {
+                // Container child, aware
                 try {
                     String methodName = "add" + normalize(name);
-                    Class<?>[] types = new Class[] {};
-                    Method addContainer = parent.getClass().getMethod(
-                            methodName, types);
-                    Object[] args = {};
-                    Element child = (Element) addContainer.invoke(parent, args);
-                    return child;
+                    Class<?> parentClass = parent.getClass();
+                    Method addContainer = parentClass.getMethod(methodName, new Class[] {});
+                    return (Element) addContainer.invoke(parent, new Object[] {});
                 } catch (NoSuchMethodException e) {
-                    Container c = (Container) parent;
-                    if (c.isChild(name)) {
-                        // known existing leaf
-                        // will be handled by endElement code
+                    if (((Container) parent).isChild(name)) {
+                        // known existing leaf will be handled by endElement code
                         return null;
                     }
                     // It's an unknown container or child
@@ -179,28 +160,30 @@ public abstract class Container extends Element {
                     }
                     parser.unknownLevel = 1;
                     return null;
-                } catch (Exception e2) {
-                    throw new YangException(YangException.ELEMENT_MISSING,
-                            parent.getPath(name) + ": Unexpected element");
                 }
             } else { // Container is aware but parent is not
                      // This is the case where we stop parsing
                      // the NETCONF rpc data and start to create
                      // ConfM objects instead
-                try {
-                    Element child = instantiate(parent, name);
-                    parent.addChild(child);
-                    return child;
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                    throw new YangException(YangException.ELEMENT_MISSING,
-                            parent.getPath(name) + ": Unexpected element");
-                } catch (Exception e2) {
-                    e2.printStackTrace();
-                    throw new YangException(YangException.ELEMENT_MISSING,
-                            parent.getPath(name) + ": Unexpected element");
-                }
+                Element child = instantiate(parent, name);
+                parent.addChild(child);
+                return child;
             }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new YangException(YangException.ELEMENT_MISSING,
+                    parent.getPath(name) + ": Unexpected element");
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+            throw new YangException(YangException.ELEMENT_MISSING,
+                    parent.getPath(name) + ": Unexpected element");
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            throw new YangException(YangException.ELEMENT_MISSING,
+                    parent.getPath(name) + ": Unexpected element");
+        } catch (InvocationTargetException e) {
+            throw new YangException(YangException.ELEMENT_MISSING,
+                    parent.getPath(name) + ": Unexpected element");
         }
     }
 
@@ -280,10 +263,9 @@ public abstract class Container extends Element {
      * 
      * @return Package name, if namespace is data model aware
      */
-    public static String hasPackage(String ns) {
+    public static String getPackage(String ns) {
         if (packages == null) return null;
-        for (int i = 0; i < packages.size(); i++) {
-            Package p = packages.get(i);
+        for (Package p : packages) {
             if (p.ns.equals(ns)) return p.pkg;
         }
         return null;
