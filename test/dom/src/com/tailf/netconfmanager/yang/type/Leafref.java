@@ -11,7 +11,8 @@
 
 package com.tailf.netconfmanager.yang.type;
 
-import com.tailf.netconfmanager.yang.Statement;
+import com.tailf.netconfmanager.Element;
+import com.tailf.netconfmanager.Prefix;
 import com.tailf.netconfmanager.yang.YangException;
 
 /**
@@ -19,7 +20,7 @@ import com.tailf.netconfmanager.yang.YangException;
  * 
  * @author emil@tail-f.com
  */
-public class Leafref extends Type<Statement> {
+public class Leafref extends Type<Element> {
 
     private static final long serialVersionUID = 1L;
     
@@ -35,51 +36,46 @@ public class Leafref extends Type<Statement> {
     }
     
     /**
-     * Creates a Leafref object from a Statement.
+     * Creates a Leafref object from an Element.
      * 
      * @param value The initial value of the new Leafref object.
      * @throws YangException If an invariant was broken during initialization.
      */
-    public Leafref(Statement identity) throws YangException {
-        super(identity);
+    public Leafref(Element leaf) throws YangException {
+        super(leaf);
     }
     
     /**
-     * Creates a YangType object from three strings: identity
-     * argument/identifier and the identity module namespace and prefix.
+     * Creates a Leafref object from three strings: Leaf namespace, prefix and
+     * argument/identifier.
      *
-     * @param id identity argument/identifier
-     * @param ns identity module namespace
-     * @param prefix identity module prefix
+     * @param ns Leaf module namespace
+     * @param prefix Leaf module prefix
+     * @param id Leaf argument/identifier
      * @throws YangException If an invariant was broken during initialization.
      */
-    public Leafref(String id, String ns, String prefix)
+    public Leafref(String ns, String prefix, String id)
             throws YangException {
-        super(id + " " + ns + " " + prefix);
+        super(ns + " " + prefix + " " + id);
     }
 
     /**
-     * Returns a top-level Identity Statement from a String.
+     * Returns a Leaf element from a String.
      * <p>
-     * The string should contain space separated tokens, ordered as follows:
-     * module name, module namespace, module prefix, identity argument.
+     * The string should contain space separated tokens: the Leaf namespace,
+     * prefix and argument/identifier.
      * 
      * @param s The string.
-     * @return A Statement representing the referenced leaf, parsed from s.
+     * @return  An Element representing the referenced Leaf, parsed from s.
      * @throws YangException If s is improperly formatted.
      */
     @Override
-    protected Statement fromString(String s) throws YangException {
+    protected Element fromString(String s) throws YangException {
         String[] ss = s.split(" ");
-        if (ss.length == 4 || ss.length == 5) {
-            Statement module = new Statement("module", ss[0]);
-            module.addChild(new Statement("namespace", ss[1]));
-            module.addChild(new Statement("prefix", ss[2]));
-            Statement res = module.addChild(new Statement("Identity", ss[4]));
-            if (ss.length == 5) {
-                
-            }
-            return res;
+        if (ss.length == 3) {
+            Element leaf = new Element(ss[0], ss[2]);
+            leaf.setPrefix(new Prefix(ss[1], ss[0]));
+            return leaf;
         } else {
             throw new YangException(YangException.BAD_VALUE, s);
         }
@@ -91,7 +87,7 @@ public class Leafref extends Type<Statement> {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return obj instanceof Leafref || obj instanceof Statement;
+        return obj instanceof Leafref || obj instanceof Element;
     }
 
 }
