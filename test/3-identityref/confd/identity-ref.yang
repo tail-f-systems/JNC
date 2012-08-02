@@ -1,0 +1,21 @@
+module identity-ref {
+    namespace "http://example.com/ns/idref/1.0";
+    prefix idref;
+    
+    identity baseid;
+    identity id {
+        base baseid;
+    }
+    
+    typedef my-type {
+        type identityref {
+            base baseid;
+        }
+    }
+    
+    container c {
+        leaf ref-leaf {
+            type my-type;
+        }
+    }
+}
