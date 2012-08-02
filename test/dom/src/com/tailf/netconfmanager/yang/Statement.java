@@ -166,11 +166,13 @@ public final class Statement {
      * changed to this statement, and the top of this statement, respectively.
      * 
      * @param stmt The statement to add as child to this statement.
+     * @return The added statement.
      */
-    public void addChild(Statement stmt) {
+    public Statement addChild(Statement stmt) {
         stmt.top = this.top;
         stmt.parent = this;
         substmts.add(stmt);
+        return stmt;
     }
     
     /**
