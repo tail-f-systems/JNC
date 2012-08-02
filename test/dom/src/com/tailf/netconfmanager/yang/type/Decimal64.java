@@ -82,7 +82,7 @@ public class Decimal64 extends Int<BigDecimal> {
     /**
      * Sets the value of this object using a BigDecimal.
      * 
-     * @param value The BigDecimal.
+     * @param n The BigDecimal.
      * @param fractionDigits Number of decimals allowed.
      * @throws YangException If value is too small or too large with regard to
      *                        the fractionDigits argument.
