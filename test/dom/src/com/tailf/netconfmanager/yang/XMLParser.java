@@ -33,7 +33,7 @@ public class XMLParser extends com.tailf.netconfmanager.XMLParser {
     /**
      * Read in an XML file and parse it and return an element tree.
      */
-    public Element readFile(String filename) throws NetconfException {
+    public Container readFile(String filename) throws NetconfException {
         try {
             ConfHandler handler = new ConfHandler();
             parser.setContentHandler(handler);
