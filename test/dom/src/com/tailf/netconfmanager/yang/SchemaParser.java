@@ -64,13 +64,13 @@ public class SchemaParser {
     }
 
     private class SchemaHandler extends DefaultHandler {
-        protected Hashtable<Tagpath, SchemaNode> h;
+        protected HashMap<Tagpath, SchemaNode> h;
         protected SchemaNode node;
         protected RevisionInfo ri;
         protected ArrayList<RevisionInfo> riArrayList;
         protected String value = null;
 
-        SchemaHandler(Hashtable<Tagpath, SchemaNode> h2) {
+        SchemaHandler(HashMap<Tagpath, SchemaNode> h2) {
             super();
             h = h2;
         }
@@ -156,7 +156,7 @@ public class SchemaParser {
      * Read in an XML file and parse it and return a hashtable with SchemaNode
      * objects.
      */
-    public void readFile(String filename, Hashtable<Tagpath, SchemaNode> h) throws NetconfException {
+    public void readFile(String filename, HashMap<Tagpath, SchemaNode> h) throws NetconfException {
         try {
             SchemaHandler handler = new SchemaHandler(h);
             parser.setContentHandler(handler);
@@ -168,7 +168,7 @@ public class SchemaParser {
         }
     }
 
-    public void readFile(URL schemaUrl, Hashtable<Tagpath, SchemaNode> h) throws NetconfException {
+    public void readFile(URL schemaUrl, HashMap<Tagpath, SchemaNode> h) throws NetconfException {
         try {
             SchemaHandler handler = new SchemaHandler(h);
             parser.setContentHandler(handler);
