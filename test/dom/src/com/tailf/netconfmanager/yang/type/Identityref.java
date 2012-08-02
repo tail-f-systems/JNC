@@ -12,7 +12,6 @@
 package com.tailf.netconfmanager.yang.type;
 
 import com.tailf.netconfmanager.Element;
-import com.tailf.netconfmanager.Prefix;
 import com.tailf.netconfmanager.yang.YangException;
 
 /**
@@ -61,24 +60,13 @@ public class Identityref extends Type<Element> {
 
     /**
      * Returns an identity element from a String.
-     * <p>
-     * The string should contain space separated tokens: the identity
-     * namespace, prefix and argument/identifier.
      * 
      * @param s The string.
      * @return  An Element representing the referenced identity, parsed from s.
-     * @throws YangException If s is improperly formatted.
      */
     @Override
-    protected Element fromString(String s) throws YangException {
-        String[] ss = s.split(" ");
-        if (ss.length == 3) {
-            Element identity = new Element(ss[0], ss[2]);
-            identity.setPrefix(new Prefix(ss[1], ss[0]));
-            return identity;
-        } else {
-            throw new YangException(YangException.BAD_VALUE, s);
-        }
+    protected Element fromString(String s) {
+        return new Element("", s);
     }
 
     /*
