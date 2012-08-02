@@ -1596,7 +1596,7 @@ class TypedefMethodGenerator(MethodGenerator):
             constructor.add_line('super(value);')
             if self.needs_check:
                 constructor.add_line('check();')
-                constructor.add_exception('ConfMException')
+                constructor.add_exception('YangException')
             constructors.append(constructor)
         return constructors
 
@@ -1623,7 +1623,7 @@ class TypedefMethodGenerator(MethodGenerator):
             setter.add_line('super.setValue(value);')
             if self.needs_check:
                 setter.add_line('check();')
-                setter.add_exception('ConfMException')
+                setter.add_exception('YangException')
             setters.append(setter)
         return setters
     
@@ -1632,7 +1632,7 @@ class TypedefMethodGenerator(MethodGenerator):
         if self.needs_check:
             checker = JavaMethod(modifiers=['public', 'void'], name='check')
             checker.add_javadoc('Checks all restrictions (if any).')
-            checker.add_exception('ConfMException')
+            checker.add_exception('YangException')
             if self.enum:
                 checker.add_line('boolean e = false;')
                 for e in self.enum:
