@@ -1958,10 +1958,10 @@ def register_schema(prefix_name):
     public static void registerSchema() throws NetconfException {
         StackTraceElement[] sTrace = (new Exception()).getStackTrace();
         ClassLoader loader = sTrace[0].getClass().getClassLoader();
-        java.net.URL schemaUrl = loader.getSystemResource("''' +
+        java.net.URL schemaUrl = loader.getResource("''' +
             prefix_name + '''.schema");
         SchemaParser parser = new SchemaParser();
-        Hashtable h = CsTree.create(NAMESPACE);
+        HashMap<Tagpath, SchemaNode> h = SchemaTree.create(NAMESPACE);
         if (schemaUrl == null)
             parser.readFile("''' + prefix_name + '''.schema", h);
         else
