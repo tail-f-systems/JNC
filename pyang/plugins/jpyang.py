@@ -304,7 +304,7 @@ def write_file(d, file_name, file_content, ctx):
             raise
     finally:
         if ctx.opts.verbose:
-            print 'Writing file to: ' + os.getcwd()
+            print 'Writing file to: ' + os.getcwd() + '/' + file_name
         os.chdir(wd)
     with open(d + '/' + file_name, 'w+') as f:
         f.write(file_content)
@@ -460,6 +460,8 @@ def get_types(yang_type, ctx):
         # TODO: Maybe this should be com.tailf.confm.confd.Decimal64
     elif yang_type.arg == 'boolean':
         primitive = 'boolean'
+    elif yang_type.arg == 'identityref':
+        primitive = 'identityref'
 #    elif yang_type.arg == 'bits':  # Handled by else clause
 #    TODO: add support for built-in datatypes bits, empty, identityref,
 #    instance-identifier, leafref and union
@@ -471,6 +473,8 @@ def get_types(yang_type, ctx):
             type_id = get_package(yang_type, ctx) + yang_type.arg
             print_warning(key=type_id, ctx=ctx)
         else:
+            if typedef is None and ctx.opts.verbose:
+                print yang_type.keyword + ' ' + yang_type.arg
             basetype = get_base_type(typedef)
             package = get_package(typedef, ctx)
             typedef_arg = capitalize_first(yang_type.arg)
