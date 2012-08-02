@@ -11,7 +11,8 @@
 
 package com.tailf.netconfmanager.yang.type;
 
-import com.tailf.netconfmanager.yang.Statement;
+import com.tailf.netconfmanager.Element;
+import com.tailf.netconfmanager.Prefix;
 import com.tailf.netconfmanager.yang.YangException;
 
 /**
@@ -19,7 +20,7 @@ import com.tailf.netconfmanager.yang.YangException;
  * 
  * @author emil@tail-f.com
  */
-public class Identityref extends Type<Statement> {
+public class Identityref extends Type<Element> {
 
     private static final long serialVersionUID = 1L;
     
@@ -40,7 +41,7 @@ public class Identityref extends Type<Statement> {
      * @param value The initial value of the new YangType object.
      * @throws YangException If an invariant was broken during initialization.
      */
-    public Identityref(Statement identity) throws YangException {
+    public Identityref(Element identity) throws YangException {
         super(identity);
     }
     
@@ -48,35 +49,33 @@ public class Identityref extends Type<Statement> {
      * Creates an Identityref object from three strings: identity
      * argument/identifier, the identity module namespace and its prefix.
      *
-     * @param id identity argument/identifier
      * @param ns identity module namespace
      * @param prefix identity module prefix
+     * @param id identity argument/identifier
      * @throws YangException If an invariant was broken during initialization.
      */
-    public Identityref(String id, String ns, String prefix)
+    public Identityref(String ns, String prefix, String id)
             throws YangException {
-        super(id + " " + ns + " " + prefix);
+        super(ns + " " + prefix + " " + id);
     }
 
     /**
-     * Returns a Statement from a String.
+     * Returns an identity element from a String.
      * <p>
-     * The string should contain space separated tokens, ordered as follows:
-     * module name, module namespace, module prefix, identity argument
+     * The string should contain space separated tokens: the identity
+     * namespace, prefix and argument/identifier.
      * 
      * @param s The string.
-     * @return  A Statement representing the referenced identity, parsed from s.
+     * @return  An Element representing the referenced identity, parsed from s.
      * @throws YangException If s is improperly formatted.
      */
     @Override
-    protected Statement fromString(String s) throws YangException {
+    protected Element fromString(String s) throws YangException {
         String[] ss = s.split(" ");
-        if (ss.length == 4) {
-            Statement module = new Statement("module", ss[0]);
-            module.addChild(new Statement("namespace", ss[1]));
-            module.addChild(new Statement("prefix", ss[2]));
-            module.addChild(new Statement("Identity", ss[4]));
-            return module.getSubstmts().get(2);
+        if (ss.length == 3) {
+            Element identity = new Element(ss[0], ss[2]);
+            identity.setPrefix(new Prefix(ss[1], ss[0]));
+            return identity;
         } else {
             throw new YangException(YangException.BAD_VALUE, s);
         }
@@ -88,7 +87,7 @@ public class Identityref extends Type<Statement> {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return obj instanceof Identityref || obj instanceof Statement;
+        return obj instanceof Identityref || obj instanceof Element;
     }
 
 }
