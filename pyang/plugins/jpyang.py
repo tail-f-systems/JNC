@@ -477,7 +477,7 @@ def get_types(yang_type, ctx):
                 print yang_type.keyword + ' ' + yang_type.arg
             basetype = get_base_type(typedef)
             package = get_package(typedef, ctx)
-            typedef_arg = capitalize_first(yang_type.arg)
+            typedef_arg = capitalize_first(camelize(yang_type.arg))
             return package + '.' + typedef_arg, get_types(basetype, ctx)[1]
     return confm + capitalize_first(primitive), primitive + alt
 
