@@ -420,28 +420,24 @@ def get_types(yang_type, ctx):
     if yang_type.keyword == 'leaf':
         yang_type = yang_type.search_one('type')
     assert yang_type.keyword in ('type', 'typedef'), 'argument is type, typedef or leaf'
-    confm = 'com.tailf.confm.xs.'
-    primitive = 'String'
-    alt = ''
-    if yang_type.arg in ('string', 'enumeration'):
-        pass  # String is the default
-    elif yang_type in ('binary', 'instance-identifier', 'empty'):
-        primitive, alt = alt, primitive
-        if yang_type.arg == 'binary':
-
-            # confm = confm[:-3] + 'Confd.OctetList'  # Possible alternative...
-            confm += 'Base64Binary'
-        elif yang_type.arg == 'instance-identifier':
-            confm = confm[:-3] + 'confd.ObjectRef'
-        elif yang_type.arg == 'empty':
-            confm = confm[:-3] + 'confd.Exists'
+    primitive = capitalize_first(camelize(yang_type.arg))
+    netconf = 'com.tailf.netconfmanager.yang.type.' + primitive
+    if yang_type.arg in ('string', 'boolean'):
+        netconf = 'com.tailf.netconfmanager.yang.type.Yang' + primitive
+    elif yang_type.arg in ('enumeration', 'binary'):
+        primitive = 'String'
+    elif yang_type.arg in ('bits', ):
+        primitive = 'BigInteger'
+    elif yang_type.arg in ('instance-identifier', 'leafref', 'identityref'):
+        primitive = 'Element'
+    elif yang_type.arg in ('empty', ):
+        primitive = 'boolean'
     elif yang_type.arg in ('int8', 'int16', 'int32', 'int64', 'uint8',
             'uint16', 'uint32', 'uint64'):
+        integer_type = ['long', 'int', 'short', 'byte']
         if yang_type.arg[:1] == 'u':
-            confm += 'Unsigned'
-            integer_type = ['long', 'long', 'int', 'short']
-        else:
-            integer_type = ['long', 'int', 'short', 'byte']
+            integer_type.pop()
+            integer_type.insert(0, 'long')
         # XXX: One might want to implement uint8 as short instead of byte, etc.
         if yang_type.arg[-2:] == '64':
             primitive = integer_type[0]
@@ -456,12 +452,7 @@ def get_types(yang_type, ctx):
                 key=yang_type.arg, ctx=ctx)
             primitive = 'long'
     elif yang_type.arg == 'decimal64':
-        primitive = 'double'
-        # TODO: Maybe this should be com.tailf.confm.confd.Decimal64
-    elif yang_type.arg == 'boolean':
-        primitive = 'boolean'
-    elif yang_type.arg == 'identityref':
-        primitive = 'identityref'
+        primitive = 'BigDecimal'
 #    elif yang_type.arg == 'bits':  # Handled by else clause
 #    TODO: add support for built-in datatypes bits, empty, identityref,
 #    instance-identifier, leafref and union
@@ -479,7 +470,7 @@ def get_types(yang_type, ctx):
             package = get_package(typedef, ctx)
             typedef_arg = capitalize_first(camelize(yang_type.arg))
             return package + '.' + typedef_arg, get_types(basetype, ctx)[1]
-    return confm + capitalize_first(primitive), primitive + alt
+    return netconf, primitive
 
 
 def get_base_type(stmt):
