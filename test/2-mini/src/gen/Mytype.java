@@ -7,9 +7,8 @@
 
 package gen;
 
-import com.tailf.confm.*;
-import com.tailf.inm.*;
-import java.util.Hashtable;
+import com.tailf.netconfmanager.yang.YangException;
+import com.tailf.netconfmanager.yang.type.YangString;
 
 /**
  * This class represents a "src/gen/my-type" element
@@ -18,14 +17,15 @@ import java.util.Hashtable;
  * @version    1.0 2012-7-4
  * @author    Auto Generated
  */
-public class Mytype extends com.tailf.confm.xs.String {
+@SuppressWarnings("serial")
+public class Mytype extends YangString {
 
     /**
      * Constructor for my-type object from a string.
      * @param value Value to construct the my-type from.
      */
     public Mytype(String value) 
-        throws ConfMException {
+        throws YangException {
         super(value);
         check();
     }
@@ -33,18 +33,17 @@ public class Mytype extends com.tailf.confm.xs.String {
     /**
      * Sets the value for child typedef "my-type", using a string value.
      * @param my-typeValue The value to set.
+     * @throws YangException 
      */
-    public void setValue(String mytypeValue)
-            throws ConfMException {
+    public void setValue(String mytypeValue) throws YangException {
         super.setValue(mytypeValue);
-        check();
     }
 
     /**
      * Checks all restrictions (if any).
      */
     public void check()
-        throws ConfMException {
+        throws YangException {
     }
 
 }

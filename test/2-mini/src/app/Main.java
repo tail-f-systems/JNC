@@ -1,10 +1,14 @@
 package app;
 
 import java.io.IOException;
-import java.util.ListIterator;
 
-import com.tailf.confm.*;
-import com.tailf.inm.*;
+import com.tailf.netconfmanager.ConfDSession;
+import com.tailf.netconfmanager.Element;
+import com.tailf.netconfmanager.NetconfException;
+import com.tailf.netconfmanager.NetconfSession;
+import com.tailf.netconfmanager.NodeSet;
+import com.tailf.netconfmanager.yang.Device;
+import com.tailf.netconfmanager.yang.DeviceUser;
 
 import gen.Mini;
 

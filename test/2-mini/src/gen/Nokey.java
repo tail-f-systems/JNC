@@ -7,9 +7,11 @@
 
 package gen;
 
-import com.tailf.confm.*;
-import com.tailf.inm.*;
-import java.util.Hashtable;
+import com.tailf.netconfmanager.Element;
+import com.tailf.netconfmanager.ElementLeafListValueIterator;
+import com.tailf.netconfmanager.NetconfException;
+import com.tailf.netconfmanager.yang.Container;
+
 
 /**
  * This class represents a "noKey" element
@@ -18,6 +20,7 @@ import java.util.Hashtable;
  * @version    1.0 2012-7-4
  * @author    Auto Generated
  */
+@SuppressWarnings("serial")
 public class Nokey extends Container {
 
     /**

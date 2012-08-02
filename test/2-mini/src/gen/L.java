@@ -7,9 +7,11 @@
 
 package gen;
 
-import com.tailf.confm.*;
-import com.tailf.inm.*;
-import java.util.Hashtable;
+import com.tailf.netconfmanager.Element;
+import com.tailf.netconfmanager.NetconfException;
+import com.tailf.netconfmanager.yang.Container;
+import com.tailf.netconfmanager.yang.Leaf;
+import com.tailf.netconfmanager.yang.type.YangString;
 
 /**
  * This class represents a "l" element
@@ -18,6 +20,7 @@ import java.util.Hashtable;
  * @version    1.0 2012-7-4
  * @author    Auto Generated
  */
+@SuppressWarnings("serial")
 public class L extends Container {
 
     /**
@@ -34,7 +37,7 @@ public class L extends Container {
      * Constructor for an initialized L object.
      * @param kValue Key argument of child.
      */
-    public L(com.tailf.confm.xs.String kValue)
+    public L(YangString kValue)
         throws NetconfException {
         super(Mini.NAMESPACE, "l");
         // Set key element: k
@@ -111,16 +114,16 @@ public class L extends Container {
      * Return the value for child leaf "k".
      * @return The value of the leaf.
      */
-    public com.tailf.confm.xs.String getKValue()
+    public YangString getKValue()
         throws NetconfException {
-        return (com.tailf.confm.xs.String)getValue("k");
+        return (YangString)getValue("k");
     }
 
     /**
      * Sets the value for child leaf "k", using the java primitive value.
      * @param kValue The value to set.
      */
-    public void setKValue(com.tailf.confm.xs.String kValue)
+    public void setKValue(YangString kValue)
         throws NetconfException {
         setLeafValue(Mini.NAMESPACE,
             "k",
@@ -134,7 +137,7 @@ public class L extends Container {
      */
     public void setKValue(String kValue)
         throws NetconfException {
-        setKValue(new com.tailf.confm.xs.String(kValue));
+        setKValue(new YangString(kValue));
     }
 
     /**

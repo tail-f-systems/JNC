@@ -15,10 +15,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.tailf.confm.Leaf;
-import com.tailf.inm.Element;
-import com.tailf.inm.INMException;
-import com.tailf.inm.NodeSet;
+import com.tailf.netconfmanager.*;
 
 public class MainTest {
     
@@ -68,7 +65,7 @@ public class MainTest {
     
     @Test
     public void testInitialConfig() throws NetconfException, IOException {
-        Iterator iter = main.getConfig().listIterator();
+        Iterator<Element> iter = main.getConfig().listIterator();
         boolean test3Found = false, test4Found = false;
         while (iter.hasNext()) {
             Element config = (Element)iter.next();
@@ -86,7 +83,7 @@ public class MainTest {
     public void testUpdateConfig() throws NetconfException, IOException {
         gen.L l = null;
         String msg = "test2 already in configuration!";
-        Iterator iter = main.getConfig().listIterator();
+        Iterator<Element> iter = main.getConfig().listIterator();
         while (iter.hasNext()) {
             Element next = (Element)iter.next();
             if (next instanceof gen.L) {

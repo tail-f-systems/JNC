@@ -7,9 +7,15 @@
 
 package gen;
 
-import com.tailf.confm.*;
-import com.tailf.inm.*;
-import java.util.Hashtable;
+
+import java.util.HashMap;
+
+import com.tailf.netconfmanager.NetconfException;
+import com.tailf.netconfmanager.Tagpath;
+import com.tailf.netconfmanager.yang.Container;
+import com.tailf.netconfmanager.yang.SchemaNode;
+import com.tailf.netconfmanager.yang.SchemaParser;
+import com.tailf.netconfmanager.yang.SchemaTree;
 
 /**
  * The root class for namespace http://exampleCom/ns/mini/10 (accessible from 
@@ -41,9 +47,10 @@ public class Mini {
     public static void registerSchema() throws NetconfException {
         StackTraceElement[] sTrace = (new Exception()).getStackTrace();
         ClassLoader loader = sTrace[0].getClass().getClassLoader();
-        java.net.URL schemaUrl = loader.getSystemResource("Mini.schema");
+        java.net.URL schemaUrl = loader.getResource("Mini.schema");
+//        java.net.URL schemaUrl = ClassLoader.getSystemResource("Mini.schema");
         SchemaParser parser = new SchemaParser();
-        Hashtable h = CsTree.create(NAMESPACE);
+        HashMap<Tagpath, SchemaNode> h = SchemaTree.create(NAMESPACE);
         if (schemaUrl == null)
             parser.readFile("Mini.schema", h);
         else
