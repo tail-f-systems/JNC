@@ -766,9 +766,10 @@ class ClassGenerator(object):
                     '.NAMESPACE) with prefix "' + prefix.arg + '" (' + name +
                     '.PREFIX).'),
                 source=self.src)
-        self.java_class.add_import('confm', 'com.tailf.confm.*')
-        self.java_class.add_import('inm', 'com.tailf.inm.*')
-        self.java_class.add_import('Hashtable', 'java.util.Hashtable')
+        self.java_class.add_import('netconfmanager', 'com.tailf.netconfmanager.*')
+        self.java_class.add_import('yang', 'com.tailf.netconfmanager.yang.*')
+        self.java_class.add_import('type', 'com.tailf.netconfmanager.yang.type.*')
+        self.java_class.add_import('Hashtable', 'java.util.HashMap')
         self.java_class.add_field('NAMESPACE', static_string('NAMESPACE', ns_arg))
         self.java_class.add_field('PREFIX', static_string('PREFIX', prefix.arg))
         self.java_class.add_enabler(name, enable(name))
@@ -785,7 +786,10 @@ class ClassGenerator(object):
         fields = []
 
         self.java_class = JavaClass(filename=self.filename, package=self.package,
-                imports=['com.tailf.confm.*', 'com.tailf.inm.*', 'java.util.Hashtable'],
+                imports=['com.tailf.netconfmanager.*', 
+                         'com.tailf.netconfmanager.yang.*', 
+                         'com.tailf.netconfmanager.yang.type.*', 
+                         'java.util.HashMap'],
                 # TODO: Hashtable not used in generated code
 
                 description='This class represents a "' + self.path + stmt.arg +
