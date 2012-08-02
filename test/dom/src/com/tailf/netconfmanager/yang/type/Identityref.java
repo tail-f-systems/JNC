@@ -36,9 +36,9 @@ public class Identityref extends Type<Element> {
     }
     
     /**
-     * Creates a YangType object from a Statement.
+     * Creates an Identityref object from an Element.
      * 
-     * @param value The initial value of the new YangType object.
+     * @param value The initial value of the new Identityref object.
      * @throws YangException If an invariant was broken during initialization.
      */
     public Identityref(Element identity) throws YangException {
@@ -46,8 +46,8 @@ public class Identityref extends Type<Element> {
     }
     
     /**
-     * Creates an Identityref object from three strings: identity
-     * argument/identifier, the identity module namespace and its prefix.
+     * Creates an Identityref object from three strings: identity namespace,
+     * prefix and argument/identifier.
      *
      * @param ns identity module namespace
      * @param prefix identity module prefix
