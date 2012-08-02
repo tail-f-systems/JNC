@@ -24,7 +24,7 @@ public class Identityref extends Type<Statement> {
     private static final long serialVersionUID = 1L;
     
     /**
-     * Creates a YangType object from a String, formatted as described in
+     * Creates an Identityref object from a String, formatted as described in
      * {@link Identityref#fromString(String)}.
      * 
      * @param s The string.
@@ -45,8 +45,8 @@ public class Identityref extends Type<Statement> {
     }
     
     /**
-     * Creates a YangType object from three strings: identity
-     * argument/identifier and the identity module namespace and prefix.
+     * Creates an Identityref object from three strings: identity
+     * argument/identifier, the identity module namespace and its prefix.
      *
      * @param id identity argument/identifier
      * @param ns identity module namespace
@@ -62,20 +62,21 @@ public class Identityref extends Type<Statement> {
      * Returns a Statement from a String.
      * <p>
      * The string should contain space separated tokens, ordered as follows:
-     * identity argument/identifier, identity namespace uri, prefix
+     * module name, module namespace, module prefix, identity argument
      * 
-     * @param s A string representation of a value of type T.
-     * @return A T value parsed from s.
-     * @throws YangException If s does not contain a parsable T.
+     * @param s The string.
+     * @return  A Statement representing the referenced identity, parsed from s.
+     * @throws YangException If s is improperly formatted.
      */
     @Override
     protected Statement fromString(String s) throws YangException {
         String[] ss = s.split(" ");
-        if (ss.length == 3) {
-            Statement module = new Statement("module", "<unknown>");
+        if (ss.length == 4) {
+            Statement module = new Statement("module", ss[0]);
             module.addChild(new Statement("namespace", ss[1]));
             module.addChild(new Statement("prefix", ss[2]));
-            return new Statement("Identity", ss[0], module, module, null);
+            module.addChild(new Statement("Identity", ss[4]));
+            return module.getSubstmts().get(2);
         } else {
             throw new YangException(YangException.BAD_VALUE, s);
         }
