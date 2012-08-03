@@ -2369,50 +2369,52 @@ class OrderedSet(collections.MutableSet):
     """
 
     def __init__(self, iterable=None):
+        self.ITEM, self.PREV, self.NEXT = range(3)
         self.end = end = [] 
         end += [None, end, end]         # sentinel node for doubly linked list
-        self.map = {}                   # key --> [key, prev, next]
+        self.map = {}                   # value --> [value, prev, next]
         if iterable is not None:
             self |= iterable
 
     def __len__(self):
         return len(self.map)
 
-    def __contains__(self, key):
-        return key in self.map
+    def __contains__(self, item):
+        return item in self.map
 
-    def add(self, key):
-        if key not in self.map:
+    def add(self, item):
+        if item not in self.map:
             end = self.end
-            curr = end[1]
-            curr[2] = end[1] = self.map[key] = [key, curr, end]
+            curr = end[self.PREV]
+            self.map[item] = [item, curr, end]
+            end[self.PREV] = self.map[item]
+            curr[self.NEXT] = self.map[item]
 
-    def discard(self, key):
-        if key in self.map:        
-            key, prev, after = self.map.pop(key)
-            prev[2] = after
-            after[1] = prev
+    def discard(self, item):
+        if item in self.map:        
+            item, prev, after = self.map.pop(item)
+            prev[self.NEXT] = after
+            after[self.PREV] = prev
+
+    def _iterate(self, iter_index):
+        end = self.end
+        curr = end[iter_index]
+        while curr is not end:
+            yield curr[self.ITEM]
+            curr = curr[iter_index]
 
     def __iter__(self):
-        end = self.end
-        curr = end[2]
-        while curr is not end:
-            yield curr[0]
-            curr = curr[2]
+        return self._iterate(self.NEXT)
 
     def __reversed__(self):
-        end = self.end
-        curr = end[1]
-        while curr is not end:
-            yield curr[0]
-            curr = curr[1]
+        return self._iterate(self.PREV)
 
     def pop(self, last=True):
         if not self:
             raise KeyError('set is empty')
-        key = next(reversed(self)) if last else next(iter(self))
-        self.discard(key)
-        return key
+        item = next(reversed(self)) if last else next(iter(self))
+        self.discard(item)
+        return item
 
     def __repr__(self):
         if not self:
