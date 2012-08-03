@@ -756,8 +756,6 @@ class ClassGenerator(object):
                     '.NAMESPACE) with prefix "' + prefix.arg + '" (' + name +
                     '.PREFIX).'),
                 source=self.src)
-        self.java_class.add_import('jnc', 'com.tailf.jnc.*')
-        self.java_class.add_import('Hashtable', 'java.util.HashMap')
         self.java_class.add_field('NAMESPACE', static_string('NAMESPACE', ns_arg))
         self.java_class.add_field('PREFIX', static_string('PREFIX', prefix.arg))
         self.java_class.add_enabler(name, enable(name))
@@ -774,7 +772,7 @@ class ClassGenerator(object):
         fields = []
 
         self.java_class = JavaClass(filename=self.filename, package=self.package,
-                imports=['com.tailf.jnc.*', 'java.util.HashMap'],
+#                imports=['com.tailf.jnc.*', 'java.util.HashMap'],
                 # TODO: Hashtable not used in generated code
 
                 description='This class represents a "' + self.path + stmt.arg +
@@ -861,7 +859,7 @@ class ClassGenerator(object):
             if type_stmt.i_typedef:
                 if not self.yang_types.defined(type_stmt.i_typedef.arg):
                     typedef_generator = ClassGenerator(type_stmt.i_typedef, 
-                        package=get_package(type_stmt.i_typedef, self.ctx),
+                        package='src.'+get_package(type_stmt.i_typedef, self.ctx),
                         path=self.package.replace('.', '/') + '/', ns=None,
                         prefix_name=None, parent=self)
                     typedef_generator.generate()
@@ -897,9 +895,9 @@ class ClassGenerator(object):
                 path=self.path + sub.parent.arg + '/', ns=None,
                 prefix_name=None, parent=self)
             child_generator.generate()
-            name = extract_names(sub.arg)[1]
-            sub_package = get_package(sub, self.ctx) + '.' + name
-            self.java_class.add_import(sub_package, sub_package)
+#            name = extract_names(sub.arg)[1]
+#            sub_package = get_package(sub, self.ctx) + '.' + name
+#            self.java_class.add_import(sub_package, sub_package)
             if sub.keyword == 'list':
                 key, _, confm_keys, _ = extract_keys(sub, self.ctx)
                 add(sub.arg, access_methods_comment(sub))
@@ -921,14 +919,14 @@ class ClassGenerator(object):
                 add(sub.arg, delete_stmt(sub))
         elif sub.keyword in ('leaf', 'leaf-list'):
             type_stmt = sub.search_one('type')
-            if type_stmt.i_typedef:
-                if not self.yang_types.defined(type_stmt.i_typedef.arg):
-                    type_generator = ClassGenerator(stmt=type_stmt.i_typedef,
-                        package=get_package(type_stmt.i_typedef,
-                                            self.ctx).replace('.', '/') + '/',
-                        path=self.path + sub.parent.arg + '/', ns=None,
-                        prefix_name=None, parent=self)
-                    type_generator.generate()
+#            if type_stmt.i_typedef:
+#                if not self.yang_types.defined(type_stmt.i_typedef.arg):
+#                    type_generator = ClassGenerator(stmt=type_stmt.i_typedef,
+#                        package='src.'+get_package(type_stmt.i_typedef,
+#                                            self.ctx).replace('.', '/') + '/',
+#                        path=self.path + sub.parent.arg + '/', ns=None,
+#                        prefix_name=None, parent=self)
+#                    type_generator.generate()
             type_str1, type_str2 = get_types(type_stmt, self.ctx)
             if sub.keyword == 'leaf':
                 key = sub.parent.search_one('key')
@@ -1192,6 +1190,9 @@ class JavaClass(object):
         self.modifiers = modifiers
         self.source = source
         self.fields = collections.OrderedDict()
+        svUID = JavaValue(modifiers=['private', 'static', 'final', 'long'],
+                          name='serialVersionUID', value='1L', indent=4)
+        self.fields['vUID'] = svUID
         self.constructors = collections.OrderedDict()
         self.cloners = collections.OrderedDict()
         self.enablers = collections.OrderedDict()
@@ -1204,7 +1205,7 @@ class JavaClass(object):
                       self.name_getters, self.access_methods,
                       self.support_methods]
 
-    def add_import(self, key, import_):
+    def _add_import(self, key, import_):
         """Adds import_ to list of imports"""
         self.imports[key] = import_
 
@@ -1222,10 +1223,18 @@ class JavaClass(object):
 
     def add_enabler(self, key, enabler):
         """Adds an 'enable'-method as a string"""
+        self._add_import('JNCException', 'com.tailf.jnc.JNCException')
+        self._add_import('YangElement', 'com.tailf.jnc.YangElement')
         self.enablers[key] = enabler
 
     def add_schema_registrator(self, key, schema_registrator):
         """Adds a register schema method"""
+        self._add_import('JNCException', 'com.tailf.jnc.JNCException')
+        self._add_import('SchemaParser', 'com.tailf.jnc.SchemaParser')
+        self._add_import('Tagpath', 'com.tailf.jnc.Tagpath')
+        self._add_import('SchemaNode', 'com.tailf.jnc.SchemaNode')
+        self._add_import('SchemaTree', 'com.tailf.jnc.SchemaTree')
+        self._add_import('HashMap', 'java.util.HashMap')
         self.schema_registrators[key] = schema_registrator
 
     def add_name_getter(self, key, name_getter):
@@ -1318,6 +1327,7 @@ class JavaValue(object):
         if modifiers is None:
             self.modifiers = []
         self.name = name
+        self.value = value
         self.indent = ' ' * indent
 
     def __eq__(self, other):
