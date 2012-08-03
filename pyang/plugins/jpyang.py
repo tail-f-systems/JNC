@@ -1391,7 +1391,12 @@ class JavaValue(object):
 
     def add_dependency(self, import_):
         """Adds import_ to list of imports needed for value to compile"""
-        self.imports.append(import_)
+        if import_ not in java_reserved_words | {'String'}:
+            if import_ in ('BigInteger', 'BigDecimal'):
+                import_ = 'java.math.' + import_
+            else:
+                import_ = 'com.tailf.jnc.' + import_
+            self.imports.append(import_)
 
     def javadoc_as_string(self):
         """Returns a list representing javadoc lines for this value"""
@@ -1595,12 +1600,7 @@ class TypedefMethodGenerator(MethodGenerator):
                 # i == 1, Primitive constructor
                 javadoc2.extend([' object from a ', primitive, '.'])
                 constructor.add_parameter(primitive + ' value')
-                if primitive not in java_reserved_words | {'String'}:
-                    if primitive in ('BigInteger', 'BigDecimal'):
-                        import_ = 'java.math.' + primitive
-                    else:
-                        import_ = 'com.tailf.jnc.' + primitive
-                    constructor.add_dependency(import_)
+                constructor.add_dependency(primitive)
             constructor.add_javadoc(''.join(javadoc2))
             constructor.add_javadoc(''.join(javadoc))
             constructor.add_line('super(value);')
