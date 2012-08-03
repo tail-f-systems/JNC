@@ -1291,6 +1291,9 @@ class JavaClass(object):
             for method in flatten(self.attrs):
                 if hasattr(method, 'imports'):
                     self.imports |= method.imports
+                if hasattr(method, 'exceptions'):
+                    self.imports |= map(lambda s: 'com.tailf.jnc.' + s, 
+                                        method.exceptions)
         if self.imports:
             header.append('')
             for import_ in self.imports:
