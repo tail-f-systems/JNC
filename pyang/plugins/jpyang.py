@@ -1202,10 +1202,6 @@ class JavaClass(object):
                       self.name_getters, self.access_methods,
                       self.support_methods]
 
-    def _add_import(self, key, import_):
-        """Adds import_ to list of imports"""
-        self.imports.add(import_)
-
     def add_field(self, key, field):
         """Adds a field represented as a string"""
         self.fields.add(field)
@@ -1220,18 +1216,18 @@ class JavaClass(object):
 
     def add_enabler(self, key, enabler):
         """Adds an 'enable'-method as a string"""
-        self._add_import('JNCException', 'com.tailf.jnc.JNCException')
-        self._add_import('YangElement', 'com.tailf.jnc.YangElement')
+        self.imports.add('com.tailf.jnc.JNCException')
+        self.imports.add('com.tailf.jnc.YangElement')
         self.enablers.add(enabler)
 
     def add_schema_registrator(self, key, schema_registrator):
         """Adds a register schema method"""
-        self._add_import('JNCException', 'com.tailf.jnc.JNCException')
-        self._add_import('SchemaParser', 'com.tailf.jnc.SchemaParser')
-        self._add_import('Tagpath', 'com.tailf.jnc.Tagpath')
-        self._add_import('SchemaNode', 'com.tailf.jnc.SchemaNode')
-        self._add_import('SchemaTree', 'com.tailf.jnc.SchemaTree')
-        self._add_import('HashMap', 'java.util.HashMap')
+        self.imports.add('com.tailf.jnc.JNCException')
+        self.imports.add('com.tailf.jnc.SchemaParser')
+        self.imports.add('com.tailf.jnc.Tagpath')
+        self.imports.add('com.tailf.jnc.SchemaNode')
+        self.imports.add('com.tailf.jnc.SchemaTree')
+        self.imports.add('java.util.HashMap')
         self.schema_registrators.add(schema_registrator)
 
     def add_name_getter(self, key, name_getter):
@@ -1252,11 +1248,11 @@ class JavaClass(object):
         """Returns self.body. If it is None, fields and methods are added to it
         before it is returned."""
         if self.body is None:
-            if any(x in self.modifiers for x in ['extends', 'implements']):
-                self.fields.add_first(JavaValue(
-                    modifiers=['private', 'static', 'final', 'long'],
-                    name='serialVersionUID', value='1L', indent=4))
             self.body = []
+            if any(x in self.modifiers for x in ['extends', 'implements']):
+                self.body.extend(JavaValue(
+                    modifiers=['private', 'static', 'final', 'long'],
+                    name='serialVersionUID', value='1L', indent=4).as_list())
             for method in flatten(self.attrs):
                 if hasattr(method, 'as_list'):
                     self.body.extend(method.as_list())
@@ -1291,6 +1287,10 @@ class JavaClass(object):
         # package and import statement goes here
         header.append('')
         header.append('package ' + strip_first(self.package) + ';')
+        if self.body is None:
+            for method in flatten(self.attrs):
+                if hasattr(method, 'imports'):
+                    self.imports |= method.imports
         if self.imports:
             header.append('')
             for import_ in self.imports:
@@ -1318,7 +1318,7 @@ class JavaValue(object):
     """A Java value"""
 
     def __init__(self, exact=None, javadocs=None, modifiers=None, name=None,
-                 value=None, indent=0):
+                 value=None, imports=None, indent=0):
         """Value constructor"""
         self.exact = exact
         self.javadocs = javadocs
@@ -1329,6 +1329,9 @@ class JavaValue(object):
             self.modifiers = []
         self.name = name
         self.value = value
+        self.imports = imports
+        if imports is None:
+            self.imports = []
         self.indent = ' ' * indent
 
     def __eq__(self, other):
@@ -1386,7 +1389,12 @@ class JavaValue(object):
         """Adds line to javadoc comment, leading ' ', '*' and '/' removed"""
         self._set_instance_data('javadocs', line.lstrip(' */'))
 
+    def add_dependency(self, import_):
+        """Adds import_ to list of imports needed for value to compile"""
+        self.imports.append(import_)
+
     def javadoc_as_string(self):
+        """Returns a list representing javadoc lines for this value"""
         lines = []
         if self.javadocs:
             lines.append( self.indent + '/**' )
@@ -1587,6 +1595,12 @@ class TypedefMethodGenerator(MethodGenerator):
                 # i == 1, Primitive constructor
                 javadoc2.extend([' object from a ', primitive, '.'])
                 constructor.add_parameter(primitive + ' value')
+                if primitive not in java_reserved_words | {'String'}:
+                    if primitive in ('BigInteger', 'BigDecimal'):
+                        import_ = 'java.math.' + primitive
+                    else:
+                        import_ = 'com.tailf.jnc.' + primitive
+                    constructor.add_dependency(import_)
             constructor.add_javadoc(''.join(javadoc2))
             constructor.add_javadoc(''.join(javadoc))
             constructor.add_line('super(value);')
