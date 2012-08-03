@@ -1181,9 +1181,9 @@ class JavaClass(object):
             imports = []
         self.filename = filename
         self.package = package
-        self.imports = collections.OrderedDict()
+        self.imports = OrderedSet()
         for i in range(len(imports)):
-            self.imports[str(i)] = imports[i]
+            self.imports.add(imports[i])
         self.description = description
         self.body = body
         self.version = version
@@ -1207,7 +1207,7 @@ class JavaClass(object):
 
     def _add_import(self, key, import_):
         """Adds import_ to list of imports"""
-        self.imports[key] = import_
+        self.imports.add(import_)
 
     def add_field(self, key, field):
         """Adds a field represented as a string"""
@@ -1292,8 +1292,8 @@ class JavaClass(object):
         header.append('package ' + strip_first(self.package) + ';')
         if self.imports:
             header.append('')
-            for value in self.imports.values():
-                header.append('import ' + value + ';')
+            for import_ in self.imports:
+                header.append('import ' + import_ + ';')
 
         # Class doc-comment and declaration, with modifiers
         header.append('')
