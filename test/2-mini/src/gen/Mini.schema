@@ -5,10 +5,11 @@
         <primitive_type>0</primitive_type>
         <min_occurs>1</min_occurs>
         <max_occurs>1</max_occurs>
-        <children>http://example.com/ns/mini/1.0 mini my-type c no-key l</children>
+        <children>c noKey l</children>
         <flags>0</flags>
         <desc></desc>
-    </node><node>
+    </node>
+    <node>
         <tagpath>/c/</tagpath>
         <namespace>http://example.com/ns/mini/1.0</namespace>
         <primitive_type>0</primitive_type>
@@ -17,8 +18,9 @@
         <children></children>
         <flags>0</flags>
         <desc></desc>
-    </node><node>
-        <tagpath>/no-key/</tagpath>
+    </node>
+    <node>
+        <tagpath>/noKey/</tagpath>
         <namespace>http://example.com/ns/mini/1.0</namespace>
         <primitive_type>0</primitive_type>
         <min_occurs>0</min_occurs>
@@ -26,22 +28,24 @@
         <children>ll</children>
         <flags>0</flags>
         <desc></desc>
-    </node><node>
+    </node>
+    <node>
         <tagpath>/l/</tagpath>
         <namespace>http://example.com/ns/mini/1.0</namespace>
         <primitive_type>0</primitive_type>
         <min_occurs>0</min_occurs>
         <max_occurs>-1</max_occurs>
-        <children>k k</children>
+        <children>k</children>
         <flags>0</flags>
         <desc></desc>
-    </node><node>
+    </node>
+    <node>
         <tagpath>/l/k/</tagpath>
         <namespace>http://example.com/ns/mini/1.0</namespace>
         <primitive_type>0</primitive_type>
         <min_occurs>1</min_occurs>
         <max_occurs>1</max_occurs>
-        <children>string</children>
+        <children></children>
         <flags>0</flags>
         <desc></desc>
     </node>

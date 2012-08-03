@@ -73,7 +73,7 @@ class ElementHandler extends DefaultHandler {
             prefixes = null;
             addOtherAttributes(attributes, child);
             current = child; // step down
-        } catch (NetconfException e) {
+        } catch (JNCException e) {
             e.printStackTrace();
             throw new SAXException(e.toString());
         }
@@ -137,7 +137,7 @@ class ElementHandler extends DefaultHandler {
                     current.value = null;
                 }
             }
-        } catch (NetconfException e) {
+        } catch (JNCException e) {
             e.printStackTrace();
             throw new SAXException(e.toString());
         }

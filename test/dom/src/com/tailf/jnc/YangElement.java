@@ -191,7 +191,7 @@ public abstract class YangElement extends Element {
      * 
      */
     public void setLeafValue(String ns, String name, String value)
-            throws YangException, NetconfException {
+            throws YangException, JNCException {
 
         // Aware
         String methodName = "set" + normalize(name) + "Value";
@@ -322,7 +322,7 @@ public abstract class YangElement extends Element {
     // ------------------------------------------------------------
 
     protected void setLeafValue(String ns, String path, Object value,
-            String[] childrenNames) throws NetconfException {
+            String[] childrenNames) throws JNCException {
         NodeSet nodes = get(path);
 
         if (nodes.isEmpty()) {
@@ -336,18 +336,18 @@ public abstract class YangElement extends Element {
     }
 
     protected void setLeafListValue(String ns, String path, Object value,
-            String[] childrenNames) throws NetconfException {
+            String[] childrenNames) throws JNCException {
         Leaf leaf = new Leaf(ns, path);
         leaf.setValue(value);
         insertChild(leaf, childrenNames);
     }
 
-    protected boolean isLeafDefault(String path) throws NetconfException {
+    protected boolean isLeafDefault(String path) throws JNCException {
         NodeSet nodes = get(path);
         return (nodes.isEmpty());
     }
 
-    protected void markLeafReplace(String path) throws NetconfException {
+    protected void markLeafReplace(String path) throws JNCException {
         NodeSet nodes = get(path);
 
         if (nodes.isEmpty()) {
@@ -356,7 +356,7 @@ public abstract class YangElement extends Element {
         } else nodes.first().markReplace();
     }
 
-    protected void markLeafMerge(String path) throws NetconfException {
+    protected void markLeafMerge(String path) throws JNCException {
         NodeSet nodes = get(path);
         if (nodes.isEmpty()) {
             throw new YangException(YangException.ELEMENT_MISSING,
@@ -364,7 +364,7 @@ public abstract class YangElement extends Element {
         } else nodes.first().markMerge();
     }
 
-    protected void markLeafCreate(String path) throws NetconfException {
+    protected void markLeafCreate(String path) throws JNCException {
         NodeSet nodes = get(path);
 
         if (nodes.isEmpty()) {
@@ -373,7 +373,7 @@ public abstract class YangElement extends Element {
         } else nodes.first().markCreate();
     }
 
-    protected void markLeafDelete(String path) throws NetconfException {
+    protected void markLeafDelete(String path) throws JNCException {
         NodeSet nodes = get(path);
 
         if (nodes.isEmpty()) {
@@ -385,7 +385,7 @@ public abstract class YangElement extends Element {
     /**
      *
      */
-    protected YangElement searchOne(String path) throws NetconfException {
+    protected YangElement searchOne(String path) throws JNCException {
         NodeSet nodes = get(path);
         if (nodes.isEmpty()) {
             throw new YangException(YangException.ELEMENT_MISSING,
@@ -610,7 +610,7 @@ public abstract class YangElement extends Element {
      * @return Return subtree with operations to transmute subtree A into
      *         subtree B.
      */
-    public YangElement sync(YangElement b) throws NetconfException {
+    public YangElement sync(YangElement b) throws JNCException {
         return YangElement.sync(this, b);
     }
 
@@ -627,7 +627,7 @@ public abstract class YangElement extends Element {
      *         subtree B.
      */
 
-    public static YangElement sync(YangElement a, YangElement b) throws NetconfException {
+    public static YangElement sync(YangElement a, YangElement b) throws JNCException {
 
         NodeSet uniqueA = new NodeSet();
         NodeSet uniqueB = new NodeSet();
@@ -663,7 +663,7 @@ public abstract class YangElement extends Element {
      * @return Subtrees with operations to transmute subtree A into subtree B.
      */
 
-    public static NodeSet syncMerge(NodeSet a, NodeSet b) throws NetconfException {
+    public static NodeSet syncMerge(NodeSet a, NodeSet b) throws JNCException {
         DummyElement aDummy = new DummyElement("DUMMY", "dummy");
         DummyElement bDummy = new DummyElement("DUMMY", "dummy");
         int i;
@@ -834,7 +834,7 @@ public abstract class YangElement extends Element {
      *         subtree B.
      */
 
-    public static NodeSet sync(NodeSet a, NodeSet b) throws NetconfException {
+    public static NodeSet sync(NodeSet a, NodeSet b) throws JNCException {
         DummyElement aDummy = new DummyElement("DUMMY", "dummy");
         DummyElement bDummy = new DummyElement("DUMMY", "dummy");
         int i;
@@ -906,7 +906,7 @@ public abstract class YangElement extends Element {
      *            File name.
      * @see #writeFile(String)
      */
-    public static Element readFile(String filename) throws NetconfException {
+    public static Element readFile(String filename) throws JNCException {
         YangXMLParser p = new com.tailf.jnc.YangXMLParser();
         return p.readFile(filename);
     }
@@ -916,7 +916,7 @@ public abstract class YangElement extends Element {
     private SchemaNode n = null;
 
     protected void encode(Transport out, boolean newline_at_end,
-            Capabilities capas) throws NetconfException {
+            Capabilities capas) throws JNCException {
         if (RevisionInfo.olderRevisionSupportEnabled && capas != null) {
             if (tp == null)
                 tp = tagpath();
@@ -934,8 +934,8 @@ public abstract class YangElement extends Element {
                         case RevisionInfo.R_MAX_ELEM_RAISED:
                             int max = r.idata;
                             if (getChildren().size() > max) {
-                                throw new NetconfException(
-                                        NetconfException.REVISION_ERROR,
+                                throw new JNCException(
+                                        JNCException.REVISION_ERROR,
                                         tp + "too many children for old node "
                                                 + "with rev( " + rev + ")");
                             }

@@ -146,7 +146,7 @@ public class Element implements Serializable {
      * @return A new configuration element tree
      */
     public static Element create(String namespace, String pathStr)
-            throws NetconfException {
+            throws JNCException {
         PrefixMap prefixMap = new PrefixMap();
         prefixMap.add(new Prefix("", namespace));
         return Element.create(prefixMap, pathStr);
@@ -168,7 +168,7 @@ public class Element implements Serializable {
      * @return A new configuration element tree
      */
     public static Element create(Prefix prefix, String pathStr)
-            throws NetconfException {
+            throws JNCException {
         PrefixMap prefixMap = new PrefixMap();
         prefixMap.add(prefix);
         return Element.create(prefixMap, pathStr);
@@ -190,7 +190,7 @@ public class Element implements Serializable {
      * @return A new configuration element tree
      */
     public static Element create(PrefixMap prefixMap, String pathStr)
-            throws NetconfException {
+            throws JNCException {
         trace("create: \"" + pathStr + "\"");
         PathCreate path = new PathCreate(pathStr);
         Element t = path.eval(prefixMap);
@@ -282,7 +282,7 @@ public class Element implements Serializable {
      * @return A new configuration element sub-tree that is a child of the
      *         context node
      */
-    public Element createPath(String pathStr) throws NetconfException {
+    public Element createPath(String pathStr) throws JNCException {
         return createPath(CREATE_MERGE, null, pathStr);
     }
 
@@ -298,7 +298,7 @@ public class Element implements Serializable {
      * @return A new configuration element sub-tree that is a child of the
      *         context node
      */
-    public Element createPath(int mode, String pathStr) throws NetconfException {
+    public Element createPath(int mode, String pathStr) throws JNCException {
         return createPath(mode, null, pathStr);
     }
 
@@ -319,7 +319,7 @@ public class Element implements Serializable {
      *         context node
      */
     public Element createPath(String namespace, String pathStr)
-            throws NetconfException {
+            throws JNCException {
         PrefixMap p = new PrefixMap();
         p.add(new Prefix("", namespace));
         return createPath(CREATE_MERGE, p, pathStr);
@@ -342,7 +342,7 @@ public class Element implements Serializable {
      *         context node
      */
     public Element createPath(Prefix prefix, String pathStr)
-            throws NetconfException {
+            throws JNCException {
         PrefixMap p = new PrefixMap();
         p.add(prefix);
         return createPath(CREATE_MERGE, p, pathStr);
@@ -365,7 +365,7 @@ public class Element implements Serializable {
      *         context node
      */
     public Element createPath(PrefixMap addPrefixes, String pathStr)
-            throws NetconfException {
+            throws JNCException {
         return createPath(CREATE_MERGE, addPrefixes, pathStr);
     }
 
@@ -391,7 +391,7 @@ public class Element implements Serializable {
      *         context node
      */
     public Element createPath(int mode, PrefixMap addPrefixes, String pathStr)
-            throws NetconfException {
+            throws JNCException {
         trace("createPath: \"" + pathStr + "\"");
         PathCreate path = new PathCreate(pathStr);
         if (addPrefixes != null)
@@ -416,7 +416,7 @@ public class Element implements Serializable {
             if (step == steps && nodeSet.size() > 0)
                 return first_found; /* path already exist */
             if (mode == CREATE_MERGE && deepest.size() > 1)
-                throw new NetconfException(NetconfException.PATH_CREATE_ERROR,
+                throw new JNCException(JNCException.PATH_CREATE_ERROR,
                         "multiple nodes found by path: \"" + pathStr + "\"");
             step--; // need to do last step again
             // trace("step=="+step+"  steps="+steps);
@@ -533,9 +533,9 @@ public class Element implements Serializable {
      * @param child
      *            Child element to be inserted
      */
-    public int insertChild(Element child) throws NetconfException {
+    public int insertChild(Element child) throws JNCException {
         if (child.parent != null || child == this)
-            throw new NetconfException(NetconfException.ELEMENT_ALREADY_IN_USE, this);
+            throw new JNCException(JNCException.ELEMENT_ALREADY_IN_USE, this);
 
         if (children == null)
             children = new NodeSet();
@@ -554,9 +554,9 @@ public class Element implements Serializable {
      * @param index
      *            Inserts child at a certain position. 0 is the first.
      */
-    public int insertChild(Element child, int index) throws NetconfException {
+    public int insertChild(Element child, int index) throws JNCException {
         if (child.parent != null)
-            throw new NetconfException(NetconfException.ELEMENT_ALREADY_IN_USE, this);
+            throw new JNCException(JNCException.ELEMENT_ALREADY_IN_USE, this);
 
         if (children == null)
             children = new NodeSet();
@@ -576,9 +576,9 @@ public class Element implements Serializable {
      *            The names of all children in order.
      */
     public int insertChild(Element child, String[] childrenNames)
-            throws NetconfException {
+            throws JNCException {
         if (child.parent != null)
-            throw new NetconfException(NetconfException.ELEMENT_ALREADY_IN_USE, this);
+            throw new JNCException(JNCException.ELEMENT_ALREADY_IN_USE, this);
 
         if (children == null)
             children = new NodeSet();
@@ -608,7 +608,7 @@ public class Element implements Serializable {
      * @param child
      *            Child element to be inserted
      */
-    public int insertFirst(Element child) throws NetconfException {
+    public int insertFirst(Element child) throws JNCException {
         return insertChild(child, 0);
     }
 
@@ -619,7 +619,7 @@ public class Element implements Serializable {
      * @param child
      *            Child element to be inserted
      */
-    public int insertLast(Element child) throws NetconfException {
+    public int insertLast(Element child) throws JNCException {
         return insertChild(child);
     }
 
@@ -643,7 +643,7 @@ public class Element implements Serializable {
      *            Path string for children that will be deleted
      * @return An array of the deleted element nodes.
      */
-    public NodeSet delete(String pathStr) throws NetconfException {
+    public NodeSet delete(String pathStr) throws JNCException {
         NodeSet nodes = get(pathStr);
 
         if (nodes != null)
@@ -896,7 +896,7 @@ public class Element implements Serializable {
      *            Path string to find node
      * @return The value of the (first) found element or <code>null</code>
      */
-    public Object getValue(String pathStr) throws NetconfException {
+    public Object getValue(String pathStr) throws JNCException {
         NodeSet nodes = get(pathStr);
         if (nodes != null && nodes.size() > 0)
             return nodes.getElement(0).getValue();
@@ -910,7 +910,7 @@ public class Element implements Serializable {
      * 
      */
 
-    public boolean exists(String pathStr) throws NetconfException {
+    public boolean exists(String pathStr) throws JNCException {
         NodeSet nodes = get(pathStr);
         if (nodes != null && nodes.size() > 0)
             return true;
@@ -927,7 +927,7 @@ public class Element implements Serializable {
      * @return An array of the values of the element nodes found by the
      *         expression (or <code>null</code>)
      */
-    public Object[] getValues(String pathStr) throws NetconfException {
+    public Object[] getValues(String pathStr) throws JNCException {
         NodeSet nodes = get(pathStr);
         if (nodes != null) {
             Object[] values = new String[nodes.size()];
@@ -948,7 +948,7 @@ public class Element implements Serializable {
      * @return A set with the values of the element nodes found by the
      *         expression (or <code>null</code>)
      */
-    public Set<String> getValuesAsSet(String pathStr) throws NetconfException {
+    public Set<String> getValuesAsSet(String pathStr) throws JNCException {
         Object[] valuesBefore = this.getValues(pathStr);
         List<String> valueList = Arrays.asList((String[])valuesBefore);
         return new HashSet<String>(valueList);
@@ -975,7 +975,7 @@ public class Element implements Serializable {
      * @param value
      *            Value to be set
      */
-    public void setValue(String pathStr, Object value) throws NetconfException {
+    public void setValue(String pathStr, Object value) throws JNCException {
         NodeSet nodes = get(pathStr);
         for (int i = 0; i < nodes.size(); i++)
             nodes.getElement(i).setValue(value);
@@ -989,7 +989,7 @@ public class Element implements Serializable {
      * @param pathStr
      *            Path string to find nodes
      */
-    public void deleteValue(String pathStr) throws NetconfException {
+    public void deleteValue(String pathStr) throws JNCException {
         NodeSet nodes = get(pathStr);
         for (int i = 0; i < nodes.size(); i++)
             nodes.getElement(i).deleteValue();
@@ -1026,7 +1026,7 @@ public class Element implements Serializable {
      *            Path string to find nodes
      * @return The first element node found by the expression.
      */
-    public Element getFirst(String pathStr) throws NetconfException {
+    public Element getFirst(String pathStr) throws JNCException {
         Path path = new Path(pathStr);
         NodeSet nodeSet = path.eval(this);
         if (nodeSet == null || nodeSet.size() == 0)
@@ -1043,7 +1043,7 @@ public class Element implements Serializable {
      *            Path string to find nodes
      * @return The last element node found by the expression.
      */
-    public Element getLast(String pathStr) throws NetconfException {
+    public Element getLast(String pathStr) throws JNCException {
         Path path = new Path(pathStr);
         NodeSet nodeSet = path.eval(this);
         if (nodeSet == null || nodeSet.size() == 0)
@@ -1067,7 +1067,7 @@ public class Element implements Serializable {
      *            Path string to find nodes
      * @return An array of the element nodes found by the expression.
      */
-    public NodeSet get(String pathStr) throws NetconfException {
+    public NodeSet get(String pathStr) throws JNCException {
         Path path = new Path(pathStr);
         return path.eval(this);
     }
@@ -1202,7 +1202,7 @@ public class Element implements Serializable {
      * @return Resulting target subtrees in NodeSet
      * 
      */
-    public Element merge(Element root, int op) throws NetconfException {
+    public Element merge(Element root, int op) throws JNCException {
 
         // make list of nodes down to this node from root
         NodeSet list = new NodeSet();
@@ -1246,7 +1246,7 @@ public class Element implements Serializable {
             System.err.println(" root= " + root);
             System.err.println(" compare: " + x.compare(root));
 
-            throw new NetconfException(NetconfException.ELEMENT_MISSING, x.getPath()
+            throw new JNCException(JNCException.ELEMENT_MISSING, x.getPath()
                     + ", " + root.getPath());
         }
         // same now, go down
@@ -1370,7 +1370,7 @@ public class Element implements Serializable {
      * @param pathStr
      *            Path string to find nodes
      */
-    public void markDelete(String pathStr) throws NetconfException {
+    public void markDelete(String pathStr) throws JNCException {
         Path path = new Path(pathStr);
         NodeSet nodeSet = path.eval(this);
         if (nodeSet != null)
@@ -1393,7 +1393,7 @@ public class Element implements Serializable {
      * @param pathStr
      *            Path string to find nodes
      */
-    public void markReplace(String pathStr) throws NetconfException {
+    public void markReplace(String pathStr) throws JNCException {
         Path path = new Path(pathStr);
         NodeSet nodeSet = path.eval(this);
         if (nodeSet != null)
@@ -1416,7 +1416,7 @@ public class Element implements Serializable {
      * @param pathStr
      *            Path string to find nodes
      */
-    public void markMerge(String pathStr) throws NetconfException {
+    public void markMerge(String pathStr) throws JNCException {
         Path path = new Path(pathStr);
         NodeSet nodeSet = path.eval(this);
         if (nodeSet != null)
@@ -1439,7 +1439,7 @@ public class Element implements Serializable {
      * @param pathStr
      *            Path string to find nodes
      */
-    public void markCreate(String pathStr) throws NetconfException {
+    public void markCreate(String pathStr) throws JNCException {
         Path path = new Path(pathStr);
         NodeSet nodeSet = path.eval(this);
         if (nodeSet != null)
@@ -1748,11 +1748,11 @@ public class Element implements Serializable {
      * Encode to XML and send it to the provided stream. Similar to the
      * toXMLString(), but without the pretty printing.
      */
-    protected void encode(Transport out) throws NetconfException {
+    protected void encode(Transport out) throws JNCException {
         encode(out, true);
     }
 
-    protected void encode(Transport out, Capabilities c) throws NetconfException {
+    protected void encode(Transport out, Capabilities c) throws JNCException {
         encode(out, true, c);
     }
 
@@ -1769,12 +1769,12 @@ public class Element implements Serializable {
      *            If 'true' a newline is printed at the end
      */
     protected void encode(Transport out, boolean newline_at_end)
-            throws NetconfException {
+            throws JNCException {
         encode(out, newline_at_end, null);
     }
 
     protected void encode(Transport out, boolean newline_at_end,
-            Capabilities capas) throws NetconfException {
+            Capabilities capas) throws JNCException {
         String qName = qualifiedName();
         out.print("<");
         out.print(qName);
@@ -1883,7 +1883,7 @@ public class Element implements Serializable {
      *            File name.
      * @see #writeFile(String)
      */
-    public static Element readFile(String filename) throws NetconfException {
+    public static Element readFile(String filename) throws JNCException {
 
         XMLParser p = new XMLParser();
         return p.readFile(filename);

@@ -40,7 +40,7 @@ public class SSHConnection {
      *            Host or IP address to connect to
      */
 
-    public SSHConnection(String host) throws IOException, NetconfException {
+    public SSHConnection(String host) throws IOException, JNCException {
         this(host, 830, 0);
     }
 
@@ -54,7 +54,7 @@ public class SSHConnection {
      *            Port number to connect to.
      */
     public SSHConnection(String host, int port) throws IOException,
-            NetconfException {
+            JNCException {
         this(host, port, 0);
     }
 
@@ -69,7 +69,7 @@ public class SSHConnection {
      * @param connectTimeout
      */
     public SSHConnection(String host, int port, int connectTimeout)
-            throws IOException, NetconfException {
+            throws IOException, JNCException {
 
         connection = new Connection(host, port);
         connection.connect(null, connectTimeout, 0);
@@ -102,7 +102,7 @@ public class SSHConnection {
      *             without having called {@link #close()} first.
      */
     public SSHConnection(String host, int port, int connectTimeout,
-            int kexTimeout) throws IOException, NetconfException {
+            int kexTimeout) throws IOException, JNCException {
         connection = new Connection(host, port);
         connection.connect(null, connectTimeout, kexTimeout);
     }
@@ -139,9 +139,9 @@ public class SSHConnection {
      * 
      **/
     public void authenticateWithPassword(String user, String password)
-            throws IOException, NetconfException {
+            throws IOException, JNCException {
         if (!connection.authenticateWithPassword(user, password))
-            throw new NetconfException(NetconfException.AUTH_FAILED, this);
+            throw new JNCException(JNCException.AUTH_FAILED, this);
     }
 
     /**
@@ -157,15 +157,15 @@ public class SSHConnection {
      *            Password.
      **/
     public void authenticateWithPublicKeyFile(String user, File pemFile,
-            String password) throws IOException, NetconfException {
+            String password) throws IOException, JNCException {
         try {
             if (!connection.authenticateWithPublicKey(user, pemFile, password)) {
-                throw new NetconfException(NetconfException.AUTH_FAILED, this);
+                throw new JNCException(JNCException.AUTH_FAILED, this);
             }
         } catch (IOException e) {
             throw e;
         } catch (Exception e) {
-            throw new NetconfException(NetconfException.AUTH_FAILED, this);
+            throw new JNCException(JNCException.AUTH_FAILED, this);
         }
     }
 
@@ -181,9 +181,9 @@ public class SSHConnection {
      *            Passphrase.
      **/
     public void authenticateWithPublicKey(String user, char[] pemPrivateKey,
-            String pass) throws IOException, NetconfException {
+            String pass) throws IOException, JNCException {
         if (!connection.authenticateWithPublicKey(user, pemPrivateKey, pass)) {
-            throw new NetconfException(NetconfException.AUTH_FAILED, this);
+            throw new JNCException(JNCException.AUTH_FAILED, this);
         }
     }
 

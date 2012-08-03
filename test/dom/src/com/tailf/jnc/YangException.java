@@ -16,7 +16,7 @@ package com.tailf.jnc;
  * 
  * 
  */
-public class YangException extends NetconfException {
+public class YangException extends JNCException {
 
     private static final long serialVersionUID = 1L;
 

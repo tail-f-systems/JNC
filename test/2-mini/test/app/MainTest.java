@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.tailf.netconfmanager.*;
+import com.tailf.jnc.*;
 
 public class MainTest {
     
@@ -53,7 +53,7 @@ public class MainTest {
     
     @BeforeClass
     public static void oneTimeSetUp() throws InterruptedException, IOException,
-            NetconfException {
+            JNCException {
         Mini.enable();
         startConfD();
     }
@@ -64,7 +64,7 @@ public class MainTest {
     }
     
     @Test
-    public void testInitialConfig() throws NetconfException, IOException {
+    public void testInitialConfig() throws JNCException, IOException {
         Iterator<Element> iter = main.getConfig().listIterator();
         boolean test3Found = false, test4Found = false;
         while (iter.hasNext()) {
@@ -80,7 +80,7 @@ public class MainTest {
     }
     
     @Test
-    public void testUpdateConfig() throws NetconfException, IOException {
+    public void testUpdateConfig() throws JNCException, IOException {
         gen.L l = null;
         String msg = "test2 already in configuration!";
         Iterator<Element> iter = main.getConfig().listIterator();

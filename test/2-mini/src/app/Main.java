@@ -2,13 +2,13 @@ package app;
 
 import java.io.IOException;
 
-import com.tailf.netconfmanager.ConfDSession;
-import com.tailf.netconfmanager.Element;
-import com.tailf.netconfmanager.NetconfException;
-import com.tailf.netconfmanager.NetconfSession;
-import com.tailf.netconfmanager.NodeSet;
-import com.tailf.netconfmanager.yang.Device;
-import com.tailf.netconfmanager.yang.DeviceUser;
+import com.tailf.jnc.ConfDSession;
+import com.tailf.jnc.Device;
+import com.tailf.jnc.DeviceUser;
+import com.tailf.jnc.Element;
+import com.tailf.jnc.JNCException;
+import com.tailf.jnc.NetconfSession;
+import com.tailf.jnc.NodeSet;
 
 import gen.Mini;
 
@@ -32,36 +32,36 @@ public class Main {
         } catch (IOException e0) {
             System.err.println("Can't connect");
             System.exit(1);
-        } catch (NetconfException e1) {
+        } catch (JNCException e1) {
             System.err.println("Can't authenticate" + e1);
             System.exit(1);
         }
     }
     
-    NodeSet editConfig(Element config) throws IOException,NetconfException {
+    NodeSet editConfig(Element config) throws IOException,JNCException {
         return editConfig(dev, config);
     }
 
-    private NodeSet editConfig(Device d, Element config) throws IOException,NetconfException {
+    private NodeSet editConfig(Device d, Element config) throws IOException,JNCException {
         d.getSession("cfg").editConfig(config);
         // Inspect the updated RUNNING configuration
         return getConfig(d);
     }
     
-    private NodeSet getConfig(Device d) throws IOException, NetconfException {
+    private NodeSet getConfig(Device d) throws IOException, JNCException {
         ConfDSession session = d.getSession("cfg");
         NodeSet reply = session.getConfig(NetconfSession.RUNNING);
         return reply;
     }
     
-    public NodeSet getConfig() throws IOException,NetconfException{
+    public NodeSet getConfig() throws IOException,JNCException{
         return getConfig(dev);
     }
     
     public int run() {
         try {
             Mini.enable();
-        } catch (NetconfException e) {
+        } catch (JNCException e) {
             System.err.println("Schema file not found.");
             return -1;
         }
@@ -70,10 +70,10 @@ public class Main {
 
     /**
      * @param args Ignored
-     * @throws NetconfException 
+     * @throws JNCException 
      * @throws IOException 
      */
-    public static void main(String[] args) throws IOException, NetconfException {
+    public static void main(String[] args) throws IOException, JNCException {
         Main main = new Main();
         Mini.enable();
         main.init();

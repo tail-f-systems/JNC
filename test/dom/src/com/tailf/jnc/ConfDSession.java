@@ -110,7 +110,7 @@ public class ConfDSession extends NetconfSession {
      * @param transport
      *            Transport object
      */
-    public ConfDSession(Transport transport) throws NetconfException, IOException {
+    public ConfDSession(Transport transport) throws JNCException, IOException {
         super();
         setTransport(transport);
         mkSession();
@@ -129,14 +129,14 @@ public class ConfDSession extends NetconfSession {
      */
 
     public ConfDSession(Transport transport, XMLParser parser)
-            throws NetconfException, IOException {
+            throws JNCException, IOException {
         super();
         setTransport(transport);
         this.parser = parser;
         mkSession();
     }
 
-    private void mkSession() throws NetconfException, IOException {
+    private void mkSession() throws JNCException, IOException {
         setCapability(Capabilities.WITH_DEFAULTS_CAPABILITY);
         setCapability(Capabilities.ACTIONS_CAPABILITY);
         setCapability(Capabilities.TRANSACTIONS_CAPABILITY);
@@ -162,9 +162,9 @@ public class ConfDSession extends NetconfSession {
      * @param value
      *            Value for with-defaults.
      */
-    public void setWithDefaults(boolean value) throws NetconfException {
+    public void setWithDefaults(boolean value) throws JNCException {
         if (!capabilities.hasWithDefaults())
-            throw new NetconfException(NetconfException.SESSION_ERROR,
+            throw new JNCException(JNCException.SESSION_ERROR,
                     "server does not support the :with-defaults capability");
         withDefaultsAttr = new Attribute(Capabilities.WITH_DEFAULTS_CAPABILITY,
                 "with-defaults", new Boolean(value).toString());
@@ -178,7 +178,7 @@ public class ConfDSession extends NetconfSession {
      * @param data
      *            element tree with action-data
      */
-    public Element action(Element data) throws NetconfException, IOException {
+    public Element action(Element data) throws JNCException, IOException {
         trace("action: " + data.toXMLString());
         encode_action(out, data);
         out.flush();
@@ -212,7 +212,7 @@ public class ConfDSession extends NetconfSession {
      * @see #commitTransaction()
      * @see #abortTransaction()
      */
-    public void startTransaction(int datastore) throws NetconfException,
+    public void startTransaction(int datastore) throws JNCException,
             IOException {
         trace("startTransaction: " + datastoreToString(datastore));
         encode_startTransaction(out, encode_datastore(datastore));
@@ -243,7 +243,7 @@ public class ConfDSession extends NetconfSession {
      * @see #commitTransaction()
      * @see #abortTransaction()
      */
-    public void prepareTransaction() throws NetconfException, IOException {
+    public void prepareTransaction() throws JNCException, IOException {
         trace("prepareTransaction");
         encode_prepareTransaction(out);
         out.flush();
@@ -259,7 +259,7 @@ public class ConfDSession extends NetconfSession {
      * @see #prepareTransaction()
      * @see #abortTransaction()
      */
-    public void commitTransaction() throws NetconfException, IOException {
+    public void commitTransaction() throws JNCException, IOException {
         trace("commitTransaction");
         encode_commitTransaction(out);
         out.flush();
@@ -276,7 +276,7 @@ public class ConfDSession extends NetconfSession {
      * @see #prepareTransaction()
      * @see #commitTransaction()
      */
-    public void abortTransaction() throws NetconfException, IOException {
+    public void abortTransaction() throws JNCException, IOException {
         trace("abortTransaction");
         encode_abortTransaction(out);
         out.flush();
@@ -288,7 +288,7 @@ public class ConfDSession extends NetconfSession {
      * session
      */
 
-    Element recv_rpc_reply() throws NetconfException, IOException {
+    Element recv_rpc_reply() throws JNCException, IOException {
         StringBuffer reply = in.readOne();
         trace("reply= " + reply);
         Element t = parser.parse(reply.toString());
@@ -299,7 +299,7 @@ public class ConfDSession extends NetconfSession {
         if (data != null)
             return data;
         /* rpc-error */
-        throw new NetconfException(NetconfException.RPC_REPLY_ERROR, t);
+        throw new JNCException(JNCException.RPC_REPLY_ERROR, t);
     }
 
     /**
@@ -313,7 +313,7 @@ public class ConfDSession extends NetconfSession {
      * xmlns="http://example.com/interfaces/1.0"> <interface> <name>eth0</name>
      * <reset/> </interface> </interfaces> </data> </action> </rpc>
      */
-    void encode_action(Transport out, Element data) throws NetconfException {
+    void encode_action(Transport out, Element data) throws JNCException {
         String prefix = Element.defaultPrefixes
                 .nsToPrefix(Capabilities.NS_ACTIONS);
         String act = mk_prefix_colon(prefix);

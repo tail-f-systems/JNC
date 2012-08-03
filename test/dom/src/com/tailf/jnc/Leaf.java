@@ -34,7 +34,7 @@ public class Leaf extends Element {
     private SchemaNode n = null;
 
     protected void encode(Transport out, boolean newline_at_end,
-            Capabilities capas) throws NetconfException {
+            Capabilities capas) throws JNCException {
         if (RevisionInfo.olderRevisionSupportEnabled && capas != null) {
             if (tp == null)
                 tp = tagpath();
@@ -56,8 +56,8 @@ public class Leaf extends Element {
                             // we wish to send
                             if (r.data.equals(getValue().toString())) {
 
-                                throw new NetconfException(
-                                        NetconfException.REVISION_ERROR, tp
+                                throw new JNCException(
+                                        JNCException.REVISION_ERROR, tp
                                                 + " bad enum value for rev ("
                                                 + rev + ") " + r.data);
                             }
@@ -66,8 +66,8 @@ public class Leaf extends Element {
 
                             // Same thing - check for too new bit strings
                             if (r.data.equals(getValue().toString())) {
-                                throw new NetconfException(
-                                        NetconfException.REVISION_ERROR, tp
+                                throw new JNCException(
+                                        JNCException.REVISION_ERROR, tp
                                                 + " bad bits value for rev ("
                                                 + rev + ") " + r.data);
                             }

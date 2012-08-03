@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.tailf.netconfmanager.*;
+import com.tailf.jnc.*;
 
 public class MainTest {
     
@@ -53,7 +53,7 @@ public class MainTest {
     
     @BeforeClass
     public static void oneTimeSetUp() throws InterruptedException, IOException,
-            NetconfException {
+            JNCException {
         Idref.enable();
         startConfD();
     }
@@ -64,7 +64,7 @@ public class MainTest {
     }
     
     @Test
-    public void testInitialConfig() throws NetconfException, IOException {
+    public void testInitialConfig() throws JNCException, IOException {
         Iterator<Element> iter = main.getConfig().listIterator();
         while (iter.hasNext()) {
             Element config = (Element)iter.next();

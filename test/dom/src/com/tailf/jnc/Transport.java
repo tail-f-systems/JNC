@@ -34,7 +34,7 @@ public interface Transport {
     /**
      * Reads "one" reply from the transport input stream.
      */
-    public StringBuffer readOne() throws IOException, NetconfException;
+    public StringBuffer readOne() throws IOException, JNCException;
 
     /**
      * Prints an integer to the transport output stream.

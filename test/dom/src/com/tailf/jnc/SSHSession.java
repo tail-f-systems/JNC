@@ -58,7 +58,7 @@ public class SSHSession implements Transport {
      * @param con
      *            an established and authenticated SSH connection
      */
-    public SSHSession(SSHConnection con) throws IOException, NetconfException {
+    public SSHSession(SSHConnection con) throws IOException, JNCException {
         this(con, (long) 0);
     }
 
@@ -70,7 +70,7 @@ public class SSHSession implements Transport {
      *            Time to wait for read. (in milliseconds)
      */
     public SSHSession(SSHConnection con, long readTimeout) throws IOException,
-            NetconfException {
+            JNCException {
         this.readTimeout = readTimeout;
         this.connection = con;
 
@@ -185,7 +185,7 @@ public class SSHSession implements Transport {
      * replies as described in <a target="_top"
      * href="ftp://ftp.rfc-editor.org/in-notes/rfc4742.txt">RFC 4742</a>.
      */
-    public StringBuffer readOne() throws IOException, NetconfException {
+    public StringBuffer readOne() throws IOException, JNCException {
         StringWriter wr = new StringWriter();
         int ch;
         while (true) {
@@ -195,7 +195,7 @@ public class SSHSession implements Transport {
                 if ((conditionSet & ChannelCondition.TIMEOUT) == ChannelCondition.TIMEOUT) {
                     // it's a timeout - there is nothing to
                     // read, not even eof
-                    throw new NetconfException(NetconfException.TIMEOUT_ERROR,
+                    throw new JNCException(JNCException.TIMEOUT_ERROR,
                             new Long(readTimeout));
                 }
             }

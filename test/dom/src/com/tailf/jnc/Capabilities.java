@@ -306,7 +306,7 @@ public class Capabilities {
         }
     }
 
-    protected Capabilities(Element e) throws NetconfException {
+    protected Capabilities(Element e) throws JNCException {
         NodeSet caps = e.get("capability");
         capas = new ArrayList<Capa>(caps.size());
         data_capas = new ArrayList<Capa>(caps.size());

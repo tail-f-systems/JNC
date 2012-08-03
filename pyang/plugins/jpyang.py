@@ -421,9 +421,9 @@ def get_types(yang_type, ctx):
         yang_type = yang_type.search_one('type')
     assert yang_type.keyword in ('type', 'typedef'), 'argument is type, typedef or leaf'
     primitive = capitalize_first(camelize(yang_type.arg))
-    netconf = 'com.tailf.netconfmanager.yang.type.' + primitive
+    netconf = 'com.tailf.jnc.Yang' + primitive
     if yang_type.arg in ('string', 'boolean'):
-        netconf = 'com.tailf.netconfmanager.yang.type.Yang' + primitive
+        pass
     elif yang_type.arg in ('enumeration', 'binary'):
         primitive = 'String'
     elif yang_type.arg in ('bits', ):
@@ -438,7 +438,6 @@ def get_types(yang_type, ctx):
         if yang_type.arg[:1] == 'u':
             integer_type.pop()
             integer_type.insert(0, 'long')
-        # XXX: One might want to implement uint8 as short instead of byte, etc.
         if yang_type.arg[-2:] == '64':
             primitive = integer_type[0]
         elif yang_type.arg[-2:] == '32':
@@ -757,9 +756,7 @@ class ClassGenerator(object):
                     '.NAMESPACE) with prefix "' + prefix.arg + '" (' + name +
                     '.PREFIX).'),
                 source=self.src)
-        self.java_class.add_import('netconfmanager', 'com.tailf.netconfmanager.*')
-        self.java_class.add_import('yang', 'com.tailf.netconfmanager.yang.*')
-        self.java_class.add_import('type', 'com.tailf.netconfmanager.yang.type.*')
+        self.java_class.add_import('jnc', 'com.tailf.jnc.*')
         self.java_class.add_import('Hashtable', 'java.util.HashMap')
         self.java_class.add_field('NAMESPACE', static_string('NAMESPACE', ns_arg))
         self.java_class.add_field('PREFIX', static_string('PREFIX', prefix.arg))
@@ -777,16 +774,13 @@ class ClassGenerator(object):
         fields = []
 
         self.java_class = JavaClass(filename=self.filename, package=self.package,
-                imports=['com.tailf.netconfmanager.*', 
-                         'com.tailf.netconfmanager.yang.*', 
-                         'com.tailf.netconfmanager.yang.type.*', 
-                         'java.util.HashMap'],
+                imports=['com.tailf.jnc.*', 'java.util.HashMap'],
                 # TODO: Hashtable not used in generated code
 
                 description='This class represents a "' + self.path + stmt.arg +
                 '" element\n * from the namespace ' + self.ns,
                 source=self.src,
-                modifiers='extends Container') 
+                modifiers='extends YangElement') 
 
         i_children_exists = (hasattr(stmt, 'i_children')
             and stmt.i_children is not None
@@ -841,19 +835,19 @@ class ClassGenerator(object):
         elif stmt.keyword == 'list':
             key, only_strings, confm_keys, primitive_keys = extract_keys(stmt, self.ctx)
             self.java_class.add_constructor('0', constructor(stmt, self.ctx, root=self.prefix_name,
-                set_prefix=self.top_level, throws="\n        throws NetconfException"))
+                set_prefix=self.top_level, throws="\n        throws JNCException"))
             self.java_class.add_constructor('1', constructor(stmt, self.ctx, 
                 root=self.prefix_name, set_prefix=self.top_level,
                 mode=1, args=confm_keys, throws='''
-            throws NetconfException'''))
+            throws JNCException'''))
             self.java_class.add_constructor('2', constructor(stmt, self.ctx, 
                 root=self.prefix_name, set_prefix=self.top_level,
                 mode=2, args=primitive_keys, throws='''
-            throws NetconfException'''))
+            throws JNCException'''))
             if not only_strings:
                 self.java_class.add_constructor('3', constructor(stmt, self.ctx, root=self.prefix_name,
                     set_prefix=self.top_level, mode=3, args=primitive_keys, throws='''
-            throws NetconfException'''))
+            throws JNCException'''))
             self.java_class.add_cloner('deep', clone(name, map(capitalize_first,
                 key.arg.split(' ')), shallow=False))
             self.java_class.add_cloner('shallow', clone(name,
@@ -1533,7 +1527,7 @@ class MethodGenerator(object):
             cloner.add_javadoc('Clones this object, returning %s copy.' % a[i])
             cloner.add_javadoc('@return A clone of the object.%s' % b[i])
             cloner.add_modifier('public')
-            cloner.set_return_type('Container')
+            cloner.set_return_type('YangElement')
             cloner.set_name('clone%s' % c[i])
             cloner.add_line('return clone%sContent(new %s());' % (c[i], self.n))
         return cloners
@@ -1685,7 +1679,7 @@ class ListMethodGenerator(MethodGenerator):
             constructor = JavaMethod(modifiers=['public'], name=self.n)
             constructor.add_javadoc(''.join(javadoc1))
             constructor.add_javadoc(javadoc2[i])
-            constructor.add_exception('NetconfException')  # TODO: Add only if needed
+            constructor.add_exception('JNCException')  # TODO: Add only if needed
             call = ['super']
             call.extend(self._root_namespace(self.stmt.arg))
             constructor.add_line(''.join(call))
@@ -1746,7 +1740,7 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
                    argument name(s) should be supplied without the 'Value'
                    suffix. Typically used as a (set of) key(s) in the method.
                    Note that mode must be > 0 for this to have an effect.
-    throws      -- Typically 'throws NetconfException', prepended with a newline
+    throws      -- Typically 'throws JNCException', prepended with a newline
                    and spaces for indentation.
 
     """
@@ -1816,7 +1810,7 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
 def clone(class_name, key_names=None, shallow='False'):
     """Returns a string representing a Java clone method. Iff key_names is
     empty, get<key_name>Value() methods are called to fetch constructor
-    arguments and null is returned if an NetconfException is raised. If shallow is
+    arguments and null is returned if an JNCException is raised. If shallow is
     set, the cloneShallowContent method is invoked instead of cloneContent.
 
     class_name -- The name of the class to clone instances of
@@ -1840,7 +1834,7 @@ def clone(class_name, key_names=None, shallow='False'):
                 MAX_COLS -= len(tmp)
             catch_stmt += tmp
         catch_stmt = catch_stmt[:-2] + '''));
-        } catch (NetconfException e) { return null; }
+        } catch (JNCException e) { return null; }
     }\n'''
     else:
         catch_stmt = '());\n    }\n'
@@ -1925,7 +1919,7 @@ def static_string(identifier, value):
 
 def enable(prefix_name):
     """Returns a string representing a java method that calls the
-    Container.setPackage method of the confm library, and the registerSchema
+    YangElement.setPackage method of the confm library, and the registerSchema
     method of the class with prefix == prefix_name (typically = this).
 
     prefix_name -- The name of the class containing the registerSchema method
@@ -1935,8 +1929,8 @@ def enable(prefix_name):
      * Enable the elements in this namespace to be aware
      * of the data model and use the generated classes.
      */
-    public static void enable() throws NetconfException {
-        Container.setPackage(NAMESPACE, PREFIX);
+    public static void enable() throws JNCException {
+        YangElement.setPackage(NAMESPACE, PREFIX);
         ''' + prefix_name + '''.registerSchema();
     }'''
 
@@ -1955,7 +1949,7 @@ def register_schema(prefix_name):
      * schema table (CsTree) making it possible to lookup
      * CsNode entries for all tagpaths
      */
-    public static void registerSchema() throws NetconfException {
+    public static void registerSchema() throws JNCException {
         StackTraceElement[] sTrace = (new Exception()).getStackTrace();
         ClassLoader loader = sTrace[0].getClass().getClassLoader();
         java.net.URL schemaUrl = loader.getResource("''' +
@@ -2018,9 +2012,9 @@ def get_stmt(stmt, keys, string=False):
      * @return The ''' + stmt.keyword + ''' entry with the specified keys.
      */
     public ''' + name + ' get' + name + '(' + arguments[:-2] + ''')
-        throws NetconfException {
+        throws JNCException {
         String path = "''' + stmt.arg + xpath + '''";
-        return (''' + name + ''')getListContainer(path);
+        return (''' + name + ''')searchOne(path);
     }''')
 
 
@@ -2038,7 +2032,7 @@ def get_value(stmt, ret_type='com.tailf.confm.xs.String'):
      * @return The value of the ''' + stmt.keyword + '''.
      */
     public ''' + ret_type + ' get' + name + '''Value()
-        throws NetconfException {
+        throws JNCException {
         return (''' + ret_type + ')getValue("' + stmt.arg + '''");
     }'''
 
@@ -2115,7 +2109,7 @@ def set_value(stmt, nameID='', spec1='', spec2='', argument='', body=''):
         spec1 + '''.
      */
     public void set''' + nameID + 'Value(' + argument + ''')
-        throws NetconfException {
+        throws JNCException {
         ''' + body + '''
     }''')
 
@@ -2126,7 +2120,7 @@ def unset_value(stmt):
      * Unsets the value for child ''' + stmt.keyword + ' "' + stmt.arg + '''".
      */
     public void unset''' + capitalize_first(stmt.arg) + '''Value()
-        throws NetconfException {
+        throws JNCException {
         delete("''' + stmt.arg + '''");
     }'''
 
@@ -2151,7 +2145,7 @@ def add_value(stmt, prefix):
         ''' will not have a value.
      */
     public void add''' + name + '''()
-        throws NetconfException {
+        throws JNCException {
         setLeaf''' + value_type + 'Value(' + prefix + '''.NAMESPACE,
             "''' + stmt.arg + '''",
             null,
@@ -2185,7 +2179,7 @@ def mark(stmt, op, arg_type='String'):
      */
     public void mark''' + capitalize_first(stmt.arg) + capitalize_first(op) +
         '(' + argument + ''')
-        throws NetconfException {
+        throws JNCException {
         markLeaf''' + capitalize_first(op) + '("' + path + '''");
     }''')
 
@@ -2267,7 +2261,7 @@ def add_stmt(stmt, args=None, field=False, string=False):
      * @return The added child.
      */
     public ''' + name + ' add' + name + '(' + spec2[:-2] + ''')
-        throws NetconfException {''' + spec3 + '''
+        throws JNCException {''' + spec3 + '''
         insertChild(''' + stmt.arg + ''', childrenNames());
         return ''' + stmt.arg + ''';
     }'''
@@ -2319,7 +2313,7 @@ def delete_stmt(stmt, args=None, string=False, keys=True):
      * Deletes ''' + stmt.keyword + ' entry "' + stmt.arg + spec1 + '''"
      */
     public void delete''' + capitalize_first(stmt.arg) + '(' + arguments[:-2] + ''')
-        throws NetconfException {
+        throws JNCException {
         ''' + spec2 + 'String path = "' + stmt.arg + spec3 + '''";
         delete(path);
     }'''

@@ -45,7 +45,7 @@ import java.net.*;
 public class SchemaParser {
     protected XMLReader parser;
 
-    public SchemaParser() throws NetconfException {
+    public SchemaParser() throws JNCException {
         try {
             String javaVersion = System.getProperty("java.version");
 
@@ -56,7 +56,7 @@ public class SchemaParser {
                 parser = XMLReaderFactory.createXMLReader();
         } catch (Exception e) {
             System.exit(-1);
-            throw new NetconfException(NetconfException.PARSER_ERROR,
+            throw new JNCException(JNCException.PARSER_ERROR,
                     "failed to initialize parser: " + e);
         }
     }
@@ -154,25 +154,25 @@ public class SchemaParser {
      * Read in an XML file and parse it and return a hashtable with SchemaNode
      * objects.
      */
-    public void readFile(String filename, HashMap<Tagpath, SchemaNode> h) throws NetconfException {
+    public void readFile(String filename, HashMap<Tagpath, SchemaNode> h) throws JNCException {
         try {
             SchemaHandler handler = new SchemaHandler(h);
             parser.setContentHandler(handler);
             parser.parse(filename);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new NetconfException(NetconfException.PARSER_ERROR, "parse file: "
+            throw new JNCException(JNCException.PARSER_ERROR, "parse file: "
                     + filename + " error: " + e);
         }
     }
 
-    public void readFile(URL schemaUrl, HashMap<Tagpath, SchemaNode> h) throws NetconfException {
+    public void readFile(URL schemaUrl, HashMap<Tagpath, SchemaNode> h) throws JNCException {
         try {
             SchemaHandler handler = new SchemaHandler(h);
             parser.setContentHandler(handler);
             parser.parse(new InputSource(schemaUrl.openStream()));
         } catch (Exception e) {
-            throw new NetconfException(NetconfException.PARSER_ERROR, "parse file: "
+            throw new JNCException(JNCException.PARSER_ERROR, "parse file: "
                     + schemaUrl + " error: " + e);
         }
     }

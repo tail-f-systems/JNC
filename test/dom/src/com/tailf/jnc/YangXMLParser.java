@@ -24,21 +24,21 @@ public class YangXMLParser extends com.tailf.jnc.XMLParser {
     /**
      * Constructor. Initializes the parser instance.
      */
-    public YangXMLParser() throws NetconfException {
+    public YangXMLParser() throws JNCException {
         super();
     }
 
     /**
      * Read in an XML file and parse it and return an element tree.
      */
-    public YangElement readFile(String filename) throws NetconfException {
+    public YangElement readFile(String filename) throws JNCException {
         try {
             ElementHandler handler = new ElementHandler();
             parser.setContentHandler(handler);
             parser.parse(filename);
             return (YangElement) handler.top;
         } catch (Exception e) {
-            throw new NetconfException(NetconfException.PARSER_ERROR, "parse file: "
+            throw new JNCException(JNCException.PARSER_ERROR, "parse file: "
                     + filename + " error: " + e);
         }
     }
@@ -49,7 +49,7 @@ public class YangXMLParser extends com.tailf.jnc.XMLParser {
      * @param is
      *            Inputsource (byte stream) where the XML text is read from
      */
-    public Element parse(InputSource is) throws NetconfException {
+    public Element parse(InputSource is) throws JNCException {
         try {
             ElementHandler handler = new ElementHandler();
             parser.setContentHandler(handler);
@@ -57,7 +57,7 @@ public class YangXMLParser extends com.tailf.jnc.XMLParser {
             return handler.top;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new NetconfException(NetconfException.PARSER_ERROR, "parse error: "
+            throw new JNCException(JNCException.PARSER_ERROR, "parse error: "
                     + e);
 
         }

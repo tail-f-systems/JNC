@@ -14,16 +14,16 @@ package com.tailf.jnc;
 /**
  * Exception class for errors produced by this library.
  * <p>
- * INMException uses an errorCode field to indicate what went wrong. Depending
+ * JNCException uses an errorCode field to indicate what went wrong. Depending
  * on errorCode an opaqueData field may point to contextual information
  * describing the error. The toString method uses both of these fields to print
  * an appropriate error string describing the error.
  */
-public class NetconfException extends Exception {
+public class JNCException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
-    public NetconfException(int errorCode, Object opaqueData) {
+    public JNCException(int errorCode, Object opaqueData) {
         this.errorCode = errorCode;
         this.opaqueData = opaqueData;
         if (errorCode == RPC_REPLY_ERROR) {

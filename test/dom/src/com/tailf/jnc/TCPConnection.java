@@ -64,7 +64,7 @@ public class TCPConnection {
      */
     public TCPConnection(String host, int port, String username, String uid,
             String gid, String suplgids, String dir, String groups)
-            throws IOException, UnknownHostException, NetconfException {
+            throws IOException, UnknownHostException, JNCException {
         this(host, port);
         authenticate(username, uid, gid, suplgids, dir, groups);
     }
@@ -75,7 +75,7 @@ public class TCPConnection {
      * authenticate(String,String,String,String,String,String) authenticate}
      */
     public TCPConnection(String host, int port) throws IOException,
-            UnknownHostException, NetconfException {
+            UnknownHostException, JNCException {
         trace("created");
         this.host = host;
         this.port = port;

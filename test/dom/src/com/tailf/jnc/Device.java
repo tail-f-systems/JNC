@@ -375,7 +375,7 @@ public class Device implements Serializable {
      * name and SSH connects to the device, this method must be called prior to
      * establishing any sessions (channels)
      */
-    public void connect(String localUser) throws IOException, NetconfException {
+    public void connect(String localUser) throws IOException, JNCException {
         connect(localUser, 0);
     }
 
@@ -389,7 +389,7 @@ public class Device implements Serializable {
      */
 
     public void connect(String localUser, int connectTimeout)
-            throws IOException, NetconfException {
+            throws IOException, JNCException {
         DeviceUser u = null;
         for (int i = 0; i < users.size(); i++) {
             DeviceUser u2 = (DeviceUser) users.get(i);
@@ -399,7 +399,7 @@ public class Device implements Serializable {
             }
         }
         if (u == null)
-            throw new NetconfException(NetconfException.AUTH_FAILED, "No such user: "
+            throw new JNCException(JNCException.AUTH_FAILED, "No such user: "
                     + localUser);
         con = new SSHConnection(mgmt_ip, mgmt_port, connectTimeout);
         auth(u);
@@ -429,7 +429,7 @@ public class Device implements Serializable {
      *            symbolic Name of the session
      * 
      */
-    public void newSession(String sessionName) throws NetconfException,
+    public void newSession(String sessionName) throws JNCException,
             IOException, YangException {
         newSession(null, sessionName);
     }
@@ -445,7 +445,7 @@ public class Device implements Serializable {
      *            symbolic Name of the session
      */
     public void newSession(IOSubscriber sub, String sessionName)
-            throws NetconfException, IOException, YangException {
+            throws JNCException, IOException, YangException {
         SessionConnData data = getConnData(sessionName);
         // always create the configTree
         newSessionConfigTree(sessionName);
@@ -502,7 +502,7 @@ public class Device implements Serializable {
      *            symbolic Name of the session
      * 
      */
-    public void runBacklog(String sessionName) throws IOException, NetconfException {
+    public void runBacklog(String sessionName) throws IOException, JNCException {
         System.out.println("Running backlog ");
         SessionConnData data = getConnData(sessionName);
         if (data == null)
@@ -559,7 +559,7 @@ public class Device implements Serializable {
         return null;
     }
 
-    private void auth(DeviceUser currentUser) throws IOException, NetconfException {
+    private void auth(DeviceUser currentUser) throws IOException, JNCException {
         if (currentUser.password != null)
             con.authenticateWithPassword(currentUser.remoteUser,
                     currentUser.password);

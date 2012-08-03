@@ -50,7 +50,7 @@ public class NodeSet extends ArrayList<Element> {
      * @param pathStr
      *            Path string to find nodes within the nodes
      */
-    public NodeSet get(String pathStr) throws NetconfException {
+    public NodeSet get(String pathStr) throws JNCException {
         NodeSet result = new NodeSet();
         for (int i = 0; i < size(); i++) {
             Element e = getElement(i);
@@ -68,7 +68,7 @@ public class NodeSet extends ArrayList<Element> {
      * @param pathStr
      *            Path string to find an element within the nodes
      */
-    public Element getFirst(String pathStr) throws NetconfException {
+    public Element getFirst(String pathStr) throws JNCException {
         for (int i = 0; i < size(); i++) {
             Element e = getElement(i);
             Element r = e.getFirst(pathStr);
@@ -158,7 +158,7 @@ public class NodeSet extends ArrayList<Element> {
      * Encode to XML and send the sequence of elements to the provided stream.
      * 
      */
-    void encode(Transport out, Capabilities c) throws NetconfException {
+    void encode(Transport out, Capabilities c) throws JNCException {
         for (int i = 0; i < size(); i++) {
             Element elem = getElement(i);
             elem.encode(out, true, c);
