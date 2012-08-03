@@ -15,7 +15,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.tailf.jnc.*;
+import com.tailf.jnc.Element;
+import com.tailf.jnc.JNCException;
 
 public class MainTest {
     
