@@ -1189,17 +1189,14 @@ class JavaClass(object):
         self.version = version
         self.modifiers = modifiers
         self.source = source
-        self.fields = collections.OrderedDict()
-        svUID = JavaValue(modifiers=['private', 'static', 'final', 'long'],
-                          name='serialVersionUID', value='1L', indent=4)
-        self.fields['vUID'] = svUID
-        self.constructors = collections.OrderedDict()
-        self.cloners = collections.OrderedDict()
-        self.enablers = collections.OrderedDict()
-        self.schema_registrators = collections.OrderedDict()
-        self.name_getters = collections.OrderedDict()
+        self.fields = OrderedSet()
+        self.constructors = OrderedSet()
+        self.cloners = OrderedSet()
+        self.enablers = OrderedSet()
+        self.schema_registrators = OrderedSet()
+        self.name_getters = OrderedSet()
         self.access_methods = collections.OrderedDict()
-        self.support_methods = collections.OrderedDict()
+        self.support_methods = OrderedSet()
         self.attrs = [self.fields, self.constructors, self.cloners,
                       self.enablers, self.schema_registrators,
                       self.name_getters, self.access_methods,
@@ -1211,21 +1208,21 @@ class JavaClass(object):
 
     def add_field(self, key, field):
         """Adds a field represented as a string"""
-        self.fields[key] = field
+        self.fields.add(field)
 
     def add_constructor(self, key, constructor):
         """Adds a constructor represented as a string"""
-        self.constructors[key] = constructor
+        self.constructors.add(constructor)
 
     def add_cloner(self, key, cloner):
         """Adds a clone method represented as a string"""
-        self.cloners[key] = cloner
+        self.cloners.add(cloner)
 
     def add_enabler(self, key, enabler):
         """Adds an 'enable'-method as a string"""
         self._add_import('JNCException', 'com.tailf.jnc.JNCException')
         self._add_import('YangElement', 'com.tailf.jnc.YangElement')
-        self.enablers[key] = enabler
+        self.enablers.add(enabler)
 
     def add_schema_registrator(self, key, schema_registrator):
         """Adds a register schema method"""
@@ -1235,11 +1232,11 @@ class JavaClass(object):
         self._add_import('SchemaNode', 'com.tailf.jnc.SchemaNode')
         self._add_import('SchemaTree', 'com.tailf.jnc.SchemaTree')
         self._add_import('HashMap', 'java.util.HashMap')
-        self.schema_registrators[key] = schema_registrator
+        self.schema_registrators.add(schema_registrator)
 
     def add_name_getter(self, key, name_getter):
         """Adds a keyNames or childrenNames method represented as a string"""
-        self.name_getters[key] = name_getter
+        self.name_getters.add(name_getter)
 
     def append_access_method(self, key, access_method):
         """Adds an access method represented as a string"""
@@ -1249,12 +1246,16 @@ class JavaClass(object):
 
     def add_support_method(self, key, support_method):
         """Adds a support method represented as a string"""
-        self.support_methods[key] = support_method
+        self.support_methods.add(support_method)
 
     def get_body(self):
         """Returns self.body. If it is None, fields and methods are added to it
         before it is returned."""
         if self.body is None:
+            if any(x in self.modifiers for x in ['extends', 'implements']):
+                self.fields.add_first(JavaValue(
+                    modifiers=['private', 'static', 'final', 'long'],
+                    name='serialVersionUID', value='1L', indent=4))
             self.body = []
             for method in flatten(self.attrs):
                 if hasattr(method, 'as_list'):
@@ -2403,6 +2404,13 @@ class OrderedSet(collections.MutableSet):
             self.map[item] = [item, self.end[self.PREV], self.end]
             self.end[self.PREV][self.NEXT] = self.map[item]
             self.end[self.PREV] = self.map[item]
+
+    def add_first(self, item):
+        """Adds an item to the beginning of this set."""
+        if item not in self:
+            self.map[item] = [item, self.end, self.end[self.NEXT]]
+            self.end[self.NEXT][self.PREV] = self.map[item]
+            self.end[self.NEXT] = self.map[item]
 
     def discard(self, item):
         """Finds and discards an item from this set, amortized O(1) time."""
