@@ -1517,6 +1517,7 @@ class MethodGenerator(object):
         self.is_container = stmt.keyword == 'container'
         self.is_list = stmt.keyword == 'list'
         self.is_typedef = stmt.keyword == 'typedef'
+        assert self.is_container or self.is_list or self.is_typedef
         self.ctx = ctx
         self.gen = self
         if type(self) is MethodGenerator:
@@ -1607,10 +1608,57 @@ class MethodGenerator(object):
         return self.gen.setters()
 
     def checker(self):
+        assert self.gen is not self, 'Avoid infinite recursion'
         if self.is_typedef:
             return self.gen.checker()
         else:
             return None
+    
+    def markers(self):
+        """Generates methods that enqueues operations to be performed."""
+        if self.is_typedef:
+            return None
+        else:
+            return self.gen.markers()
+
+
+class LeafMethodGenerator(object):
+    """Method generator for YANG leaf and leaf-list associated methods"""
+    
+    def __init__(self, stmt, ctx):
+        self.stmt = stmt
+        self.is_leaf = stmt.keyword == 'leaf'
+        self.is_leaflist = stmt.keyword == 'leaf-list'
+        assert self.is_leaf or self.is_leaflist
+        self.type_stmt = stmt.search_one('type')
+        self.is_string = self.type_stmt.arg in ('string', 'enumeration')
+        self.type_str = get_types(self.type_stmt, ctx)
+        self.ctx = ctx
+        
+    def mark(self, operation):
+        assert operation in ('replace', 'merge', 'create', 'delete')
+        mark_methods = [JavaMethod()]
+        if self.is_string:
+            mark_methods.append(JavaMethod())
+        for i, mark_method in enumerate(mark_methods):
+            mark_method.set_name('mark' + capitalize_first(self.stmt.arg)
+                                 + capitalize_first(operation))
+            mark_method.add_modifier('public')
+            mark_method.set_return_type('void')
+            mark_method.add_exception('JNCException')
+            path = self.stmt.arg
+            mark_method.add_javadoc(''.join(['Marks the "', self.stmt.arg, '" ', 
+                       self.stmt.keyword, ' with operation "',
+                       operation, '".']))
+            if self.is_leaflist:
+                path += '[name=\'" + ' + self.stmt.arg + 'Value+"\']'
+                javadoc = '@param ' + self.stmt.arg + 'Value The value to mark'
+                if i == 1:
+                    javadoc += ', given as a String'
+                mark_method.add_javadoc(javadoc)
+                mark_method.add_parameter(self.type_str + ' ' + self.stmt.arg + 'Value')
+            mark_method.add_line('markLeaf' + capitalize_first(operation) + '("' + path + '");')
+        return mark_methods
 
 
 class TypedefMethodGenerator(MethodGenerator):
@@ -1618,6 +1666,7 @@ class TypedefMethodGenerator(MethodGenerator):
 
     def __init__(self, stmt, ctx=None):
         super(TypedefMethodGenerator, self).__init__(stmt, ctx)
+        assert self.gen is self
         assert self.is_typedef, 'This class is only valid for typedef stmts'
         self.stmt_type = stmt.search_one('type')
         self.is_string = False
@@ -1715,12 +1764,16 @@ class ContainerMethodGenerator(MethodGenerator):
 
     def __init__(self, stmt, ctx=None):
         super(ContainerMethodGenerator, self).__init__(stmt, ctx)
+        assert self.gen is self
         assert self.is_container, 'Only valid for container stmts'
 
     def constructors(self):
         return [self.empty_constructor()]
 
     def setters(self):
+        return NotImplemented
+    
+    def markers(self):
         return NotImplemented
 
 
@@ -1729,6 +1782,7 @@ class ListMethodGenerator(MethodGenerator):
 
     def __init__(self, stmt, ctx=None):
         super(ListMethodGenerator, self).__init__(stmt, ctx)
+        assert self.gen is self
         assert self.is_list, 'Only valid for list stmts'
         self.is_config = is_config(stmt)
 
@@ -1792,6 +1846,9 @@ class ListMethodGenerator(MethodGenerator):
         return constructors
 
     def setters(self):
+        return NotImplemented
+    
+    def markers(self):
         return NotImplemented
 
 
