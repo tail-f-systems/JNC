@@ -59,6 +59,11 @@ java_reserved_words = {'abstract', 'assert', 'boolean', 'break', 'byte',
 """A set of identifiers that are reserved in Java"""
 
 
+java_lang = {'Boolean', 'Byte', 'Double', 'Float', 'Integer',
+             'Long', 'Number', 'Object', 'Short', 'String'}
+"""A subset of the java.lang classes"""
+
+
 immutable_stmts = {'type', 'typedef', 'namespace', 'prefix', 'organization',
     'contact', 'description', 'range'}
 """A set of statement keywords that should not have their arguments modified"""
@@ -778,7 +783,7 @@ class ClassGenerator(object):
                 description='This class represents a "' + self.path + stmt.arg +
                 '" element\n * from the namespace ' + self.ns,
                 source=self.src,
-                modifiers='extends YangElement') 
+                superclass='YangElement') 
 
         i_children_exists = (hasattr(stmt, 'i_children')
             and stmt.i_children is not None
@@ -826,10 +831,12 @@ class ClassGenerator(object):
             self.java_class.add_name_getter('keys', key_names(stmt))
             self.java_class.add_name_getter('children', children_names(stmt))
         if stmt.keyword == 'container':
-            self.java_class.add_constructor('unique', constructor(
-                stmt, self.ctx, set_prefix=self.top_level, root=self.prefix_name))
-            self.java_class.add_cloner('deep', clone(name, shallow=False))
-            self.java_class.add_cloner('shallow', clone(name, shallow=True))
+            # Use Container MethodGenerator to generate methods
+            gen = ContainerMethodGenerator(stmt, self.ctx)
+            self.java_class.add_constructor('unique', gen.empty_constructor())
+            cloners = gen.cloners()
+            self.java_class.add_cloner('deep', cloners[0])
+            self.java_class.add_cloner('shallow', cloners[1])
         elif stmt.keyword == 'list':
             key, only_strings, confm_keys, primitive_keys = extract_keys(stmt, self.ctx)
             self.java_class.add_constructor('0', constructor(stmt, self.ctx, root=self.prefix_name,
@@ -853,7 +860,7 @@ class ClassGenerator(object):
         elif stmt.keyword == 'typedef':
             type_stmt = stmt.search_one('type')
             super_type = get_types(type_stmt, self.ctx)[0]
-            self.java_class.modifiers = 'extends ' + super_type
+            self.java_class.superclass = super_type
 
             # If supertype is derived, make sure a class for it is generated
             if type_stmt.i_typedef:
@@ -866,7 +873,7 @@ class ClassGenerator(object):
                     self.yang_types.add(type_stmt.i_typedef.arg)
             self.yang_types.add(stmt.arg)
 
-            # Use Typedef MethodGenerator to generate constructor methods
+            # Use Typedef MethodGenerator to generate methods
             gen = TypedefMethodGenerator(stmt, self.ctx)
             for i, method in enumerate(gen.constructors()):
                 self.java_class.add_constructor(str(i), method)
@@ -1160,7 +1167,7 @@ class JavaClass(object):
 
     def __init__(self, filename=None, package=None, imports=None,
                  description=None, body=None, version='1.0',
-                 modifiers='', source='<unknown>.yang'):
+                 superclass=None, interfaces=None, source='<unknown>.yang'):
         """Constructor.
 
         filename    -- Should preferably not contain a complete path since it is
@@ -1172,8 +1179,8 @@ class JavaClass(object):
         body        -- Should contain the actual code of the class if it is not
                        supplied through the add-methods
         version     -- Version number, defaults to '1.0'.
-        modifiers   -- Can contain Java statements such as 
-                       ' implements Serializable' or ' extends Element'.
+        superclass  -- Parent class of this Java class, or None
+        interaces   -- List of interfaces implemented by this Java class
         source      -- A string somehow representing the origin of the class
 
         """
@@ -1187,7 +1194,10 @@ class JavaClass(object):
         self.description = description
         self.body = body
         self.version = version
-        self.modifiers = modifiers
+        self.superclass = superclass
+        self.interfaces = interfaces
+        if interfaces is None:
+            self.interfaces = []
         self.source = source
         self.fields = OrderedSet()
         self.constructors = OrderedSet()
@@ -1212,6 +1222,9 @@ class JavaClass(object):
 
     def add_cloner(self, key, cloner):
         """Adds a clone method represented as a string"""
+        if not isinstance(cloner, str):
+            for import_ in cloner.imports:
+                self.imports.add(import_)
         self.cloners.add(cloner)
 
     def add_enabler(self, key, enabler):
@@ -1249,7 +1262,7 @@ class JavaClass(object):
         before it is returned."""
         if self.body is None:
             self.body = []
-            if any(x in self.modifiers for x in ['extends', 'implements']):
+            if self.superclass is not None or 'Serializable' in self.interfaces:
                 self.body.extend(JavaValue(
                     modifiers=['private', 'static', 'final', 'long'],
                     name='serialVersionUID', value='1L', indent=4).as_list())
@@ -1261,6 +1274,19 @@ class JavaClass(object):
                 self.body.append('')
             self.body.append('}')
         return self.body
+
+    def get_superclass_and_interfaces(self):
+        """Returns a string with extends and implements"""
+        res = []
+        if self.superclass:
+            res.append(' extends ')
+            res.append(self.superclass)
+        if self.interfaces:
+            res.append(' implements ')
+            res.append(', '.join(self.interfaces))
+        if res:
+            res.append(' ')
+        return ''.join(res)
 
     def java_class(self):
         """Returns a string representing complete Java code for this class.
@@ -1309,10 +1335,10 @@ class JavaClass(object):
                                 get_date(date_format=1)]))
         header.append(' * @author Auto Generated')
         header.append(' */')
-        header.append(' '.join(['public class',
-                                self.filename.split('.')[0],
-                                self.modifiers,
-                                '{']))
+        header.append(''.join(['public class ',
+                               self.filename.split('.')[0],
+                               self.get_superclass_and_interfaces(),
+                               '{']))
         header.append('')
         return '\n'.join(header + self.get_body())
 
@@ -1394,12 +1420,19 @@ class JavaValue(object):
 
     def add_dependency(self, import_):
         """Adds import_ to list of imports needed for value to compile"""
-        if import_ not in java_reserved_words | {'String'}:
+        _, sep, class_name = import_.rpartition('.')
+        if sep:
+            if class_name not in java_lang:
+                self.imports.append(import_)
+                return class_name
+        elif import_ not in java_reserved_words | java_lang:
             if import_ in ('BigInteger', 'BigDecimal'):
-                import_ = 'java.math.' + import_
+                pkg = 'java.math'
             else:
-                import_ = 'com.tailf.jnc.' + import_
-            self.imports.append(import_)
+                pkg = 'com.tailf.jnc'
+            self.imports.append('.'.join([pkg, import_]))
+        return import_
+        
 
     def javadoc_as_string(self):
         """Returns a list representing javadoc lines for this value"""
@@ -1447,14 +1480,16 @@ class JavaMethod(JavaValue):
 
     def set_return_type(self, return_type):
         """Sets the type of the return value of this method"""
-        self._set_instance_data('return_type', return_type)
+        self._set_instance_data('return_type',
+                                self.add_dependency(return_type))
 
     def add_parameter(self, parameter):
         self._set_instance_data('parameters', parameter)
 
     def add_exception(self, exception):
         """Adds exception to method"""
-        self._set_instance_data('exceptions', exception)
+        self._set_instance_data('exceptions',
+                                self.add_dependency(exception))
 
     def add_line(self, line):
         """Adds line to method body"""
