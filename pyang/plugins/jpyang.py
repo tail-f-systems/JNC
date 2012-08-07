@@ -2396,10 +2396,10 @@ def delete_stmt(stmt, args=None, string=False, keys=True):
 class OrderedSet(collections.MutableSet):
     """A set of unique items that preserves the insertion order.
 
-    Created by: Raymond Hettinger
-    Version: 2009-03-19
+    Created by: Raymond Hettinger 2009-03-19
+    Edited by: Emil Wall 2012-08-03
     Licence: http://opensource.org/licenses/MIT
-    Source: http://code.activestate.com/recipes/576694/
+    Original source: http://code.activestate.com/recipes/576694/
 
     An ordered set is implemented as a wrapper class for a dictionary
     implementing a doubly linked list. It also has a pointer to the last item
