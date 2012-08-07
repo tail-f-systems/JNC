@@ -169,7 +169,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                     self.fatal("%s contains errors" % epos.top.arg)
                 if (etag in ('TYPE_NOT_FOUND', 'FEATURE_NOT_FOUND',
                     'IDENTITY_NOT_FOUND', 'GROUPING_NOT_FOUND')):
-                    print_warning(msg=(etag.lower() + ', generated class ' + 
+                    print_warning(msg=(etag.lower() + ', generated class ' +
                         'hierarchy might be incomplete.'), key=etag)
                 else:
                     print_warning(msg=(etag.lower() + ', aborting.'), key=etag)
@@ -368,10 +368,10 @@ def camelize(string):
 
 def flatten(l):
     """Returns a flattened version of iterable l
-    
+
     l must not have an attribute named values unless the return value values()
     is a valid substitution of l. Same applies to all items in l.
-    
+
     Example: flatten([['12', '34'], ['56', ['7']]]) = ['12', '34', '56', '7']
     """
     res = []
@@ -690,7 +690,7 @@ class YangType(object):
 class ClassGenerator(object):
     """Used to generate java classes from a yang module"""
 
-    def __init__(self, stmt, package=None, src=None, ctx=None, path='', ns='', 
+    def __init__(self, stmt, package=None, src=None, ctx=None, path='', ns='',
             prefix_name='', top_level=False, yang_types=None, parent=None):
         """Constructor.
 
@@ -748,14 +748,14 @@ class ClassGenerator(object):
         (self.filename, name) = extract_names(prefix.arg)
 
         for stmt in self.stmt.substmts:
-            if stmt.keyword in ('container', 'list', 'augment', 'typedef'):  # TODO: other top-level stmts
+            if stmt.keyword in ('container', 'list', 'augment', 'typedef'):
                 child_generator = ClassGenerator(stmt, ns=ns_arg,
                     prefix_name=name, top_level=True, parent=self)
                 child_generator.generate()
 
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + self.filename + '"...'
-        self.java_class = JavaClass(filename=self.filename, 
+        self.java_class = JavaClass(filename=self.filename,
                 package=self.package, description=('The root class for namespace ' +
                     ns_arg + ' (accessible from \n * ' + name +
                     '.NAMESPACE) with prefix "' + prefix.arg + '" (' + name +
@@ -768,7 +768,7 @@ class ClassGenerator(object):
         self.write_to_file()
 
     def generate_class(self):
-        """Generates a Java class hierarchy providing an interface to a YANG 
+        """Generates a Java class hierarchy providing an interface to a YANG
         module. Uses mutual recursion with generate_child.
 
         """
@@ -781,7 +781,7 @@ class ClassGenerator(object):
                 description='This class represents a "' + self.path +
                     stmt.arg + '" element\n * from the namespace ' + self.ns,
                 source=self.src,
-                superclass='YangElement') 
+                superclass='YangElement')
 
         i_children_exists = (hasattr(stmt, 'i_children')
             and stmt.i_children is not None
@@ -824,29 +824,29 @@ class ClassGenerator(object):
 
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + self.filename + '"...'
-            
+
         gen = MethodGenerator(stmt, self.ctx)
-        
+
         for constructor in gen.constructors():
             self.java_class.add_constructor(constructor)
-            
+
         for cloner in gen.cloners():
             self.java_class.add_cloner(cloner)
-            
+
         try:
             for i, method in enumerate(gen.setters()):
                 self.java_class.append_access_method(str(i), method)
         except TypeError:
             pass  # setters not implemented
-        
+
         checker = gen.checker()
         if checker is not None:
             self.java_class.append_access_method('check', checker)
-            
+
         support_method = gen.support_method(fields)
         if support_method is not None:
             self.java_class.add_support_method(support_method)
-            
+
         if stmt.keyword != 'typedef':  # TODO: Only add key name getter when relevant
             self.java_class.add_name_getter(key_names(stmt))
             self.java_class.add_name_getter(children_names(stmt))
@@ -858,8 +858,8 @@ class ClassGenerator(object):
             # If supertype is derived, make sure a class for it is generated
             if type_stmt.i_typedef:
                 if not self.yang_types.defined(type_stmt.i_typedef.arg):
-                    typedef_generator = ClassGenerator(type_stmt.i_typedef, 
-                        package='src.'+get_package(type_stmt.i_typedef, self.ctx),
+                    typedef_generator = ClassGenerator(type_stmt.i_typedef,
+                        package='src.' + get_package(type_stmt.i_typedef, self.ctx),
                         path=self.package.replace('.', os.sep) + os.sep, ns=None,
                         prefix_name=None, parent=self)
                     typedef_generator.generate()
@@ -871,7 +871,7 @@ class ClassGenerator(object):
     def generate_child(self, sub):
         """Appends access methods to class for children in the YANG module.
         Returns a list which contains the name of sub if it is a container,
-        otherwise an empty list is returned. Uses mutual recursion with 
+        otherwise an empty list is returned. Uses mutual recursion with
         generate_class.
 
         For this function to work, self.java_class must be defined.
@@ -906,19 +906,12 @@ class ClassGenerator(object):
                 fields.append(sub.arg)
                 add(sub.arg, access_methods_comment(sub))
                 self.java_class.add_field(sub.arg, child_field(sub))
-                add(sub.arg, add_stmt(sub, args=[(sub.parent.arg + '.' + sub.arg, sub.arg)], field=True))
+                add(sub.arg, add_stmt(sub, args=[(sub.parent.arg + '.' +
+                        sub.arg, sub.arg)], field=True))
                 add(sub.arg, add_stmt(sub, args=[], field=True))
                 add(sub.arg, delete_stmt(sub))
         elif sub.keyword in ('leaf', 'leaf-list'):
             type_stmt = sub.search_one('type')
-#            if type_stmt.i_typedef:
-#                if not self.yang_types.defined(type_stmt.i_typedef.arg):
-#                    type_generator = ClassGenerator(stmt=type_stmt.i_typedef,
-#                        package='src.'+get_package(type_stmt.i_typedef,
-#                                            self.ctx).replace('.', os.sep) + os.sep,
-#                        path=self.path + sub.parent.arg + os.sep, ns=None,
-#                        prefix_name=None, parent=self)
-#                    type_generator.generate()
             type_str1, type_str2 = get_types(type_stmt, self.ctx)
             if sub.keyword == 'leaf':
                 key = sub.parent.search_one('key')
@@ -1011,7 +1004,7 @@ class PackageInfoGenerator(object):
         for directory in dirs:
             for sub in self.stmt.substmts:
                 # XXX: refactor
-                if(camelize(capitalize_first(sub.arg)) == 
+                if(camelize(capitalize_first(sub.arg)) ==
                    camelize(capitalize_first(directory).replace('.',
                         '?')).replace('?', '.')):
                     old_d = self.d
@@ -1295,7 +1288,7 @@ class JavaClass(object):
         header.append(' * Java output format plug-in of pyang.')
         header.append(' * Origin: ' + self.source)
         header.append(' */')
- 
+
         # package and import statement goes here
         header.append('')
         header.append('package ' + strip_first(self.package) + ';')
@@ -1304,7 +1297,7 @@ class JavaClass(object):
                 if hasattr(method, 'imports'):
                     self.imports |= method.imports
                 if hasattr(method, 'exceptions'):
-                    self.imports |= map(lambda s: 'com.tailf.jnc.' + s, 
+                    self.imports |= map(lambda s: 'com.tailf.jnc.' + s,
                                         method.exceptions)
         if self.imports:
             header.append('')
@@ -1418,7 +1411,6 @@ class JavaValue(object):
                 pkg = 'com.tailf.jnc'
             self.imports.append('.'.join([pkg, import_]))
         return import_
-        
 
     def javadoc_as_string(self):
         """Returns a list representing javadoc lines for this value"""
@@ -1482,9 +1474,9 @@ class JavaMethod(JavaValue):
         self._set_instance_data('body', self.indent + ' ' * 4 + line)
 
     def as_list(self):
-        """String list of code lines that this Java method consists of. 
+        """String list of code lines that this Java method consists of.
         Overrides JavaValue.as_list().
-        
+
         """
         if self.exact is None:
             assert self.name is not None
@@ -1580,7 +1572,7 @@ class MethodGenerator(object):
             cloner.set_name('clone%s' % c[i])
             cloner.add_line('return clone%sContent(new %s());' % (c[i], self.n))
         return cloners
-    
+
     def support_method(self, fields=None):
         if self.is_typedef:
             return None
@@ -1613,7 +1605,7 @@ class MethodGenerator(object):
         """
         assert self.gen is not self, 'Avoid infinite recursion'
         return self.gen.setters()
-    
+
     def checker(self):
         if self.is_typedef:
             return self.gen.checker()
@@ -1623,7 +1615,7 @@ class MethodGenerator(object):
 
 class TypedefMethodGenerator(MethodGenerator):
     """Method generator specific to typedef classes"""
-    
+
     def __init__(self, stmt, ctx=None):
         super(TypedefMethodGenerator, self).__init__(stmt, ctx)
         assert self.is_typedef, 'This class is only valid for typedef stmts'
@@ -1693,7 +1685,7 @@ class TypedefMethodGenerator(MethodGenerator):
                 setter.add_exception('YangException')
             setters.append(setter)
         return setters
-    
+
     def checker(self):
         """Returns a 'check' JavaMethod, which checks regexp constraints"""
         if self.needs_check:
@@ -1720,7 +1712,7 @@ class TypedefMethodGenerator(MethodGenerator):
 
 class ContainerMethodGenerator(MethodGenerator):
     """Method generator specific to classes generated from container stmts"""
-    
+
     def __init__(self, stmt, ctx=None):
         super(ContainerMethodGenerator, self).__init__(stmt, ctx)
         assert self.is_container, 'Only valid for container stmts'
@@ -1734,7 +1726,7 @@ class ContainerMethodGenerator(MethodGenerator):
 
 class ListMethodGenerator(MethodGenerator):
     """Method generator specific to classes generated from list stmts"""
-    
+
     def __init__(self, stmt, ctx=None):
         super(ListMethodGenerator, self).__init__(stmt, ctx)
         assert self.is_list, 'Only valid for list stmts'
@@ -2408,10 +2400,10 @@ class OrderedSet(collections.MutableSet):
     Version: 2009-03-19
     Licence: http://opensource.org/licenses/MIT
     Source: http://code.activestate.com/recipes/576694/
-    
+
     An ordered set is implemented as a wrapper class for a dictionary
     implementing a doubly linked list. It also has a pointer to the last item
-    in the set (self.end) which is used by the add and _iterate methods to add 
+    in the set (self.end) which is used by the add and _iterate methods to add
     items to the end of the list and to know when an iteration has finished,
     respectively.
 
@@ -2419,18 +2411,18 @@ class OrderedSet(collections.MutableSet):
 
     def __init__(self, iterable=None):
         """Creates an ordered set.
-        
+
         iterable -- A mutable iterable, typically a list or a set, containing
                     initial values of the set. If the default value (None) is
                     used, the set is initialized as empty.
-        
+
         """
         self.ITEM, self.PREV, self.NEXT = range(3)
-        self.end = end = [] 
+        self.end = end = []
         end += [None, end, end]         # sentinel node for doubly linked list
         self.map = {}                   # value --> [value, prev, next]
         if iterable is not None:
-            self |= iterable            
+            self |= iterable
 
     def __len__(self):
         """Returns the number of items in this set."""
@@ -2456,17 +2448,17 @@ class OrderedSet(collections.MutableSet):
 
     def discard(self, item):
         """Finds and discards an item from this set, amortized O(1) time."""
-        if item in self:        
+        if item in self:
             item, prev, after = self.map.pop(item)
             prev[self.NEXT] = after
             after[self.PREV] = prev
 
     def _iterate(self, iter_index):
         """Internal generator method to iterate through this set.
-        
+
         iter_index -- If 1, the set is iterated in reverse order. If 2, the set
                       is iterated in order of insertion. Else IndexError.
-        
+
         """
         curr = self.end[iter_index]
         while curr is not self.end:
@@ -2476,22 +2468,22 @@ class OrderedSet(collections.MutableSet):
     def __iter__(self):
         """Returns a generator object for iterating the set in the same order
         as its items were added.
-        
+
         """
         return self._iterate(self.NEXT)
 
     def __reversed__(self):
         """Returns a generator object for iterating the set, beginning with the
         most recently added item and ending with the first/oldest item.
-        
+
         """
         return self._iterate(self.PREV)
 
     def pop(self, last=True):
         """Discards the first or last item of this set.
-        
+
         last -- If True the last item is discarded, otherwise the first.
-        
+
         """
         if not self:
             raise KeyError('set is empty')
@@ -2503,7 +2495,7 @@ class OrderedSet(collections.MutableSet):
         """Returns a string representing this set. If empty, the string
         returned is 'OrderedSet()', otherwise if the set contains items a, b
         and c: 'OrderedSet([a, b, c])'
-        
+
         """
         if not self:
             return '%s()' % (self.__class__.__name__,)
@@ -2512,13 +2504,13 @@ class OrderedSet(collections.MutableSet):
     def __eq__(self, other):
         """Returns True if other is an OrderedSet containing the same items as
         other, in the same order.
-        
+
         """
         return isinstance(other, OrderedSet) and list(self) == list(other)
 
     def __del__(self):
         """Destructor, clears self to avoid circular reference which could
         otherwise occur due to the doubly linked list.
-        
+
         """
         self.clear()
