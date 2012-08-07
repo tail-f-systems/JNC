@@ -175,7 +175,7 @@ class JPyangPlugin(plugin.PyangPlugin):
                     print_warning(msg=(etag.lower() + ', aborting.'), key=etag)
                     self.fatal("%s contains errors" % epos.top.arg)
         directory = ctx.opts.directory
-        d = directory.replace('.', '/')
+        d = directory.replace('.', os.sep)
         for module in modules:
             if module.keyword == 'module':
                 # Generate Java classes
@@ -289,7 +289,7 @@ def write_file(d, file_name, file_content, ctx):
     named file_name with file_content in it.
 
     """
-    d = d.replace('.', '/')
+    d = d.replace('.', os.sep)
     wd = os.getcwd()
     try:
         os.makedirs(d, 0777)
@@ -309,9 +309,9 @@ def write_file(d, file_name, file_content, ctx):
             raise
     finally:
         if ctx.opts.verbose:
-            print 'Writing file to: ' + os.getcwd() + '/' + file_name
+            print 'Writing file to: ' + os.getcwd() + os.sep + file_name
         os.chdir(wd)
-    with open(d + '/' + file_name, 'w+') as f:
+    with open(d + os.sep + file_name, 'w+') as f:
         f.write(file_content)
 
 
@@ -566,7 +566,7 @@ def in_schema(stmt):
 
 def strip_first(s):
     """Returns s but with chars up to and including '.' or '/' removed"""
-    return '.'.join(s.replace('/', '.').split('.')[1:])
+    return '.'.join(s.replace(os.sep, '.').split('.')[1:])
 
 
 def indent(lines, level=1):
@@ -761,10 +761,10 @@ class ClassGenerator(object):
                     '.NAMESPACE) with prefix "' + prefix.arg + '" (' + name +
                     '.PREFIX).'),
                 source=self.src)
-        self.java_class.add_field('NAMESPACE', static_string('NAMESPACE', ns_arg))
-        self.java_class.add_field('PREFIX', static_string('PREFIX', prefix.arg))
-        self.java_class.add_enabler(name, enable(name))
-        self.java_class.add_schema_registrator(name, register_schema(name))
+        self.java_class.add_field(static_string('NAMESPACE', ns_arg))
+        self.java_class.add_field(static_string('PREFIX', prefix.arg))
+        self.java_class.add_enabler(enable(name))
+        self.java_class.add_schema_registrator(register_schema(name))
         self.write_to_file()
 
     def generate_class(self):
@@ -773,15 +773,13 @@ class ClassGenerator(object):
 
         """
         stmt = self.stmt
-        (self.filename, name) = extract_names(stmt.arg)
+        self.filename, _ = extract_names(stmt.arg)
         fields = []
 
-        self.java_class = JavaClass(filename=self.filename, package=self.package,
-#                imports=['com.tailf.jnc.*', 'java.util.HashMap'],
-                # TODO: Hashtable not used in generated code
-
-                description='This class represents a "' + self.path + stmt.arg +
-                '" element\n * from the namespace ' + self.ns,
+        self.java_class = JavaClass(filename=self.filename,
+                package=self.package,
+                description='This class represents a "' + self.path +
+                    stmt.arg + '" element\n * from the namespace ' + self.ns,
                 source=self.src,
                 superclass='YangElement') 
 
@@ -826,37 +824,32 @@ class ClassGenerator(object):
 
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + self.filename + '"...'
+            
+        gen = MethodGenerator(stmt, self.ctx)
+        
+        for constructor in gen.constructors():
+            self.java_class.add_constructor(constructor)
+            
+        for cloner in gen.cloners():
+            self.java_class.add_cloner(cloner)
+            
+        try:
+            for i, method in enumerate(gen.setters()):
+                self.java_class.append_access_method(str(i), method)
+        except TypeError:
+            pass  # setters not implemented
+        
+        checker = gen.checker()
+        if checker is not None:
+            self.java_class.append_access_method('check', checker)
+            
+        support_method = gen.support_method(fields)
+        if support_method is not None:
+            self.java_class.add_support_method(support_method)
+            
         if stmt.keyword != 'typedef':  # TODO: Only add key name getter when relevant
-            self.java_class.add_support_method('unique', support_add(fields))
-            self.java_class.add_name_getter('keys', key_names(stmt))
-            self.java_class.add_name_getter('children', children_names(stmt))
-        if stmt.keyword == 'container':
-            # Use Container MethodGenerator to generate methods
-            gen = ContainerMethodGenerator(stmt, self.ctx)
-            self.java_class.add_constructor('unique', gen.empty_constructor())
-            cloners = gen.cloners()
-            self.java_class.add_cloner('deep', cloners[0])
-            self.java_class.add_cloner('shallow', cloners[1])
-        elif stmt.keyword == 'list':
-            key, only_strings, confm_keys, primitive_keys = extract_keys(stmt, self.ctx)
-            self.java_class.add_constructor('0', constructor(stmt, self.ctx, root=self.prefix_name,
-                set_prefix=self.top_level, throws="\n        throws JNCException"))
-            self.java_class.add_constructor('1', constructor(stmt, self.ctx, 
-                root=self.prefix_name, set_prefix=self.top_level,
-                mode=1, args=confm_keys, throws='''
-            throws JNCException'''))
-            self.java_class.add_constructor('2', constructor(stmt, self.ctx, 
-                root=self.prefix_name, set_prefix=self.top_level,
-                mode=2, args=primitive_keys, throws='''
-            throws JNCException'''))
-            if not only_strings:
-                self.java_class.add_constructor('3', constructor(stmt, self.ctx, root=self.prefix_name,
-                    set_prefix=self.top_level, mode=3, args=primitive_keys, throws='''
-            throws JNCException'''))
-            self.java_class.add_cloner('deep', clone(name, map(capitalize_first,
-                key.arg.split(' ')), shallow=False))
-            self.java_class.add_cloner('shallow', clone(name,
-                map(capitalize_first, key.arg.split(' ')), shallow=True))
+            self.java_class.add_name_getter(key_names(stmt))
+            self.java_class.add_name_getter(children_names(stmt))
         elif stmt.keyword == 'typedef':
             type_stmt = stmt.search_one('type')
             super_type = get_types(type_stmt, self.ctx)[0]
@@ -867,20 +860,12 @@ class ClassGenerator(object):
                 if not self.yang_types.defined(type_stmt.i_typedef.arg):
                     typedef_generator = ClassGenerator(type_stmt.i_typedef, 
                         package='src.'+get_package(type_stmt.i_typedef, self.ctx),
-                        path=self.package.replace('.', '/') + '/', ns=None,
+                        path=self.package.replace('.', os.sep) + os.sep, ns=None,
                         prefix_name=None, parent=self)
                     typedef_generator.generate()
                     self.yang_types.add(type_stmt.i_typedef.arg)
             self.yang_types.add(stmt.arg)
 
-            # Use Typedef MethodGenerator to generate methods
-            gen = TypedefMethodGenerator(stmt, self.ctx)
-            for i, method in enumerate(gen.constructors()):
-                self.java_class.add_constructor(str(i), method)
-            for i, method in enumerate(gen.setters()):
-                self.java_class.append_access_method(str(i), method)
-
-            self.java_class.append_access_method('check', gen.checker())
         self.write_to_file()
 
     def generate_child(self, sub):
@@ -899,7 +884,7 @@ class ClassGenerator(object):
         if sub.keyword in ('list', 'container', 'typedef'):
             child_generator = ClassGenerator(stmt=sub,
                 package=self.package + '.' + sub.parent.arg,
-                path=self.path + sub.parent.arg + '/', ns=None,
+                path=self.path + sub.parent.arg + os.sep, ns=None,
                 prefix_name=None, parent=self)
             child_generator.generate()
 #            name = extract_names(sub.arg)[1]
@@ -930,8 +915,8 @@ class ClassGenerator(object):
 #                if not self.yang_types.defined(type_stmt.i_typedef.arg):
 #                    type_generator = ClassGenerator(stmt=type_stmt.i_typedef,
 #                        package='src.'+get_package(type_stmt.i_typedef,
-#                                            self.ctx).replace('.', '/') + '/',
-#                        path=self.path + sub.parent.arg + '/', ns=None,
+#                                            self.ctx).replace('.', os.sep) + os.sep,
+#                        path=self.path + sub.parent.arg + os.sep, ns=None,
 #                        prefix_name=None, parent=self)
 #                    type_generator.generate()
             type_str1, type_str2 = get_types(type_stmt, self.ctx)
@@ -1022,7 +1007,7 @@ class PackageInfoGenerator(object):
         dirs = filter(is_not_java_file, directory_listing)
         class_hierarchy = self.generate_javadoc(self.stmt.substmts, java_files)
         write_file(self.d, 'package-info.java', self.gen_package_info(class_hierarchy,
-            self.d.replace('/', '.')), self.ctx)
+            self.d.replace(os.sep, '.')), self.ctx)
         for directory in dirs:
             for sub in self.stmt.substmts:
                 # XXX: refactor
@@ -1030,7 +1015,7 @@ class PackageInfoGenerator(object):
                    camelize(capitalize_first(directory).replace('.',
                         '?')).replace('?', '.')):
                     old_d = self.d
-                    self.d += '/' + directory
+                    self.d += os.sep + directory
                     old_stmt = self.stmt
                     self.stmt = sub
                     self.generate_package_info()
@@ -1212,28 +1197,28 @@ class JavaClass(object):
                       self.name_getters, self.access_methods,
                       self.support_methods]
 
-    def add_field(self, key, field):
+    def add_field(self, field):
         """Adds a field represented as a string"""
         self.fields.add(field)
 
-    def add_constructor(self, key, constructor):
+    def add_constructor(self, constructor):
         """Adds a constructor represented as a string"""
         self.constructors.add(constructor)
 
-    def add_cloner(self, key, cloner):
+    def add_cloner(self, cloner):
         """Adds a clone method represented as a string"""
         if not isinstance(cloner, str):
             for import_ in cloner.imports:
                 self.imports.add(import_)
         self.cloners.add(cloner)
 
-    def add_enabler(self, key, enabler):
+    def add_enabler(self, enabler):
         """Adds an 'enable'-method as a string"""
         self.imports.add('com.tailf.jnc.JNCException')
         self.imports.add('com.tailf.jnc.YangElement')
         self.enablers.add(enabler)
 
-    def add_schema_registrator(self, key, schema_registrator):
+    def add_schema_registrator(self, schema_registrator):
         """Adds a register schema method"""
         self.imports.add('com.tailf.jnc.JNCException')
         self.imports.add('com.tailf.jnc.SchemaParser')
@@ -1243,7 +1228,7 @@ class JavaClass(object):
         self.imports.add('java.util.HashMap')
         self.schema_registrators.add(schema_registrator)
 
-    def add_name_getter(self, key, name_getter):
+    def add_name_getter(self, name_getter):
         """Adds a keyNames or childrenNames method represented as a string"""
         self.name_getters.add(name_getter)
 
@@ -1253,7 +1238,7 @@ class JavaClass(object):
             self.access_methods[key] = []
         self.access_methods[key].append(access_method)
 
-    def add_support_method(self, key, support_method):
+    def add_support_method(self, support_method):
         """Adds a support method represented as a string"""
         self.support_methods.add(support_method)
 
@@ -1266,6 +1251,7 @@ class JavaClass(object):
                 self.body.extend(JavaValue(
                     modifiers=['private', 'static', 'final', 'long'],
                     name='serialVersionUID', value='1L', indent=4).as_list())
+                self.body.append('')
             for method in flatten(self.attrs):
                 if hasattr(method, 'as_list'):
                     self.body.extend(method.as_list())
@@ -1580,7 +1566,8 @@ class MethodGenerator(object):
         return self.gen.constructors()
 
     def cloners(self):
-        assert not self.is_typedef, "Typedefs don't have clone methods"
+        if self.is_typedef:
+            return []  # Typedefs don't have clone methods
         cloners = [JavaMethod(), JavaMethod()]
         a = ('an exact', 'a shallow')
         b = ('', ' Children are not included.')
@@ -1593,6 +1580,31 @@ class MethodGenerator(object):
             cloner.set_name('clone%s' % c[i])
             cloner.add_line('return clone%sContent(new %s());' % (c[i], self.n))
         return cloners
+    
+    def support_method(self, fields=None):
+        if self.is_typedef:
+            return None
+        add_child = JavaMethod(modifiers=['public'],
+                               return_type='void',
+                               name='addChild',
+                               parameters=['Element child'])
+        add_child.add_dependency('Element')
+        add_child.add_javadoc('Support method for addChild.')
+        add_child.add_javadoc('Adds a child to this object.')
+        add_child.add_javadoc('')
+        add_child.add_javadoc('@param child The child to add')
+        add_child.add_line('super.addChild(child);')
+        if fields is None:
+            fields = []
+        for i in range(len(fields) - 1, -1, -1):
+            cond = ''
+            if i > 0:
+                cond = 'else '
+            add_child.add_line(''.join([cond, 'if (child instanceof ',
+                    capitalize_first(fields[i]), ') ', fields[i], ' = (',
+                    capitalize_first(fields[i]), ')child;']))
+            add_child.add_dependency(capitalize_first(fields[i]))
+        return add_child
 
     def setters(self):
         """Returns a list of JavaMethods representing setters to include
@@ -1601,6 +1613,12 @@ class MethodGenerator(object):
         """
         assert self.gen is not self, 'Avoid infinite recursion'
         return self.gen.setters()
+    
+    def checker(self):
+        if self.is_typedef:
+            return self.gen.checker()
+        else:
+            return None
 
 
 class TypedefMethodGenerator(MethodGenerator):
@@ -1637,14 +1655,15 @@ class TypedefMethodGenerator(MethodGenerator):
             else:
                 # i == 1, Primitive constructor
                 javadoc2.extend([' object from a ', primitive, '.'])
-                constructor.add_parameter(primitive + ' value')
-                constructor.add_dependency(primitive)
+                tmp_primitive = constructor.add_dependency(primitive)
+                constructor.add_parameter(tmp_primitive + ' value')
             constructor.add_javadoc(''.join(javadoc2))
             constructor.add_javadoc(''.join(javadoc))
             constructor.add_line('super(value);')
             if self.needs_check:
                 constructor.add_line('check();')
-                constructor.add_exception('YangException')
+                exception = constructor.add_dependency('YangException')
+                constructor.add_exception(exception)
             constructors.append(constructor)
         return constructors
 
@@ -2380,35 +2399,6 @@ def delete_stmt(stmt, args=None, string=False, keys=True):
         ''' + spec2 + 'String path = "' + stmt.arg + spec3 + '''";
         delete(path);
     }'''
-
-
-def support_add(fields=None):
-    """Generates an addChild method.
-
-    fields -- a list of fields in the generated class
-
-    """
-    assignments = ''
-    if fields is None:
-        fields = []
-    for i in range(len(fields) - 1, -1, -1):
-        assignments += ('if ($child instanceof ' + capitalize_first(fields[i]) +
-            ') ' + fields[i] + ' = (' + capitalize_first(fields[i]) + ')$child;')
-        if i > 0:
-            assignments += '\n        else '
-    return '''    /**
-     * -------------------------------------------------------
-     * Support method for addChild.
-     * -------------------------------------------------------
-     */
-
-    /**
-     * Adds a child to this object.
-     */
-    public void addChild(Element $child) {
-        super.addChild($child);
-        ''' + assignments + '''
-    }'''  # TODO: '$' should be removed unless it is actually needed
 
 
 class OrderedSet(collections.MutableSet):
