@@ -56,7 +56,28 @@ public class YangInt16Test {
 
     @Test
     public void testValid() {
-        fail("Not yet implemented");
+        // These should be valid
+    	assertTrue(i1.valid(0));
+    	assertTrue(i1.valid(1));
+    	assertTrue(i1.valid(-1));
+    	assertTrue(i1.valid(255));
+    	assertTrue(i1.valid(256));
+    	assertTrue(i1.valid(Short.MAX_VALUE));
+    	assertTrue(i1.valid(Short.MIN_VALUE));
+    	assertTrue(i1.valid(0x7fffL));
+    	assertTrue(i1.valid(0x0000L));
+    	assertTrue(i1.valid(-0x8000L));
+    	
+    	// These should not be valid
+    	assertFalse(i1.valid(0x8000L));
+    	assertFalse(i1.valid(-0x8001L));
+    	assertFalse(i1.valid(0x10000L));
+    	assertFalse(i1.valid(Short.MAX_VALUE+1));
+    	assertFalse(i1.valid(Short.MIN_VALUE-1));
+    	assertFalse(i1.valid(-Short.MIN_VALUE));
+    	assertFalse(i1.valid(Long.MAX_VALUE));
+    	assertFalse(i1.valid(Long.MIN_VALUE));
+    	assertFalse(i1.valid(0xffffffffL));
     }
 
     @Test
