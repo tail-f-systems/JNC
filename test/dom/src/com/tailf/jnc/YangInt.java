@@ -191,7 +191,7 @@ abstract class YangInt<T extends Number> extends YangType<T> {
     @Override
     protected void max(int max) throws YangException {
         YangException.throwException(!valid(max), max);
-        super.min(max);
+        super.max(max);
     }
 
 }
