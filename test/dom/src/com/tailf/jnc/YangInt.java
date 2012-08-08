@@ -174,7 +174,7 @@ abstract class YangInt<T extends Number> extends YangType<T> {
      */
     @Override
     protected void min(int min) throws YangException {
-        YangException.throwException(valid(min), this);
+        YangException.throwException(!valid(min), min);
         super.min(min);
     }
 
@@ -186,7 +186,7 @@ abstract class YangInt<T extends Number> extends YangType<T> {
      */
     @Override
     protected void max(int max) throws YangException {
-        YangException.throwException(valid(max), this);
+        YangException.throwException(!valid(max), max);
         super.min(max);
     }
 
