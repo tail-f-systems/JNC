@@ -103,7 +103,7 @@ public class YangDecimal64 extends YangInt<BigDecimal> {
         YangException.throwException(fractionDigits == null, this);
         BigDecimal pow63 = new BigDecimal("2.0").pow(63);
         BigDecimal minValue = pow63.negate().movePointLeft(fractionDigits);
-        pow63 = pow63.add(BigDecimal.ONE);
+        pow63 = pow63.subtract(BigDecimal.ONE);
         BigDecimal maxValue = pow63.movePointLeft(fractionDigits);
         setMinMax(minValue, maxValue);
     }
@@ -174,6 +174,16 @@ public class YangDecimal64 extends YangInt<BigDecimal> {
             } catch (NullPointerException e) {}
         }
         return false;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangType#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        int hash = super.hashCode();
+        return (fractionDigits == null) ? hash : (hash << fractionDigits);
     }
 
 }
