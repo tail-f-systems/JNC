@@ -49,9 +49,9 @@ public class YangInt16Test {
 
     @Test
     public void testCanEqual() {
-        i1.canEqual(i1);
-        i1.canEqual(i2);
-        i1.canEqual(i3);
+        assertTrue(i1.canEqual(i1));
+        assertTrue(i1.canEqual(i2));
+        assertTrue(i1.canEqual(i3));
     }
 
     @Test
