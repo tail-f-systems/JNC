@@ -52,19 +52,32 @@ public class YangInt32Test {
     @Test
     public void testMin() throws YangException {
         i1.min(Short.MIN_VALUE);
+        i1.min(Integer.MIN_VALUE);
+        
+        i2.min(Short.MAX_VALUE);  // 0xffff Smaller than Short.MAX_VALUE
+        
         i1.min(-1);
         i1.min(0);
         
         try {
             i1.min(Short.MAX_VALUE);
-            fail("7 not smaller than Short.MAX_VALUE");
+            fail("7 should compare smaller than Short.MAX_VALUE");
         } catch (YangException e) {}
         i2.min(Short.MAX_VALUE);  // 0xffff Smaller than Short.MAX_VALUE
+        try {
+            i1.min(Integer.MAX_VALUE);
+            fail("7 should compare smaller than Integer.MAX_VALUE");
+        } catch (YangException e) {}
+        try {
+            i2.min(Integer.MAX_VALUE);
+            fail("0xffff should compare smaller than Integer.MAX_VALUE");
+        } catch (YangException e) {}
         
         try {
             i1.min(0xffff);
-            fail("7 not smaller than 0xffff");
+            fail("7 should compare smaller than 0xffff");
         } catch (YangException e) {}
+        
         i2.min(0xffff);  // 0xffff Smaller than 0xffff
         
         try {
@@ -75,6 +88,7 @@ public class YangInt32Test {
 
     @Test
     public void testMax() throws YangException {
+        i2.max(Integer.MAX_VALUE);  // Integer.MAX_VALUE should be valid
         i2.max(0x10000);  // 0x100000 should be valid
         try {
             i2.max(-1);
@@ -84,12 +98,16 @@ public class YangInt32Test {
             i2.max(-0x8000);
             fail("0xffff should compare larger than -0x8000");
         } catch (YangException e) {}
+        try {
+            i2.max(Short.MAX_VALUE);
+            fail("0xffff should compare larger than Short.MAX_VALUE");
+        } catch (YangException e) {}
 
         try {
             i2.max(0);
             fail("0xffff should be larger than 0");
         } catch (YangException e) {}
-        i2.max(0xffff);  // 0xffff should not be smaller than 0xffff
+        i2.max(0xffff);  // 0xffff should not compare smaller than 0xffff
     }
 
     @Test
