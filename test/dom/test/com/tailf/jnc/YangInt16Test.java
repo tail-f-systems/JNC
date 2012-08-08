@@ -36,15 +36,13 @@ public class YangInt16Test {
 
     @Test
     public void testEqualsObject() {
-        assertTrue(i1.equals((Object)iv1));
-        assertTrue(i1.equals((Object)7));
+        assertFalse(i1.equals((Object)iv1));
+        assertFalse(i1.equals((Object)7));
         assertFalse(i1.equals((Object)iv2));
         assertFalse(i1.equals((Object)"7"));
-
-        assertTrue(i2.equals((Object)iv2));
-
+        assertFalse(i2.equals((Object)iv2));
         assertFalse(i3.equals((Object)iv3));
-        assertTrue(i3.equals((Object)iv2));
+        assertFalse(i3.equals((Object)iv2));
     }
 
     @Test
