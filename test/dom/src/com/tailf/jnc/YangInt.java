@@ -126,7 +126,7 @@ abstract class YangInt<T extends Number> extends YangType<T> {
      * @return A T value parsed from s.
      * @throws NumberFormatException If unable to parse a value of type T.
      */
-    protected abstract T parse(String s) throws NumberFormatException;
+    protected abstract T decode(String s) throws NumberFormatException;
     
     /*
      * (non-Javadoc)
@@ -135,20 +135,24 @@ abstract class YangInt<T extends Number> extends YangType<T> {
     @Override
     protected final T fromString(String s) throws YangException {
         try {
-            return parse(s);
+            return decode(s);
         } catch (NumberFormatException e) {
             throw new YangException(YangException.BAD_VALUE, e);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.tailf.jnc.yang.YangType#canEqual(java.lang.Object)
+    /**
+     * Compares type of obj with this object to see if they can be equal.
+     * <p>
+     * If a subclass of this class overrides the equals method, this method
+     * should be overridden as well.
+     * 
+     * @param obj Object to compare type with.
+     * @return true if obj type is compatible; false otherwise.
      */
     @Override
     public boolean canEqual(Object obj) {
-        return (obj instanceof YangInt
-                || obj instanceof Number);
+        return (obj instanceof YangInt);
     }
 
     /** ---------- Restrictions ---------- */
@@ -162,7 +166,7 @@ abstract class YangInt<T extends Number> extends YangType<T> {
      */
     @Override
     protected void exact(int value) throws YangException {
-        YangException.throwException(valid(value), this);
+        YangException.throwException(!valid(value), this);
         super.exact(value);
     }
 

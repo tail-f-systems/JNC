@@ -40,7 +40,7 @@ public class YangString extends BaseString {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return obj instanceof YangString || obj instanceof String;
+        return obj instanceof YangString;
     }
 
 }

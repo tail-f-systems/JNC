@@ -52,8 +52,8 @@ public class YangInt16 extends YangInt<Short> {
      * @see com.tailf.jnc.yang.YangInt#parse(java.lang.String)
      */
     @Override
-    protected Short parse(String s) {
-        return Short.parseShort(s);
+    protected Short decode(String s) {
+        return Short.decode(s);
     }
 
 }

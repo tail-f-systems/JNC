@@ -52,8 +52,8 @@ public class YangInt32 extends YangInt<Integer> {
      * @see com.tailf.jnc.yang.YangInt#parse(java.lang.String)
      */
     @Override
-    protected Integer parse(String s) {
-        return Integer.parseInt(s);
+    protected Integer decode(String s) {
+        return Integer.decode(s);
     }
 
 }

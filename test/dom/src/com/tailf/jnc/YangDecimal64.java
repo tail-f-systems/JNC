@@ -133,8 +133,9 @@ public class YangDecimal64 extends YangInt<BigDecimal> {
     @Override
     public void check() throws YangException {
         // Check that the fraction-digits arguments value is within bounds
-        boolean withinBounds = fractionDigits < 1 || fractionDigits > 18;
-        YangException.throwException(withinBounds, this);
+        boolean outsideBounds = fractionDigits != null
+                && (fractionDigits < 1 || fractionDigits > 18);
+        YangException.throwException(outsideBounds, this);
         
         // Check value bounds using parent check method
         super.check();
@@ -145,8 +146,34 @@ public class YangDecimal64 extends YangInt<BigDecimal> {
      * @see com.tailf.jnc.yang.YangInt#parse(java.lang.String)
      */
     @Override
-    protected BigDecimal parse(String s) throws NumberFormatException {
+    protected BigDecimal decode(String s) throws NumberFormatException {
         return new BigDecimal(s);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangInt#canEqual(java.lang.Object)
+     */
+    @Override
+    public boolean canEqual(Object obj) {
+        return obj instanceof YangDecimal64;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangType#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof YangDecimal64) {
+            YangDecimal64 other = (YangDecimal64) obj;
+            try {
+                return (other.canEqual(this)
+                        && getValue().compareTo(other.getValue()) == 0
+                        && fractionDigits == other.fractionDigits);
+            } catch (NullPointerException e) {}
+        }
+        return false;
     }
 
 }

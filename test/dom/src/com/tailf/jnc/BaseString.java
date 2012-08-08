@@ -76,7 +76,7 @@ public class BaseString extends YangType<String> {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return obj instanceof BaseString || obj instanceof String;
+        return obj instanceof BaseString;
     }
 
     /* ---------- Restrictions ---------- */

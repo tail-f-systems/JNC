@@ -52,7 +52,7 @@ public class YangEnumeration extends BaseString {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return obj instanceof YangEnumeration || obj instanceof String;
+        return obj instanceof YangEnumeration;
     }
 
 }

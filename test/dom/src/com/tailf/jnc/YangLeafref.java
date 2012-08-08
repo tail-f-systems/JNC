@@ -84,7 +84,7 @@ public class YangLeafref extends YangType<Element> {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return obj instanceof YangLeafref || obj instanceof Element;
+        return obj instanceof YangLeafref;
     }
 
 }

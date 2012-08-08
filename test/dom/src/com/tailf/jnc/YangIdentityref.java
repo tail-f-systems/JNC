@@ -73,7 +73,7 @@ public class YangIdentityref extends YangType<Element> {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return obj instanceof YangIdentityref || obj instanceof Element;
+        return obj instanceof YangIdentityref;
     }
 
 }

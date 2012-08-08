@@ -52,8 +52,8 @@ public class YangInt8 extends YangInt<Byte> {
      * @see com.tailf.jnc.yang.YangInt#parse(java.lang.String)
      */
     @Override
-    protected Byte parse(String s) {
-        return Byte.parseByte(s);
+    protected Byte decode(String s) {
+        return Byte.decode(s);
     }
 
 }

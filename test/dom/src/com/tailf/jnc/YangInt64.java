@@ -52,8 +52,8 @@ public class YangInt64 extends YangInt<Long> {
      * @see com.tailf.jnc.yang.YangInt#parse(java.lang.String)
      */
     @Override
-    protected Long parse(String s) {
-        return Long.parseLong(s);
+    protected Long decode(String s) {
+        return Long.decode(s);
     }
 
 }

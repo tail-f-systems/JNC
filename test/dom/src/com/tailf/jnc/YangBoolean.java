@@ -77,7 +77,7 @@ public class YangBoolean extends YangType<Boolean> {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return obj instanceof YangBoolean || obj instanceof Boolean;
+        return obj instanceof YangBoolean;
     }
 
 }

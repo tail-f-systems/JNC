@@ -70,7 +70,7 @@ public class YangUInt64 extends YangInt<BigInteger> {
      * @see com.tailf.jnc.yang.YangInt#parse(java.lang.String)
      */
     @Override
-    protected BigInteger parse(String s) throws NumberFormatException {
+    protected BigInteger decode(String s) throws NumberFormatException {
         return new BigInteger(s);
     }
 

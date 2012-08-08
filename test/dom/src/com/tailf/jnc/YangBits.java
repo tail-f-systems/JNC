@@ -78,7 +78,7 @@ public abstract class YangBits extends YangInt<BigInteger> {
      * @see com.tailf.jnc.yang.YangInt#parse(java.lang.String)
      */
     @Override
-    protected BigInteger parse(String s) {
+    protected BigInteger decode(String s) {
         return new BigInteger(s);
     }
 
@@ -99,9 +99,7 @@ public abstract class YangBits extends YangInt<BigInteger> {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return (obj instanceof YangBits
-                || obj instanceof BigInteger
-                || obj instanceof String);
+        return (obj instanceof YangBits);
     }
 
     /*
