@@ -103,30 +103,30 @@ public class YangUInt16Test {
     }
 
     @Test
-    public void testParseString() {
-        assertFalse(i1.parse("7").equals((byte)7));
-        assertFalse(i1.parse("7").equals((short)7));
-        assertTrue(i1.parse("7").equals((int)7));
-        assertFalse(i1.parse("7").equals((long)7));
+    public void testDecodeString() {
+        assertFalse(i1.decode("7").equals((byte)7));
+        assertFalse(i1.decode("7").equals((short)7));
+        assertTrue(i1.decode("7").equals((int)7));
+        assertFalse(i1.decode("7").equals((long)7));
         
-        assertTrue(i1.parse("7") == (byte)7);
-        assertTrue(i1.parse("7") == (short)7);
-        assertTrue(i1.parse("7") == (int)7);
-        assertTrue(i1.parse("7") == (long)7);
+        assertTrue(i1.decode("7") == (byte)7);
+        assertTrue(i1.decode("7") == (short)7);
+        assertTrue(i1.decode("7") == (int)7);
+        assertTrue(i1.decode("7") == (long)7);
 
-        assertTrue(i1.parse("-1") == -1);
+        assertTrue(i1.decode("-1") == -1);
         
-        assertTrue(i1.parse(Integer.valueOf(Integer.MAX_VALUE).toString())
+        assertTrue(i1.decode(Integer.valueOf(Integer.MAX_VALUE).toString())
                 == Integer.MAX_VALUE);
         try {
-            i1.parse(Long.valueOf(Integer.MAX_VALUE + 1L).toString());
+            i1.decode(Long.valueOf(Integer.MAX_VALUE + 1L).toString());
             fail("Should not be able to parse such a large number");
         } catch (NumberFormatException e) {}
         
-        assertTrue(i1.parse(Integer.valueOf(Integer.MIN_VALUE).toString())
+        assertTrue(i1.decode(Integer.valueOf(Integer.MIN_VALUE).toString())
                 == Integer.MIN_VALUE);
         try {
-            i1.parse(Long.valueOf(Integer.MIN_VALUE - 1L).toString());
+            i1.decode(Long.valueOf(Integer.MIN_VALUE - 1L).toString());
             fail("Should not be able to parse such a small number");
         } catch (NumberFormatException e) {}
 
