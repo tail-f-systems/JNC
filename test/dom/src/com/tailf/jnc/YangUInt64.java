@@ -93,6 +93,7 @@ public class YangUInt64 extends YangInt<BigInteger> {
     @Override
     protected void min(int min) throws YangException {
         BigInteger b = BigInteger.valueOf(min);
+        YangException.throwException(!valid(min), min);
         YangException.throwException(value.compareTo(b) < 0, this);
     }
 
@@ -103,6 +104,7 @@ public class YangUInt64 extends YangInt<BigInteger> {
     @Override
     protected void max(int max) throws YangException {
         BigInteger b = BigInteger.valueOf(max);
+        YangException.throwException(!valid(max), max);
         YangException.throwException(value.compareTo(b) > 0, this);
     }
 
