@@ -51,13 +51,30 @@ public class YangUInt16Test {
         
         try {
             i2.min(0x10000);
-            fail("0xffff Smaller than 0x10000");
+            fail("0x100000 valid and/or 0xffff smaller than 0x10000");
         } catch (YangException e) {}
     }
 
     @Test
-    public void testMax() {
-        fail("Not yet implemented");
+    public void testMax() throws YangException {
+        try {
+            i2.max(0x10000);
+            fail("0x100000 should not be valid");
+        } catch (YangException e) {}
+        try {
+            i2.max(-1);
+            fail("-1 should not be valid");
+        } catch (YangException e) {}
+        try {
+            i2.max(-0x8000);
+            fail("-0x8000 should not be valid");
+        } catch (YangException e) {}
+
+        try {
+            i2.max(0);
+            fail("0xffff should be larger than 0");
+        } catch (YangException e) {}
+        i2.max(0xffff);  // 0xffff should not be smaller than 0xffff
     }
 
     @Test
@@ -95,7 +112,9 @@ public class YangUInt16Test {
 
     @Test
     public void testHashCode() {
-        fail("Not yet implemented");
+        assertTrue(i1 + "not 7", i1.hashCode() == 7);
+        assertTrue(i2 + "not 65535", i2.hashCode() == 0xffff);
+        assertTrue(i3 + "not 13", i3.hashCode() == 13);
     }
 
     @Test
@@ -110,12 +129,30 @@ public class YangUInt16Test {
 
     @Test
     public void testToString() {
-        fail("Not yet implemented");
+        assertTrue(i1 + "not 7", i1.toString().equals("7"));
+        assertTrue(i2 + "not 65535", i2.toString().equals("65535"));
+        assertTrue(i3 + "not 13", i3.toString().equals("13"));
     }
 
     @Test
-    public void testEqualsObject() {
-        fail("Not yet implemented");
+    public void testEqualsObject() throws YangException {
+        YangUInt16 tmp1 = new YangUInt16(7);
+        YangInt16 tmp2 = new YangInt16(7);
+        java.io.Serializable tmp3 = new YangUInt16(7);
+
+        assertTrue(tmp1.equals(tmp2));
+        assertTrue("Symmetric", tmp1.equals(tmp2) == tmp2.equals(tmp1));
+        assertTrue(tmp1.equals(tmp3));
+        assertTrue("Symmetric", tmp1.equals(tmp3) == tmp3.equals(tmp1));
+        assertTrue(tmp2.equals(tmp3));
+        assertTrue("Symmetric", tmp2.equals(tmp3) == tmp3.equals(tmp2));
+        
+        assertTrue("Reflexive", i1.equals(i1));
+        assertTrue("Symmetric", i1.equals(tmp1) == tmp1.equals(i1));
+        assertTrue("Transitive", i1.equals(tmp1) && tmp1.equals(tmp3)
+                == i1.equals(tmp3));
+        
+        assertFalse(i1.equals(7));
     }
 
 }
