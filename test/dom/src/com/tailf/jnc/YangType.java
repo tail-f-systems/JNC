@@ -182,7 +182,7 @@ abstract class YangType<T> implements java.io.Serializable {
      * @throws YangException if value is smaller than min.
      */
     protected void min(int min) throws YangException {
-        Utils.restrict(value, min, Utils.Operator.GR);
+        Utils.restrict(value, min, Utils.Operator.GE);
     }
 
     /**
@@ -192,7 +192,7 @@ abstract class YangType<T> implements java.io.Serializable {
      * @throws YangException if value is larger than max.
      */
     protected void max(int max) throws YangException {
-        Utils.restrict(value, max, Utils.Operator.LT);
+        Utils.restrict(value, max, Utils.Operator.LE);
     }
 
 }
