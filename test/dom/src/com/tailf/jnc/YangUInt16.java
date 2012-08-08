@@ -56,7 +56,7 @@ public class YangUInt16 extends YangInt32 {
     @Override
     protected void min(int min) throws YangException {
         Utils.restrict(value & 0xffffffffL, min & 0xffffffffL,
-                Utils.Operator.GR);
+                Utils.Operator.GE);
     }
 
     /*
@@ -66,7 +66,7 @@ public class YangUInt16 extends YangInt32 {
     @Override
     protected void max(int max) throws YangException {
         Utils.restrict(value & 0xffffffffL, max & 0xffffffffL,
-                Utils.Operator.LT);
+                Utils.Operator.LE);
     }
 
 }

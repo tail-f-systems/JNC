@@ -52,11 +52,27 @@ final class Utils {
             }
         },
         /**
+         * Greater than or equal. GE.cmp(a, b) is equivalent to a &gt;= b.
+         */
+        GE {
+            @Override public boolean cmp(long x1, long x2) {
+                return x1 >= x2;
+            }
+        },
+        /**
          * Less than operator. LT.cmp(a, b) is equivalent to a &lt; b.
          */
         LT {
             @Override public boolean cmp(long x1, long x2) {
                 return x1 < x2;
+            }
+        },
+        /**
+         * Less than or equal. LE.cmp(a, b) is equivalent to a &lt;= b.
+         */
+        LE {
+            @Override public boolean cmp(long x1, long x2) {
+                return x1 <= x2;
             }
         };
         /**
