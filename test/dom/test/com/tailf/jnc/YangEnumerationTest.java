@@ -10,12 +10,13 @@ public class YangEnumerationTest {
     private YangEnumeration one;
     private YangEnumeration two;
     private YangEnumeration spacy;
+    private String spacystr = "  leading  and trailing  ";
 
     @Before
     public void setUp() throws Exception {
         one = new YangEnumeration("one");
         two = new YangEnumeration("two");
-        spacy = new YangEnumeration("  leading  and trailing  ");
+        spacy = new YangEnumeration("spacy");
     }
 
     @Test
@@ -30,11 +31,37 @@ public class YangEnumerationTest {
 
     @Test
     public void testYangEnumeration() throws YangException {
+        // Values set in setUp
         assertTrue(one.value.equals("one"));
         assertTrue(two.value.equals("two"));
-        assertFalse(spacy.value.equals("  leading  and trailing  "));
+        assertTrue(spacy.value.equals("spacy"));
+
+        // Empty string not allowed
+        try {
+            spacy = new YangEnumeration("");
+            fail("Expected YangException");
+        } catch (YangException e) {
+            assertTrue(e.opaqueData.equals("empty string"));
+        }
+        assertFalse(spacy.value.equals(""));
+        assertTrue(spacy.value.equals("spacy"));
+        
+        // Leading and trailing spaces not allowed
+        try {
+            spacy = new YangEnumeration(spacystr);
+            fail("Expected YangException");
+        } catch (YangException e) {
+            assertTrue(e.opaqueData.equals(spacystr));
+        }
+        assertFalse(spacy.value.equals(spacystr));
+        assertTrue(spacy.value.equals("spacy"));
+        
+        // No wsCollapse occurs
+        spacy = new YangEnumeration("leading  and trailing");
         assertFalse(spacy.value.equals("leading and trailing"));
         assertTrue(spacy.value.equals("leading  and trailing"));
+        
+        // Null not allowed
         try {
             one = new YangEnumeration(null);
             fail("Expected NullPointerException");
@@ -45,8 +72,11 @@ public class YangEnumerationTest {
     @Test
     public void testEnumeration() {
         assertTrue(one.enumeration(one.value));
+        assertFalse(one.enumeration(two.value));
         assertTrue(two.enumeration(two.value));
         assertTrue(spacy.enumeration(spacy.value));
+        assertFalse(spacy.enumeration(one.value));
+        assertFalse(spacy.enumeration(null));
     }
 
 }
