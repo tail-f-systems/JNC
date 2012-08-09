@@ -10,13 +10,15 @@ import org.junit.Test;
 public class BaseStringTest {
 
 	private BaseString bs;
-	private BaseString empty;
+    private BaseString empty;
+    private BaseString spacy;
 	private BaseString nullary;
 
 	@Before
 	public void setUp() throws Exception {
 		bs = new BaseString("baseString");
-		empty = new BaseString("");
+        empty = new BaseString("");
+        spacy = new BaseString("  A\t  space   ");
 		nullary = null;
 	}
 
@@ -133,52 +135,139 @@ public class BaseStringTest {
 
 	@Test
 	public void testWsReplace() {
-		fail("Not yet implemented");
+		assertTrue(spacy.value.equals("  A\t  space   "));
+		spacy.wsReplace();
+        assertTrue(spacy.value.equals("  A   space   "));
 	}
 
 	@Test
 	public void testWsCollapse() {
-		fail("Not yet implemented");
+        assertTrue(spacy.value.equals("  A\t  space   "));
+        spacy.wsCollapse();
+        assertTrue(spacy.value.equals("A\t space"));
+        spacy.wsReplace();
+        assertTrue(spacy.value.equals("A  space"));
+        spacy.wsCollapse();
+        assertTrue(spacy.value.equals("A space"));
 	}
 
 	@Test
 	public void testHashCode() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testSetValueT() {
-		fail("Not yet implemented");
+        assertTrue(bs.hashCode() == "baseString".hashCode());
+        assertTrue(empty.hashCode() == 0);
+        assertTrue(spacy.hashCode() == "  A\t  space   ".hashCode());
+        spacy.wsReplace();
+        spacy.wsCollapse();
+        assertFalse(spacy.hashCode() == "  A\t  space   ".hashCode());
+        assertTrue(spacy.hashCode() == "A space".hashCode());
 	}
 
 	@Test
 	public void testToString() {
-		fail("Not yet implemented");
+        assertTrue(bs.toString().equals(bs.value));
+        assertTrue(empty.toString().equals(""));
+        assertTrue(spacy.toString().equals(spacy.value));
+        assertFalse(spacy.toString().equals(bs.value));
+        assertFalse(spacy.toString().equals(empty.value));
+        spacy.value = "";
+        assertTrue(spacy.toString().equals(empty.value));
 	}
 
 	@Test
-	public void testFromStringString1() {
-		fail("Not yet implemented");
+	public void testEquals() {
+        assertTrue(bs.equals(bs));
+        assertFalse(bs.equals(null));
+        assertFalse(bs.equals("baseString"));
 	}
 
 	@Test
-	public void testEqualsObject() {
-		fail("Not yet implemented");
+	public void testExact() throws YangException {
+        bs.exact("baseString".length());
+        try {
+            bs.exact(0);
+            fail("Expected YangException");
+        } catch (YangException e) {}
+        try {
+            bs.exact(-1);
+            fail("Expected YangException");
+        } catch (YangException e) {}
+        try {
+            bs.exact(Integer.MAX_VALUE);
+            fail("Expected YangException");
+        } catch (YangException e) {}
+
+        empty.exact(0);
+        spacy.exact("  A\t  space   ".length());
+        spacy.wsReplace();
+        spacy.exact("  A\t  space   ".length());
+        spacy.wsCollapse();
+        spacy.exact("A space".length());
 	}
 
 	@Test
-	public void testExact() {
-		fail("Not yet implemented");
+	public void testMin() throws YangException {
+        bs.min("baseString".length());
+        bs.min("baseString".length() - 1);
+        bs.min(0);
+        bs.min(-1);
+        bs.min(Integer.MIN_VALUE);
+        
+        try {
+            bs.min(Integer.MAX_VALUE);
+            fail("Expected YangException");
+        } catch (YangException e) {}
+        try {
+            bs.min("baseString".length() + 1);
+            fail("Expected YangException");
+        } catch (YangException e) {}
+        
+        bs.value = "base";
+        bs.min("base".length());
+        try {
+            bs.min("baseString".length());
+            fail("Expected YangException");
+        } catch (YangException e) {}
+
+        empty.min(0);
+        spacy.min(0);
 	}
 
 	@Test
-	public void testMin() {
-		fail("Not yet implemented");
-	}
+	public void testMax() throws YangException {
+        bs.max("baseString".length());
+        bs.max("baseString".length() + 1);
+        bs.max(Integer.MAX_VALUE);
+        
+        try {
+            bs.max(Integer.MIN_VALUE);
+            fail("Expected YangException");
+        } catch (YangException e) {}
+        try {
+            bs.max("baseString".length() - 1);
+            fail("Expected YangException");
+        } catch (YangException e) {}
+        try {
+            bs.max(0);
+            fail("Expected YangException");
+        } catch (YangException e) {}
+        try {
+            bs.max(-1);
+            fail("Expected YangException");
+        } catch (YangException e) {}
+        
+        bs.value = "base";
+        bs.max("base".length());
+        bs.max("baseString".length());
+        try {
+            bs.max("bas".length());
+            fail("Expected YangException");
+        } catch (YangException e) {}
 
-	@Test
-	public void testMax() {
-		fail("Not yet implemented");
+        empty.max(0);
+        try {
+            spacy.max(0);
+            fail("Expected YangException");
+        } catch (YangException e) {}
 	}
 
 }
