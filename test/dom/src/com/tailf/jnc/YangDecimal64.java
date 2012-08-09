@@ -168,10 +168,10 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
         if (obj instanceof YangDecimal64) {
             YangDecimal64 other = (YangDecimal64) obj;
             try {
-                return (other.canEqual(this)
-                        && getValue().compareTo(other.getValue()) == 0
-                        && fractionDigits == other.fractionDigits);
-            } catch (NullPointerException e) {}
+                exact(other.getValue());
+                return (fractionDigits == other.fractionDigits
+                        && other.canEqual(this));
+            } catch (Exception e) {}  // Different/null value, or can't equal
         }
         return false;
     }
