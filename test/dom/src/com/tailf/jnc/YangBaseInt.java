@@ -164,7 +164,7 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
      * @throws YangException If comparison does not evaluate to true or if the
      *                        value argument is not {@link YangBaseInt#valid}.
      */
-    protected void exact(int value) throws YangException {
+    protected void exact(Number value) throws YangException {
         YangException.throwException(!valid(value), this);
         Utils.restrict(this.value, value, Utils.Operator.EQ);
     }
@@ -175,7 +175,7 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
      * @param min The min-value to compare against.
      * @throws YangException If value is smaller than min or min is invalid.
      */
-    protected void min(int min) throws YangException {
+    protected void min(Number min) throws YangException {
         YangException.throwException(!valid(min), min);
         Utils.restrict(value, min, Utils.Operator.GE);
     }
@@ -186,7 +186,7 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
      * @param max The max-value to compare against.
      * @throws YangException If value is larger than max or max is invalid.
      */
-    protected void max(int max) throws YangException {
+    protected void max(Number max) throws YangException {
         YangException.throwException(!valid(max), max);
         Utils.restrict(value, max, Utils.Operator.LE);
     }
