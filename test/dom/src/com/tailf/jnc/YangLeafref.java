@@ -17,7 +17,7 @@ package com.tailf.jnc;
  * 
  * @author emil@tail-f.com
  */
-public class YangLeafref extends YangType<Element> {
+public class YangLeafref extends YangBaseType<Element> {
 
     private static final long serialVersionUID = 1L;
     
@@ -80,7 +80,7 @@ public class YangLeafref extends YangType<Element> {
 
     /*
      * (non-Javadoc)
-     * @see com.tailf.jnc.YangType#canEqual(java.lang.Object)
+     * @see com.tailf.jnc.YangBaseType#canEqual(java.lang.Object)
      */
     @Override
     public boolean canEqual(Object obj) {

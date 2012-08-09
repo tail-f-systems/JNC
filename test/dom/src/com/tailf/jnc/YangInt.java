@@ -20,7 +20,7 @@ import java.math.BigDecimal;
  * 
  * @author emil@tail-f.com
  */
-abstract class YangInt<T extends Number> extends YangType<T> {
+abstract class YangInt<T extends Number> extends YangBaseType<T> {
 
     private static final long serialVersionUID = 1L;
 

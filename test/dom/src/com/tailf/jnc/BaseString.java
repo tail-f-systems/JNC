@@ -23,7 +23,7 @@ import java.util.regex.PatternSyntaxException;
  * 
  * @author emil@tail-f.com
  */
-public class BaseString extends YangType<String> {
+public class BaseString extends YangBaseType<String> {
 
     private static final long serialVersionUID = 1L;
 
@@ -50,7 +50,7 @@ public class BaseString extends YangType<String> {
     }
 
     /**
-     * Identity method provided because this class extends the YangType class.
+     * Identity method provided because this class extends the YangBaseType class.
      * 
      * @param s A string.
      * @return s.
@@ -61,7 +61,7 @@ public class BaseString extends YangType<String> {
     }
 
     /**
-     * Nop method provided because this class extends the YangType class.
+     * Nop method provided because this class extends the YangBaseType class.
      */
     @Override
     public void check() throws YangException {

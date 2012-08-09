@@ -161,7 +161,7 @@ public class YangDecimal64 extends YangInt<BigDecimal> {
     
     /*
      * (non-Javadoc)
-     * @see com.tailf.jnc.YangType#equals(java.lang.Object)
+     * @see com.tailf.jnc.YangBaseType#equals(java.lang.Object)
      */
     @Override
     public boolean equals(Object obj) {
@@ -178,7 +178,7 @@ public class YangDecimal64 extends YangInt<BigDecimal> {
     
     /*
      * (non-Javadoc)
-     * @see com.tailf.jnc.YangType#hashCode()
+     * @see com.tailf.jnc.YangBaseType#hashCode()
      */
     @Override
     public int hashCode() {

@@ -17,7 +17,7 @@ package com.tailf.jnc;
  * 
  * @author emil@tail-f.com
  */
-public class YangBoolean extends YangType<Boolean> {
+public class YangBoolean extends YangBaseType<Boolean> {
 
     private static final long serialVersionUID = 1L;
 
@@ -62,7 +62,7 @@ public class YangBoolean extends YangType<Boolean> {
     }
 
     /**
-     * Nop method provided because this class extends the YangType class.
+     * Nop method provided because this class extends the YangBaseType class.
      */
     @Override
     public void check() throws YangException {

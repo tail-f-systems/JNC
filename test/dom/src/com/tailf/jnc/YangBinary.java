@@ -17,7 +17,7 @@ package com.tailf.jnc;
  * 
  * @author emil@tail-f.com
  */
-public class YangBinary extends YangType<String> {
+public class YangBinary extends YangBaseType<String> {
 
     private static final long serialVersionUID = 1L;
 
@@ -65,7 +65,7 @@ public class YangBinary extends YangType<String> {
     }
 
     /**
-     * Nop method provided because this class extends the YangType class.
+     * Nop method provided because this class extends the YangBaseType class.
      */
     @Override
     public void check() throws YangException {
@@ -80,7 +80,7 @@ public class YangBinary extends YangType<String> {
     }
 
     /**
-     * Identity method provided because this class extends the YangType class.
+     * Identity method provided because this class extends the YangBaseType class.
      * 
      * @param s A string.
      * @return s.
