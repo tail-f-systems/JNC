@@ -111,8 +111,8 @@ public class YangBinary extends YangBaseType<String> {
      * @throws YangException If value buffer does not have len number of
      *         octets/bytes.
      */
-    protected void exact(int len) throws YangException {
-        Utils.restrict(this.value, len, Utils.Operator.EQ);
+    protected void exact(int numberOfBytes) throws YangException {
+        Utils.restrict(this.value, numberOfBytes, Utils.Operator.EQ);
     }
 
     /**
@@ -123,8 +123,8 @@ public class YangBinary extends YangBaseType<String> {
      * @throws YangException If value buffer does not have less than len
      *         number of octets/bytes.
      */
-    protected void min(int len) throws YangException {
-        Utils.restrict(value, len, Utils.Operator.GE);
+    protected void min(int numberOfBytes) throws YangException {
+        Utils.restrict(value, numberOfBytes, Utils.Operator.GE);
     }
 
     /**
@@ -135,8 +135,8 @@ public class YangBinary extends YangBaseType<String> {
      * @throws YangException If value buffer does not have more than len
      *         number of octets/bytes.
      */
-    protected void max(int len) throws YangException {
-        Utils.restrict(value, len, Utils.Operator.LE);
+    protected void max(int numberOfBytes) throws YangException {
+        Utils.restrict(value, numberOfBytes, Utils.Operator.LE);
     }
     
     /* ---------- YangBinary encoder/decoder class ---------- */
