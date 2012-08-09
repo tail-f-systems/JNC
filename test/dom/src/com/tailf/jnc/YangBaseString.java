@@ -45,6 +45,7 @@ public class YangBaseString extends YangBaseType<String> {
      */
     @Override
     public void setValue(String value) throws YangException {
+        YangException.throwException(value == null, new NullPointerException());
         this.value = value;
         check();
     }
@@ -58,13 +59,6 @@ public class YangBaseString extends YangBaseType<String> {
     @Override
     protected String fromString(String s) {
         return s;
-    }
-
-    /**
-     * Nop method provided because this class extends the YangBaseType class.
-     */
-    @Override
-    public void check() throws YangException {
     }
 
     /**

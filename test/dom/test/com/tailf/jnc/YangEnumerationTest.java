@@ -64,8 +64,10 @@ public class YangEnumerationTest {
         // Null not allowed
         try {
             one = new YangEnumeration(null);
-            fail("Expected NullPointerException");
-        } catch (NullPointerException e) {}
+            fail("Expected YangException");
+        } catch (YangException e) {
+            assertTrue(e.opaqueData instanceof NullPointerException);
+        }
         one.value.equals("one");
     }
 

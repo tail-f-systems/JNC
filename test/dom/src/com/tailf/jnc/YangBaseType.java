@@ -74,6 +74,7 @@ abstract class YangBaseType<T> implements YangType<T> {
     @Override
     public void setValue(T value) throws YangException {
         assert !(value instanceof YangType): "Avoid circular value chain";
+        YangException.throwException(value == null, new NullPointerException());
         this.value = value;
         check();
     }
@@ -93,7 +94,7 @@ abstract class YangBaseType<T> implements YangType<T> {
      */
     @Override
     public void check() throws YangException {
-        YangException.throwException(getValue() == null, this);
+        YangException.throwException(value == null, new NullPointerException());
     }
 
     /**

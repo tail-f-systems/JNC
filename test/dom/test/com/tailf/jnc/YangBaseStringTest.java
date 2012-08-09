@@ -36,9 +36,11 @@ public class YangBaseStringTest {
 
 		try {
 			bs.setValue(null);
-			fail("Expected NullPointerException");
-		} catch (NullPointerException e) {
+			fail("Expected YangException");
+		} catch (YangException e) {
+		    assertTrue(e.opaqueData instanceof NullPointerException);
 		}
+		assertTrue(bs.value != null);
 	}
 
 	@Test
