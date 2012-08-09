@@ -30,7 +30,36 @@ def init_context(self):
 
 
 def create_statement_tree(self):
-    """Constructs a statement tree rooted at self.m"""
+    """Constructs a statement tree rooted at self.m
+    
+    The tree corresponds to the following yang module:
+    
+    module m {
+      namespace ns;
+      prefix root-m;
+      container m {
+        list l {
+          key "k my";
+          leaf k {
+            type string;
+          }
+          leaf my {
+            type t;
+          }
+        }
+        leaf-list ll {
+          type decimal64;
+        }
+        leaf leaf {
+          type string;
+        }
+      }
+      typedef t {
+        type int32;
+      }
+    }
+    
+    """
     # Module m with prefix p, container c and typedef t children
     self.m = Statement(None, None, None, 'module', arg='m')
     self.ns = Statement(self.m, self.m, None, 'namespace', arg='ns')
@@ -39,10 +68,11 @@ def create_statement_tree(self):
     self.t = Statement(self.m, self.m, None, 'typedef', arg='t')
     self.m.substmts = [self.p, self.ns, self.c, self.t]
     
-    # list and leaf children of c
+    # list, leaf-list and leaf children of c
     self.l = Statement(self.m, self.c, None, 'list', arg='l')
+    self.ll = Statement(self.m, self.c, None, 'leaf-list', arg='ll')
     self.leaf = Statement(self.m, self.c, None, 'leaf', arg='leaf')
-    self.c.substmts = [self.l, self.leaf]
+    self.c.substmts = [self.l, self.ll, self.leaf]
     
     # type child of t
     self.ty = Statement(self.m, self.t, None, 'type', arg='int32')
@@ -53,6 +83,10 @@ def create_statement_tree(self):
     self.k = Statement(self.m, self.l, None, 'leaf', arg='k')
     self.my = Statement(self.m, self.l, None, 'leaf', arg='my')
     self.l.substmts = [self.key, self.k, self.my]
+    
+    # type child of c/ll
+    self.llty = Statement(self.m, self.ll, None, 'type', arg='decimal64')
+    self.ll.substmts = [self.llty]
     
     # type child of c/leaf
     self.leafty = Statement(self.m, self.leaf, None, 'type', arg='string')
