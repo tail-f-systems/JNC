@@ -79,13 +79,40 @@ public class YangInt16Test {
     }
 
     @Test
-    public void testParseString() {
-        fail("Not yet implemented");
+    public void testDecodeString() {
+        assertTrue(i1.decode("123") == 123);
+        assertTrue(i1.decode("123").equals(Short.valueOf((short)123)));
+        assertTrue(i1.decode("-123") == -123);
+        assertTrue(i1.decode("-0") == 0);
+        assertTrue(i1.decode("010") == 8);  // Octal
+        assertTrue(i1.decode("0x10") == 16);  // Hexadecimal
+        assertTrue(i1.decode("#10") == 16);  // Hexadecimal
+        assertTrue(i1.decode("-0x8000") == -32768);  // Min
+        assertTrue(i1.decode("0x7fFf") == 32767);  // Max, mixed case
+
+        try {
+            i1.decode("");
+            fail("Expected NumberFormatException");
+        } catch (NumberFormatException e) {}
+        try {
+            i1.decode("0x8000"); // Max + 1
+            fail("Expected NumberFormatException");
+        } catch (NumberFormatException e) {}
     }
 
     @Test
-    public void testEqualsShort() {
-        fail("Not yet implemented");
+    public void testEqualsShort() throws YangException {
+        assertTrue(i1.equals(i1));
+        assertFalse(i1.equals(null));
+        assertFalse(i1.equals(7));
+        assertFalse(i1.equals(Short.valueOf((short)7)));
+        assertTrue(i1.equals(new YangInt16((short)7)));
+        i1.value = null;
+        assertFalse(i1.equals(i1));
+        assertFalse(i1.equals(new YangInt16((short)7)));
+        i1.value = 7;
+        
+        assertTrue(i2.equals(i3));
     }
 
 }
