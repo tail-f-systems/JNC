@@ -31,6 +31,10 @@ public class YangEnumeration extends BaseString {
      */
     public YangEnumeration(String value) throws YangException {
         super(value);
+        if (value.isEmpty()) {
+            YangException.throwException(true, "empty string");
+        }
+        pattern("[^ ]|[^ ].*[^ ]");
     }
 
     /**
@@ -40,7 +44,7 @@ public class YangEnumeration extends BaseString {
      * @return true if value of this object is equal to value; false otherwise.
      */
     protected boolean enumeration(String value) {
-        return equals(value);
+        return this.value.equals(value);
     }
 
     /**

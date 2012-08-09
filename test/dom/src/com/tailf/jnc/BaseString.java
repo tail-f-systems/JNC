@@ -99,7 +99,7 @@ public class BaseString extends YangType<String> {
      *         does not match.
      */
     protected void pattern(String[] regexes) throws YangException {
-        Object opaqueData = this;
+        Object opaqueData = value;
         boolean matches = true;
         try {
             for (int i = 0; i < regexes.length; i++)
