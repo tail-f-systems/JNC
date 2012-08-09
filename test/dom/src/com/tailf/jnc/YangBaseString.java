@@ -128,4 +128,36 @@ public class YangBaseString extends YangBaseType<String> {
         value = Utils.wsCollapse(value);
     }
 
+    /** ---------- Restrictions ---------- */
+
+    /**
+     * Checks that the value of this object has the specified length.
+     * 
+     * @param length The required length of this value
+     * @throws YangException If the comparison does not evaluate to true.
+     */
+    protected void exact(int length) throws YangException {
+        Utils.restrict(this.value, length, Utils.Operator.EQ);
+    }
+
+    /**
+     * Checks that the value of this object has at least the specified length.
+     * 
+     * @param length The lower limit of the length of this value
+     * @throws YangException if value is shorter than length.
+     */
+    protected void min(int length) throws YangException {
+        Utils.restrict(value, length, Utils.Operator.GE);
+    }
+
+    /**
+     * Checks that the value of this object has at most the specified length.
+     * 
+     * @param length The upper limit of the length of this value.
+     * @throws YangException if value is longer than length.
+     */
+    protected void max(int length) throws YangException {
+        Utils.restrict(value, length, Utils.Operator.LE);
+    }
+
 }

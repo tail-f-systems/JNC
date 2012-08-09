@@ -148,37 +148,4 @@ abstract class YangBaseType<T> implements YangType<T> {
         return value.hashCode();
     }
 
-    /** ---------- Restrictions ---------- */
-
-    /**
-     * Checks that the value of this object equals or has the same length as
-     * the provided other value.
-     * 
-     * @param other The integer value to compare against.
-     * @throws YangException If the comparison does not evaluate to true.
-     */
-    protected void exact(int other) throws YangException {
-        Utils.restrict(this.value, other, Utils.Operator.EQ);
-    }
-
-    /**
-     * Checks that the value of this object is not smaller than the min-value.
-     * 
-     * @param min The min-value to compare against.
-     * @throws YangException if value is smaller than min.
-     */
-    protected void min(int min) throws YangException {
-        Utils.restrict(value, min, Utils.Operator.GE);
-    }
-
-    /**
-     * Checks that the value of this object is not larger than the max-value.
-     * 
-     * @param max The max-value to compare against.
-     * @throws YangException if value is larger than max.
-     */
-    protected void max(int max) throws YangException {
-        Utils.restrict(value, max, Utils.Operator.LE);
-    }
-
 }
