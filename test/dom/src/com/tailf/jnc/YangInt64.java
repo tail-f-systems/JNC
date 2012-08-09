@@ -52,7 +52,7 @@ public class YangInt64 extends YangInt<Long> {
      * @see com.tailf.jnc.yang.YangInt#parse(java.lang.String)
      */
     @Override
-    protected Long decode(String s) {
+    protected Long decode(String s) throws NumberFormatException {
         return Long.decode(s);
     }
 

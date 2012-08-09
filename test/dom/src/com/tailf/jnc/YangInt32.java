@@ -52,7 +52,7 @@ public class YangInt32 extends YangInt<Integer> {
      * @see com.tailf.jnc.yang.YangInt#parse(java.lang.String)
      */
     @Override
-    protected Integer decode(String s) {
+    protected Integer decode(String s) throws NumberFormatException {
         return Integer.decode(s);
     }
 
