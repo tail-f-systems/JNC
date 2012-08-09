@@ -46,7 +46,6 @@ final class Utils {
          */
         EQ {
             @Override public boolean cmp(BigDecimal x1, BigDecimal x2) {
-                // return x1.compareTo(x2) == 0;
                 return x1.subtract(x2).abs().doubleValue() < EPSILON;
             }
         },
@@ -56,7 +55,6 @@ final class Utils {
          */
         GR {
             @Override public boolean cmp(BigDecimal x1, BigDecimal x2) {
-                // return x1.compareTo(x2) > 0;
                 return x1.subtract(x2).doubleValue() > 0;
             }
         },
@@ -66,7 +64,6 @@ final class Utils {
          */
         GE {
             @Override public boolean cmp(BigDecimal x1, BigDecimal x2) {
-                // return x1.compareTo(x2) >= 0;
                 return x1.subtract(x2).doubleValue() > -EPSILON;
             }
         },
@@ -76,7 +73,6 @@ final class Utils {
          */
         LT {
             @Override public boolean cmp(BigDecimal x1, BigDecimal x2) {
-                // return x1.compareTo(x2) < 0;
                 return x1.subtract(x2).doubleValue() < 0;
             }
         },
@@ -86,7 +82,6 @@ final class Utils {
          */
         LE {
             @Override public boolean cmp(BigDecimal x1, BigDecimal x2) {
-                // return x1.compareTo(x2) <= 0;
                 return x1.subtract(x2).doubleValue() < EPSILON;
             }
         };
