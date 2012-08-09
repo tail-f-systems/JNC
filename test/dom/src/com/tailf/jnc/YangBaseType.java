@@ -19,7 +19,7 @@ import java.math.BigDecimal;
  * 
  * @author emil@tail-f.com
  */
-abstract class YangType<T> implements java.io.Serializable {
+abstract class YangBaseType<T> implements java.io.Serializable, YangType<T> {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,7 +34,7 @@ abstract class YangType<T> implements java.io.Serializable {
      * Empty constructor for a YangType object. The value will not be
      * initialized when calling this method.
      */
-    public YangType() {
+    public YangBaseType() {
     }
 
     /**
@@ -44,7 +44,7 @@ abstract class YangType<T> implements java.io.Serializable {
      * @throws YangException If an invariant was broken during initialization,
      *                        or if value could not be parsed from s.
      */
-    public YangType(String s) throws YangException {
+    public YangBaseType(String s) throws YangException {
         setValue(s);
     }
 
@@ -54,7 +54,7 @@ abstract class YangType<T> implements java.io.Serializable {
      * @param value The initial value of the new YangType object.
      * @throws YangException If an invariant was broken during initialization.
      */
-    public YangType(T value) throws YangException {
+    public YangBaseType(T value) throws YangException {
         setValue(value);
     }
 
@@ -133,8 +133,8 @@ abstract class YangType<T> implements java.io.Serializable {
         if (value == null || !canEqual(obj)) {
             return false;
         }
-        if (obj instanceof YangType<?>) {
-            YangType<?> other = (YangType<?>) obj;
+        if (obj instanceof YangBaseType<?>) {
+            YangBaseType<?> other = (YangBaseType<?>) obj;
             if (!other.canEqual(this))
                 return false;
             obj = other.getValue();
