@@ -83,13 +83,13 @@ class Test(unittest.TestCase):
         assert res[0].name == res[1].name == 'T'
         assert res[0].parameters == ['String value']
         assert res[1].parameters == ['int value']
-        assert res[0].exceptions == res[1].exceptions == ['ConfMException']
+        assert res[0].exceptions == res[1].exceptions == ['YangException']
         assert res[0].indent == res[1].indent == '    '
         expected = '''    /**
      * Constructor for T object from a {}.
      * @param value Value to construct the T from.
      */
-    public T({} value) throws ConfMException {{
+    public T({} value) throws YangException {{
         super(value);
         check();
     }}'''
@@ -104,13 +104,13 @@ class Test(unittest.TestCase):
         """All methods' fields and as_list representations as expected"""
         res = self.lgen.gen.value_constructors()
         assert len(res) == 3, 'There should be three constructors'
-        params = [['com.tailf.confm.xs.String kValue', 'gen.T myValue'],
+        params = [['com.tailf.jnc.YangString kValue', 'gen.T myValue'],
                   ['String kValue', 'String myValue'],
                   ['String kValue', 'int myValue']]
         addition = ['',
                     'with Strings for the keys.',
                     'with primitive Java types.']
-        confm_string = 'new com.tailf.confm.xs.String('
+        confm_string = 'new com.tailf.jnc.YangString('
         gen_t = 'new gen.T('
         setvalue = [['kValue', 'myValue'],
                     [confm_string + 'kValue)', gen_t + 'myValue)'],
@@ -121,7 +121,7 @@ class Test(unittest.TestCase):
      * @param kValue Key argument of child.
      * @param myValue Key argument of child.
      */
-    public L({}) throws INMException {{
+    public L({}) throws JNCException {{
         super(RootM.NAMESPACE, "l");
         Leaf k = new Leaf(RootM.NAMESPACE, "k");
         k.setValue({});
@@ -135,7 +135,7 @@ class Test(unittest.TestCase):
             assert method.return_type == None
             assert method.name == 'L'
             assert method.parameters == params[i]
-            assert method.exceptions == ['INMException']
+            assert method.exceptions == ['JNCException']
             assert method.indent == '    '
             assert '\n'.join(method.as_list()) == expected.format(addition[i],
                 ', '.join(params[i]), setvalue[i][0], setvalue[i][1])
@@ -177,7 +177,7 @@ class Test(unittest.TestCase):
      * Clones this object, returning {0} copy.
      * @return A clone of the object.{1}
      */
-    public Container clone{2}() {{
+    public YangElement clone{2}() {{
         return clone{2}Content(new {3}());
     }}'''
 
@@ -195,8 +195,8 @@ class Test(unittest.TestCase):
             res1 = '\n'.join(res[1].as_list())
             assert res1 == expected1, '\nwas:' + res1 + '\nnot:' + expected1
         
-        # Generating cloners for a typedef should raise an AssertionError
-        self.assertRaises(AssertionError, self.tgen.cloners)
+        # Generating cloners for a typedef should return empty list
+        assert self.tgen.cloners() == [], '\nwas:' + str(self.tgen.cloners())
 
     def testSetters(self):
         """Setters correctly generated for lists, containers and typedefs"""
@@ -204,7 +204,7 @@ class Test(unittest.TestCase):
      * Sets the value using a {}.
      * @param value The value to set.
      */
-    public void setValue({} value) throws ConfMException {{
+    public void setValue({} value) throws YangException {{
         super.setValue(value);
         check();
     }}'''

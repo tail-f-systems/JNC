@@ -208,19 +208,19 @@ class Test(unittest.TestCase):
         # String
         stmt = Statement(None, None, None, 'type', arg='string')
         confm, primitive = jpyang.get_types(stmt, self.ctx)
-        assert confm == 'com.tailf.confm.xs.String', 'was: ' + confm
+        assert confm == 'com.tailf.jnc.YangString', 'was: ' + confm
         assert primitive == 'String'
 
         # int32 - signed, so xs.Int and int is used
         stmt = Statement(None, None, None, 'type', arg='int32')
         confm, primitive = jpyang.get_types(stmt, self.ctx)
-        assert confm == 'com.tailf.confm.xs.Int', 'was: ' + confm
+        assert confm == 'com.tailf.jnc.YangInt32', 'was: ' + confm
         assert primitive == 'int', 'was: ' + primitive
 
         # uint32 - unsigned, so xs.UnsignedLong and long are used (same as 64)
         stmt = Statement(None, None, None, 'type', arg='uint32')
         confm, primitive = jpyang.get_types(stmt, self.ctx)
-        assert confm == 'com.tailf.confm.xs.UnsignedLong', 'was: ' + confm
+        assert confm == 'com.tailf.jnc.YangUInt32', 'was: ' + confm
         assert primitive == 'long', 'was: ' + primitive
         
         # TODO: Test typedefs, other non-type stmts, None and remaining types
