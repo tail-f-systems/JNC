@@ -35,14 +35,27 @@ public class YangInt16Test {
     }
 
     @Test
-    public void testEqualsObject() {
+    public void testEquals() throws YangException {
         assertFalse(i1.equals((Object)iv1));
         assertFalse(i1.equals((Object)7));
         assertFalse(i1.equals((Object)iv2));
         assertFalse(i1.equals((Object)"7"));
         assertFalse(i2.equals((Object)iv2));
+        assertTrue(i2.equals((Object)i3));
         assertFalse(i3.equals((Object)iv3));
         assertFalse(i3.equals((Object)iv2));
+
+        assertTrue(i1.equals(i1));
+        assertFalse(i1.equals(null));
+        assertFalse(i1.equals(7));
+        assertFalse(i1.equals(Short.valueOf((short)7)));
+        assertTrue(i1.equals(new YangInt16((short)7)));
+        i1.value = null;
+        assertFalse(i1.equals(i1));
+        assertFalse(i1.equals(new YangInt16((short)7)));
+        i1.value = 7;
+        
+        assertTrue(i2.equals(i3));
     }
 
     @Test
@@ -50,6 +63,8 @@ public class YangInt16Test {
         assertTrue(i1.canEqual(i1));
         assertTrue(i1.canEqual(i2));
         assertTrue(i1.canEqual(i3));
+        assertFalse(i1.canEqual(null));
+        assertFalse(i1.canEqual(Short.MAX_VALUE));
     }
 
     @Test
@@ -76,6 +91,12 @@ public class YangInt16Test {
     	assertFalse(i1.valid(Long.MAX_VALUE));
     	assertFalse(i1.valid(Long.MIN_VALUE));
     	assertFalse(i1.valid(0xffffffffL));
+    	
+    	// null
+        try {
+            i1.valid(null);
+            fail("Expected NullPointerException");
+        } catch (NullPointerException e) {}
     }
 
     @Test
@@ -98,21 +119,10 @@ public class YangInt16Test {
             i1.decode("0x8000"); // Max + 1
             fail("Expected NumberFormatException");
         } catch (NumberFormatException e) {}
-    }
-
-    @Test
-    public void testEqualsShort() throws YangException {
-        assertTrue(i1.equals(i1));
-        assertFalse(i1.equals(null));
-        assertFalse(i1.equals(7));
-        assertFalse(i1.equals(Short.valueOf((short)7)));
-        assertTrue(i1.equals(new YangInt16((short)7)));
-        i1.value = null;
-        assertFalse(i1.equals(i1));
-        assertFalse(i1.equals(new YangInt16((short)7)));
-        i1.value = 7;
-        
-        assertTrue(i2.equals(i3));
+        try {
+            i1.decode(null);
+            fail("Expected NullPointerException");
+        } catch (NullPointerException e) {}
     }
 
 }
