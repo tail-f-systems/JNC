@@ -20,7 +20,7 @@ import java.math.BigDecimal;
  * 
  * @author emil@tail-f.com
  */
-abstract class YangInt<T extends Number> extends YangBaseType<T> {
+abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
 
     private static final long serialVersionUID = 1L;
 
@@ -39,7 +39,7 @@ abstract class YangInt<T extends Number> extends YangBaseType<T> {
     protected BigDecimal MAX_VALUE = null;
     
     /**
-     * Creates a YangInt object from a String.
+     * Creates a YangBaseInt object from a String.
      * 
      * @param s The string.
      * @param minValue Lower bound for the value of this object.
@@ -48,19 +48,19 @@ abstract class YangInt<T extends Number> extends YangBaseType<T> {
      *                        if value could not be parsed from s, or if
      *                        minValue is larger than maxValue.
      */
-    public YangInt(String s)
+    public YangBaseInt(String s)
             throws YangException {
         super(s);
     }
 
     /**
-     * Creates a YangInt object from a value of type T.
+     * Creates a YangBaseInt object from a value of type T.
      * 
-     * @param value The initial value of the new YangInt object.
+     * @param value The initial value of the new YangBaseInt object.
      * @throws YangException If an invariant was broken during initialization,
      *                        or if minValue is larger than maxValue.
      */
-    public YangInt(T value)
+    public YangBaseInt(T value)
             throws YangException {
         super(value);
         YangException.throwException(!valid(value.longValue()), this);
@@ -105,7 +105,7 @@ abstract class YangInt<T extends Number> extends YangBaseType<T> {
     /**
      * Checks that the value of this object is not null and valid. Called in 
      * constructors and value setters. Subclasses that have state invariants
-     * in addition to those handled by the {@link YangInt#valid} method should
+     * in addition to those handled by the {@link YangBaseInt#valid} method should
      * override this method and throw a YangException if such an invariant has
      * been violated.
      * 
@@ -152,7 +152,7 @@ abstract class YangInt<T extends Number> extends YangBaseType<T> {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return (obj instanceof YangInt);
+        return (obj instanceof YangBaseInt);
     }
 
     /** ---------- Restrictions ---------- */
@@ -162,7 +162,7 @@ abstract class YangInt<T extends Number> extends YangBaseType<T> {
      * 
      * @param value The value to compare against.
      * @throws YangException If comparison does not evaluate to true or if the
-     *                        value argument is not {@link YangInt#valid}.
+     *                        value argument is not {@link YangBaseInt#valid}.
      */
     @Override
     protected void exact(int value) throws YangException {

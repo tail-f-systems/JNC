@@ -7,18 +7,18 @@ import java.util.regex.PatternSyntaxException;
 import org.junit.Before;
 import org.junit.Test;
 
-public class BaseStringTest {
+public class YangBaseStringTest {
 
-	private BaseString bs;
-    private BaseString empty;
-    private BaseString spacy;
-	private BaseString nullary;
+	private YangBaseString bs;
+    private YangBaseString empty;
+    private YangBaseString spacy;
+	private YangBaseString nullary;
 
 	@Before
 	public void setUp() throws Exception {
-		bs = new BaseString("baseString");
-        empty = new BaseString("");
-        spacy = new BaseString("  A\t  space   ");
+		bs = new YangBaseString("baseString");
+        empty = new YangBaseString("");
+        spacy = new YangBaseString("  A\t  space   ");
 		nullary = null;
 	}
 
@@ -64,13 +64,13 @@ public class BaseStringTest {
 	@Test
 	public void testBaseString() throws YangException {
 		try {
-			nullary = new BaseString(null);
+			nullary = new YangBaseString(null);
 			fail("Expected NullPointerException");
 		} catch (NullPointerException e) {
 		} catch (YangException e) {}
 		assertTrue(nullary == null);
 
-		nullary = new BaseString("nullary");
+		nullary = new YangBaseString("nullary");
 		assertTrue(nullary.value.equals("nullary"));
 	}
 

@@ -23,17 +23,17 @@ import java.util.regex.PatternSyntaxException;
  * 
  * @author emil@tail-f.com
  */
-public class BaseString extends YangBaseType<String> {
+public class YangBaseString extends YangBaseType<String> {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates a BaseString object from a java.lang.String.
+     * Creates a YangBaseString object from a java.lang.String.
      * 
      * @param value The Java String.
      * @throws YangException If an invariant was broken during assignment.
      */
-    public BaseString(String value) throws YangException {
+    public YangBaseString(String value) throws YangException {
         setValue(value);
     }
 
@@ -71,12 +71,12 @@ public class BaseString extends YangBaseType<String> {
      * Compares type of obj with this object to see if they can be equal.
      * 
      * @param obj Object to compare type with.
-     * @return true if obj is an instance of BaseString or java.lang.String;
+     * @return true if obj is an instance of YangBaseString or java.lang.String;
      *         false otherwise.
      */
     @Override
     public boolean canEqual(Object obj) {
-        return obj instanceof BaseString;
+        return obj instanceof YangBaseString;
     }
 
     /* ---------- Restrictions ---------- */
