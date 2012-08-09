@@ -51,7 +51,7 @@ public class YangDecimal64Test {
         assertTrue(tmp1.getFractionDigits() == 1);
 
         tmp1 = new YangDecimal64("0.01", 5);
-        assertTrue(Math.abs(tmp1.value.doubleValue() - 0.01) < 0.00001);
+        assertTrue(Math.abs(tmp1.value.doubleValue() - 0.01) < Utils.EPSILON);
         assertTrue(tmp1.getFractionDigits() == 5);
     }
 
@@ -62,25 +62,25 @@ public class YangDecimal64Test {
         assertTrue(tmp1.getFractionDigits() == 1);
 
         tmp1 = new YangDecimal64(0.01, 5);
-        assertTrue(Math.abs(tmp1.value.doubleValue() - 0.01) < 0.00001);
+        assertTrue(Math.abs(tmp1.value.doubleValue() - 0.01) < Utils.EPSILON);
         assertTrue(tmp1.getFractionDigits() == 5);
     }
 
     @Test
     public void testSetValueStringInt() throws YangException {
-        assertTrue(Math.abs(d1.value.doubleValue()) < 0.00001);
+        assertTrue(Math.abs(d1.value.doubleValue()) < Utils.EPSILON);
         assertTrue(d1.getFractionDigits() == 1);
         d1.setValue("-0.1", 7);
-        assertTrue(Math.abs(d1.value.doubleValue()+0.1) < 0.00001);
+        assertTrue(Math.abs(d1.value.doubleValue()+0.1) < Utils.EPSILON);
         assertTrue(d1.getFractionDigits() == 7);
     }
 
     @Test
     public void testSetValueNumberInt() throws YangException {
-        assertTrue(Math.abs(d1.value.doubleValue()) < 0.00001);
+        assertTrue(Math.abs(d1.value.doubleValue()) < Utils.EPSILON);
         assertTrue(d1.getFractionDigits() == 1);
         d1.setValue(-0.1, 7);
-        assertTrue(Math.abs(d1.value.doubleValue()+0.1) < 0.00001);
+        assertTrue(Math.abs(d1.value.doubleValue()+0.1) < Utils.EPSILON);
         assertTrue(d1.getFractionDigits() == 7);
     }
 
@@ -94,16 +94,26 @@ public class YangDecimal64Test {
         d1.exact(0);
         d2.exact(new BigDecimal("3.14"));
         d3.exact(new BigDecimal("3.14"));
-        
+
         try {
-            (new YangDecimal64(0.99999999999945645, 1)).exact(0);
+            (new YangDecimal64(0.945645, 1)).exact(0);
             fail("Truncation should not occur");
         } catch (YangException e) {}
+        try {
+            d2.exact(3);
+            d3.exact(3);
+            fail("Rounding should not occur");
+        } catch (YangException e) {}
         
-        // Should be within precision
-        (new YangDecimal64(0.999999999999999999999, 1)).exact(1);
-        (new YangDecimal64(0.9999999999999999, 1)).exact(1);
-        (new YangDecimal64(0.9999999999, 1)).exact(1);
+        // Within precision
+        (new YangDecimal64("0.9999999999999999999", 1)).exact(1);
+        (new YangDecimal64("0.999999999999999999", 1)).exact(1);
+        
+        // Outside precision
+        try {
+            (new YangDecimal64("0.99999999999999999", 1)).exact(1);
+            fail("Outside precision");
+        } catch (YangException e) {}
     }
 
     @Test
@@ -213,16 +223,16 @@ public class YangDecimal64Test {
 
     @Test
     public void testSetValueString() throws YangException {
-        assertTrue(Math.abs(d1.value.doubleValue()) < 0.00001);
+        assertTrue(Math.abs(d1.value.doubleValue()) < Utils.EPSILON);
         d1.setValue("-0.1");
-        assertTrue(Math.abs(d1.value.doubleValue()+0.1) < 0.00001);
+        assertTrue(Math.abs(d1.value.doubleValue()+0.1) < Utils.EPSILON);
     }
 
     @Test
     public void testSetValueBigDecimal() throws YangException {
-        assertTrue(Math.abs(d1.value.doubleValue()) < 0.00001);
+        assertTrue(Math.abs(d1.value.doubleValue()) < Utils.EPSILON);
         d1.setValue(new BigDecimal("-0.1"));
-        assertTrue(Math.abs(d1.value.doubleValue()+0.1) < 0.00001);
+        assertTrue(Math.abs(d1.value.doubleValue()+0.1) < Utils.EPSILON);
     }
 
 }
