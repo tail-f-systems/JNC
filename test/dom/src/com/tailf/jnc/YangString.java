@@ -35,7 +35,7 @@ public class YangString extends YangBaseString {
      * Compares type of obj with this object to see if they can be equal.
      * 
      * @param obj Object to compare type with.
-     * @return true if obj is an instance of YangString or java.lang.String;
+     * @return true if obj is an instance of YangString;
      *         false otherwise.
      */
     @Override
