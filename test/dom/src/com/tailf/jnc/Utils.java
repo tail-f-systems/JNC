@@ -39,40 +39,40 @@ final class Utils {
          * Equality operator. EQ.cmp(a, b) is equivalent to a == b.
          */
         EQ {
-            @Override public boolean cmp(long x1, long x2) {
-                return x1 == x2;
+            @Override public boolean cmp(BigDecimal x1, BigDecimal x2) {
+                return x1.compareTo(x2) == 0;
             }
         },
         /**
          * Greater than operator. GR.cmp(a, b) is equivalent to a &gt; b.
          */
         GR {
-            @Override public boolean cmp(long x1, long x2) {
-                return x1 > x2;
+            @Override public boolean cmp(BigDecimal x1, BigDecimal x2) {
+                return x1.compareTo(x2) > 0;
             }
         },
         /**
          * Greater than or equal. GE.cmp(a, b) is equivalent to a &gt;= b.
          */
         GE {
-            @Override public boolean cmp(long x1, long x2) {
-                return x1 >= x2;
+            @Override public boolean cmp(BigDecimal x1, BigDecimal x2) {
+                return x1.compareTo(x2) >= 0;
             }
         },
         /**
          * Less than operator. LT.cmp(a, b) is equivalent to a &lt; b.
          */
         LT {
-            @Override public boolean cmp(long x1, long x2) {
-                return x1 < x2;
+            @Override public boolean cmp(BigDecimal x1, BigDecimal x2) {
+                return x1.compareTo(x2) < 0;
             }
         },
         /**
          * Less than or equal. LE.cmp(a, b) is equivalent to a &lt;= b.
          */
         LE {
-            @Override public boolean cmp(long x1, long x2) {
-                return x1 <= x2;
+            @Override public boolean cmp(BigDecimal x1, BigDecimal x2) {
+                return x1.compareTo(x2) <= 0;
             }
         };
         /**
@@ -82,26 +82,44 @@ final class Utils {
          * @param x2 Second operand
          * @return The result of the comparison
          */
-        public abstract boolean cmp(long x1, long x2);
+        public abstract boolean cmp(
+                BigDecimal x1, BigDecimal x2);
     }
 
     /**
-     * Checks that a comparison between value and arg, or between the length of
-     * value and arg if applicable, evaluates to true.
+     * Checks that a comparison between v and arg, or between the length of v
+     * and arg if applicable, evaluates to true.
      * 
-     * @param value A Number or String to be compared.
-     * @param arg The integer value to compare against.
+     * @param v A Number or String value to be compared.
+     * @param arg The Number value to compare against.
      * @param op The operator to use (EQ: ==, GR: &gt;, LT: &lt;).
-     * @throws YangException If the comparison does not evaluate to true.
+     * @throws YangException If the comparison does not evaluate to true, or if
+     *                       v is not a Number or a String.
      */
-    public static void restrict(Object value, long arg, Operator op) throws YangException {
-        boolean fail = true;
-        if (value instanceof Number) {
-            fail = !op.cmp(((Number) value).intValue(), arg);
-        } else if (value instanceof String) {
-            fail = !op.cmp(((String) value).length(), arg);
+    public static void restrict(Object v, Number arg, Operator op)
+            throws YangException {
+        if (v instanceof Number) {
+            restrict((Number) v, bigDecimalValueOf(arg), op);
+        } else if (v instanceof String) {
+            restrict(((String) v).length(), bigDecimalValueOf(arg), op);
+        } else {
+            YangException.throwException(true, v);
         }
-        YangException.throwException(fail, value);
+    }
+
+    /**
+     * Checks that a comparison between v and arg, or between the length of v
+     * and arg if applicable, evaluates to true.
+     * 
+     * @param v A Number value to be compared.
+     * @param arg The BigDecimal value to compare against.
+     * @param op The operator to use (EQ: ==, GR: &gt;, LT: &lt;).
+     * @throws YangException If the comparison does not evaluate to true, or if
+     *                       v is not a Number or a String.
+     */
+    public static void restrict(Number v, BigDecimal arg, Operator op)
+            throws YangException {
+        YangException.throwException(!op.cmp(bigDecimalValueOf(v), arg), v);
     }
 
     /**
