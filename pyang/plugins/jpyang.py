@@ -443,6 +443,7 @@ def get_types(yang_type, ctx):
         if yang_type.arg[:1] == 'u':
             integer_type.pop()
             integer_type.insert(0, 'long')
+            netconf = 'com.tailf.jnc.YangUI' + yang_type.arg[2:]
         if yang_type.arg[-2:] == '64':
             primitive = integer_type[0]
         elif yang_type.arg[-2:] == '32':
