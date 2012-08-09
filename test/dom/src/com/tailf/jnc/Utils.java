@@ -7,7 +7,12 @@ import java.math.BigInteger;
 final class Utils {
     
     /* ---------- YangType utilities ---------- */
-
+    
+    /**
+     * The precision of Yang Decimal64 values with max (18) fraction digits
+     */
+    public static final double EPSILON = 1E-17;
+    
     /**
      * Converts a number into its BigDecimal equivalent. Useful for comparisons
      * between Numbers.
@@ -35,46 +40,57 @@ final class Utils {
      * @author emil@tail-f.com
      */
     public static enum Operator {
+        
         /**
          * Equality operator. EQ.cmp(a, b) is equivalent to a == b.
          */
         EQ {
             @Override public boolean cmp(BigDecimal x1, BigDecimal x2) {
-                return x1.compareTo(x2) == 0;
+                // return x1.compareTo(x2) == 0;
+                return x1.subtract(x2).abs().doubleValue() < EPSILON;
             }
         },
+        
         /**
          * Greater than operator. GR.cmp(a, b) is equivalent to a &gt; b.
          */
         GR {
             @Override public boolean cmp(BigDecimal x1, BigDecimal x2) {
-                return x1.compareTo(x2) > 0;
+                // return x1.compareTo(x2) > 0;
+                return x1.subtract(x2).doubleValue() > 0;
             }
         },
+        
         /**
          * Greater than or equal. GE.cmp(a, b) is equivalent to a &gt;= b.
          */
         GE {
             @Override public boolean cmp(BigDecimal x1, BigDecimal x2) {
-                return x1.compareTo(x2) >= 0;
+                // return x1.compareTo(x2) >= 0;
+                return x1.subtract(x2).doubleValue() > -EPSILON;
             }
         },
+        
         /**
          * Less than operator. LT.cmp(a, b) is equivalent to a &lt; b.
          */
         LT {
             @Override public boolean cmp(BigDecimal x1, BigDecimal x2) {
-                return x1.compareTo(x2) < 0;
+                // return x1.compareTo(x2) < 0;
+                return x1.subtract(x2).doubleValue() < 0;
             }
         },
+        
         /**
          * Less than or equal. LE.cmp(a, b) is equivalent to a &lt;= b.
          */
         LE {
             @Override public boolean cmp(BigDecimal x1, BigDecimal x2) {
-                return x1.compareTo(x2) <= 0;
+                // return x1.compareTo(x2) <= 0;
+                return x1.subtract(x2).doubleValue() < EPSILON;
             }
         };
+        
         /**
          * Comparison function for a Boolean operator.
          * 
@@ -82,8 +98,7 @@ final class Utils {
          * @param x2 Second operand
          * @return The result of the comparison
          */
-        public abstract boolean cmp(
-                BigDecimal x1, BigDecimal x2);
+        public abstract boolean cmp(BigDecimal x1, BigDecimal x2);
     }
 
     /**
