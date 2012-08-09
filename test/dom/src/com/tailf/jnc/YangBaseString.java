@@ -11,10 +11,6 @@
 
 package com.tailf.jnc;
 
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-
-
 /**
  * A String wrapper extended by built in String based types.
  * <p>
@@ -93,17 +89,7 @@ public class YangBaseString extends YangBaseType<String> {
      *         does not match.
      */
     protected void pattern(String[] regexes) throws YangException {
-        Object opaqueData = value;
-        boolean matches = true;
-        try {
-            for (int i = 0; i < regexes.length; i++)
-                if (!(matches = Pattern.matches(regexes[i], value)))
-                    break;
-        } catch (PatternSyntaxException e) {
-            opaqueData = e;
-            matches = false;
-        }
-        YangException.throwException(!matches, opaqueData);
+        YangException.throwException(!Utils.matches(value, regexes), value);
     }
 
     /**
