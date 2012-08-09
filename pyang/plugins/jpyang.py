@@ -884,25 +884,15 @@ class ClassGenerator(object):
 #            sub_package = get_package(sub, self.ctx) + '.' + name
 #            self.java_class.add_import(sub_package, sub_package)
             if sub.keyword == 'list':
-                key, _, confm_keys, _ = extract_keys(sub, self.ctx)
-                add(sub.arg, access_methods_comment(sub))
-                add(sub.arg, get_stmt(sub, confm_keys))
-                add(sub.arg, get_stmt(sub, confm_keys, string=True))
-                add(sub.arg, child_iterator(sub))
-                add(sub.arg, add_stmt(sub, args=[(sub.arg, sub.arg)]))
-                add(sub.arg, add_stmt(sub, args=confm_keys))
-                add(sub.arg, add_stmt(sub, args=confm_keys, string=True))
-                add(sub.arg, add_stmt(sub, args=[]))
-                add(sub.arg, delete_stmt(sub, args=confm_keys))
-                add(sub.arg, delete_stmt(sub, args=confm_keys, string=True))
+                child_gen = MethodGenerator(sub, self.ctx)
+                for access_method in child_gen.gen.parent_access_methods():
+                    add(sub.arg, access_method)
             elif sub.keyword == 'container':
                 fields.append(sub.arg)
-                add(sub.arg, access_methods_comment(sub))
                 self.java_class.add_field(sub.arg, child_field(sub))
-                add(sub.arg, add_stmt(sub, args=[(sub.parent.arg + '.' +
-                        sub.arg, sub.arg)], field=True))
-                add(sub.arg, add_stmt(sub, args=[], field=True))
-                add(sub.arg, delete_stmt(sub))
+                child_gen = MethodGenerator(sub, self.ctx)
+                for access_method in child_gen.gen.parent_access_methods():
+                    add(sub.arg, access_method)
         elif sub.keyword in ('leaf', 'leaf-list'):
             type_stmt = sub.search_one('type')
             type_str1, type_str2 = get_types(type_stmt, self.ctx)
@@ -1623,15 +1613,15 @@ class LeafMethodGenerator(object):
         self.is_leaf = stmt.keyword == 'leaf'
         self.is_leaflist = stmt.keyword == 'leaf-list'
         assert self.is_leaf or self.is_leaflist
-        self.type_stmt = stmt.search_one('type')
-        self.is_string = self.type_stmt.arg in ('string', 'enumeration')
-        self.type_str = get_types(self.type_stmt, ctx)
+        self.stmt_type = stmt.search_one('type')
+        self.type_str = get_types(self.stmt_type, ctx)
+        self.is_string = self.type_str[1] == 'String'
         self.ctx = ctx
         
     def mark(self, operation):
         assert operation in ('replace', 'merge', 'create', 'delete')
         mark_methods = [JavaMethod()]
-        if self.is_string:
+        if not self.is_string and self.is_leaflist:
             mark_methods.append(JavaMethod())
         for i, mark_method in enumerate(mark_methods):
             mark_method.set_name('mark' + capitalize_first(self.stmt.arg)
@@ -1661,11 +1651,11 @@ class TypedefMethodGenerator(MethodGenerator):
         super(TypedefMethodGenerator, self).__init__(stmt, ctx)
         assert self.gen is self
         assert self.is_typedef, 'This class is only valid for typedef stmts'
-        self.stmt_type = stmt.search_one('type')
+        self.stmt_type = stmt.search_one('type')  # FIXME use get_type!
         self.is_string = False
         self.needs_check = True  # Set to False to avoid redundant checks
         if self.stmt_type is not None:
-            self.is_string = self.stmt_type.arg in ('string', 'enumeration')
+            self.is_string = self.stmt_type.arg in ('string', 'enumeration')   # FIXME use get_type!
             for s in ('length', 'path', 'range', 'require_instance'):
                 setattr(self, s, self.stmt_type.search_one(s))
             for s in ('bit', 'enum', 'pattern'):
@@ -1768,6 +1758,17 @@ class ContainerMethodGenerator(MethodGenerator):
     
     def markers(self):
         return NotImplemented
+    
+    def parent_access_methods(self):
+        res = []
+        res.append(access_methods_comment(self.stmt))
+        res.append(add_stmt(self.stmt,
+                            args=[(self.stmt.parent.arg + '.' +
+                                   self.stmt.arg, self.stmt.arg)],
+                            field=True))
+        res.append(add_stmt(self.stmt, args=[], field=True))
+        res.append(delete_stmt(self.stmt))
+        return res
 
 
 class ListMethodGenerator(MethodGenerator):
@@ -1843,6 +1844,21 @@ class ListMethodGenerator(MethodGenerator):
     
     def markers(self):
         return NotImplemented
+    
+    def parent_access_methods(self):
+        res = []
+        _, _, confm_keys, _ = extract_keys(self.stmt, self.ctx)
+        res.append(access_methods_comment(self.stmt))
+        res.append(get_stmt(self.stmt, confm_keys))
+        res.append(get_stmt(self.stmt, confm_keys, string=True))
+        res.append(child_iterator(self.stmt))
+        res.append(add_stmt(self.stmt, args=[(self.stmt.arg, self.stmt.arg)]))
+        res.append(add_stmt(self.stmt, args=confm_keys))
+        res.append(add_stmt(self.stmt, args=confm_keys, string=True))
+        res.append(add_stmt(self.stmt, args=[]))
+        res.append(delete_stmt(self.stmt, args=confm_keys))
+        res.append(delete_stmt(self.stmt, args=confm_keys, string=True))
+        return res
 
 
 def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
