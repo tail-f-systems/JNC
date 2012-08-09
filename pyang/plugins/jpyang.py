@@ -440,7 +440,7 @@ def get_types(yang_type, ctx):
     elif yang_type.arg in ('int8', 'int16', 'int32', 'int64', 'uint8',
             'uint16', 'uint32', 'uint64'):
         integer_type = ['long', 'int', 'short', 'byte']
-        if yang_type.arg[:1] == 'u':
+        if yang_type.arg[:1] == 'u':  # Unsigned
             integer_type.pop()
             integer_type.insert(0, 'long')
             netconf = 'com.tailf.jnc.YangUI' + yang_type.arg[2:]
@@ -450,18 +450,10 @@ def get_types(yang_type, ctx):
             primitive = integer_type[1]
         elif yang_type.arg[-2:] == '16':
             primitive = integer_type[2]
-        elif yang_type.arg[-1:] == '8':
+        else:  # 8 bits
             primitive = integer_type[3]
-        else:
-            print_warning('Parsed ' + yang_type.arg + ' as an integer.',
-                key=yang_type.arg, ctx=ctx)
-            primitive = 'long'
     elif yang_type.arg == 'decimal64':
         primitive = 'BigDecimal'
-#    elif yang_type.arg == 'bits':  # Handled by else clause
-#    TODO: add support for built-in datatypes bits, empty, identityref,
-#    instance-identifier, leafref and union
-#    TODO: enumeration and derived datatypes?
     else:
         try:
             typedef = yang_type.i_typedef
