@@ -1,6 +1,6 @@
 package com.tailf.jnc;
 
-public interface YangType<T> {
+public interface YangType<T> extends java.io.Serializable{
 
     /**
      * Sets the value of this object using a String.

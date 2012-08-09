@@ -13,13 +13,12 @@ package com.tailf.jnc;
 
 import java.math.BigDecimal;
 
-
 /**
  * Represents a built-in YANG data type.
  * 
  * @author emil@tail-f.com
  */
-abstract class YangBaseType<T> implements java.io.Serializable, YangType<T> {
+abstract class YangBaseType<T> implements YangType<T> {
 
     private static final long serialVersionUID = 1L;
 
@@ -58,45 +57,41 @@ abstract class YangBaseType<T> implements java.io.Serializable, YangType<T> {
         setValue(value);
     }
 
-    /**
-     * Sets the value of this object using a String.
-     * 
-     * @param s A string containing the new value to set.
-     * @throws YangException If an invariant was broken during assignment, or
-     *                        if value could not be parsed from s.
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangType#setValue(java.lang.String)
      */
+    @Override
     public void setValue(String s) throws YangException {
         s = Utils.wsCollapse(s);
         setValue(fromString(s));
     }
 
-    /**
-     * Sets the value of this object using a value of type T.
-     * 
-     * @param value The new value to set.
-     * @throws YangException If an invariant was broken during assignment.
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangType#setValue(T)
      */
+    @Override
     public void setValue(T value) throws YangException {
         assert !(value instanceof YangType): "Avoid circular value chain";
         this.value = value;
         check();
     }
 
-    /**
-     * @return The value of this object.
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangType#getValue()
      */
+    @Override
     public T getValue() {
         return value;
     }
-
-    /**
-     * Checks that the value of this object is not null. Called in constructors
-     * and value setters. Subclasses that have state invariants should extend
-     * this method and throw a YangException if such an invariant has been
-     * violated.
-     * 
-     * @throws YangException If the value of this object is null.
+    
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangType#check()
      */
+    @Override
     public void check() throws YangException {
         YangException.throwException(getValue() == null, this);
     }
@@ -112,11 +107,10 @@ abstract class YangBaseType<T> implements java.io.Serializable, YangType<T> {
     /**
      * Returns a value of type T given a String.
      * <p>
-     * Note: No implementation should use this.value - this method would be
-     * static if Java allowed for abstract static classes.
+     * Note: This method is non-static since T is a non-static type.
      * 
      * @param s A string representation of a value of type T.
-     * @return A T value parsed from s.
+     * @return A T value parsed from s (not this.value!).
      * @throws YangException If s does not contain a parsable T.
      */
     protected abstract T fromString(String s) throws YangException;
@@ -146,14 +140,6 @@ abstract class YangBaseType<T> implements java.io.Serializable, YangType<T> {
         }
         return value.equals(obj);
     }
-    
-    /**
-     * Compares type of obj with this object to see if they can be equal.
-     * 
-     * @param obj Object to compare type with.
-     * @return true if obj type is compatible; false otherwise.
-     */
-    public abstract boolean canEqual(Object obj);
 
     @Override
     public int hashCode() {
