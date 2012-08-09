@@ -53,20 +53,23 @@ public class YangStringTest {
     }
 
     @Test
-    public void testEqualsObject() {
+    public void testEquals() {
         assertTrue(ys1.equals(ys1));
         assertTrue(ys1.equals(ys2));
-        assertTrue(ys1.equals(str1));
         assertFalse(ys1.equals(yi16));
         assertFalse(yi16.equals(ys1));
+        
+        assertFalse(ys1.equals(str1));
+        assertFalse(ys1.equals(str2));
+        assertFalse(ys1.equals(str3));
     }
 
     @Test
     public void testCanEqual() {
         assertTrue(ys1.canEqual(ys1));
         assertTrue(ys1.canEqual(ys2));
-        assertTrue(ys1.canEqual(str1));
-        assertTrue(ys1.canEqual(str2));
+        assertFalse(ys1.canEqual(str1));
+        assertFalse(ys1.canEqual(str2));
         assertFalse(ys1.canEqual(intVal));
         assertFalse(ys1.canEqual(yi16));
     }
@@ -75,13 +78,6 @@ public class YangStringTest {
     public void testFromStringString() {
         assertTrue(ys1.fromString(str1).equals(str1));
         assertTrue(ys1.fromString(str2).equals(str2));
-    }
-
-    @Test
-    public void testEqualsString() {
-        assertTrue(ys1.equals(str1));
-        assertTrue(ys1.equals(str2));
-        assertFalse(ys1.equals(str3));
     }
 
     @Test
