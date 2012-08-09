@@ -92,8 +92,8 @@ public class YangDecimal64Test {
     @Test
     public void testExact() throws YangException {
         d1.exact(0);
-        d2.exact(3);
-        d3.exact(3);
+        d2.exact(new BigDecimal("3.14"));
+        d3.exact(new BigDecimal("3.14"));
         
         try {
             (new YangDecimal64(0.99999999999945645, 1)).exact(0);
@@ -102,6 +102,8 @@ public class YangDecimal64Test {
         
         // Should be within precision
         (new YangDecimal64(0.999999999999999999999, 1)).exact(1);
+        (new YangDecimal64(0.9999999999999999, 1)).exact(1);
+        (new YangDecimal64(0.9999999999, 1)).exact(1);
     }
 
     @Test
