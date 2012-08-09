@@ -19,7 +19,7 @@ import java.math.BigInteger;
  * 
  * @author emil@tail-f.com
  */
-public class YangUInt64 extends YangInt<BigInteger> {
+public class YangUInt64 extends YangBaseInt<BigInteger> {
 
     private static final long serialVersionUID = 1L;
 
@@ -78,7 +78,7 @@ public class YangUInt64 extends YangInt<BigInteger> {
 
     /*
      * (non-Javadoc)
-     * @see com.tailf.jnc.YangInt#exact(int)
+     * @see com.tailf.jnc.YangBaseInt#exact(int)
      */
     @Override
     protected void exact(int other) throws YangException {
@@ -88,7 +88,7 @@ public class YangUInt64 extends YangInt<BigInteger> {
 
     /*
      * (non-Javadoc)
-     * @see com.tailf.jnc.YangInt#min(int)
+     * @see com.tailf.jnc.YangBaseInt#min(int)
      */
     @Override
     protected void min(int min) throws YangException {
@@ -99,7 +99,7 @@ public class YangUInt64 extends YangInt<BigInteger> {
 
     /*
      * (non-Javadoc)
-     * @see com.tailf.jnc.YangInt#max(int)
+     * @see com.tailf.jnc.YangBaseInt#max(int)
      */
     @Override
     protected void max(int max) throws YangException {

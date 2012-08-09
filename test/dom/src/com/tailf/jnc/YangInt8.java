@@ -17,7 +17,7 @@ package com.tailf.jnc;
  * 
  * @author emil@tail-f.com
  */
-public class YangInt8 extends YangInt<Byte> {
+public class YangInt8 extends YangBaseInt<Byte> {
 
     private static final long serialVersionUID = 1L;
 

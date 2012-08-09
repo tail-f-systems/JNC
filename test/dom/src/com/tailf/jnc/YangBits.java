@@ -19,7 +19,7 @@ import java.math.BigInteger;
  *
  * @author emil@tail-f.com
  */
-public abstract class YangBits extends YangInt<BigInteger> {
+public abstract class YangBits extends YangBaseInt<BigInteger> {
 
     private static final long serialVersionUID = 1L;
 

@@ -17,7 +17,7 @@ package com.tailf.jnc;
  * 
  * @author emil@tail-f.com
  */
-public class YangString extends BaseString {
+public class YangString extends YangBaseString {
 
     private static final long serialVersionUID = 1L;
 

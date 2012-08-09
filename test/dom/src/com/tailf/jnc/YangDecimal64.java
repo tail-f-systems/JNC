@@ -19,7 +19,7 @@ import java.math.BigDecimal;
  * 
  * @author emil@tail-f.com
  */
-public class YangDecimal64 extends YangInt<BigDecimal> {
+public class YangDecimal64 extends YangBaseInt<BigDecimal> {
 
     private static final long serialVersionUID = 1L;
     
@@ -152,7 +152,7 @@ public class YangDecimal64 extends YangInt<BigDecimal> {
     
     /*
      * (non-Javadoc)
-     * @see com.tailf.jnc.YangInt#canEqual(java.lang.Object)
+     * @see com.tailf.jnc.YangBaseInt#canEqual(java.lang.Object)
      */
     @Override
     public boolean canEqual(Object obj) {

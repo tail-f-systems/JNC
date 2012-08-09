@@ -51,7 +51,7 @@ public class YangUInt16 extends YangInt32 {
 
     /*
      * (non-Javadoc)
-     * @see com.tailf.jnc.YangInt#min(int)
+     * @see com.tailf.jnc.YangBaseInt#min(int)
      */
     @Override
     protected void min(int min) throws YangException {
@@ -62,7 +62,7 @@ public class YangUInt16 extends YangInt32 {
 
     /*
      * (non-Javadoc)
-     * @see com.tailf.jnc.YangInt#max(int)
+     * @see com.tailf.jnc.YangBaseInt#max(int)
      */
     @Override
     protected void max(int max) throws YangException {
