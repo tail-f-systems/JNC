@@ -2,6 +2,8 @@ package com.tailf.jnc;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 
 final class Utils {
@@ -131,6 +133,8 @@ final class Utils {
             throws YangException {
         YangException.throwException(!op.cmp(bigDecimalValueOf(v), arg), v);
     }
+    
+    /* ---------- String utilities ---------- */
 
     /**
      * Whitespace collapse. Contiguous sequences of 0x20 are collapsed into a
@@ -165,6 +169,19 @@ final class Utils {
      */
     public static String wsReplace(String value) {
         return value == null ? null : value.replaceAll("[\t\n\r]", " ");
+    }
+    
+    public static boolean matches(String value, String[] regexes)
+            throws YangException {
+        boolean matches = true;
+        try {
+            for (int i = 0; i < regexes.length; i++)
+                if (!(matches = Pattern.matches(regexes[i], value)))
+                    break;
+        } catch (PatternSyntaxException e) {
+            YangException.throwException(true, e);
+        }
+        return matches;
     }
 
 }
