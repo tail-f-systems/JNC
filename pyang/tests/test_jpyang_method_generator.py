@@ -46,7 +46,7 @@ class Test(unittest.TestCase):
         res = self.lgen._root_namespace(self.my.arg)
         expected = ['(', self.lgen.root, '.NAMESPACE, "']
         expected.extend([self.my.arg, '");'])
-        assert ''.join(expected) == '(RootM.NAMESPACE, "my");'
+        assert ''.join(expected) == '(RootM.NAMESPACE, "my");', 'was ' + str(expected)
         assert res == expected, 'was: ' + str(res) + '\nnot: ' + str(expected)
 
     def testEmpty_constructor(self):
@@ -104,7 +104,7 @@ class Test(unittest.TestCase):
         """All methods' fields and as_list representations as expected"""
         res = self.lgen.gen.value_constructors()
         assert len(res) == 3, 'There should be three constructors'
-        params = [['com.tailf.jnc.YangString kValue', 'gen.T myValue'],
+        params = [['YangString kValue', 'T myValue'],
                   ['String kValue', 'String myValue'],
                   ['String kValue', 'int myValue']]
         addition = ['',
@@ -134,11 +134,19 @@ class Test(unittest.TestCase):
             assert method.modifiers == ['public']
             assert method.return_type == None
             assert method.name == 'L'
-            assert method.parameters == params[i]
+            assert method.parameters == params[i], ('\nwas ' +
+                                                    str(method.parameters) +
+                                                    '\nnot ' +
+                                                    str(params[i]))
             assert method.exceptions == ['JNCException']
             assert method.indent == '    '
             assert '\n'.join(method.as_list()) == expected.format(addition[i],
-                ', '.join(params[i]), setvalue[i][0], setvalue[i][1])
+                ', '.join(params[i]), setvalue[i][0], setvalue[i][1]), (
+                    '\nwas ' +
+                    '\n'.join(method.as_list()) +
+                    '\nnot ' +
+                    expected.format(addition[i],
+                ', '.join(params[i]), setvalue[i][0], setvalue[i][1]))
 
     def testConstructors(self):
         """The correct subroutines are called from constructor"""

@@ -3,7 +3,8 @@ Created on 20 jul 2012
 
 @author: emil@tail-f.com
 
-PyUnit is needed to run these tests.
+The unittest module is needed to run these tests. If you are using a really old
+version of python you might have to download PyUnit to get it.
 
 To run, stand in project dir and enter:
 $ python -m unittest discover -v
@@ -24,6 +25,7 @@ class Test(unittest.TestCase):
         util.create_statement_tree(self)
         self.strleafgen = jpyang.LeafMethodGenerator(self.leaf, self.ctx)
         self.int32leafgen = jpyang.LeafMethodGenerator(self.my, self.ctx)
+        self.llgen = jpyang.LeafMethodGenerator(self.ll, self.ctx)
 
     def tearDown(self):
         """Runs after each test"""
@@ -33,28 +35,53 @@ class Test(unittest.TestCase):
         """Statement tree and generators are properly constructed"""
         util.test_default_context(self)
         util.test_statement_tree(self)
+        
         assert self.strleafgen.is_string
         assert not self.int32leafgen.is_string
+        assert not self.llgen.is_string
+        
         assert self.strleafgen.stmt.arg == 'leaf'
         assert self.int32leafgen.stmt.arg == 'my'
+        assert self.llgen.stmt.arg == 'll'
+        
         assert self.strleafgen.type_str[1] == 'String'
         assert self.int32leafgen.type_str[1] == 'int'
+        assert self.llgen.type_str[1] == 'BigDecimal'
 
     def testMark(self):
-        for op in ('replace', 'merge', 'create', 'delete'):
-            # String leaf
-            methodlist = self.strleafgen.mark(op)
-            assert len(methodlist) == 1, 'was ' + str(len(methodlist))
-            method = methodlist[0]
-            print '\n'.join(method.as_list())
-            
-            # Int32 leaf
-            methodlist = self.int32leafgen.mark(op)
-            assert len(methodlist) == 2, 'was ' + str(len(methodlist))
-            method1 = methodlist[0]
-            method2 = methodlist[1]
-            print '\n'.join(method1.as_list())
-            print '\n'.join(method2.as_list())
+        mark = '''    /**
+     * Marks the {0} "{1}" with operation "{2}".{3}
+     */
+    public void mark{4}{5}({6}) throws JNCException {{
+        markLeaf{5}("{7}");
+    }}'''
+        javadoc = ['\n     * @param ',
+                   'Value The value to mark',
+                   ', given as a String']
+        generators = ((self.strleafgen, 'leaf'),
+                      (self.int32leafgen, 'my'),
+                      (self.llgen, 'll'))
+        params = ('YangDecimal64 llValue', 'String llValue')
+        for gen, arg in generators:
+            for op in ('replace', 'merge', 'create', 'delete'):
+                mark_methods = gen.mark(op)
+                assert len(mark_methods) == 1 + gen.is_leaflist, 'was ' + str(len(mark_methods))
+                for i, method in enumerate(mark_methods):
+                    res = '\n'.join(method.as_list())
+                    if gen.is_leaf:
+                        expected = mark.format('leaf', arg, op, '',
+                                               jpyang.capitalize_first(arg),
+                                               op.capitalize(), '', arg)
+                    else:
+                        expected = mark.format('leaf-list', arg, op,
+                                               (javadoc[0] + arg +
+                                                ''.join(javadoc[1:i+2])),
+                                               jpyang.capitalize_first(arg),
+                                               op.capitalize(), params[i],
+                                               ''.join([arg, '[name=\'" + ',
+                                                        arg, 'Value + "\']']))
+                    assert res == expected, '\n'.join(['was', res,
+                                                      'not', expected])
 
 
 if __name__ == "__main__":
