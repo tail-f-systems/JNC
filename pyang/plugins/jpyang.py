@@ -1524,8 +1524,11 @@ class MethodGenerator(object):
         self.is_container = stmt.keyword == 'container'
         self.is_list = stmt.keyword == 'list'
         self.is_typedef = stmt.keyword == 'typedef'
+        self.is_leaf = stmt.keyword == 'leaf'
+        self.is_leaflist = stmt.keyword == 'leaf-list'
         self.is_top_level = self.stmt.parent == self.stmt.top
-        assert self.is_container or self.is_list or self.is_typedef
+        assert (self.is_container or self.is_list or self.is_typedef
+            or self.is_leaf or self.is_leaflist)
         self.ctx = ctx
         self.gen = self
         if type(self) is MethodGenerator:
@@ -1535,6 +1538,8 @@ class MethodGenerator(object):
                 self.gen = ContainerMethodGenerator(stmt, ctx)
             if self.is_list:
                 self.gen = ListMethodGenerator(stmt, ctx)
+            if self.is_leaf or self.is_leaflist:
+                self.gen = LeafMethodGenerator(stmt, ctx)
 
     def fix_imports(self, method):
         res = set([])
@@ -1579,13 +1584,16 @@ class MethodGenerator(object):
                 constructor.add_line('setDefaultPrefix();')
                 setPrefix = ['setPrefix(', self.root, '.PREFIX);']
                 constructor.add_line(''.join(setPrefix))
-        else:
+        elif self.is_typedef:
             constructor.add_line('super(value);')
+        else:
+            return None
         return self.fix_imports(constructor)
 
     def empty_constructor(self):
         """Returns parameter-free constructor as a JavaMethod object"""
         assert not self.is_typedef, "Typedefs don't have empty constructors"
+        assert not self.is_leaf and not self.is_leaflist
         constructor = self.constructor_template()
         javadoc = ['Constructor for an empty ']
         javadoc.append(self.n)
@@ -1599,11 +1607,14 @@ class MethodGenerator(object):
 
         """
         assert self.gen is not self, 'Avoid infinite recursion'
-        return self.gen.constructors()
+        if self.is_leaf or self.is_leaflist:
+            return None
+        else:
+            return self.gen.constructors()
 
     def cloners(self):
-        if self.is_typedef:
-            return []  # Typedefs don't have clone methods
+        if self.is_typedef or self.is_leaf or self.is_leaflist:
+            return []  # Typedefs, leafs and leaflists don't have clone methods
         cloners = [JavaMethod(), JavaMethod()]
         a = ('an exact', 'a shallow')
         b = ('', ' Children are not included.')
@@ -1620,7 +1631,7 @@ class MethodGenerator(object):
 
     def support_method(self, fields=None):
         
-        if self.is_typedef:
+        if self.is_typedef or self.is_leaf or self.is_leaflist:
             return None
         add_child = JavaMethod(modifiers=['public'],
                                return_type='void',
@@ -1650,7 +1661,10 @@ class MethodGenerator(object):
 
         """
         assert self.gen is not self, 'Avoid infinite recursion'
-        return self.gen.setters()
+        if self.is_leaf or self.is_leaflist:
+            return None
+        else:
+            return self.gen.setters()
 
     def checker(self):
         assert self.gen is not self, 'Avoid infinite recursion'
@@ -1661,24 +1675,21 @@ class MethodGenerator(object):
     
     def markers(self):
         """Generates methods that enqueues operations to be performed."""
-        if self.is_typedef:
+        if self.is_typedef or self.is_leaf or self.is_leaflist:
             return None
         else:
             return self.gen.markers()
 
 
-class LeafMethodGenerator(object):
+class LeafMethodGenerator(MethodGenerator):
     """Method generator for YANG leaf and leaf-list associated methods"""
     
     def __init__(self, stmt, ctx):
-        self.stmt = stmt
-        self.is_leaf = stmt.keyword == 'leaf'
-        self.is_leaflist = stmt.keyword == 'leaf-list'
+        super(LeafMethodGenerator, self).__init__(stmt, ctx)
         assert self.is_leaf or self.is_leaflist
         self.stmt_type = stmt.search_one('type')
         self.type_str = get_types(self.stmt_type, ctx)
         self.is_string = self.type_str[1] == 'String'
-        self.ctx = ctx
         
     def mark(self, op):
         assert op in ('replace', 'merge', 'create', 'delete')
