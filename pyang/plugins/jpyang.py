@@ -921,12 +921,7 @@ class ClassGenerator(object):
                 if optional:
                     add(sub.arg, unset_value(sub))
                 add(sub.arg, add_value(sub, self.prefix_name))
-                if optional:
-                    add(sub.arg, mark(sub, 'replace'))
-                    add(sub.arg, mark(sub, 'merge'))
-                    add(sub.arg, mark(sub, 'create'))
-                    add(sub.arg, mark(sub, 'delete'))
-            elif sub.keyword == 'leaf-list':
+            else:  # sub.keyword == 'leaf-list':
                 add(sub.arg, access_methods_comment(sub, optional=False))
                 add(sub.arg, child_iterator(sub))
                 add(sub.arg, set_leaf_value(sub, prefix=self.prefix_name, arg_type=type_str1))
@@ -940,14 +935,11 @@ class ClassGenerator(object):
                 add(sub.arg, delete_stmt(sub, args=[(type_str1, sub.arg + 'Value')],
                         string=True, keys=False))
                 add(sub.arg, add_value(sub, self.prefix_name))
-                add(sub.arg, mark(sub, 'replace', arg_type=type_str1))
-                add(sub.arg, mark(sub, 'replace', arg_type='String'))
-                add(sub.arg, mark(sub, 'merge', arg_type=type_str1))
-                add(sub.arg, mark(sub, 'merge', arg_type='String'))
-                add(sub.arg, mark(sub, 'create', arg_type=type_str1))
-                add(sub.arg, mark(sub, 'create', arg_type='String'))
-                add(sub.arg, mark(sub, 'delete', arg_type=type_str1))
-                add(sub.arg, mark(sub, 'delete', arg_type='String'))
+                optional = True
+            if optional:
+                child_gen = MethodGenerator(sub, self.ctx)
+                for mark_method in child_gen.markers():
+                    add(sub.arg, mark_method)
         return fields
 
     def write_to_file(self):
@@ -1661,7 +1653,7 @@ class MethodGenerator(object):
     
     def markers(self):
         """Generates methods that enqueues operations to be performed."""
-        if self.is_typedef or self.is_leaf or self.is_leaflist:
+        if self.is_typedef:
             return None
         else:
             return self.gen.markers()
@@ -1676,6 +1668,12 @@ class LeafMethodGenerator(MethodGenerator):
         self.stmt_type = stmt.search_one('type')
         self.type_str = get_types(self.stmt_type, ctx)
         self.is_string = self.type_str[1] == 'String'
+    
+    def markers(self):
+        res = []
+        for op in ('replace', 'merge', 'create', 'delete'):
+            res.append(self.mark(op))
+        return res
         
     def mark(self, op):
         assert op in ('replace', 'merge', 'create', 'delete')
