@@ -64,6 +64,9 @@ java_lang = {'Boolean', 'Byte', 'Double', 'Float', 'Integer',
 """A subset of the java.lang classes"""
 
 
+java_built_in = java_reserved_words | java_lang
+
+
 immutable_stmts = {'type', 'typedef', 'namespace', 'prefix', 'organization',
     'contact', 'description', 'range'}
 """A set of statement keywords that should not have their arguments modified"""
@@ -889,7 +892,7 @@ class ClassGenerator(object):
                     add(sub.arg, access_method)
             elif sub.keyword == 'container':
                 fields.append(sub.arg)
-                self.java_class.add_field(sub.arg, child_field(sub))
+                self.java_class.add_field(child_field(sub))
                 child_gen = MethodGenerator(sub, self.ctx)
                 for access_method in child_gen.gen.parent_access_methods():
                     add(sub.arg, access_method)
@@ -1284,7 +1287,7 @@ class JavaClass(object):
                                         method.exceptions)
         if self.imports:
             header.append('')
-            for import_ in self.imports:
+            for import_ in self.imports.as_sorted_list():
                 header.append('import ' + import_ + ';')
 
         # Class doc-comment and declaration, with modifiers
@@ -1322,7 +1325,7 @@ class JavaValue(object):
         self.value = value
         self.imports = imports
         if imports is None:
-            self.imports = []
+            self.imports = set([])
         self.indent = ' ' * indent
 
     def __eq__(self, other):
@@ -1381,18 +1384,14 @@ class JavaValue(object):
         self._set_instance_data('javadocs', line.lstrip(' */'))
 
     def add_dependency(self, import_):
-        """Adds import_ to list of imports needed for value to compile"""
+        """Adds import_ to list of imports needed for value to compile."""
         _, sep, class_name = import_.rpartition('.')
         if sep:
-            if class_name not in java_lang:
-                self.imports.append(import_)
+            if class_name not in java_built_in:
+                self.imports.add(import_)
                 return class_name
-        elif import_ not in java_reserved_words | java_lang:
-            if import_ in ('BigInteger', 'BigDecimal'):
-                pkg = 'java.math'
-            else:
-                pkg = 'com.tailf.jnc'
-            self.imports.append('.'.join([pkg, import_]))
+        elif import_ not in java_built_in:
+            self.imports.add(import_)
         return import_
 
     def javadoc_as_string(self):
@@ -1428,13 +1427,20 @@ class JavaMethod(JavaValue):
         super(JavaMethod, self).__init__(exact=exact, javadocs=javadocs,
                                          modifiers=modifiers, name=name,
                                          value=None, indent=indent)
-        self.return_type = return_type
-        self.parameters = parameters
-        if parameters is None:
-            self.parameters = []
-        self.exceptions = exceptions
-        if exceptions is None:
-            self.exceptions = []
+        self.return_type = None
+        if return_type is not None:
+            self.set_return_type(return_type)
+        
+        self.parameters = []
+        if parameters is not None:
+            for param_type, param_name in parameters:
+                self.add_parameter(param_type, param_name, stmt=None)
+                
+        self.exceptions = []
+        if exceptions is not None:
+            for exc in exceptions:
+                self.add_exception(exc)
+        
         self.body = body
         if body is None:
             self.body = []
@@ -1444,8 +1450,17 @@ class JavaMethod(JavaValue):
         self._set_instance_data('return_type',
                                 self.add_dependency(return_type))
 
-    def add_parameter(self, parameter):
-        self._set_instance_data('parameters', parameter)
+    def add_parameter(self, param_type, param_name, stmt=None):
+        """Adds a parameter to this method
+        
+        param_type -- String representation of the argument type
+        param_name -- String representation of the argument name
+        stmt       -- The statement that the class containing this method is
+                      generated from, if any.
+        """
+        self._set_instance_data('parameters', 
+                                ' '.join([self.add_dependency(param_type),
+                                          param_name]))
 
     def add_exception(self, exception):
         """Adds exception to method"""
@@ -1487,8 +1502,8 @@ class JavaMethod(JavaValue):
 class MethodGenerator(object):
     """A generator for JavaMethod objects"""
 
-    def __init__(self, stmt, ctx=None):
-        """Constructor. Context must be supplied for some methods to work."""
+    def __init__(self, stmt, ctx):
+        """Sets the attributes of the method generator, depending on stmt"""
         self.stmt = stmt
         self.n = extract_names(stmt.arg)[1]
         prefix = None
@@ -1497,6 +1512,9 @@ class MethodGenerator(object):
         self.root = None
         if prefix is not None:
             self.root = extract_names(prefix.arg)[1]
+            if stmt.parent != stmt.top:
+                self.root = '.'.join([ctx.opts.directory.lstrip('src' + os.sep),
+                                      self.root])
         self.is_container = stmt.keyword == 'container'
         self.is_list = stmt.keyword == 'list'
         self.is_typedef = stmt.keyword == 'typedef'
@@ -1511,27 +1529,53 @@ class MethodGenerator(object):
             if self.is_list:
                 self.gen = ListMethodGenerator(stmt, ctx)
 
+    def fix_imports(self, method):
+        res = set([])
+        for dependency in method.imports:
+            if dependency in ('BigInteger', 'BigDecimal'):
+                pkg = 'java.math'
+            elif dependency in map(lambda s: capitalize_first(camelize(s.arg)),
+                                     self.stmt.substmts):
+                basepkg = self.ctx.opts.directory
+                if basepkg[:4] == 'src' + os.sep:
+                    basepkg = basepkg[4:]
+                pkg = '.'.join([basepkg, self.stmt.arg])
+            else:
+                pkg = 'com.tailf.jnc'
+            res.add('.'.join([pkg, dependency]))
+        method.imports = res
+        return method
+
     def _root_namespace(self, stmt_arg):
         """Returns '([Root].NAMESPACE, "[stmt.arg]");'"""
         return ['(', self.root, '.NAMESPACE, "', stmt_arg, '");']
+    
+    def constructor_template(self):
+        """Returns a constructor invoking parent constructor, without
+        parameters and javadoc."""
+        constructor = JavaMethod(modifiers=['public'], name=self.n)
+        if self.is_container or self.is_list:
+            call = ['super']
+            call.extend(self._root_namespace(self.stmt.arg))
+            constructor.add_line(''.join(call))
+            if self.stmt.parent == self.stmt.top:
+                # Top level statement
+                constructor.add_line('setDefaultPrefix();')
+                setPrefix = ['setPrefix(', self.root, '.PREFIX);']
+                constructor.add_line(''.join(setPrefix))
+        else:
+            constructor.add_line('super(value);')
+        return self.fix_imports(constructor)
 
     def empty_constructor(self):
         """Returns parameter-free constructor as a JavaMethod object"""
         assert not self.is_typedef, "Typedefs don't have empty constructors"
-        constructor = JavaMethod(modifiers=['public'], name=self.n)
+        constructor = self.constructor_template()
         javadoc = ['Constructor for an empty ']
         javadoc.append(self.n)
         javadoc.append(' object.')
         constructor.add_javadoc(''.join(javadoc))
-        call = ['super']
-        call.extend(self._root_namespace(self.stmt.arg))
-        constructor.add_line(''.join(call))
-        if self.stmt.parent == self.stmt.top:
-            # Top level statement
-            constructor.add_line('setDefaultPrefix();')
-            setPrefix = ['setPrefix(', self.root, '.PREFIX);']
-            constructor.add_line(''.join(setPrefix))
-        return constructor
+        return self.fix_imports(constructor)
 
     def constructors(self):
         """Returns a list of JavaMethods representing constructors to include
@@ -1555,15 +1599,17 @@ class MethodGenerator(object):
             cloner.set_return_type('YangElement')
             cloner.set_name('clone%s' % c[i])
             cloner.add_line('return clone%sContent(new %s());' % (c[i], self.n))
+            cloner = self.fix_imports(cloner)
         return cloners
 
     def support_method(self, fields=None):
+        
         if self.is_typedef:
             return None
         add_child = JavaMethod(modifiers=['public'],
                                return_type='void',
                                name='addChild',
-                               parameters=['Element child'])
+                               parameters=[('Element', 'child')])
         add_child.add_dependency('Element')
         add_child.add_javadoc('Support method for addChild.')
         add_child.add_javadoc('Adds a child to this object.')
@@ -1580,7 +1626,7 @@ class MethodGenerator(object):
                     capitalize_first(fields[i]), ') ', fields[i], ' = (',
                     capitalize_first(fields[i]), ')child;']))
             add_child.add_dependency(capitalize_first(fields[i]))
-        return add_child
+        return self.fix_imports(add_child)
 
     def setters(self):
         """Returns a list of JavaMethods representing setters to include
@@ -1639,8 +1685,9 @@ class LeafMethodGenerator(object):
                 if i == 1:
                     javadoc += ', given as a String'
                 mark_method.add_javadoc(javadoc)
-                mark_method.add_parameter(self.type_str + ' ' + self.stmt.arg + 'Value')
+                mark_method.add_parameter(self.type_str, self.stmt.arg + 'Value')
             mark_method.add_line('markLeaf' + capitalize_first(operation) + '("' + path + '");')
+            mark_method = self.fix_imports(mark_method)
         return mark_methods
 
 
@@ -1670,25 +1717,24 @@ class TypedefMethodGenerator(MethodGenerator):
 
         # Iterate once if string, twice otherwise
         for i in range(1 + (not self.is_string)):
-            constructor = JavaMethod(modifiers=['public'], name=self.n)
+            constructor = self.constructor_template()
             javadoc2 = ['Constructor for ', self.n]
             if i == 0:
                 # String constructor
                 javadoc2.append(' object from a string.')
-                constructor.add_parameter('String value')
+                constructor.add_parameter('String', 'value')
             else:
                 # i == 1, Primitive constructor
                 javadoc2.extend([' object from a ', primitive, '.'])
                 tmp_primitive = constructor.add_dependency(primitive)
-                constructor.add_parameter(tmp_primitive + ' value')
+                constructor.add_parameter(tmp_primitive, 'value')
             constructor.add_javadoc(''.join(javadoc2))
             constructor.add_javadoc(''.join(javadoc))
-            constructor.add_line('super(value);')
             if self.needs_check:
                 constructor.add_line('check();')
                 exception = constructor.add_dependency('YangException')
                 constructor.add_exception(exception)
-            constructors.append(constructor)
+            constructors.append(self.fix_imports(constructor))
         return constructors
 
     def setters(self):
@@ -1704,18 +1750,18 @@ class TypedefMethodGenerator(MethodGenerator):
             if i == 0:
                 # String setter
                 javadoc2.append('string value.')
-                setter.add_parameter('String value')
+                setter.add_parameter('String', 'value')
             else:
                 # i == 1, Primitive setter
                 javadoc2.extend(['value of type ', primitive, '.'])
-                setter.add_parameter(primitive + ' value')
+                setter.add_parameter(primitive, 'value')
             setter.add_javadoc(''.join(javadoc2))
             setter.add_javadoc(javadoc)
             setter.add_line('super.setValue(value);')
             if self.needs_check:
                 setter.add_line('check();')
                 setter.add_exception('YangException')
-            setters.append(setter)
+            setters.append(self.fix_imports(setter))
         return setters
 
     def checker(self):
@@ -1738,7 +1784,7 @@ class TypedefMethodGenerator(MethodGenerator):
                         checker.add_line('    "' + p.arg + '",')
                     checker.add_line('};')
                     checker.add_line('pattern(regexs);')
-            return [checker]
+            return [self.fix_imports(checker)]
         return []
 
 
@@ -1758,6 +1804,75 @@ class ContainerMethodGenerator(MethodGenerator):
     
     def markers(self):
         return NotImplemented
+    
+    def parent_adder(self, args, string):
+        """Generates add-method for stmt, optionally parametrized by an
+        argument of specified type and with customizable comments.
+    
+        stmt   -- The YANG statement that needs an adder
+        args   -- A list of tuples, each tuple containing an arg_type and an
+                  arg_name. Each arg_type corresponds to an argument type
+                  which is also used to deduce what the method should do:
+                  1. If arg_type is the same as stmt.arg, the produced method
+                     will add its argument as a child instead of creating a new
+                     one. No cloning occurs.
+                  2. JNC types produces a method that adds a new stmt with that
+                     key, unless string is set.
+                  Similarly, Each arg_name corresponds to an argument name. The names of
+                  the method's arguments are typically key identifiers or a single
+                  lowercase stmt name. Setting args to an empty list produces a
+                  method with no argument, which can be used to create subtree
+                  filters.
+        string -- If set to True, the keys are specified with the ordinary String
+                  type instead of the Tail-f ConfM String type.
+    
+        """
+        res = [JavaMethod()]
+        name = capitalize_first(self.stmt.arg)
+        for method in res:
+            method.add_modifier('public')
+            method.set_return_type(name, self.stmt.parent)
+            method.set_name('add' + name)
+            method.add_exception('JNCException')
+            if args is None:
+                args = []
+            spec2 = spec3 = ''
+            if len(args) == 1 and args[0][0] == self.stmt.arg:
+                spec1 = ('.\n     * @param ' + args[0][1] +
+                    ' Child to be added to children')
+                spec2 = name + ' ' + self.stmt.arg + ', '
+            else:
+                spec3 = ('\n' + ' ' * 8 + name + ' ' + self.stmt.arg +
+                    ' = new ' + name + '(')
+                if not args:
+                    spec1 = '''.
+             * This method is used for creating subtree filters'''
+                    spec3 += ');'
+                else:
+                    spec1 = ', with given key arguments'
+                    if string:
+                        spec1 += '.\n     * The keys are specified as strings'
+                    for (arg_type, arg_name) in args:
+                        spec1 += ('.\n     * @param ' + arg_name +
+                            ' Key argument of child')
+                        if string:
+                            spec2 += 'String ' + arg_name + ', '
+                        else:
+                            spec2 += arg_type + ' ' + arg_name + ', '
+                        spec3 += arg_name + ', '
+                    spec3 = spec3[:-2] + ');'
+            if self.stmt.parent.keyword == 'container':  # Add to a parent field
+                spec3 += '\n' + ' ' * 8 + 'this.' + self.stmt.arg + ' = ' + self.stmt.arg + ';'
+        return self.fix_imports(res)
+        '''    /**
+             * Adds ''' + self.stmt.keyword + ' entry "' + self.stmt.arg + '"' + spec1 + '''.
+             * @return The added child.
+             */
+            public ''' + name + ' add' + name + '(' + spec2[:-2] + ''')
+                throws JNCException {''' + spec3 + '''
+                insertChild(''' + self.stmt.arg + ''', childrenNames());
+                return ''' + self.stmt.arg + ''';
+            }'''
     
     def parent_access_methods(self):
         res = []
@@ -1798,37 +1913,34 @@ class ListMethodGenerator(MethodGenerator):
 
         # Create constructors in a loop
         for i in range(number_of_value_constructors):
-            constructor = JavaMethod(modifiers=['public'], name=self.n)
+            constructor = self.constructor_template()
             constructor.add_javadoc(''.join(javadoc1))
             constructor.add_javadoc(javadoc2[i])
             constructor.add_exception('JNCException')  # TODO: Add only if needed
-            call = ['super']
-            call.extend(self._root_namespace(self.stmt.arg))
-            constructor.add_line(''.join(call))
             for key in key_stmts:
                 javadoc = ['@param ', key.arg, 'Value Key argument of child.']
                 confm, primitive = get_types(key, self.ctx)
                 setValue = [key.arg, '.setValue(']
                 if i == 0:
                     # Default constructor
-                    parameter = [confm, ' ', key.arg, 'Value']
+                    param_type = confm
                     setValue.extend([key.arg, 'Value);'])
                 else:
                     # String or primitive constructor
                     setValue.extend(['new ', confm, '(', key.arg, 'Value));'])
                     if i == 1:
-                        parameter = ['String ', key.arg, 'Value']
+                        param_type = 'String'
                     else:
-                        parameter = [primitive, ' ', key.arg, 'Value']
+                        param_type = primitive
                 newLeaf = ['Leaf ', key.arg, ' = new Leaf']
                 newLeaf.extend(self._root_namespace(key.arg))
                 insertChild = ['insertChild(', key.arg, ', childrenNames());']
                 constructor.add_javadoc(''.join(javadoc))
-                constructor.add_parameter(''.join(parameter))
+                constructor.add_parameter(param_type, key.arg + 'Value')
                 constructor.add_line(''.join(newLeaf))
                 constructor.add_line(''.join(setValue))
                 constructor.add_line(''.join(insertChild))
-            constructors.append(constructor)
+            constructors.append(self.fix_imports(constructor))
 
         return constructors
 
@@ -2556,6 +2668,12 @@ class OrderedSet(collections.MutableSet):
         item = next(reversed(self)) if last else next(iter(self))
         self.discard(item)
         return item
+    
+    def as_sorted_list(self):
+        """Returns a sorted list with the items in this set"""
+        res = [x for x in self]
+        res.sort()
+        return res
 
     def __repr__(self):
         """Returns a string representing this set. If empty, the string
