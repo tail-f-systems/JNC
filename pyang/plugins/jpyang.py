@@ -368,6 +368,11 @@ def camelize(string):
     return camelized_str
 
 
+def normalize(string):
+    """returns capitalize_first(camelize(string))"""
+    return capitalize_first(camelize(string))
+
+
 def flatten(l):
     """Returns a flattened version of iterable l
 
@@ -427,7 +432,7 @@ def get_types(yang_type, ctx):
     if yang_type.keyword in ('leaf', 'leaf-list'):
         yang_type = yang_type.search_one('type')
     assert yang_type.keyword in ('type', 'typedef'), 'argument is type, typedef or leaf'
-    primitive = capitalize_first(camelize(yang_type.arg))
+    primitive = normalize(yang_type.arg)
     netconf = 'com.tailf.jnc.Yang' + primitive
     if yang_type.arg in ('string', 'boolean'):
         pass
@@ -467,7 +472,7 @@ def get_types(yang_type, ctx):
                 print yang_type.keyword + ' ' + yang_type.arg
             basetype = get_base_type(typedef)
             package = get_package(typedef, ctx)
-            typedef_arg = capitalize_first(camelize(yang_type.arg))
+            typedef_arg = normalize(yang_type.arg)
             return package + '.' + typedef_arg, get_types(basetype, ctx)[1]
     return netconf, primitive
 
@@ -509,14 +514,13 @@ def extract_keys(stmt, ctx):
 
 
 def extract_names(arg):
-    """Returns a tuple with arg capitalized and prepended with .java, and arg
-    capitalized.
+    """Returns a tuple with arg normalized and prepended with .java, and arg
+    normalized.
 
     arg -- Any string, really
 
     """
-    capitalized = capitalize_first(camelize(arg))
-    return (capitalized + '.java', capitalized)
+    return (normalize(arg) + '.java', normalize(arg))
 
 
 def get_date(date_format=0):
@@ -1521,8 +1525,7 @@ class MethodGenerator(object):
 
     def fix_imports(self, method):
         res = set([])
-        children = map(lambda s: capitalize_first(camelize(s.arg)),
-                       self.stmt.substmts)
+        children = map(lambda s: normalize(s.arg), self.stmt.substmts)
         basepkg = self.ctx.opts.directory
         if basepkg[:4] == 'src' + os.sep:
             basepkg = basepkg[4:]
@@ -1841,10 +1844,10 @@ class ContainerMethodGenerator(MethodGenerator):
     
         """
         res = [JavaMethod()]
-        name = capitalize_first(self.stmt.arg)
+        name = normalize(self.stmt.arg)
         for method in res:
             method.add_modifier('public')
-            method.set_return_type(name, self.stmt.parent)
+            method.set_return_type(name)
             method.set_name('add' + name)
             method.add_exception('JNCException')
             if args is None:
