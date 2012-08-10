@@ -1821,7 +1821,7 @@ class ContainerMethodGenerator(MethodGenerator):
     def markers(self):
         return NotImplemented
     
-    def parent_adder(self, args, string):
+    def parent_adders(self):
         """Generates add-method for stmt, optionally parametrized by an
         argument of specified type and with customizable comments.
     
@@ -1843,61 +1843,37 @@ class ContainerMethodGenerator(MethodGenerator):
                   type instead of the Tail-f ConfM String type.
     
         """
-        res = [JavaMethod()]
+        res = [JavaMethod(), JavaMethod()]
         name = normalize(self.stmt.arg)
-        for method in res:
+        name2 = camelize(self.stmt.arg)
+        for i, method in enumerate(res):
             method.add_modifier('public')
             method.set_return_type(name)
             method.set_name('add' + name)
             method.add_exception('JNCException')
-            if args is None:
-                args = []
-            spec2 = spec3 = ''
-            if len(args) == 1 and args[0][0] == self.stmt.arg:
-                spec1 = ('.\n     * @param ' + args[0][1] +
-                    ' Child to be added to children')
-                spec2 = name + ' ' + self.stmt.arg + ', '
-            else:
-                spec3 = ('\n' + ' ' * 8 + name + ' ' + self.stmt.arg +
-                    ' = new ' + name + '(')
-                if not args:
-                    spec1 = '''.
-             * This method is used for creating subtree filters'''
-                    spec3 += ');'
-                else:
-                    spec1 = ', with given key arguments'
-                    if string:
-                        spec1 += '.\n     * The keys are specified as strings'
-                    for (arg_type, arg_name) in args:
-                        spec1 += ('.\n     * @param ' + arg_name +
-                            ' Key argument of child')
-                        if string:
-                            spec2 += 'String ' + arg_name + ', '
-                        else:
-                            spec2 += arg_type + ' ' + arg_name + ', '
-                        spec3 += arg_name + ', '
-                    spec3 = spec3[:-2] + ');'
-            if self.stmt.parent.keyword == 'container':  # Add to a parent field
-                spec3 += '\n' + ' ' * 8 + 'this.' + self.stmt.arg + ' = ' + self.stmt.arg + ';'
-        return self.fix_imports(res)
-        '''    /**
-             * Adds ''' + self.stmt.keyword + ' entry "' + self.stmt.arg + '"' + spec1 + '''.
-             * @return The added child.
-             */
-            public ''' + name + ' add' + name + '(' + spec2[:-2] + ''')
-                throws JNCException {''' + spec3 + '''
-                insertChild(''' + self.stmt.arg + ''', childrenNames());
-                return ''' + self.stmt.arg + ''';
-            }'''
+            javadoc1 = ['Adds container entry "', name, '"']
+            if i == 0:  # Add existing object
+                javadoc1.append(', using an existing object.')
+                javadoc2 = ' '.join(['@param', name2, 'The object to add.'])
+                method.add_parameter(name, name2)
+            else:  # Create new, for subtree filter usage
+                javadoc1.append('.')
+                javadoc2 = 'This method is used for creating subtree filters.'
+                method.add_line(' '.join([name, name2, '= new', name + '();']))
+            method.add_javadoc(''.join(javadoc1))
+            method.add_javadoc(javadoc2)
+            method.add_javadoc('@return The added child.')
+            method.add_line('this.' + name2 + ' = ' + name2 + ';')
+            method.add_line('insertChild(' + name2 + ', childrenNames());')
+            method.add_line('return ' + name2 + ';')
+            self.fix_imports(method)
+        return res
     
     def parent_access_methods(self):
         res = []
         res.append(access_methods_comment(self.stmt))
-        res.append(add_stmt(self.stmt,
-                            args=[(self.stmt.parent.arg + '.' +
-                                   self.stmt.arg, self.stmt.arg)],
-                            field=True))
-        res.append(add_stmt(self.stmt, args=[], field=True))
+        for adder in self.parent_adders():
+            res.append(adder)
         res.append(delete_stmt(self.stmt))
         return res
 
