@@ -1833,26 +1833,10 @@ class ContainerMethodGenerator(MethodGenerator):
         return NotImplemented
     
     def parent_adders(self):
-        """Generates add-method for stmt, optionally parametrized by an
-        argument of specified type and with customizable comments.
-    
-        stmt   -- The YANG statement that needs an adder
-        args   -- A list of tuples, each tuple containing an arg_type and an
-                  arg_name. Each arg_type corresponds to an argument type
-                  which is also used to deduce what the method should do:
-                  1. If arg_type is the same as stmt.arg, the produced method
-                     will add its argument as a child instead of creating a new
-                     one. No cloning occurs.
-                  2. JNC types produces a method that adds a new stmt with that
-                     key, unless string is set.
-                  Similarly, Each arg_name corresponds to an argument name. The names of
-                  the method's arguments are typically key identifiers or a single
-                  lowercase stmt name. Setting args to an empty list produces a
-                  method with no argument, which can be used to create subtree
-                  filters.
-        string -- If set to True, the keys are specified with the ordinary String
-                  type instead of the Tail-f ConfM String type.
-    
+        """Returns a list of two methods that adds an instance of the class to
+        be generated from the statement of this method generator to its parent
+        class.
+        
         """
         res = [JavaMethod(), JavaMethod()]
         name = normalize(self.stmt.arg)
@@ -1959,6 +1943,38 @@ class ListMethodGenerator(MethodGenerator):
     
     def markers(self):
         return NotImplemented
+    
+    def parent_adders(self):
+        """Returns a list of methods that adds an instance of the class to
+        be generated from the statement of this method generator to its parent
+        class.
+        
+        """
+        res = [JavaMethod(), JavaMethod(), JavaMethod(), JavaMethod()]
+        name = normalize(self.stmt.arg)
+        name2 = camelize(self.stmt.arg)
+        for i, method in enumerate(res):
+            method.add_modifier('public')
+            method.set_return_type(name)
+            method.set_name('add' + name)
+            method.add_exception('JNCException')
+            javadoc1 = ['Adds container entry "', name, '"']
+            if i == 0:  # Add existing object
+                javadoc1.append(', using an existing object.')
+                javadoc2 = ' '.join(['@param', name2, 'The object to add.'])
+                method.add_parameter(name, name2)
+            else:  # Create new, for subtree filter usage
+                javadoc1.append('.')
+                javadoc2 = 'This method is used for creating subtree filters.'
+                method.add_line(' '.join([name, name2, '= new', name + '();']))
+            method.add_javadoc(''.join(javadoc1))
+            method.add_javadoc(javadoc2)
+            method.add_javadoc('@return The added child.')
+            method.add_line('this.' + name2 + ' = ' + name2 + ';')
+            method.add_line('insertChild(' + name2 + ', childrenNames());')
+            method.add_line('return ' + name2 + ';')
+            self.fix_imports(method)
+        return res
     
     def parent_access_methods(self):
         res = []
