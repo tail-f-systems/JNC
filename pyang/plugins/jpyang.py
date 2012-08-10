@@ -1467,6 +1467,7 @@ class JavaMethod(JavaValue):
         Overrides JavaValue.as_list().
 
         """
+        MAX_COLS = 80
         if self.exact is None:
             assert self.name is not None
             assert self.indent is not None
@@ -1483,6 +1484,8 @@ class JavaMethod(JavaValue):
             if self.exceptions:
                 signature.append(' throws ')
                 signature.append(', '.join(self.exceptions))
+                if sum(len(s) for s in signature) >= MAX_COLS:
+                    signature.insert(-2, '\n' + (self.indent * 3)[:-1])
             signature.append(' {')
             self.exact.append(''.join(signature))
             self.exact.extend(self.body)
