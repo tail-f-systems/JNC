@@ -1716,7 +1716,7 @@ class LeafMethodGenerator(MethodGenerator):
                 mark_method.add_parameter(param_type, self.stmt.arg + 'Value')
                 mark_method.add_javadoc(javadoc)
             mark_method.add_line('markLeaf' + capitalize_first(op) + '("' + path + '");')
-#            mark_method = self.fix_imports(mark_method)
+            self.fix_imports(mark_method)
         return mark_methods
 
 
