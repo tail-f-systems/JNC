@@ -38,7 +38,6 @@ import sys
 import collections
 
 from datetime import date
-from numbers import Number
 
 from pyang import plugin
 from pyang import util
@@ -1350,19 +1349,6 @@ class JavaValue(object):
     def __ne__(self, other):
         """Returns True iff self and other represents different values"""
         return not self.__eq__(other)
-
-    def shares_mutables_with(self, other):
-        """Returns True iff mutable instance data is shared with other"""
-        Immutable = basestring, tuple, Number, frozenset
-        for attr, value in vars(self).items():
-            if value is None or isinstance(value, Immutable):
-                continue
-            try:
-                if getattr(other, attr) is value:
-                    return True
-            except AttributeError:
-                pass
-        return False
 
     def _set_instance_data(self, attr, value):
         try:

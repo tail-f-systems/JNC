@@ -71,7 +71,7 @@ class Test(unittest.TestCase):
         assert self.method.body is not self.constructor.body
         assert self.method.indent is not self.constructor.indent
         assert self.method.indent == self.constructor.indent
-        assert not self.method.shares_mutables_with(self.constructor)
+        assert not util.shares_mutables_with(self, self.constructor)
 
     def testEq(self):
         """Equality checks with == and != works as expected"""
@@ -109,16 +109,16 @@ class Test(unittest.TestCase):
         assert method == shallow, 'But still equal'
         assert method.as_list() == clone.as_list(), 'Same string repr'
         assert method.as_list() == shallow.as_list(), 'Same string repr'
-        assert not method.shares_mutables_with(clone)
-        assert method.shares_mutables_with(shallow)
+        assert not util.shares_mutables_with(method, clone)
+        assert util.shares_mutables_with(method, shallow)
         
         # Test that deleted attributes are handled correctly
         clone.javadocs = method.javadocs
-        assert method.shares_mutables_with(clone), 'javadoc is shared'
+        assert util.shares_mutables_with(method, clone), 'javadoc is shared'
         del clone.javadocs
         assert not hasattr(clone, 'javadocs'), 'deleted from clone'
         assert hasattr(method, 'javadocs'), 'not deleted from method'
-        assert not method.shares_mutables_with(clone), 'Not sharing anymore'
+        assert not util.shares_mutables_with(method, clone), 'Not sharing anymore'
 
     def testExact_caching(self):
         """Setting instance data with set and add methods overwrites cache"""

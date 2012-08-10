@@ -6,6 +6,9 @@ initialize contexts with options, and various setUp facilities.
 
 @author: emil@tail-f.com
 """
+
+from numbers import Number
+
 from pyang import FileRepository, Context
 from pyang.statements import Statement
 from pyang.plugins import jpyang  #@UnresolvedImport
@@ -167,3 +170,17 @@ def test_method_generators(self):
         assert not hasattr(gen, 'is_config') or gen.is_config
         assert not hasattr(gen, 'stmt_type') or gen.stmt_type == self.ty
         assert not hasattr(gen, 'is_string') or not gen.is_string
+
+
+def shares_mutables_with(self, other):
+        """Returns True iff mutable instance data is shared with other"""
+        Immutable = basestring, tuple, Number, frozenset
+        for attr, value in vars(self).items():
+            if value is None or isinstance(value, Immutable):
+                continue
+            try:
+                if getattr(other, attr) is value:
+                    return True
+            except AttributeError:
+                pass
+        return False
