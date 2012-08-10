@@ -422,10 +422,10 @@ def make_valid_identifiers(stmt):
 
 def get_types(yang_type, ctx):
     """Returns confm and primitive counterparts of yang_type, which is a type,
-    typedef or leaf statement.
+    typedef, leaf or leaf-list statement.
 
     """
-    if yang_type.keyword == 'leaf':
+    if yang_type.keyword in ('leaf', 'leaf-list'):
         yang_type = yang_type.search_one('type')
     assert yang_type.keyword in ('type', 'typedef'), 'argument is type, typedef or leaf'
     primitive = capitalize_first(camelize(yang_type.arg))
@@ -1315,18 +1315,27 @@ class JavaValue(object):
                  value=None, imports=None, indent=0):
         """Value constructor"""
         self.exact = exact
-        self.javadocs = javadocs
-        if javadocs is None:
-            self.javadocs = []
-        self.modifiers = modifiers
-        if modifiers is None:
-            self.modifiers = []
-        self.name = name
         self.value = value
-        self.imports = imports
-        if imports is None:
-            self.imports = set([])
         self.indent = ' ' * indent
+        
+        self.javadocs = []
+        if javadocs is not None:
+            for javadoc in javadocs:
+                self.add_javadoc(javadoc)
+        
+        self.modifiers = []
+        if modifiers is not None:
+            for modifier in modifiers:
+                self.add_modifier(modifier)
+        
+        self.name = None
+        if name is not None:
+            self.set_name(name)
+        
+        self.imports = set([])
+        if imports is not None:
+            for import_ in imports:
+                self.imports.add(import_)
 
     def __eq__(self, other):
         """Returns True iff self and other represents an identical value"""
@@ -1512,12 +1521,10 @@ class MethodGenerator(object):
         self.root = None
         if prefix is not None:
             self.root = extract_names(prefix.arg)[1]
-            if stmt.parent != stmt.top:
-                self.root = '.'.join([ctx.opts.directory.lstrip('src' + os.sep),
-                                      self.root])
         self.is_container = stmt.keyword == 'container'
         self.is_list = stmt.keyword == 'list'
         self.is_typedef = stmt.keyword == 'typedef'
+        self.is_top_level = self.stmt.parent == self.stmt.top
         assert self.is_container or self.is_list or self.is_typedef
         self.ctx = ctx
         self.gen = self
@@ -1531,14 +1538,22 @@ class MethodGenerator(object):
 
     def fix_imports(self, method):
         res = set([])
+        children = map(lambda s: capitalize_first(camelize(s.arg)),
+                       self.stmt.substmts)
+        basepkg = self.ctx.opts.directory
+        if basepkg[:4] == 'src' + os.sep:
+            basepkg = basepkg[4:]
         for dependency in method.imports:
-            if dependency in ('BigInteger', 'BigDecimal'):
+            if dependency.startswith(('java.math', 'com.tailf.jnc', basepkg)):
+                res.add(dependency)
+                continue
+            elif dependency in ('BigInteger', 'BigDecimal'):
                 pkg = 'java.math'
-            elif dependency in map(lambda s: capitalize_first(camelize(s.arg)),
-                                     self.stmt.substmts):
-                basepkg = self.ctx.opts.directory
-                if basepkg[:4] == 'src' + os.sep:
-                    basepkg = basepkg[4:]
+            elif dependency == self.root:
+                if self.is_top_level:
+                    continue
+                pkg = basepkg
+            elif dependency in children:
                 pkg = '.'.join([basepkg, self.stmt.arg])
             else:
                 pkg = 'com.tailf.jnc'
@@ -1557,6 +1572,7 @@ class MethodGenerator(object):
         if self.is_container or self.is_list:
             call = ['super']
             call.extend(self._root_namespace(self.stmt.arg))
+            constructor.add_dependency(self.root)
             constructor.add_line(''.join(call))
             if self.stmt.parent == self.stmt.top:
                 # Top level statement
@@ -1664,30 +1680,32 @@ class LeafMethodGenerator(object):
         self.is_string = self.type_str[1] == 'String'
         self.ctx = ctx
         
-    def mark(self, operation):
-        assert operation in ('replace', 'merge', 'create', 'delete')
+    def mark(self, op):
+        assert op in ('replace', 'merge', 'create', 'delete')
         mark_methods = [JavaMethod()]
         if not self.is_string and self.is_leaflist:
             mark_methods.append(JavaMethod())
         for i, mark_method in enumerate(mark_methods):
             mark_method.set_name('mark' + capitalize_first(self.stmt.arg)
-                                 + capitalize_first(operation))
+                                 + capitalize_first(op))
             mark_method.add_modifier('public')
             mark_method.set_return_type('void')
             mark_method.add_exception('JNCException')
             path = self.stmt.arg
-            mark_method.add_javadoc(''.join(['Marks the "', self.stmt.arg, '" ', 
-                       self.stmt.keyword, ' with operation "',
-                       operation, '".']))
+            mark_method.add_javadoc(''.join(['Marks the ', self.stmt.keyword,
+                                             ' "', self.stmt.arg,
+                                             '" with operation "', op, '".']))
             if self.is_leaflist:
-                path += '[name=\'" + ' + self.stmt.arg + 'Value+"\']'
+                path += '[name=\'" + ' + self.stmt.arg + 'Value + "\']'
                 javadoc = '@param ' + self.stmt.arg + 'Value The value to mark'
+                param_type = self.type_str[0]
                 if i == 1:
                     javadoc += ', given as a String'
+                    param_type = 'String'
+                mark_method.add_parameter(param_type, self.stmt.arg + 'Value')
                 mark_method.add_javadoc(javadoc)
-                mark_method.add_parameter(self.type_str, self.stmt.arg + 'Value')
-            mark_method.add_line('markLeaf' + capitalize_first(operation) + '("' + path + '");')
-            mark_method = self.fix_imports(mark_method)
+            mark_method.add_line('markLeaf' + capitalize_first(op) + '("' + path + '");')
+#            mark_method = self.fix_imports(mark_method)
         return mark_methods
 
 
