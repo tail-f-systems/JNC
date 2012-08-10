@@ -891,13 +891,13 @@ class ClassGenerator(object):
 #            self.java_class.add_import(sub_package, sub_package)
             if sub.keyword == 'list':
                 child_gen = MethodGenerator(sub, self.ctx)
-                for access_method in child_gen.gen.parent_access_methods():
+                for access_method in child_gen.parent_access_methods():
                     add(sub.arg, access_method)
             elif sub.keyword == 'container':
                 fields.append(sub.arg)
                 self.java_class.add_field(child_field(sub))
                 child_gen = MethodGenerator(sub, self.ctx)
-                for access_method in child_gen.gen.parent_access_methods():
+                for access_method in child_gen.parent_access_methods():
                     add(sub.arg, access_method)
         elif sub.keyword in ('leaf', 'leaf-list'):
             type_stmt = sub.search_one('type')
@@ -1659,10 +1659,18 @@ class MethodGenerator(object):
     
     def markers(self):
         """Generates methods that enqueues operations to be performed."""
+        assert self.gen is not self, 'Avoid infinite recursion'
         if self.is_typedef:
             return None
         else:
             return self.gen.markers()
+    
+    def parent_access_methods(self):
+        assert self.gen is not self, 'Avoid infinite recursion'
+        if self.is_container or self.is_list:
+            return self.gen.parent_access_methods()
+        else:
+            return None
 
 
 class LeafMethodGenerator(MethodGenerator):
