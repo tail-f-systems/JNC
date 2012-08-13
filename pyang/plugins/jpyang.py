@@ -314,11 +314,11 @@ def write_file(d, file_name, file_content, ctx):
             print 'Writing file to: ' + os.getcwd() + os.sep + file_name
         os.chdir(wd)
     with open(d + os.sep + file_name, 'w+') as f:
-        if not isinstance(file_content, basestring):
+        if isinstance(file_content, basestring):
+            f.write(file_content)
+        else:
             for line in file_content:
                 print >> f, line
-        else:
-            f.write(file_content)
 
 
 def get_package(stmt, ctx):
