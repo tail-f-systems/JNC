@@ -314,7 +314,7 @@ def write_file(d, file_name, file_content, ctx):
             print 'Writing file to: ' + os.getcwd() + os.sep + file_name
         os.chdir(wd)
     with open(d + os.sep + file_name, 'w+') as f:
-        if isinstance(file_content, list):
+        if not isinstance(file_content, basestring):
             for line in file_content:
                 print >> f, line
         else:
