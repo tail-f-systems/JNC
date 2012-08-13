@@ -1281,9 +1281,13 @@ class JavaClass(object):
                     self.imports |= map(lambda s: 'com.tailf.jnc.' + s,
                                         method.exceptions)
         if self.imports:
-            header.append('')
+            prev = ''
             for import_ in self.imports.as_sorted_list():
+                basepkg = import_[:import_.find('.')]
+                if basepkg != prev:
+                    header.append('')
                 header.append('import ' + import_ + ';')
+                prev = basepkg
 
         # Class doc-comment and declaration, with modifiers
         header.append('')
