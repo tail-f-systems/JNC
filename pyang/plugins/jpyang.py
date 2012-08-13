@@ -330,7 +330,7 @@ def get_package(stmt, ctx):
     full_package = collections.deque(ctx.opts.directory.split(os.sep))
     full_package.extend(sub_packages)
     if full_package and full_package[0] == 'src':
-        full_package.popleft()
+        full_package.popleft()  # package names may not start with 'src'
     return '.'.join(full_package)
 
 
@@ -1526,27 +1526,31 @@ class MethodGenerator(object):
             if self.is_leaf or self.is_leaflist:
                 self.gen = LeafMethodGenerator(stmt, ctx)
 
-    def fix_imports(self, method):
+    def fix_imports(self, method, child=False):
         res = set([])
         children = map(lambda s: normalize(s.arg), self.stmt.substmts)
-        basepkg = self.ctx.opts.directory
-        if basepkg[:4] == 'src' + os.sep:
-            basepkg = basepkg[4:]
+        pkg = get_package(self.stmt, self.ctx)
+        
         for dependency in method.imports:
-            if dependency.startswith(('java.math', 'com.tailf.jnc', basepkg)):
+            if dependency.startswith(('java.math', 'com.tailf.jnc', pkg)):
                 res.add(dependency)
                 continue
             elif dependency in ('BigInteger', 'BigDecimal'):
                 pkg = 'java.math'
             elif dependency == self.root:
-                if self.is_top_level:
+                if not self.is_top_level:
                     continue
-                pkg = basepkg
+                pkg = self.ctx.opts.directory
+                if pkg.startswith('src' + os.sep):
+                    pkg = pkg[len('src' + os.sep):]  # src not part of package
             elif dependency in children:
-                pkg = '.'.join([basepkg, self.stmt.arg])
+                pkg = '.'.join([pkg, self.stmt.arg])
+            elif child and dependency == normalize(self.stmt.arg):
+                pass
             else:
                 pkg = 'com.tailf.jnc'
             res.add('.'.join([pkg, dependency]))
+        
         method.imports = res
         return method
 
@@ -1665,6 +1669,41 @@ class MethodGenerator(object):
         else:
             return self.gen.markers()
     
+    def parent_adders(self):
+        """Returns a list of two methods that adds an instance of the class to
+        be generated from the statement of this method generator to its parent
+        class.
+        
+        """
+        assert self.gen is not self, 'Avoid infinite recursion'
+        if not (self.is_container or self.is_list):
+            return None
+        res = [JavaMethod(), JavaMethod()]
+        name = normalize(self.stmt.arg)
+        name2 = camelize(self.stmt.arg)
+        for i, method in enumerate(res):
+            method.add_modifier('public')
+            method.set_return_type(name)
+            method.set_name('add' + name)
+            method.add_exception('JNCException')
+            javadoc1 = ['Adds container entry "', name, '"']
+            if i == 0:  # Add existing object
+                javadoc1.append(', using an existing object.')
+                javadoc2 = ' '.join(['@param', name2, 'The object to add.'])
+                method.add_parameter(name, name2)
+            else:  # Create new, for subtree filter usage
+                javadoc1.append('.')
+                javadoc2 = 'This method is used for creating subtree filters.'
+                method.add_line(' '.join([name, name2, '= new', name + '();']))
+            method.add_javadoc(''.join(javadoc1))
+            method.add_javadoc(javadoc2)
+            method.add_javadoc('@return The added child.')
+            method.add_line('this.' + name2 + ' = ' + name2 + ';')
+            method.add_line('insertChild(' + name2 + ', childrenNames());')
+            method.add_line('return ' + name2 + ';')
+            self.fix_imports(method, child=True)
+        return res
+    
     def parent_access_methods(self):
         assert self.gen is not self, 'Avoid infinite recursion'
         if self.is_container or self.is_list:
@@ -1714,7 +1753,7 @@ class LeafMethodGenerator(MethodGenerator):
                 mark_method.add_parameter(param_type, self.stmt.arg + 'Value')
                 mark_method.add_javadoc(javadoc)
             mark_method.add_line('markLeaf' + capitalize_first(op) + '("' + path + '");')
-            self.fix_imports(mark_method)
+            self.fix_imports(mark_method, child=True)
         return mark_methods
 
 
@@ -1788,7 +1827,7 @@ class TypedefMethodGenerator(MethodGenerator):
             if self.needs_check:
                 setter.add_line('check();')
                 setter.add_exception('YangException')
-            setters.append(self.fix_imports(setter))
+            setters.append(self.fix_imports(setter, child=True))
         return setters
 
     def checker(self):
@@ -1861,7 +1900,7 @@ class ContainerMethodGenerator(MethodGenerator):
             method.add_line('this.' + name2 + ' = ' + name2 + ';')
             method.add_line('insertChild(' + name2 + ', childrenNames());')
             method.add_line('return ' + name2 + ';')
-            self.fix_imports(method)
+            self.fix_imports(method, child=True)
         return res
     
     def parent_access_methods(self):
@@ -1973,7 +2012,7 @@ class ListMethodGenerator(MethodGenerator):
             method.add_line('this.' + name2 + ' = ' + name2 + ';')
             method.add_line('insertChild(' + name2 + ', childrenNames());')
             method.add_line('return ' + name2 + ';')
-            self.fix_imports(method)
+            self.fix_imports(method, child=True)
         return res
     
     def parent_access_methods(self):
