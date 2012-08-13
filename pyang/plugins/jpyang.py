@@ -429,7 +429,7 @@ def make_valid_identifiers(stmt):
 
 
 def get_types(yang_type, ctx):
-    """Returns confm and primitive counterparts of yang_type, which is a type,
+    """Returns jnc and primitive counterparts of yang_type, which is a type,
     typedef, leaf or leaf-list statement.
 
     """
@@ -496,25 +496,25 @@ def get_base_type(stmt):
 
 def extract_keys(stmt, ctx):
     """Returns the key statement of stmt and lists containing tuples with the
-    confm (and primitive, respectively) type of the key and its identifier.
+    jnc (and primitive, respectively) type of the key and its identifier.
 
     stmt -- Typically a list statement
     ctx  -- Context used for passing debug flags
 
     """
     key = stmt.search_one('key')
-    confm_keys = []
+    jnc_keys = []
     primitive_keys = []
     only_strings = True
     for arg in key.arg.split(' '):
         key_type = stmt.search_one('leaf', arg).search_one('type')
-        confm, primitive = get_types(key_type, ctx)
-        confm_keys.append((confm, arg))
+        jnc, primitive = get_types(key_type, ctx)
+        jnc_keys.append((jnc, arg))
         primitive_keys.append((primitive, arg))
         only_strings *= primitive_keys[-1][0] == 'String'
         # XXX: 'b *= a' is syntactically equivalent to b = b and a
 
-    return key, only_strings, confm_keys, primitive_keys
+    return key, only_strings, jnc_keys, primitive_keys
 
 
 def extract_names(arg):
@@ -679,7 +679,7 @@ class YangType(object):
             'uint8', 'uint16', 'uint32', 'uint64', 'binary', 'bits', 'boolean',
             'decimal64', 'enumeration', 'identityref', 'instance-identifier',
             'leafref', 'string', 'union']
-        """List of types represented by a confm.xs or generated class"""
+        """List of types represented by a jnc or generated class"""
 
     def defined(self, yang_type):
         """Returns true if yang_type is defined, else false"""
@@ -737,8 +737,7 @@ class ClassGenerator(object):
 
     def generate_classes(self):
         """Generates a Java class hierarchy from a module or submodule
-        statement, allowing for netconf communication using the confm and inm
-        libraries.
+        statement, allowing for netconf communication using the jnc library.
 
         """
         if self.stmt.keyword == 'module':
@@ -922,10 +921,10 @@ class ClassGenerator(object):
                 add(sub.arg, get_value(sub, ret_type=type_str1))
                 add(sub.arg, set_leaf_value(sub, prefix=self.prefix_name, arg_type=type_str1))
                 add(sub.arg, set_leaf_value(sub, prefix='', arg_type='String',
-                        confm_type=type_str1))
+                        jnc_type=type_str1))
                 if type_str2 != 'String':
                     add(sub.arg, set_leaf_value(sub, prefix='',
-                        arg_type=type_str2, confm_type=type_str1))
+                        arg_type=type_str2, jnc_type=type_str1))
                 if optional:
                     add(sub.arg, unset_value(sub))
                 add(sub.arg, add_value(sub, self.prefix_name))
@@ -934,10 +933,10 @@ class ClassGenerator(object):
                 add(sub.arg, child_iterator(sub))
                 add(sub.arg, set_leaf_value(sub, prefix=self.prefix_name, arg_type=type_str1))
                 add(sub.arg, set_leaf_value(sub, prefix='', arg_type='String',
-                        confm_type=type_str1))
+                        jnc_type=type_str1))
                 if type_str2 != 'String':
                     add(sub.arg, set_leaf_value(sub, prefix='',
-                        arg_type=type_str2, confm_type=type_str1))
+                        arg_type=type_str2, jnc_type=type_str1))
                 add(sub.arg, delete_stmt(sub,
                         args=[(type_str1, sub.arg + 'Value')], keys=False))
                 add(sub.arg, delete_stmt(sub, args=[(type_str1, sub.arg + 'Value')],
@@ -1433,7 +1432,7 @@ class JavaMethod(JavaValue):
         self.parameters = []
         if parameters is not None:
             for param_type, param_name in parameters:
-                self.add_parameter(param_type, param_name, stmt=None)
+                self.add_parameter(param_type, param_name)
                 
         self.exceptions = []
         if exceptions is not None:
@@ -1449,13 +1448,12 @@ class JavaMethod(JavaValue):
         self._set_instance_data('return_type',
                                 self.add_dependency(return_type))
 
-    def add_parameter(self, param_type, param_name, stmt=None):
-        """Adds a parameter to this method
+    def add_parameter(self, param_type, param_name):
+        """Adds a parameter to this method. The argument type is added to list
+        of dependencies.
         
         param_type -- String representation of the argument type
         param_name -- String representation of the argument name
-        stmt       -- The statement that the class containing this method is
-                      generated from, if any.
         """
         self._set_instance_data('parameters', 
                                 ' '.join([self.add_dependency(param_type),
@@ -1539,24 +1537,24 @@ class MethodGenerator(object):
         children = map(lambda s: normalize(s.arg), self.stmt.substmts)
         pkg = get_package(self.stmt, self.ctx)
         basepkg = pkg.partition('.')[0]
+        rootpkg = self.ctx.opts.directory.split(os.sep)
+        if rootpkg[:1] == ['src']:
+            rootpkg = rootpkg[1:]  # src not part of package
         
         for dependency in method.imports:
             if dependency.startswith(('java.math', 'com.tailf.jnc', basepkg)):
                 res.add(dependency)
                 continue
             elif dependency in ('BigInteger', 'BigDecimal'):
-                pkg = 'java.math'
+                res.add('.'.join(['java.math', dependency]))
             elif dependency == self.root:
-                pkg = self.ctx.opts.directory
-                if pkg.startswith('src' + os.sep):
-                    pkg = pkg[len('src' + os.sep):]  # src not part of package
+                res.add('.'.join(rootpkg + [dependency]))
             elif dependency in children:
-                pkg = '.'.join([pkg, self.stmt.arg])
+                res.add('.'.join([pkg, self.stmt.arg, dependency]))
             elif child and dependency == normalize(self.stmt.arg):
-                pass
+                res.add('.'.join([pkg, dependency]))
             else:
-                pkg = 'com.tailf.jnc'
-            res.add('.'.join([pkg, dependency]))
+                res.add('.'.join(['com.tailf.jnc', dependency]))
         
         method.imports = res
         return method
@@ -1682,7 +1680,6 @@ class MethodGenerator(object):
         class.
         
         """
-        assert self.gen is not self, 'Avoid infinite recursion'
         if not (self.is_container or self.is_list):
             return None
         res = [JavaMethod(), JavaMethod()]
@@ -1697,19 +1694,28 @@ class MethodGenerator(object):
             method.set_return_type(name)
             method.set_name('add' + name)
             method.add_exception('JNCException')
-            javadoc1 = ['Adds ', self.stmt.keyword, ' entry "', name, '"']
+            javadoc1 = ['Adds ', self.stmt.keyword, ' entry "', name2, '"']
             javadoc2 = []
             if i == 0:  # Add existing object
                 javadoc1.append(', using an existing object.')
                 javadoc2.append(' '.join(['@param', name2, 'The object to add.']))
                 method.add_parameter(name, name2)
-            elif self.is_list and i in (1, 2):
-                if i == 1: # Add new with jnc type keys
-                    javadoc1.append(', with given key arguments.')
-                    for key_stmt in self.gen.key_stmts:
-                        javadoc2.append(key_stmt.arg)
-                elif len(res) == 4:  # Java primitives
-                    pass  # FIXME add javadoc and parameters
+            elif self.is_list and (i == 1 or (i == 2 and len(res) == 4)):
+                # Add child with String or JNC type keys
+                javadoc1.append(', with given key arguments.')
+                if i == 2:
+                    javadoc2.append('The keys are specified as strings.')
+                for key_stmt in self.gen.key_stmts:
+                    javadoc2.append(''.join(['@param ', key_stmt.arg,
+                        'Value Key argument of child.']))
+                    param_type, _ = get_types(key_stmt, self.ctx)
+                    if i == 2:
+                        param_type = 'String'
+                    method.add_parameter(param_type, key_stmt.arg)
+                new_child = [name, ' ', name2, ' = new ', name, '(']
+                new_child.append(', '.join([s.arg for s in self.gen.key_stmts]))
+                new_child.append(');')
+                method.add_line(''.join(new_child))
             else:  # Create new, for subtree filter usage
                 javadoc1.append('.')
                 javadoc2.append('This method is used for creating subtree filters.')
@@ -1723,10 +1729,23 @@ class MethodGenerator(object):
             method.add_line('insertChild(' + name2 + ', childrenNames());')
             method.add_line('return ' + name2 + ';')
             self.fix_imports(method, child=True)
-        if self.is_list:
-            list_adders = self.gen.parent_adders()
-            res = [res[0], list_adders[0], list_adders[1], res[1]]
         return res
+    
+    def child_iterator(self):
+        """Returns a java iterator method"""
+        if not(self.is_leaflist or self.is_list):
+            return None
+        res = JavaMethod(name=self.stmt.arg + 'Iterator')
+        return_stmt = ['return new Element']
+        if self.is_leaflist:
+            res.set_return_type('ElementLeafListValueIterator')
+            return_stmt.append('LeafListValue')
+        else:  # List
+            res.set_return_type('ElementChildrenIterator')
+            return_stmt.append('Children')
+        return_stmt.extend(['Iterator(children, "', self.stmt.arg, '");'])
+        res.add_line(''.join(return_stmt))
+        return self.fix_imports(res)
     
     def parent_access_methods(self):
         assert self.gen is not self, 'Avoid infinite recursion'
@@ -1895,43 +1914,10 @@ class ContainerMethodGenerator(MethodGenerator):
     def markers(self):
         return NotImplemented
     
-    def parent_adders(self):
-        """Returns a list of two methods that adds an instance of the class to
-        be generated from the statement of this method generator to its parent
-        class.
-        
-        """
-        res = [JavaMethod(), JavaMethod()]
-        name = normalize(self.stmt.arg)
-        name2 = camelize(self.stmt.arg)
-        for i, method in enumerate(res):
-            method.add_modifier('public')
-            method.set_return_type(name)
-            method.set_name('add' + name)
-            method.add_exception('JNCException')
-            javadoc1 = ['Adds container entry "', name, '"']
-            if i == 0:  # Add existing object
-                javadoc1.append(', using an existing object.')
-                javadoc2 = ' '.join(['@param', name2, 'The object to add.'])
-                method.add_parameter(name, name2)
-            else:  # Create new, for subtree filter usage
-                javadoc1.append('.')
-                javadoc2 = 'This method is used for creating subtree filters.'
-                method.add_line(' '.join([name, name2, '= new', name + '();']))
-            method.add_javadoc(''.join(javadoc1))
-            method.add_javadoc(javadoc2)
-            method.add_javadoc('@return The added child.')
-            method.add_line('this.' + name2 + ' = ' + name2 + ';')
-            method.add_line('insertChild(' + name2 + ', childrenNames());')
-            method.add_line('return ' + name2 + ';')
-            self.fix_imports(method, child=True)
-        return res
-    
     def parent_access_methods(self):
         res = []
         res.append(access_methods_comment(self.stmt))
-        for adder in self.parent_adders():
-            res.append(adder)
+        res.extend(self.parent_adders())
         res.append(delete_stmt(self.stmt))
         return res
 
@@ -1971,15 +1957,15 @@ class ListMethodGenerator(MethodGenerator):
             constructor.add_exception('JNCException')  # TODO: Add only if needed
             for key in self.key_stmts:
                 javadoc = ['@param ', key.arg, 'Value Key argument of child.']
-                confm, primitive = get_types(key, self.ctx)
+                jnc, primitive = get_types(key, self.ctx)
                 setValue = [key.arg, '.setValue(']
                 if i == 0:
                     # Default constructor
-                    param_type = confm
+                    param_type = jnc
                     setValue.extend([key.arg, 'Value);'])
                 else:
                     # String or primitive constructor
-                    setValue.extend(['new ', confm, '(', key.arg, 'Value));'])
+                    setValue.extend(['new ', jnc, '(', key.arg, 'Value));'])
                     if i == 1:
                         param_type = 'String'
                     else:
@@ -2011,51 +1997,16 @@ class ListMethodGenerator(MethodGenerator):
     def markers(self):
         return NotImplemented
     
-    def parent_adders(self):
-        """Returns a list of methods that adds an instance of the class to
-        be generated from the statement of this method generator to its parent
-        class.
-        
-        """
-        res = [JavaMethod(), JavaMethod(), JavaMethod(), JavaMethod()]
-        name = normalize(self.stmt.arg)
-        name2 = camelize(self.stmt.arg)
-        for i, method in enumerate(res):
-            method.add_modifier('public')
-            method.set_return_type(name)
-            method.set_name('add' + name)
-            method.add_exception('JNCException')
-            javadoc1 = ['Adds container entry "', name, '"']
-            if i == 0:  # Add existing object
-                javadoc1.append(', using an existing object.')
-                javadoc2 = ' '.join(['@param', name2, 'The object to add.'])
-                method.add_parameter(name, name2)
-            else:  # Create new, for subtree filter usage
-                javadoc1.append('.')
-                javadoc2 = 'This method is used for creating subtree filters.'
-                method.add_line(' '.join([name, name2, '= new', name + '();']))
-            method.add_javadoc(''.join(javadoc1))
-            method.add_javadoc(javadoc2)
-            method.add_javadoc('@return The added child.')
-            method.add_line('this.' + name2 + ' = ' + name2 + ';')
-            method.add_line('insertChild(' + name2 + ', childrenNames());')
-            method.add_line('return ' + name2 + ';')
-            self.fix_imports(method, child=True)
-        return res
-    
     def parent_access_methods(self):
         res = []
-        _, _, confm_keys, _ = extract_keys(self.stmt, self.ctx)
+        _, _, jnc_keys, _ = extract_keys(self.stmt, self.ctx)
         res.append(access_methods_comment(self.stmt))
-        res.append(get_stmt(self.stmt, confm_keys))
-        res.append(get_stmt(self.stmt, confm_keys, string=True))
-        res.append(child_iterator(self.stmt))
-        res.append(add_stmt(self.stmt, args=[(self.stmt.arg, self.stmt.arg)]))
-        res.append(add_stmt(self.stmt, args=confm_keys))
-        res.append(add_stmt(self.stmt, args=confm_keys, string=True))
-        res.append(add_stmt(self.stmt, args=[]))
-        res.append(delete_stmt(self.stmt, args=confm_keys))
-        res.append(delete_stmt(self.stmt, args=confm_keys, string=True))
+        res.append(get_stmt(self.stmt, jnc_keys))
+        res.append(get_stmt(self.stmt, jnc_keys, string=True))
+        res.append(self.child_iterator())
+        res.extend(self.parent_adders())
+        res.append(delete_stmt(self.stmt, args=jnc_keys))
+        res.append(delete_stmt(self.stmt, args=jnc_keys, string=True))
         return res
 
 
@@ -2107,9 +2058,9 @@ def constructor(stmt, ctx, root='', set_prefix=False, mode=0, args=None,
             else:
                 docstring = '\n     * with primitive Java types.'
             for (arg_type, arg_name) in args:
-#                tmp_list_confm = []
-#                get_types(arg_type, tmp_list_confm, [], ctx)
-#                decl = 'new ' + tmp_list_confm[0][0] + '('
+#                tmp_list_jnc = []
+#                get_types(arg_type, tmp_list_jnc, [], ctx)
+#                decl = 'new ' + tmp_list_jnc[0][0] + '('
                 decl = 'new String('  # FIXME: should call get_types with a stmt
                 values.append(decl + arg_name + 'Value)')
         for (arg_type, arg_name), value in zip(args, values):
@@ -2257,7 +2208,7 @@ def static_string(identifier, value):
 
 def enable(prefix_name):
     """Returns a string representing a java method that calls the
-    YangElement.setPackage method of the confm library, and the registerSchema
+    YangElement.setPackage method of the jnc library, and the registerSchema
     method of the class with prefix == prefix_name (typically = this).
 
     prefix_name -- The name of the class containing the registerSchema method
@@ -2358,7 +2309,7 @@ def get_stmt(stmt, keys, string=False):
     }''')
 
 
-def get_value(stmt, ret_type='com.tailf.confm.xs.String'):
+def get_value(stmt, ret_type='com.tailf.jnc.YangString'):
     """get<Identifier>Value method generator. Similar to get_stmt (see below),
     but allows parameter-free methods to be generated.
 
@@ -2377,14 +2328,14 @@ def get_value(stmt, ret_type='com.tailf.confm.xs.String'):
     }'''
 
 
-def set_leaf_value(stmt, prefix='', arg_type='', confm_type=''):
+def set_leaf_value(stmt, prefix='', arg_type='', jnc_type=''):
     """set<Identifier>Value method generator, specifically for leafs.
 
     stmt       -- Typically a leaf statement
     prefix     -- Namespace prefix of module, empty if the setLeafValue or
                   setLeafListValue methods are not to be used in the method
     arg_type   -- Type of method parameter, empty if parameter free
-    confm_type -- Type to use internally, empty if the setIdValue method is not
+    jnc_type -- Type to use internally, empty if the setIdValue method is not
                   to be used in the method
 
     """
@@ -2417,7 +2368,7 @@ def set_leaf_value(stmt, prefix='', arg_type='', confm_type=''):
             ''' + stmt.arg + '''Value,
             childrenNames());'''
     else:
-        body = ('set' + name + 'Value(new ' + confm_type + '(' + stmt.arg +
+        body = ('set' + name + 'Value(new ' + jnc_type + '(' + stmt.arg +
             'Value));')
 
     # Prepare method argument listing
