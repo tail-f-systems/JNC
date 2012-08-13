@@ -1985,7 +1985,9 @@ class ListMethodGenerator(MethodGenerator):
                     else:
                         param_type = primitive
                 newLeaf = ['Leaf ', key.arg, ' = new Leaf']
+                constructor.add_dependency('Leaf')
                 newLeaf.extend(self._root_namespace(key.arg))
+                constructor.add_dependency(self.root)
                 insertChild = ['insertChild(', key.arg, ', childrenNames());']
                 constructor.add_javadoc(''.join(javadoc))
                 constructor.add_parameter(param_type, key.arg + 'Value')
