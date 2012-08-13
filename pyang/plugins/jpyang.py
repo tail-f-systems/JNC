@@ -1687,6 +1687,10 @@ class MethodGenerator(object):
         if not (self.is_container or self.is_list):
             return None
         res = [JavaMethod(), JavaMethod()]
+        if self.is_list:
+            
+            res.extend([JavaMethod(), JavaMethod()])
+            
         name = normalize(self.stmt.arg)
         name2 = camelize(self.stmt.arg)
         for i, method in enumerate(res):
@@ -1694,22 +1698,35 @@ class MethodGenerator(object):
             method.set_return_type(name)
             method.set_name('add' + name)
             method.add_exception('JNCException')
-            javadoc1 = ['Adds container entry "', name, '"']
+            javadoc1 = ['Adds ', self.stmt.keyword, ' entry "', name, '"']
+            javadoc2 = []
             if i == 0:  # Add existing object
                 javadoc1.append(', using an existing object.')
-                javadoc2 = ' '.join(['@param', name2, 'The object to add.'])
+                javadoc2.append(' '.join(['@param', name2, 'The object to add.']))
                 method.add_parameter(name, name2)
+            elif self.is_list and i in (1, 2):
+                if i == 1: # Add new with jnc type keys
+                    javadoc1.append(', with given key arguments.')
+                    for key_stmt in self.gen.key_stmts:
+                        javadoc2.append(key_stmt.arg)
+                elif len(res) == 4:  # Java primitives
+                    pass  # FIXME add javadoc and parameters
             else:  # Create new, for subtree filter usage
                 javadoc1.append('.')
-                javadoc2 = 'This method is used for creating subtree filters.'
+                javadoc2.append('This method is used for creating subtree filters.')
                 method.add_line(' '.join([name, name2, '= new', name + '();']))
             method.add_javadoc(''.join(javadoc1))
-            method.add_javadoc(javadoc2)
+            for javadoc in javadoc2:
+                method.add_javadoc(javadoc)
             method.add_javadoc('@return The added child.')
-            method.add_line('this.' + name2 + ' = ' + name2 + ';')
+            if self.is_container:
+                method.add_line('this.' + name2 + ' = ' + name2 + ';')
             method.add_line('insertChild(' + name2 + ', childrenNames());')
             method.add_line('return ' + name2 + ';')
             self.fix_imports(method, child=True)
+        if self.is_list:
+            list_adders = self.gen.parent_adders()
+            res = [res[0], list_adders[0], list_adders[1], res[1]]
         return res
     
     def parent_access_methods(self):
@@ -1928,21 +1945,23 @@ class ListMethodGenerator(MethodGenerator):
         assert self.gen is self
         assert self.is_list, 'Only valid for list stmts'
         self.is_config = is_config(stmt)
+        self.keys = self.stmt.search_one('key').arg.split(' ')
+        findkey = lambda k: self.stmt.search_one('leaf', k)
+        self.key_stmts = map(findkey, self.keys)
+        notstring = lambda k: k.arg != 'string'
+        self.is_string = not filter(notstring, self.key_stmts)
 
     def value_constructors(self):
         """Returns a list of constructors for configuration data lists"""
         assert self.is_config, 'Only called with configuration data stmts'
 
-        keys = self.stmt.search_one('key').arg.split(' ')
-        key_stmts = map(lambda k: self.stmt.search_one('leaf', k), keys)
         constructors = []
 
         # Determine number of constructors
-        number_of_value_constructors = 2
+        number_of_value_constructors = 2 + (not self.is_string)
         javadoc1 = ['Constructor for an initialized ', self.n, ' object,']
         javadoc2 = ['', 'with Strings for the keys.']
-        if filter(lambda k: k.arg != 'string', key_stmts):
-            number_of_value_constructors += 1
+        if not self.is_string:
             javadoc2.append('with primitive Java types.')
 
         # Create constructors in a loop
@@ -1951,7 +1970,7 @@ class ListMethodGenerator(MethodGenerator):
             constructor.add_javadoc(''.join(javadoc1))
             constructor.add_javadoc(javadoc2[i])
             constructor.add_exception('JNCException')  # TODO: Add only if needed
-            for key in key_stmts:
+            for key in self.key_stmts:
                 javadoc = ['@param ', key.arg, 'Value Key argument of child.']
                 confm, primitive = get_types(key, self.ctx)
                 setValue = [key.arg, '.setValue(']
