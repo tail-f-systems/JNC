@@ -1538,16 +1538,15 @@ class MethodGenerator(object):
         res = set([])
         children = map(lambda s: normalize(s.arg), self.stmt.substmts)
         pkg = get_package(self.stmt, self.ctx)
+        basepkg = pkg.partition('.')[0]
         
         for dependency in method.imports:
-            if dependency.startswith(('java.math', 'com.tailf.jnc', pkg)):
+            if dependency.startswith(('java.math', 'com.tailf.jnc', basepkg)):
                 res.add(dependency)
                 continue
             elif dependency in ('BigInteger', 'BigDecimal'):
                 pkg = 'java.math'
             elif dependency == self.root:
-                if not self.is_top_level:
-                    continue
                 pkg = self.ctx.opts.directory
                 if pkg.startswith('src' + os.sep):
                     pkg = pkg[len('src' + os.sep):]  # src not part of package
@@ -1575,7 +1574,7 @@ class MethodGenerator(object):
             call.extend(self._root_namespace(self.stmt.arg))
             constructor.add_dependency(self.root)
             constructor.add_line(''.join(call))
-            if self.stmt.parent == self.stmt.top:
+            if self.is_top_level:
                 # Top level statement
                 constructor.add_line('setDefaultPrefix();')
                 setPrefix = ['setPrefix(', self.root, '.PREFIX);']
