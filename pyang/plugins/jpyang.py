@@ -314,7 +314,11 @@ def write_file(d, file_name, file_content, ctx):
             print 'Writing file to: ' + os.getcwd() + os.sep + file_name
         os.chdir(wd)
     with open(d + os.sep + file_name, 'w+') as f:
-        f.write(file_content)
+        if isinstance(file_content, list):
+            for line in file_content:
+                print >> f, line
+        else:
+            f.write(file_content)
 
 
 def get_package(stmt, ctx):
@@ -949,7 +953,7 @@ class ClassGenerator(object):
     def write_to_file(self):
         write_file(self.package,
                    self.filename,
-                   self.java_class.java_class(),
+                   self.java_class.as_list(),
                    self.ctx)
 
 
@@ -1248,7 +1252,7 @@ class JavaClass(object):
             res.append(' ')
         return ''.join(res)
 
-    def java_class(self):
+    def as_list(self):
         """Returns a string representing complete Java code for this class.
 
         It is vital that either self.body contains the complete code body of
@@ -1304,7 +1308,7 @@ class JavaClass(object):
                                self.get_superclass_and_interfaces(),
                                '{']))
         header.append('')
-        return '\n'.join(header + self.get_body())
+        return header + self.get_body()
 
 
 class JavaValue(object):
