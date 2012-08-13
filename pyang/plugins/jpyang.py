@@ -2302,24 +2302,26 @@ def register_schema(prefix_name):
 
 def access_methods_comment(stmt, optional=False):
     """Returns a string representing a java comment for code structure"""
+    res = ['    /* Access methods for']
     if optional:
-        opt = 'optional '
-    else:
-        opt = ''
-    return ('''    /**
-     * -------------------------------------------------------
-     * Access methods for ''' + opt + stmt.keyword +
-     ' child: "' + stmt.arg + '''".
-     * -------------------------------------------------------
-     */''')
+        res.append('optional')
+    res.extend([stmt.keyword, 'child: "' + stmt.arg + '". */'])
+    return ' '.join(res)
 
 
 def child_field(stmt):
     """Returns a string representing java code for a field"""
-    return '''    /**
-     * Field for child ''' + stmt.keyword + ' "' + stmt.arg + '''".
-     */
-    public ''' + capitalize_first(stmt.arg) + ' ' + stmt.arg + ''' = null;'''
+    res = JavaValue(name=stmt.arg, value='null', indent=4)
+    res.add_javadoc('Field for child ' + stmt.keyword + ' "' + stmt.arg + '".')
+    res.add_modifier('public')
+    res.add_modifier(capitalize_first(stmt.arg))
+    # FIXME Add dependency: Need context (ctx) or package
+#    pkg = ctx.opts.directory
+#    if pkg.startswith('src' + os.sep):
+#        pkg = pkg[len('src' + os.sep):]  # src not part of package
+#    res.add_dependency('.'.join([pkg, stmt.parent.arg,
+#                                 capitalize_first(stmt.arg)]))
+    return res
 
 
 def get_stmt(stmt, keys, string=False):
