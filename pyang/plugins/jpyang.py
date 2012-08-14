@@ -1790,6 +1790,17 @@ class MethodGenerator(object):
         else:
             return self.gen.parent_getters()
 
+    def parent_deleters(self):
+        """Returns a list of JavaMethods representing deleters to include
+        in generated class of self.stmt.parent
+
+        """
+        assert self.gen is not self, 'Avoid infinite recursion'
+        if not (self.is_list or self.is_container):
+            return None
+        else:
+            return self.gen.parent_deleters()
+
     def child_iterator(self):
         """Returns a java iterator method"""
         if not(self.is_leaflist or self.is_list):
