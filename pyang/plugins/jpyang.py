@@ -911,21 +911,14 @@ class ClassGenerator(object):
                 for access_method in child_gen.parent_access_methods():
                     add(sub.arg, access_method)
         elif sub.keyword in ('leaf', 'leaf-list'):
+            child_gen = MethodGenerator(sub, self.ctx)
+            add(sub.arg, child_gen.access_methods_comment())
             type_stmt = sub.search_one('type')
             type_str1, type_str2 = get_types(type_stmt, self.ctx)
             if sub.keyword == 'leaf':
                 key = sub.parent.search_one('key')
-                if key is not None and sub.arg in key.arg.split(' '):
-                    temp = statements.Statement(None, None, None, 'key',
-                        arg=sub.arg)  # TODO: Copy sub instead?
-                    optional = False
-
-                    # Pass temp to avoid multiple keys
-                    add(sub.arg, access_methods_comment(temp, optional))
-                else:
-                    # TODO: ensure that the leaf is truly optional
-                    optional = True
-                    add(sub.arg, access_methods_comment(sub, optional))
+                optional = key is None or sub.arg not in key.arg.split(' ')
+                # TODO: ensure that the leaf is truly optional
                 add(sub.arg, get_value(sub, ret_type=type_str1))
                 add(sub.arg, set_leaf_value(sub, prefix=self.prefix_name, arg_type=type_str1))
                 add(sub.arg, set_leaf_value(sub, prefix='', arg_type='String',
@@ -937,7 +930,6 @@ class ClassGenerator(object):
                     add(sub.arg, unset_value(sub))
                 add(sub.arg, add_value(sub, self.prefix_name))
             else:  # sub.keyword == 'leaf-list':
-                add(sub.arg, access_methods_comment(sub, optional=False))
                 add(sub.arg, child_iterator(sub))
                 add(sub.arg, set_leaf_value(sub, prefix=self.prefix_name, arg_type=type_str1))
                 add(sub.arg, set_leaf_value(sub, prefix='', arg_type='String',
@@ -1888,6 +1880,8 @@ class LeafMethodGenerator(MethodGenerator):
         self.stmt_type = stmt.search_one('type')
         self.type_str = get_types(self.stmt_type, ctx)
         self.is_string = self.type_str[1] == 'String'
+        key = stmt.parent.search_one('key')
+        self.is_optional = key is None or stmt.arg not in key.arg.split(' ')
 
     def markers(self):
         res = []
@@ -2254,15 +2248,6 @@ def register_schema(prefix_name):
         else
             parser.readFile(schemaUrl, h);
     }''')
-
-
-def access_methods_comment(stmt, optional=False):
-    """Returns a string representing a java comment for code structure"""
-    res = ['    /* Access methods for']
-    if optional:
-        res.append('optional')
-    res.extend([stmt.keyword, 'child: "' + stmt.arg + '". */'])
-    return ' '.join(res)
 
 
 def child_field(stmt):
