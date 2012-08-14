@@ -858,8 +858,8 @@ class ClassGenerator(object):
             self.java_class.add_support_method(support_method)
 
         if stmt.keyword != 'typedef':  # TODO: Only add key name getter when relevant
-            self.java_class.add_name_getter(key_names(stmt))
-            self.java_class.add_name_getter(children_names(stmt))
+            self.java_class.add_name_getter(gen.key_names())
+            self.java_class.add_name_getter(gen.children_names())
         elif stmt.keyword == 'typedef':
             type_stmt = stmt.search_one('type')
             super_type = get_types(type_stmt, self.ctx)[0]
@@ -1664,6 +1664,55 @@ class MethodGenerator(object):
             cloner = self.fix_imports(cloner)
         return cloners
 
+    def key_names(self):
+        """Returns a string representing a Java method that returns a String[]
+        with the identifiers of the keys in stmt. If stmt does not have any keys,
+        null is returned.
+
+        """
+        keys = self.stmt.search('key')
+        if not keys:
+            res = 'return null'
+        else:
+            res = 'return new String[] {\n'
+
+            # Add keys to res, one key per line, indented by 12 spaces
+            for key_str in keys:
+                for key in key_str.arg.split(' '):
+                    res += ' ' * 12 + '"' + key + '",\n'
+            res = res[:-2] + '\n' + ' ' * 8 + '}'
+        return '''    /**
+     * Structure information which specifies
+     * the keys for the list entries.
+     */
+    public String[] keyNames() {
+        ''' + res + ''';
+    }'''  # TODO: Add support for multiple keys
+
+    def children_names(self):
+        """Returns a string representing a java method that returns a String[]
+        with the identifiers of the children of stmt, excluding any keys.
+
+        """
+        children = filter(lambda x:  # x.keyword != 'key' and # TODO: add more
+            x.keyword != 'key',
+            self.stmt.substmts)
+        names = [ch.arg for ch in children]
+        if len(names) > 0:
+            names = repr(names)[1:-1].replace("'", '"').replace(', ',
+                ',\n' + ' ' * 12)
+        else:
+            names = ''
+        return '''    /**
+     * Structure information with the names of the children.
+     * Makes it possible to order the children.
+     */
+    public String[] childrenNames() {
+        return new String[] {
+            ''' + names + '''
+        };
+    }'''  # FIXME: What if there are no children?
+
     def support_method(self, fields=None):
 
         if self.is_typedef or self.is_leaf or self.is_leaflist:
@@ -2150,61 +2199,6 @@ class ListMethodGenerator(MethodGenerator):
         res.extend(self.parent_adders())
         res.extend(self.parent_deleters())
         return res
-
-
-def key_names(stmt):
-    """Returns a string representing a Java method that returns a String[]
-    with the identifiers of the keys in stmt. If stmt does not have any keys,
-    null is returned.
-
-    stmt -- A pyang Statement, typically a list or a container
-
-    """
-    keys = stmt.search('key')
-    if not keys:
-        res = 'return null'
-    else:
-        res = 'return new String[] {\n'
-
-        # Add keys to res, one key per line, indented by 12 spaces
-        for key_str in keys:
-            for key in key_str.arg.split(' '):
-                res += ' ' * 12 + '"' + key + '",\n'
-        res = res[:-2] + '\n' + ' ' * 8 + '}'
-    return '''    /**
-     * Structure information which specifies
-     * the keys for the list entries.
-     */
-    public String[] keyNames() {
-        ''' + res + ''';
-    }'''  # TODO: Add support for multiple keys
-
-
-def children_names(stmt):
-    """Returns a string representing a java method that returns a String[]
-    with the identifiers of the children of stmt, excluding any keys.
-
-    stmt -- A pyang Statement, typically a list or a container
-
-    """
-    children = filter(lambda x:  # x.keyword != 'key' and # TODO: add more
-        x.keyword != 'key',
-        stmt.substmts)
-    names = [ch.arg for ch in children]
-    if len(names) > 0:
-        names = repr(names)[1:-1].replace("'", '"').replace(', ',
-            ',\n' + ' ' * 12)
-    else:
-        names = ''
-    return '''    /**
-     * Structure information with the names of the children.
-     * Makes it possible to order the children.
-     */
-    public String[] childrenNames() {
-        return new String[] {
-            ''' + names + '''
-        };
-    }'''  # FIXME: What if there are no children?
 
 
 def static_string(identifier, value):
