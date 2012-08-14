@@ -63,6 +63,14 @@ java_lang = {'Boolean', 'Byte', 'Double', 'Float', 'Integer',
 """A subset of the java.lang classes"""
 
 
+java_util = {'Collection', 'Enumeration', 'Iterator', 'List', 'ListIterator',
+             'Map', 'Queue', 'Set', 'ArrayList', 'Arrays', 'HashMap',
+             'HashSet', 'Hashtable', 'LinkedList', 'Properties', 'Random',
+             'Scanner', 'Stack', 'StringTokenizer', 'Timer', 'TreeMap',
+             'TreeSet', 'UUID', 'Vector'}
+"""A subset of the java.util interfaces and classes"""
+
+
 java_built_in = java_reserved_words | java_lang
 
 
@@ -1227,7 +1235,7 @@ class JavaClass(object):
             if self.superclass is not None or 'Serializable' in self.interfaces:
                 self.body.extend(JavaValue(
                     modifiers=['private', 'static', 'final', 'long'],
-                    name='serialVersionUID', value='1L', indent=4).as_list())
+                    name='serialVersionUID', value='1L').as_list())
                 self.body.append('')
             for method in flatten(self.attrs):
                 if hasattr(method, 'as_list'):
@@ -1314,7 +1322,7 @@ class JavaValue(object):
     """A Java value"""
 
     def __init__(self, exact=None, javadocs=None, modifiers=None, name=None,
-                 value=None, imports=None, indent=0):
+                 value=None, imports=None, indent=4):
         """Value constructor"""
         self.exact = exact
         self.value = value
@@ -1510,12 +1518,21 @@ class MethodGenerator(object):
         self.stmt = stmt
         self.n = normalize(stmt.arg)
         self.n2 = camelize(stmt.arg)
-        prefix = None
-        if self.stmt.top is not None:
-            prefix = self.stmt.top.search_one('prefix')
+        self.children = map(lambda s: normalize(s.arg), stmt.substmts)
+        self.pkg = get_package(stmt, ctx)
+        self.basepkg = self.pkg.partition('.')[0]
+        self.rootpkg = ctx.opts.directory.split(os.sep)
+        if self.rootpkg[:1] == ['src']:
+            self.rootpkg = self.rootpkg[1:]  # src not part of package
+
+        self.ctx = ctx
         self.root = None
+        prefix = None
+        if stmt.top is not None:
+            prefix = self.stmt.top.search_one('prefix')
         if prefix is not None:
             self.root = normalize(prefix.arg)
+
         self.is_container = stmt.keyword == 'container'
         self.is_list = stmt.keyword == 'list'
         self.is_typedef = stmt.keyword == 'typedef'
@@ -1524,7 +1541,6 @@ class MethodGenerator(object):
         self.is_top_level = self.stmt.parent == self.stmt.top
         assert (self.is_container or self.is_list or self.is_typedef
             or self.is_leaf or self.is_leaflist)
-        self.ctx = ctx
         self.gen = self
         if type(self) is MethodGenerator:
             if self.is_typedef:
@@ -1536,29 +1552,43 @@ class MethodGenerator(object):
             if self.is_leaf or self.is_leaflist:
                 self.gen = LeafMethodGenerator(stmt, ctx)
 
+    def canonical_import(self, import_, child=False):
+        if import_.startswith(('java.math', 'java.util',
+                               'com.tailf.jnc', self.basepkg)):
+            return import_
+        elif import_ in ('BigInteger', 'BigDecimal'):
+            return '.'.join(['java.math', import_])
+        elif import_ in java_util:
+            return '.'.join(['java.util', import_])
+        elif import_ == self.root:
+            return '.'.join(self.rootpkg + [import_])
+        elif import_ in self.children:
+            return '.'.join([self.pkg, self.stmt.arg, import_])
+        elif child and import_ == normalize(self.stmt.arg):
+            return '.'.join([self.pkg, import_])
+        else:
+            return '.'.join(['com.tailf.jnc', import_])
+
     def fix_imports(self, method, child=False):
         res = set([])
-        children = map(lambda s: normalize(s.arg), self.stmt.substmts)
-        pkg = get_package(self.stmt, self.ctx)
-        basepkg = pkg.partition('.')[0]
-        rootpkg = self.ctx.opts.directory.split(os.sep)
-        if rootpkg[:1] == ['src']:
-            rootpkg = rootpkg[1:]  # src not part of package
 
         for dependency in method.imports:
-            if dependency.startswith(('java.math', 'com.tailf.jnc', basepkg)):
+            if dependency.startswith(('java.math', 'java.util',
+                                      'com.tailf.jnc', self.basepkg)):
                 res.add(dependency)
                 continue
-            elif dependency in ('BigInteger', 'BigDecimal'):
-                res.add('.'.join(['java.math', dependency]))
-            elif dependency == self.root:
-                res.add('.'.join(rootpkg + [dependency]))
-            elif dependency in children:
-                res.add('.'.join([pkg, self.stmt.arg, dependency]))
-            elif child and dependency == normalize(self.stmt.arg):
-                res.add('.'.join([pkg, dependency]))
+            elif dependency.endswith('>'):
+                before, sep, after = dependency[:-1].partition('<')
+                if not sep or '<' in after or ',' in after or ',' in before:
+                    if self.ctx.opts.verbose:
+                        print_warning(' '.join(['Unable to parse', dependency,
+                                                'as a Java import']),
+                                      dependency, self.ctx)
+                    continue
+                res.add(self.canonical_import(before, child))
+                res.add(self.canonical_import(after, child))
             else:
-                res.add('.'.join(['com.tailf.jnc', dependency]))
+                res.add(self.canonical_import(dependency, child))
 
         method.imports = res
         return method
@@ -1586,6 +1616,14 @@ class MethodGenerator(object):
         else:
             return None
         return self.fix_imports(constructor)
+
+    def access_methods_comment(self):
+        """Returns a JavaValue representing a code structuring Java comment"""
+        res = ['    /* Access methods for']
+        if hasattr(self.gen, 'is_optional') and self.gen.is_optional:
+            res.append('optional')
+        res.extend([self.stmt.keyword, 'child: "' + self.stmt.arg + '". */'])
+        return JavaValue(exact=[' '.join(res)])
 
     def empty_constructor(self):
         """Returns parameter-free constructor as a JavaMethod object"""
@@ -1938,11 +1976,27 @@ class ContainerMethodGenerator(MethodGenerator):
     def markers(self):
         return NotImplemented
 
+    def parent_deleters(self):
+        """Returns a list with a single method that deletes an instance of the
+        class to be generated from the statement of this method generator to
+        its parent class.
+
+        """
+        method = self._parent_template('delete')
+        method.add_javadoc(''.join(['Deletes ', self.stmt.keyword,
+                                    ' entry "', self.n2, '".']))
+        method.add_javadoc('@return An array of the deleted element nodes.')
+        method.add_line(''.join(['this.', self.n2, ' = null;']))
+        method.add_line(''.join(['String path = "', self.n2, '";']))
+        method.set_return_type('NodeSet')
+        method.add_line('return delete(path);')
+        return [self.fix_imports(method, child=True)]
+
     def parent_access_methods(self):
         res = []
-        res.append(access_methods_comment(self.stmt))
+        res.append(self.access_methods_comment())
         res.extend(self.parent_adders())
-        res.append(delete_stmt(self.stmt))
+        res.append(self.parent_deleters())
         return res
 
 
@@ -2032,7 +2086,7 @@ class ListMethodGenerator(MethodGenerator):
         res = [self._parent_template(method_type) for _ in range(2)]
 
         for i, method in enumerate(res):
-            javadoc1 = [method_type.capitalize(), ' ', self.stmt.keyword,
+            javadoc1 = [method_type.capitalize(), 's ', self.stmt.keyword,
                         ' entry "', self.n2, '", with specified keys.']
             javadoc2 = []
             path = ['String path = "', self.n2]
@@ -2079,7 +2133,7 @@ class ListMethodGenerator(MethodGenerator):
 
     def parent_access_methods(self):
         res = []
-        res.append(access_methods_comment(self.stmt))
+        res.append(self.access_methods_comment())
         res.extend(self.parent_getters())
         res.append(self.child_iterator())
         res.extend(self.parent_adders())
@@ -2340,7 +2394,7 @@ def access_methods_comment(stmt, optional=False):
 
 def child_field(stmt):
     """Returns a string representing java code for a field"""
-    res = JavaValue(name=stmt.arg, value='null', indent=4)
+    res = JavaValue(name=stmt.arg, value='null')
     res.add_javadoc('Field for child ' + stmt.keyword + ' "' + stmt.arg + '".')
     res.add_modifier('public')
     res.add_modifier(capitalize_first(stmt.arg))
