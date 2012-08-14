@@ -1398,7 +1398,7 @@ class JavaValue(object):
             if class_name not in java_built_in:
                 self.imports.add(import_)
                 return class_name
-        elif import_ not in java_built_in:
+        elif not any(x in java_built_in for x in (import_, import_[:-2])):
             self.imports.add(import_)
         return import_
 
@@ -1553,6 +1553,11 @@ class MethodGenerator(object):
                 self.gen = LeafMethodGenerator(stmt, ctx)
 
     def canonical_import(self, import_, child=False):
+        """Returns a string representing a class that can be imported in Java.
+
+        Does not handle Generics or Array types.
+
+        """
         if import_.startswith(('java.math', 'java.util',
                                'com.tailf.jnc', self.basepkg)):
             return import_
@@ -1587,6 +1592,9 @@ class MethodGenerator(object):
                     continue
                 res.add(self.canonical_import(before, child))
                 res.add(self.canonical_import(after, child))
+            elif dependency.endswith(']'):
+                assert dependency[:-2] and dependency[-2:] == '[]'
+                res.add(self.canonical_import(dependency[:-2], child))
             else:
                 res.add(self.canonical_import(dependency, child))
 
@@ -1665,53 +1673,47 @@ class MethodGenerator(object):
         return cloners
 
     def key_names(self):
-        """Returns a string representing a Java method that returns a String[]
-        with the identifiers of the keys in stmt. If stmt does not have any keys,
-        null is returned.
+        """Returns a method that can be used to get the keys of a statement.
+
+        The keys are returned by the generated method as a String array
+        with the identifiers of the keys in the statement of this generator,
+        which should be a list or a container, or otherwise None is returned.
+        If the statement does not have any keys, the generated method returns
+        null.
 
         """
-        keys = self.stmt.search('key')
-        if not keys:
-            res = 'return null'
+        if not (self.is_list or self.is_container):
+            return None
+        method = JavaMethod(modifiers=['public'], name='keyNames')
+        method.set_return_type('String[]')
+        method.add_javadoc('@return An array with the identifiers of any key children')
+        if self.is_container or not self.gen.is_config:
+            method.add_line('return null;')
         else:
-            res = 'return new String[] {\n'
-
-            # Add keys to res, one key per line, indented by 12 spaces
-            for key_str in keys:
-                for key in key_str.arg.split(' '):
-                    res += ' ' * 12 + '"' + key + '",\n'
-            res = res[:-2] + '\n' + ' ' * 8 + '}'
-        return '''    /**
-     * Structure information which specifies
-     * the keys for the list entries.
-     */
-    public String[] keyNames() {
-        ''' + res + ''';
-    }'''  # TODO: Add support for multiple keys
+            method.add_line('return new String[] {')
+            for key_stmt in self.gen.key_stmts:
+                method.add_line('"'.join([' ' * 4, key_stmt.arg, ',']))
+            method.add_line('};')
+        return self.fix_imports(method)
 
     def children_names(self):
-        """Returns a string representing a java method that returns a String[]
-        with the identifiers of the children of stmt, excluding any keys.
+        """Returns a method that can be used to get the identifiers of the
+        children of the statement of this generator, excluding any keys.
 
         """
-        children = filter(lambda x:  # x.keyword != 'key' and # TODO: add more
-            x.keyword != 'key',
-            self.stmt.substmts)
-        names = [ch.arg for ch in children]
-        if len(names) > 0:
-            names = repr(names)[1:-1].replace("'", '"').replace(', ',
-                ',\n' + ' ' * 12)
-        else:
-            names = ''
-        return '''    /**
-     * Structure information with the names of the children.
-     * Makes it possible to order the children.
-     */
-    public String[] childrenNames() {
-        return new String[] {
-            ''' + names + '''
-        };
-    }'''  # FIXME: What if there are no children?
+        if not (self.is_list or self.is_container):
+            return None
+        method = JavaMethod(modifiers=['public'], name='childrenNames')
+        method.set_return_type('String[]')
+        method.add_javadoc('@return An array with the identifiers of any children, in order.')
+        is_child = lambda stmt: stmt.keyword in ('leaf', 'container',
+                                                 'leaf-list', 'list')
+        children = filter(is_child, self.stmt.substmts)
+        method.add_line('return new String[] {')
+        for child in children:
+            method.add_line('"'.join([' ' * 4, child.arg, ',']))
+        method.add_line('};')
+        return self.fix_imports(method)
 
     def support_method(self, fields=None):
 
@@ -2068,7 +2070,9 @@ class ListMethodGenerator(MethodGenerator):
         assert self.gen is self
         assert self.is_list, 'Only valid for list stmts'
         self.is_config = is_config(stmt)
-        self.keys = self.stmt.search_one('key').arg.split(' ')
+        self.keys = []
+        if self.is_config:
+            self.keys = self.stmt.search_one('key').arg.split(' ')
         findkey = lambda k: self.stmt.search_one('leaf', k)
         self.key_stmts = map(findkey, self.keys)
         notstring = lambda k: k.arg != 'string'
