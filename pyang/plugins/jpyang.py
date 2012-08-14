@@ -442,11 +442,11 @@ def get_types(yang_type, ctx):
         pass
     elif yang_type.arg in ('enumeration', 'binary'):
         primitive = 'String'
-    elif yang_type.arg in ('bits', ):
+    elif yang_type.arg in ('bits',):
         primitive = 'BigInteger'
     elif yang_type.arg in ('instance-identifier', 'leafref', 'identityref'):
         primitive = 'Element'
-    elif yang_type.arg in ('empty', ):
+    elif yang_type.arg in ('empty',):
         primitive = 'boolean'
     elif yang_type.arg in ('int8', 'int16', 'int32', 'int64', 'uint8',
             'uint16', 'uint32', 'uint64'):
@@ -1319,21 +1319,21 @@ class JavaValue(object):
         self.exact = exact
         self.value = value
         self.indent = ' ' * indent
-        
+
         self.javadocs = []
         if javadocs is not None:
             for javadoc in javadocs:
                 self.add_javadoc(javadoc)
-        
+
         self.modifiers = []
         if modifiers is not None:
             for modifier in modifiers:
                 self.add_modifier(modifier)
-        
+
         self.name = None
         if name is not None:
             self.set_name(name)
-        
+
         self.imports = set([])
         if imports is not None:
             for import_ in imports:
@@ -1396,9 +1396,9 @@ class JavaValue(object):
         """Returns a list representing javadoc lines for this value"""
         lines = []
         if self.javadocs:
-            lines.append( self.indent + '/**' )
+            lines.append(self.indent + '/**')
             lines.extend([self.indent + ' * ' + line for line in self.javadocs])
-            lines.append( self.indent + ' */' )
+            lines.append(self.indent + ' */')
         return lines
 
     def as_list(self):
@@ -1428,17 +1428,17 @@ class JavaMethod(JavaValue):
         self.return_type = None
         if return_type is not None:
             self.set_return_type(return_type)
-        
+
         self.parameters = []
         if parameters is not None:
             for param_type, param_name in parameters:
                 self.add_parameter(param_type, param_name)
-                
+
         self.exceptions = []
         if exceptions is not None:
             for exc in exceptions:
                 self.add_exception(exc)
-        
+
         self.body = body
         if body is None:
             self.body = []
@@ -1451,11 +1451,11 @@ class JavaMethod(JavaValue):
     def add_parameter(self, param_type, param_name):
         """Adds a parameter to this method. The argument type is added to list
         of dependencies.
-        
+
         param_type -- String representation of the argument type
         param_name -- String representation of the argument name
         """
-        self._set_instance_data('parameters', 
+        self._set_instance_data('parameters',
                                 ' '.join([self.add_dependency(param_type),
                                           param_name]))
 
@@ -1541,7 +1541,7 @@ class MethodGenerator(object):
         rootpkg = self.ctx.opts.directory.split(os.sep)
         if rootpkg[:1] == ['src']:
             rootpkg = rootpkg[1:]  # src not part of package
-        
+
         for dependency in method.imports:
             if dependency.startswith(('java.math', 'com.tailf.jnc', basepkg)):
                 res.add(dependency)
@@ -1556,14 +1556,14 @@ class MethodGenerator(object):
                 res.add('.'.join([pkg, dependency]))
             else:
                 res.add('.'.join(['com.tailf.jnc', dependency]))
-        
+
         method.imports = res
         return method
 
     def _root_namespace(self, stmt_arg):
         """Returns '([Root].NAMESPACE, "[stmt.arg]");'"""
         return ['(', self.root, '.NAMESPACE, "', stmt_arg, '");']
-    
+
     def _constructor_template(self):
         """Returns a constructor invoking parent constructor, without
         parameters and javadoc."""
@@ -1624,7 +1624,7 @@ class MethodGenerator(object):
         return cloners
 
     def support_method(self, fields=None):
-        
+
         if self.is_typedef or self.is_leaf or self.is_leaflist:
             return None
         add_child = JavaMethod(modifiers=['public'],
@@ -1666,7 +1666,7 @@ class MethodGenerator(object):
             return self.gen.checker()
         else:
             return None
-    
+
     def markers(self):
         """Generates methods that enqueues operations to be performed."""
         assert self.gen is not self, 'Avoid infinite recursion'
@@ -1674,12 +1674,12 @@ class MethodGenerator(object):
             return None
         else:
             return self.gen.markers()
-    
+
     def _parent_template(self, method_type):
         """Returns an access method for the statement of this method generator.
-        
+
         method_type -- prefix of method name
-        
+
         """
         method = JavaMethod()
         method.add_modifier('public')
@@ -1687,18 +1687,18 @@ class MethodGenerator(object):
         method.set_name(method_type + self.n)
         method.add_exception('JNCException')
         return self.fix_imports(method, child=True)
-    
+
     def parent_adders(self):
         """Returns a list of methods that adds an instance of the class to be
         generated from the statement of this method generator to its parent
         class.
-        
+
         """
         if not (self.is_container or self.is_list):
             return None
         number_of_adders = 2 * (1 + self.is_list)
         res = [self._parent_template('add') for _ in range(number_of_adders)]
-        
+
         for i, method in enumerate(res):
             javadoc1 = ['Adds ', self.stmt.keyword, ' entry "', self.n2, '"']
             javadoc2 = []
@@ -1736,7 +1736,7 @@ class MethodGenerator(object):
             method.add_line('return ' + self.n2 + ';')
             self.fix_imports(method, child=True)
         return res
-    
+
     def child_iterator(self):
         """Returns a java iterator method"""
         if not(self.is_leaflist or self.is_list):
@@ -1755,7 +1755,7 @@ class MethodGenerator(object):
         return_stmt.extend(['Iterator(children, "', self.stmt.arg, '");'])
         res.add_line(''.join(return_stmt))
         return self.fix_imports(res)
-    
+
     def parent_access_methods(self):
         assert self.gen is not self, 'Avoid infinite recursion'
         if self.is_container or self.is_list:
@@ -1766,20 +1766,20 @@ class MethodGenerator(object):
 
 class LeafMethodGenerator(MethodGenerator):
     """Method generator for YANG leaf and leaf-list associated methods"""
-    
+
     def __init__(self, stmt, ctx):
         super(LeafMethodGenerator, self).__init__(stmt, ctx)
         assert self.is_leaf or self.is_leaflist
         self.stmt_type = stmt.search_one('type')
         self.type_str = get_types(self.stmt_type, ctx)
         self.is_string = self.type_str[1] == 'String'
-    
+
     def markers(self):
         res = []
         for op in ('replace', 'merge', 'create', 'delete'):
             res.append(self.mark(op))
         return res
-        
+
     def mark(self, op):
         assert op in ('replace', 'merge', 'create', 'delete')
         mark_methods = [JavaMethod()]
@@ -1919,10 +1919,10 @@ class ContainerMethodGenerator(MethodGenerator):
 
     def setters(self):
         return NotImplemented
-    
+
     def markers(self):
         return NotImplemented
-    
+
     def parent_access_methods(self):
         res = []
         res.append(access_methods_comment(self.stmt))
@@ -2002,31 +2002,31 @@ class ListMethodGenerator(MethodGenerator):
 
     def setters(self):
         return NotImplemented
-    
+
     def markers(self):
         return NotImplemented
-    
+
     def parent_getters(self):
         """Returns a list of methods that gets an instance of the class to be
         generated from the statement of this method generator to its parent
         class.
-        
+
         """
         res = [self._parent_template('get') for _ in range(2)]
-        
+
         for i, method in enumerate(res):
             method.add_modifier('public')
             method.set_return_type(self.n)
             method.set_name('get' + self.n)
             method.add_exception('JNCException')
-            
+
             javadoc1 = ['Gets ', self.stmt.keyword, ' entry "', self.n2,
                         '", with specified keys.']
             javadoc2 = []
             path = ['String path = "', self.n2]
             if i == 1:
                 javadoc2.append('The keys are specified as strings.')
-                
+
             for key in self.gen.key_stmts:
                 javadoc2.append(''.join(['@param ', key.arg,
                     'Value Key argument of child.']))
@@ -2036,7 +2036,7 @@ class ListMethodGenerator(MethodGenerator):
                 method.add_parameter(param_type, key.arg)
                 path.extend(['[', key.arg, '=\'" + ', key.arg, ' + "\']'])
             path.append('";')
-            
+
             method.add_javadoc(''.join(javadoc1))
             for javadoc in javadoc2:
                 method.add_javadoc(javadoc)
@@ -2045,7 +2045,7 @@ class ListMethodGenerator(MethodGenerator):
             method.add_line('return (' + self.n + ')searchOne(path);')
             self.fix_imports(method, child=True)
         return res
-    
+
     def parent_access_methods(self):
         res = []
         _, _, jnc_keys, _ = extract_keys(self.stmt, self.ctx)
@@ -2755,7 +2755,7 @@ class OrderedSet(collections.MutableSet):
         item = next(reversed(self)) if last else next(iter(self))
         self.discard(item)
         return item
-    
+
     def as_sorted_list(self):
         """Returns a sorted list with the items in this set"""
         res = [x for x in self]
