@@ -1675,8 +1675,8 @@ class MethodGenerator(object):
             return self.gen.markers()
     
     def parent_adders(self):
-        """Returns a list of two methods that adds an instance of the class to
-        be generated from the statement of this method generator to its parent
+        """Returns a list of methods that adds an instance of the class to be
+        generated from the statement of this method generator to its parent
         class.
         
         """
@@ -1736,6 +1736,9 @@ class MethodGenerator(object):
         if not(self.is_leaflist or self.is_list):
             return None
         res = JavaMethod(name=self.stmt.arg + 'Iterator')
+        res.add_javadoc('"'.join(['Iterator method for the list ',
+                                  self.stmt.arg, '.']))
+        res.add_javadoc('@return An iterator for the list.')
         return_stmt = ['return new Element']
         if self.is_leaflist:
             res.set_return_type('ElementLeafListValueIterator')
@@ -1997,12 +2000,53 @@ class ListMethodGenerator(MethodGenerator):
     def markers(self):
         return NotImplemented
     
+    def parent_getters(self):
+        """Returns a list of methods that gets an instance of the class to be
+        generated from the statement of this method generator to its parent
+        class.
+        
+        """
+        res = [JavaMethod(), JavaMethod()]
+            
+        name = normalize(self.stmt.arg)
+        name2 = camelize(self.stmt.arg)
+        for i, method in enumerate(res):
+            method.add_modifier('public')
+            method.set_return_type(name)
+            method.set_name('get' + name)
+            method.add_exception('JNCException')
+            
+            javadoc1 = ['Gets ', self.stmt.keyword, ' entry "', name2,
+                        '", with specified keys.']
+            javadoc2 = []
+            path = ['String path = "', name2]
+            if i == 1:
+                javadoc2.append('The keys are specified as strings.')
+                
+            for key in self.gen.key_stmts:
+                javadoc2.append(''.join(['@param ', key.arg,
+                    'Value Key argument of child.']))
+                param_type = 'String'
+                if i == 0:
+                    param_type, _ = get_types(key, self.ctx)
+                method.add_parameter(param_type, key.arg)
+                path.extend(['[', key.arg, '=\'" + ', key.arg, ' + "\']'])
+            path.append('";')
+            
+            method.add_javadoc(''.join(javadoc1))
+            for javadoc in javadoc2:
+                method.add_javadoc(javadoc)
+            method.add_javadoc('@return The added child.')
+            method.add_line(''.join(path))
+            method.add_line('return (' + name + ')searchOne(path);')
+            self.fix_imports(method, child=True)
+        return res
+    
     def parent_access_methods(self):
         res = []
         _, _, jnc_keys, _ = extract_keys(self.stmt, self.ctx)
         res.append(access_methods_comment(self.stmt))
-        res.append(get_stmt(self.stmt, jnc_keys))
-        res.append(get_stmt(self.stmt, jnc_keys, string=True))
+        res.extend(self.parent_getters())
         res.append(self.child_iterator())
         res.extend(self.parent_adders())
         res.append(delete_stmt(self.stmt, args=jnc_keys))
