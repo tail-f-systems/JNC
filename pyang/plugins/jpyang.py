@@ -2021,18 +2021,19 @@ class ListMethodGenerator(MethodGenerator):
     def markers(self):
         return NotImplemented
 
-    def parent_deleters(self):
-        """Returns a list of methods that deletes an instance of the class to
-        be generated from the statement of this method generator to its parent
-        class.
+    def _parent_method(self, method_type):
+        """Returns a list of methods that either gets an instance of the class
+        to be generated from the statement of this method generator to its
+        parent class, or deletes it, depending on the method_type parameter.
+
+        method_type -- either 'get' or 'delete'
 
         """
-        res = [self._parent_template('delete') for _ in range(2)]
+        res = [self._parent_template(method_type) for _ in range(2)]
 
         for i, method in enumerate(res):
-            method.set_return_type('void')
-            javadoc1 = ['Deletes ', self.stmt.keyword, ' entry "', self.n2,
-                        '", with specified keys.']
+            javadoc1 = [method_type.capitalize(), ' ', self.stmt.keyword,
+                        ' entry "', self.n2, '", with specified keys.']
             javadoc2 = []
             path = ['String path = "', self.n2]
             if i == 1:
@@ -2052,9 +2053,21 @@ class ListMethodGenerator(MethodGenerator):
             for javadoc in javadoc2:
                 method.add_javadoc(javadoc)
             method.add_line(''.join(path))
-            method.add_line('delete(path);')
+            if method_type == 'delete':
+                method.set_return_type('void')
+                method.add_line('delete(path);')
+            else:  # get
+                method.add_line('return (' + self.n + ')searchOne(path);')
             self.fix_imports(method, child=True)
         return res
+
+    def parent_deleters(self):
+        """Returns a list of methods that deletes an instance of the class to
+        be generated from the statement of this method generator to its parent
+        class.
+
+        """
+        return self._parent_method('delete')
 
     def parent_getters(self):
         """Returns a list of methods that gets an instance of the class to be
@@ -2062,34 +2075,7 @@ class ListMethodGenerator(MethodGenerator):
         class.
 
         """
-        res = [self._parent_template('get') for _ in range(2)]
-
-        for i, method in enumerate(res):
-            javadoc1 = ['Gets ', self.stmt.keyword, ' entry "', self.n2,
-                        '", with specified keys.']
-            javadoc2 = []
-            path = ['String path = "', self.n2]
-            if i == 1:
-                javadoc2.append('The keys are specified as strings.')
-
-            for key in self.gen.key_stmts:
-                javadoc2.append(''.join(['@param ', key.arg,
-                    'Value Key argument of child.']))
-                param_type = 'String'
-                if i == 0:
-                    param_type, _ = get_types(key, self.ctx)
-                method.add_parameter(param_type, key.arg)
-                path.extend(['[', key.arg, '=\'" + ', key.arg, ' + "\']'])
-            path.append('";')
-
-            method.add_javadoc(''.join(javadoc1))
-            for javadoc in javadoc2:
-                method.add_javadoc(javadoc)
-            method.add_javadoc('@return The child with the specified keys.')
-            method.add_line(''.join(path))
-            method.add_line('return (' + self.n + ')searchOne(path);')
-            self.fix_imports(method, child=True)
-        return res
+        return self._parent_method('get')
 
     def parent_access_methods(self):
         res = []
