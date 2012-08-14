@@ -41,12 +41,12 @@ class Test(unittest.TestCase):
         """Values and references correct in Java Methods of different origin"""
         # Create method with default settings
         assert self.method.exact is None
-        assert self.method.javadocs == []
+        assert self.method.javadocs == jpyang.OrderedSet()
         assert self.method.modifiers == []
         assert self.method.return_type is None
         assert self.method.name is None
-        assert self.method.parameters == []
-        assert self.method.exceptions == []
+        assert self.method.parameters == jpyang.OrderedSet()
+        assert self.method.exceptions == jpyang.OrderedSet()
         assert self.method.body == []
         assert self.method.indent == ' ' * 4
         
@@ -56,8 +56,8 @@ class Test(unittest.TestCase):
         assert 'public' in self.constructor.modifiers
         assert self.constructor.return_type is None
         assert self.constructor.name == self.cgen.n
-        assert self.constructor.parameters == []
-        assert self.constructor.exceptions == []
+        assert self.constructor.parameters == jpyang.OrderedSet()
+        assert self.constructor.exceptions == jpyang.OrderedSet()
         assert self.constructor.body
         assert self.constructor.indent == ' ' * 4
         

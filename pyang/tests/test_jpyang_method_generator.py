@@ -56,8 +56,8 @@ class Test(unittest.TestCase):
         assert res[0].return_type == res[1].return_type == None
         assert res[0].name == 'C'
         assert res[1].name == 'L'
-        assert res[0].parameters == res[1].parameters == []
-        assert res[0].exceptions == res[1].exceptions == []
+        assert res[0].parameters == res[1].parameters == jpyang.OrderedSet()
+        assert res[0].exceptions == res[1].exceptions == jpyang.OrderedSet()
         assert res[0].indent == res[1].indent == '    '
         expected = '''    /**
      * Constructor for an empty {0} object.
@@ -81,9 +81,10 @@ class Test(unittest.TestCase):
         assert res[0].modifiers == res[1].modifiers == ['public']
         assert res[0].return_type == res[1].return_type == None
         assert res[0].name == res[1].name == 'T'
-        assert res[0].parameters == ['String value']
-        assert res[1].parameters == ['int value']
-        assert res[0].exceptions == res[1].exceptions == ['YangException']
+        assert res[0].parameters == jpyang.OrderedSet(['String value'])
+        assert res[1].parameters == jpyang.OrderedSet(['int value'])
+        assert (res[0].exceptions == res[1].exceptions ==
+                jpyang.OrderedSet(['YangException']))
         assert res[0].indent == res[1].indent == '    '
         expected = '''    /**
      * Constructor for T object from a {}.
@@ -134,11 +135,9 @@ class Test(unittest.TestCase):
             assert method.modifiers == ['public']
             assert method.return_type == None
             assert method.name == 'L'
-            assert method.parameters == params[i], ('\nwas ' +
-                                                    str(method.parameters) +
-                                                    '\nnot ' +
-                                                    str(params[i]))
-            assert method.exceptions == ['JNCException']
+            assert method.parameters == jpyang.OrderedSet(params[i]), (
+                '\nwas ' + str(method.parameters) + '\nnot ' + str(params[i]))
+            assert method.exceptions == jpyang.OrderedSet(['JNCException'])
             assert method.indent == '    '
             assert '\n'.join(method.as_list()) == expected.format(addition[i],
                 ', '.join(params[i]), setvalue[i][0], setvalue[i][1]), (
