@@ -10,8 +10,8 @@ $ python -m unittest discover -v
 """
 import unittest
 
-from pyang.plugins import jpyang  #@UnresolvedImport
-from pyang.tests import util  #@UnresolvedImport
+from pyang.plugins import jpyang  # @UnresolvedImport
+from pyang.tests import util  # @UnresolvedImport
 import copy
 
 
@@ -49,7 +49,7 @@ class Test(unittest.TestCase):
         assert self.method.exceptions == jpyang.OrderedSet()
         assert self.method.body == []
         assert self.method.indent == ' ' * 4
-        
+
         # Create empty constructor method for container statement c
         assert self.constructor.exact is None
         assert self.constructor.javadocs
@@ -60,7 +60,7 @@ class Test(unittest.TestCase):
         assert self.constructor.exceptions == jpyang.OrderedSet()
         assert self.constructor.body
         assert self.constructor.indent == ' ' * 4
-        
+
         # Check that no references to mutable instance data are shared
         assert self.method.javadocs is not self.constructor.javadocs
         assert self.method.modifiers is not self.constructor.modifiers
@@ -79,7 +79,7 @@ class Test(unittest.TestCase):
         assert self.constructor is method2, 'Sanity check: same reference'
         assert self.constructor == method2, 'Sanity check: equal objects'
         assert not self.constructor != method2, 'Sanity check: equal objects'
-        
+
         # Test equality between objects returned from same function
         clone = self.cgen.empty_constructor()
         assert self.constructor is not clone, 'Different reference'
@@ -89,7 +89,7 @@ class Test(unittest.TestCase):
         assert not(self.constructor == clone), 'check both __eq__ and __ne__'
         clone.return_type = None
         assert self.constructor == clone, 'Should be equal again'
-        
+
         # Test that deleted attributes are handled correctly
         del clone.return_type
         assert not(self.constructor == clone), 'Not equal if attribute is missing'
@@ -101,7 +101,7 @@ class Test(unittest.TestCase):
         method = self.constructor
         clone = copy.deepcopy(method)
         shallow = copy.copy(method)
-        
+
         # Test that the copy methods works as expected
         assert method is not clone, 'Different reference'
         assert method is not shallow, 'Different reference'
@@ -111,7 +111,7 @@ class Test(unittest.TestCase):
         assert method.as_list() == shallow.as_list(), 'Same string repr'
         assert not util.shares_mutables_with(method, clone)
         assert util.shares_mutables_with(method, shallow)
-        
+
         # Test that deleted attributes are handled correctly
         clone.javadocs = method.javadocs
         assert util.shares_mutables_with(method, clone), 'javadoc is shared'
@@ -123,28 +123,28 @@ class Test(unittest.TestCase):
     def testExact_caching(self):
         """Setting instance data with set and add methods overwrites cache"""
         self.assertRaises(AssertionError, self.method.as_list)  # name=None
-        
+
         # A method initialized with a cache is represented by it
         method = jpyang.JavaMethod(exact='bogus')
         assert method.as_list() == 'bogus'
-        
+
         # If we change the indentation, the cache is discarded
         assert method.indent == '    ', 'default indent should be 4 spaces'
         method.set_indent(2)
         assert method.indent == '  ', 'the indentation level should change'
         assert method.exact is None, 'cache should be discarded'
         self.assertRaises(AssertionError, method.as_list)  # since name=None
-        
+
         # If we set the name, the method can be represented once again
         method.set_name('name')
         res = '\n'.join(method.as_list())
         expected = '\n'.join(['  name() {', '  }'])
         assert res == expected, '\nwas: ' + res + '\nnot: ' + expected
-        
+
         # Shadow the true representation by assigning a value to the cache
         method.exact = 'bogus'
         assert method.as_list() == 'bogus'
-        
+
         # Adding a modifiers invalidates the cache again
         method.add_modifier('public')
         res = '\n'.join(method.as_list())

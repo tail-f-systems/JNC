@@ -11,8 +11,8 @@ $ python -m unittest discover -v
 """
 import unittest
 
-from pyang.plugins import jpyang  #@UnresolvedImport
-from pyang.tests import util  #@UnresolvedImport
+from pyang.plugins import jpyang  # @UnresolvedImport
+from pyang.tests import util  # @UnresolvedImport
 
 
 class Test(unittest.TestCase):
@@ -35,15 +35,15 @@ class Test(unittest.TestCase):
         """Statement tree and generators are properly constructed"""
         util.test_default_context(self)
         util.test_statement_tree(self)
-        
+
         assert self.strleafgen.is_string
         assert not self.int32leafgen.is_string
         assert not self.llgen.is_string
-        
+
         assert self.strleafgen.stmt.arg == 'leaf'
         assert self.int32leafgen.stmt.arg == 'my'
         assert self.llgen.stmt.arg == 'll'
-        
+
         assert self.strleafgen.type_str[1] == 'String'
         assert self.int32leafgen.type_str[1] == 'int'
         assert self.llgen.type_str[1] == 'BigDecimal'
@@ -75,7 +75,7 @@ class Test(unittest.TestCase):
                     else:
                         expected = mark.format('leaf-list', arg, op,
                                                (javadoc[0] + arg +
-                                                ''.join(javadoc[1:i+2])),
+                                                ''.join(javadoc[1:i + 2])),
                                                jpyang.capitalize_first(arg),
                                                op.capitalize(), params[i],
                                                ''.join([arg, '[name=\'" + ',

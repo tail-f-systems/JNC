@@ -10,8 +10,8 @@ $ python -m unittest discover -v
 """
 import unittest
 
-from pyang.plugins import jpyang  #@UnresolvedImport
-from pyang.tests import util  #@UnresolvedImport
+from pyang.plugins import jpyang  # @UnresolvedImport
+from pyang.tests import util  # @UnresolvedImport
 
 
 class Test(unittest.TestCase):
@@ -41,8 +41,7 @@ class Test(unittest.TestCase):
         expected.extend([self.cgen.stmt.arg, '");'])
         assert ''.join(expected) == '(RootM.NAMESPACE, "c");'
         assert res == expected, 'was: ' + str(res) + '\nnot: ' + str(expected)
-        
-        # 
+
         res = self.lgen._root_namespace(self.my.arg)
         expected = ['(', self.lgen.root, '.NAMESPACE, "']
         expected.extend([self.my.arg, '");'])
@@ -151,7 +150,7 @@ class Test(unittest.TestCase):
         """The correct subroutines are called from constructor"""
         # Helper function
         as_string = lambda m: '\n'.join(jpyang.JavaMethod.as_list(m))
-        
+
         # List constructors
         constructors1 = self.lgen.constructors()
         constructors2 = [self.lgen.empty_constructor()]
@@ -161,14 +160,14 @@ class Test(unittest.TestCase):
         msg = ['All 4 LIST constructors should be generated correctly']
         msg.extend(['was:', ''.join(res), 'expected:', ''.join(expected)])
         assert res == expected, '\n'.join(msg)
-        
+
         # Container constructors
         res = '\n'.join(self.cgen.constructors()[0].as_list())
         expected = '\n'.join(self.cgen.empty_constructor().as_list())
         msg = ['CONTAINER constructor generated should be parameter free']
         msg.extend(['was:', ''.join(res), 'expected:', ''.join(expected)])
         assert res == expected, '\n'.join(msg)
-        
+
         # Typedef constructors
         constructors1 = self.tgen.constructors()
         constructors2 = self.tgen.gen.constructors()
@@ -195,13 +194,13 @@ class Test(unittest.TestCase):
             expected0 = expected.format('an exact', '', '', name)
             res0 = '\n'.join(res[0].as_list())
             assert res0 == expected0, '\nwas:' + res0 + '\nnot:' + expected0
-            
+
             # Shallow clone method
             tmp = ' Children are not included.'
             expected1 = expected.format('a shallow', tmp, 'Shallow', name)
             res1 = '\n'.join(res[1].as_list())
             assert res1 == expected1, '\nwas:' + res1 + '\nnot:' + expected1
-        
+
         # Generating cloners for a typedef should return empty list
         assert self.tgen.cloners() == [], '\nwas:' + str(self.tgen.cloners())
 

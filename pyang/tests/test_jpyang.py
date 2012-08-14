@@ -10,8 +10,8 @@ $ python -m unittest discover -v
 """
 import unittest
 
-from pyang.plugins import jpyang  #@UnresolvedImport
-from pyang.tests import util  #@UnresolvedImport
+from pyang.plugins import jpyang  # @UnresolvedImport
+from pyang.tests import util  # @UnresolvedImport
 from pyang.statements import Statement
 
 
@@ -23,7 +23,7 @@ class Test(unittest.TestCase):
         # Initialize context with directory 'gen'
         util.init_context(self)
         util.test_default_context(self)
-        
+
         # Construct a statement tree: c, c/l, c/leaf, c/l/key and c/l/k
         self.c = Statement(None, None, None, 'container', arg='c')
         self.l = Statement(self.c, self.c, None, 'list', arg='l')
@@ -51,10 +51,10 @@ class Test(unittest.TestCase):
         assert res == 'TeSt', 'was: ' + res
 
     def testCamelize(self):
-        """Special, "unlikely" cases of the camelize function 
-        
+        """Special, "unlikely" cases of the camelize function
+
         Does not test for removal of any characters other than - and .
-        
+
         """
         res = jpyang.camelize('teSt')
         assert res == 'teSt', 'was: ' + res
@@ -74,16 +74,16 @@ class Test(unittest.TestCase):
         assert res == 'a-', 'was: ' + res
         res = jpyang.camelize('-a')
         assert res == 'A', 'was: ' + res
-    
+
     def testGet_package(self):
         """Correct package is retrieved for all nodes in the statement tree
-        
+
         Perform tests on all nodes in the tree. The top level statement and its
         immediate children should have the base package.
-        
+
         """
         directory = self.ctx.opts.directory
-        
+
         res = jpyang.get_package(self.c, self.ctx)
         assert res == directory, 'was: ' + res
         res = jpyang.get_package(self.leaf, self.ctx)
@@ -103,7 +103,7 @@ class Test(unittest.TestCase):
         res = jpyang.pairwise(l)
         for i in range(len(l)):
             if i != len(l) - 1:
-                assert res.next() == (l[i], l[i+1])
+                assert res.next() == (l[i], l[i + 1])
             else:
                 assert res.next() == (l[i], None)
 
@@ -123,36 +123,36 @@ class Test(unittest.TestCase):
         # Empty list
         res = jpyang.flatten([])
         assert res == [], 'was: ' + res
-        
+
         # Nested structure of empty lists
         res = jpyang.flatten([[[[], []]], [[]]])
         assert res == [], 'was: ' + res
-        
+
         # Simple case with integers
         res = jpyang.flatten([[1, 2], 3])
         assert res == [1, 2, 3], 'was: ' + res
-        
+
         # Simple case with strings
         res = jpyang.flatten([['12', '34'], ['56', ['7']]])
         assert res == ['12', '34', '56', '7'], 'was: ' + res
-        
+
         # Dictionary
         res = jpyang.flatten({'a': 1, 'b': 2})
         assert res == [1, 2], 'was: ' + res
-        
+
         # Nested dictionary, with list
         res = jpyang.flatten({'a': {'a': 1, 'b': 2}, 'b': [3, [4]]})
         assert res == [1, 2, 3, 4], 'was: ' + res
 
     def testMake_valid_identifier(self):
         """Statement arguments converts to valid Java identifiers
-        
+
         the make_valid_identifier function prepends keyword args
         with a J and that the forbidden characters . and - are removed.
-        
+
         Some simple sanity checks are performed as well. There are no tests for
         other forbidden characters than '.' and '-'.
-        
+
         """
         # Call on statement with a lowercase arg
         assert self.c.arg == 'c', 'was: ' + self.c.arg
@@ -222,7 +222,7 @@ class Test(unittest.TestCase):
         confm, primitive = jpyang.get_types(stmt, self.ctx)
         assert confm == 'com.tailf.jnc.YangUInt32', 'was: ' + confm
         assert primitive == 'long', 'was: ' + primitive
-        
+
         # TODO: Test typedefs, other non-type stmts, None and remaining types
 
     def testGet_base_type(self):
@@ -230,18 +230,18 @@ class Test(unittest.TestCase):
         # Statement not containing a type at all should return None
         res = jpyang.get_base_type(self.c)
         assert res == None, 'was: ' + res
-        
+
         # A type statement without any children should also return None
         type_stmt = Statement(None, None, None, 'type', arg='string')
         res = jpyang.get_base_type(type_stmt)
         assert res == None, 'was: ' + res.arg
-        
+
         # Adding the type statement as a child to l should work
         self.l.substmts.append(type_stmt)
         type_stmt.parent = self.l
         res = jpyang.get_base_type(self.l)
         assert res.arg == 'string', 'was: ' + res.arg
-        
+
         # Calling with the container c (parent of l) should still return None
         res = jpyang.get_base_type(self.c)
         assert res == None, 'was: ' + res.arg
