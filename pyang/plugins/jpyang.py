@@ -1661,6 +1661,7 @@ class MethodGenerator(object):
             return self.gen.setters()
 
     def checker(self):
+        """Returns a 'check' JavaMethod for generated class for self.stmt"""
         assert self.gen is not self, 'Avoid infinite recursion'
         if self.is_typedef:
             return self.gen.checker()
@@ -1736,6 +1737,17 @@ class MethodGenerator(object):
             method.add_line('return ' + self.n2 + ';')
             self.fix_imports(method, child=True)
         return res
+
+    def parent_getters(self):
+        """Returns a list of JavaMethods representing getters to include
+        in generated class of self.stmt.parent
+
+        """
+        assert self.gen is not self, 'Avoid infinite recursion'
+        if not self.is_list:
+            return None
+        else:
+            return self.gen.parent_getters()
 
     def child_iterator(self):
         """Returns a java iterator method"""
@@ -2006,6 +2018,41 @@ class ListMethodGenerator(MethodGenerator):
     def markers(self):
         return NotImplemented
 
+    def parent_deleters(self):
+        """Returns a list of methods that deletes an instance of the class to
+        be generated from the statement of this method generator to its parent
+        class.
+
+        """
+        res = [self._parent_template('delete') for _ in range(2)]
+
+        for i, method in enumerate(res):
+            method.set_return_type('void')
+            javadoc1 = ['Deletes ', self.stmt.keyword, ' entry "', self.n2,
+                        '", with specified keys.']
+            javadoc2 = []
+            path = ['String path = "', self.n2]
+            if i == 1:
+                javadoc2.append('The keys are specified as strings.')
+
+            for key in self.gen.key_stmts:
+                javadoc2.append(''.join(['@param ', key.arg,
+                    'Value Key argument of child.']))
+                param_type = 'String'
+                if i == 0:
+                    param_type, _ = get_types(key, self.ctx)
+                method.add_parameter(param_type, key.arg)
+                path.extend(['[', key.arg, '=\'" + ', key.arg, ' + "\']'])
+            path.append('";')
+
+            method.add_javadoc(''.join(javadoc1))
+            for javadoc in javadoc2:
+                method.add_javadoc(javadoc)
+            method.add_line(''.join(path))
+            method.add_line('delete(path);')
+            self.fix_imports(method, child=True)
+        return res
+
     def parent_getters(self):
         """Returns a list of methods that gets an instance of the class to be
         generated from the statement of this method generator to its parent
@@ -2015,11 +2062,6 @@ class ListMethodGenerator(MethodGenerator):
         res = [self._parent_template('get') for _ in range(2)]
 
         for i, method in enumerate(res):
-            method.add_modifier('public')
-            method.set_return_type(self.n)
-            method.set_name('get' + self.n)
-            method.add_exception('JNCException')
-
             javadoc1 = ['Gets ', self.stmt.keyword, ' entry "', self.n2,
                         '", with specified keys.']
             javadoc2 = []
@@ -2048,13 +2090,11 @@ class ListMethodGenerator(MethodGenerator):
 
     def parent_access_methods(self):
         res = []
-        _, _, jnc_keys, _ = extract_keys(self.stmt, self.ctx)
         res.append(access_methods_comment(self.stmt))
         res.extend(self.parent_getters())
         res.append(self.child_iterator())
         res.extend(self.parent_adders())
-        res.append(delete_stmt(self.stmt, args=jnc_keys))
-        res.append(delete_stmt(self.stmt, args=jnc_keys, string=True))
+        res.extend(self.parent_deleters())
         return res
 
 
