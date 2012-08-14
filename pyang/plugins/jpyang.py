@@ -1320,7 +1320,7 @@ class JavaValue(object):
         self.value = value
         self.indent = ' ' * indent
 
-        self.javadocs = []
+        self.javadocs = OrderedSet()
         if javadocs is not None:
             for javadoc in javadocs:
                 self.add_javadoc(javadoc)
@@ -1358,6 +1358,8 @@ class JavaValue(object):
             data = getattr(self, attr)
             if isinstance(data, list):
                 data.append(value)
+            elif isinstance(data, collections.MutableSet):
+                data.add(value)
             else:
                 setattr(self, attr, value)
         except AttributeError:
@@ -1429,19 +1431,20 @@ class JavaMethod(JavaValue):
         if return_type is not None:
             self.set_return_type(return_type)
 
-        self.parameters = []
+        self.parameters = OrderedSet()
         if parameters is not None:
             for param_type, param_name in parameters:
                 self.add_parameter(param_type, param_name)
 
-        self.exceptions = []
+        self.exceptions = OrderedSet()
         if exceptions is not None:
             for exc in exceptions:
                 self.add_exception(exc)
 
-        self.body = body
-        if body is None:
-            self.body = []
+        self.body = []
+        if body is not None:
+            for line in body:
+                self.add_line(line)
 
     def set_return_type(self, return_type):
         """Sets the type of the return value of this method"""
