@@ -1505,13 +1505,14 @@ class MethodGenerator(object):
     def __init__(self, stmt, ctx):
         """Sets the attributes of the method generator, depending on stmt"""
         self.stmt = stmt
-        self.n = extract_names(stmt.arg)[1]
+        self.n = normalize(stmt.arg)
+        self.n2 = camelize(stmt.arg)
         prefix = None
         if self.stmt.top is not None:
             prefix = self.stmt.top.search_one('prefix')
         self.root = None
         if prefix is not None:
-            self.root = extract_names(prefix.arg)[1]
+            self.root = normalize(prefix.arg)
         self.is_container = stmt.keyword == 'container'
         self.is_list = stmt.keyword == 'list'
         self.is_typedef = stmt.keyword == 'typedef'
@@ -1563,7 +1564,7 @@ class MethodGenerator(object):
         """Returns '([Root].NAMESPACE, "[stmt.arg]");'"""
         return ['(', self.root, '.NAMESPACE, "', stmt_arg, '");']
     
-    def constructor_template(self):
+    def _constructor_template(self):
         """Returns a constructor invoking parent constructor, without
         parameters and javadoc."""
         constructor = JavaMethod(modifiers=['public'], name=self.n)
@@ -1587,7 +1588,7 @@ class MethodGenerator(object):
         """Returns parameter-free constructor as a JavaMethod object"""
         assert not self.is_typedef, "Typedefs don't have empty constructors"
         assert not self.is_leaf and not self.is_leaflist
-        constructor = self.constructor_template()
+        constructor = self._constructor_template()
         javadoc = ['Constructor for an empty ']
         javadoc.append(self.n)
         javadoc.append(' object.')
@@ -1674,6 +1675,19 @@ class MethodGenerator(object):
         else:
             return self.gen.markers()
     
+    def _parent_template(self, method_type):
+        """Returns an access method for the statement of this method generator.
+        
+        method_type -- prefix of method name
+        
+        """
+        method = JavaMethod()
+        method.add_modifier('public')
+        method.set_return_type(self.n)
+        method.set_name(method_type + self.n)
+        method.add_exception('JNCException')
+        return self.fix_imports(method, child=True)
+    
     def parent_adders(self):
         """Returns a list of methods that adds an instance of the class to be
         generated from the statement of this method generator to its parent
@@ -1682,27 +1696,19 @@ class MethodGenerator(object):
         """
         if not (self.is_container or self.is_list):
             return None
-        res = [JavaMethod(), JavaMethod()]
-        if self.is_list:
-            
-            res.extend([JavaMethod(), JavaMethod()])
-            
-        name = normalize(self.stmt.arg)
-        name2 = camelize(self.stmt.arg)
+        number_of_adders = 2 * (1 + self.is_list)
+        res = [self._parent_template('add') for _ in range(number_of_adders)]
+        
         for i, method in enumerate(res):
-            method.add_modifier('public')
-            method.set_return_type(name)
-            method.set_name('add' + name)
-            method.add_exception('JNCException')
-            javadoc1 = ['Adds ', self.stmt.keyword, ' entry "', name2, '"']
+            javadoc1 = ['Adds ', self.stmt.keyword, ' entry "', self.n2, '"']
             javadoc2 = []
             if i == 0:  # Add existing object
                 javadoc1.append(', using an existing object.')
-                javadoc2.append(' '.join(['@param', name2, 'The object to add.']))
-                method.add_parameter(name, name2)
-            elif self.is_list and (i == 1 or (i == 2 and len(res) == 4)):
+                javadoc2.append(' '.join(['@param', self.n2, 'The object to add.']))
+                method.add_parameter(self.n, self.n2)
+            elif self.is_list and (i == 1 or i == 2) and len(res) == 4:
                 # Add child with String or JNC type keys
-                javadoc1.append(', with given key arguments.')
+                javadoc1.append(', with specified keys.')
                 if i == 2:
                     javadoc2.append('The keys are specified as strings.')
                 for key_stmt in self.gen.key_stmts:
@@ -1712,22 +1718,22 @@ class MethodGenerator(object):
                     if i == 2:
                         param_type = 'String'
                     method.add_parameter(param_type, key_stmt.arg)
-                new_child = [name, ' ', name2, ' = new ', name, '(']
+                new_child = [self.n, ' ', self.n2, ' = new ', self.n, '(']
                 new_child.append(', '.join([s.arg for s in self.gen.key_stmts]))
                 new_child.append(');')
                 method.add_line(''.join(new_child))
             else:  # Create new, for subtree filter usage
                 javadoc1.append('.')
                 javadoc2.append('This method is used for creating subtree filters.')
-                method.add_line(' '.join([name, name2, '= new', name + '();']))
+                method.add_line(' '.join([self.n, self.n2, '= new', self.n + '();']))
             method.add_javadoc(''.join(javadoc1))
             for javadoc in javadoc2:
                 method.add_javadoc(javadoc)
             method.add_javadoc('@return The added child.')
             if self.is_container:
-                method.add_line('this.' + name2 + ' = ' + name2 + ';')
-            method.add_line('insertChild(' + name2 + ', childrenNames());')
-            method.add_line('return ' + name2 + ';')
+                method.add_line('this.' + self.n2 + ' = ' + self.n2 + ';')
+            method.add_line('insertChild(' + self.n2 + ', childrenNames());')
+            method.add_line('return ' + self.n2 + ';')
             self.fix_imports(method, child=True)
         return res
     
@@ -1829,7 +1835,7 @@ class TypedefMethodGenerator(MethodGenerator):
 
         # Iterate once if string, twice otherwise
         for i in range(1 + (not self.is_string)):
-            constructor = self.constructor_template()
+            constructor = self._constructor_template()
             javadoc2 = ['Constructor for ', self.n]
             if i == 0:
                 # String constructor
@@ -1954,7 +1960,7 @@ class ListMethodGenerator(MethodGenerator):
 
         # Create constructors in a loop
         for i in range(number_of_value_constructors):
-            constructor = self.constructor_template()
+            constructor = self._constructor_template()
             constructor.add_javadoc(''.join(javadoc1))
             constructor.add_javadoc(javadoc2[i])
             constructor.add_exception('JNCException')  # TODO: Add only if needed
@@ -2006,20 +2012,18 @@ class ListMethodGenerator(MethodGenerator):
         class.
         
         """
-        res = [JavaMethod(), JavaMethod()]
-            
-        name = normalize(self.stmt.arg)
-        name2 = camelize(self.stmt.arg)
+        res = [self._parent_template('get') for _ in range(2)]
+        
         for i, method in enumerate(res):
             method.add_modifier('public')
-            method.set_return_type(name)
-            method.set_name('get' + name)
+            method.set_return_type(self.n)
+            method.set_name('get' + self.n)
             method.add_exception('JNCException')
             
-            javadoc1 = ['Gets ', self.stmt.keyword, ' entry "', name2,
+            javadoc1 = ['Gets ', self.stmt.keyword, ' entry "', self.n2,
                         '", with specified keys.']
             javadoc2 = []
-            path = ['String path = "', name2]
+            path = ['String path = "', self.n2]
             if i == 1:
                 javadoc2.append('The keys are specified as strings.')
                 
@@ -2036,9 +2040,9 @@ class ListMethodGenerator(MethodGenerator):
             method.add_javadoc(''.join(javadoc1))
             for javadoc in javadoc2:
                 method.add_javadoc(javadoc)
-            method.add_javadoc('@return The added child.')
+            method.add_javadoc('@return The child with the specified keys.')
             method.add_line(''.join(path))
-            method.add_line('return (' + name + ')searchOne(path);')
+            method.add_line('return (' + self.n + ')searchOne(path);')
             self.fix_imports(method, child=True)
         return res
     
