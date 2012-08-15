@@ -473,16 +473,6 @@ def get_base_type(stmt):
             return type_stmt
 
 
-def extract_names(arg):
-    """Returns a tuple with arg normalized and prepended with .java, and arg
-    normalized.
-
-    arg -- Any string, really
-
-    """
-    return (normalize(arg) + '.java', normalize(arg))
-
-
 def get_date(date_format=0):
     """Returns a string representation of today's date. If date_format has the
     default value of 0, the format is dd/mm/yy. Otherwise, it is on the form
@@ -669,6 +659,7 @@ class ClassGenerator(object):
 
         """  # TODO: Clarify why some arguments are optional
         self.stmt = stmt
+        self.n = normalize(stmt.arg)
         self.package = package
         self.src = src
         self.ctx = ctx
@@ -703,20 +694,20 @@ class ClassGenerator(object):
             parent_module = self.stmt.search_one('belongs-to')
             prefix = parent_module.search_one('prefix')
             ns_arg = '<unknown/prefix: ' + prefix.arg + '>'
-        (self.filename, name) = extract_names(prefix.arg)
+        self.filename = normalize(prefix.arg) + '.java'
 
         for stmt in self.stmt.substmts:
             if stmt.keyword in ('container', 'list', 'augment', 'typedef'):
                 child_generator = ClassGenerator(stmt, ns=ns_arg,
-                    prefix_name=name, top_level=True, parent=self)
+                    prefix_name=self.n, top_level=True, parent=self)
                 child_generator.generate()
 
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + self.filename + '"...'
         self.java_class = JavaClass(filename=self.filename,
                 package=self.package, description=('The root class for namespace ' +
-                    ns_arg + ' (accessible from \n * ' + name +
-                    '.NAMESPACE) with prefix "' + prefix.arg + '" (' + name +
+                    ns_arg + ' (accessible from \n * ' + self.n +
+                    '.NAMESPACE) with prefix "' + prefix.arg + '" (' + self.n +
                     '.PREFIX).'),
                 source=self.src)
 
@@ -738,7 +729,7 @@ class ClassGenerator(object):
         enabler.add_javadoc('of the data model and use the generated classes.')
         enabler.add_line('YangElement.setPackage(NAMESPACE, PREFIX);')
         enabler.add_dependency('com.tailf.jnc.YangElement')
-        enabler.add_line(name + '.registerSchema();')  # XXX: Don't import name
+        enabler.add_line(self.n + '.registerSchema();')  # XXX: Don't import self.n
         self.java_class.add_enabler(enabler)
 
         reg = JavaMethod(return_type='void', name='registerSchema')
@@ -750,7 +741,7 @@ class ClassGenerator(object):
         reg.add_javadoc('CsNode entries for all tagpaths')
         reg.add_line('StackTraceElement[] sTrace = (new Exception()).getStackTrace();')
         reg.add_line('ClassLoader loader = sTrace[0].getClass().getClassLoader();')
-        reg.add_line('URL schemaUrl = loader.getResource("' + name + '.schema");')
+        reg.add_line('URL schemaUrl = loader.getResource("' + self.n + '.schema");')
         enabler.add_dependency('java.net.URL')
         reg.add_line('SchemaParser parser = new SchemaParser();')
         enabler.add_dependency('com.tailf.jnc.SchemaParser')
@@ -760,7 +751,7 @@ class ClassGenerator(object):
         enabler.add_dependency('com.tailf.jnc.SchemaNode')
         enabler.add_dependency('com.tailf.jnc.SchemaTree')
         reg.add_line('if (schemaUrl == null)')
-        reg.add_line('    parser.readFile("' + name + '.schema", h);')
+        reg.add_line('    parser.readFile("' + self.n + '.schema", h);')
         reg.add_line('else')
         reg.add_line('    parser.readFile(schemaUrl, h);')
         self.java_class.add_schema_registrator(reg)
@@ -773,7 +764,7 @@ class ClassGenerator(object):
 
         """
         stmt = self.stmt
-        self.filename, _ = extract_names(stmt.arg)
+        self.filename = normalize(stmt.arg) + '.java'
         fields = []
 
         self.java_class = JavaClass(filename=self.filename,
@@ -887,9 +878,6 @@ class ClassGenerator(object):
                 path=self.path + camelize(sub.parent.arg) + os.sep, ns=None,
                 prefix_name=None, parent=self)
             child_generator.generate()
-#            name = extract_names(sub.arg)[1]
-#            sub_package = get_package(sub, self.ctx) + '.' + name
-#            self.java_class.add_import(sub_package, sub_package)
             if sub.keyword == 'list':
                 child_gen = MethodGenerator(sub, self.ctx)
                 for access_method in child_gen.parent_access_methods():
@@ -997,7 +985,7 @@ class PackageInfoGenerator(object):
         """
         hierarchy = []
         for stmt in stmts:
-            filename = extract_names(stmt.arg)[0]
+            filename = normalize(stmt.arg) + '.Java'
             if filename in java_files:
                 java_files.remove(filename)
                 hierarchy.append(filename)
