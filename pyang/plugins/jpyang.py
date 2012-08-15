@@ -236,7 +236,8 @@ class JPyangPlugin(plugin.PyangPlugin):
         # Generate javadoc
         for module in modules:
             if module.keyword == 'module':
-                package_info_generator = PackageInfoGenerator(d, module, ctx)
+                pkg = d if d[:3] != src else d[4:]
+                package_info_generator = PackageInfoGenerator(pkg, module, ctx)
                 package_info_generator.generate_package_info()
         javadir = ctx.opts.javadoc_directory
         if javadir:
@@ -480,11 +481,6 @@ def is_config(stmt):
         config = stmt.search_one('config')
         stmt = stmt.parent
     return config is None or config.arg == 'true'
-
-
-def strip_first(s):
-    """Returns s but with chars up to and including '.' or '/' removed"""
-    return '.'.join(s.replace(os.sep, '.').split('.')[1:])
 
 
 def indent(lines, level=1):
@@ -933,8 +929,8 @@ class PackageInfoGenerator(object):
         java_files = filter(is_java_file, directory_listing)
         dirs = filter(is_not_java_file, directory_listing)
         class_hierarchy = self.generate_javadoc(self.stmt.substmts, java_files)
-        write_file(self.d, 'package-info.java', self.gen_package_info(class_hierarchy,
-            self.d.replace(os.sep, '.')), self.ctx)
+        write_file(self.d, 'package-info.java',
+                   self.gen_package_info(class_hierarchy), self.ctx)
         for directory in dirs:
             for sub in self.stmt.substmts:
                 if normalize(sub.arg) == normalize(directory):
@@ -1012,12 +1008,11 @@ class PackageInfoGenerator(object):
         body += '</' + tag + '>'
         return indent(body.split('\n'), indent_level)
 
-    def gen_package_info(self, class_hierarchy, package):
+    def gen_package_info(self, class_hierarchy):
         """Writes a package-info.java file to the package directory with a high
         level description of the package functionality and requirements.
 
         class_hierarchy -- A tree represented as a list as in parse_hierarchy
-        ctx             -- Context used only for debugging purposes
 
         """
         if self.ctx.opts.verbose:
@@ -1059,7 +1054,7 @@ class PackageInfoGenerator(object):
         'target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">' +
         'RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>\n' +
         ' * @see <a target="_top" href="http://www.tail-f.com">Tail-f ' +
-        'Systems</a>\n */\npackage ' + strip_first(self.d) + ';'))
+        'Systems</a>\n */\npackage ' + self.d + ';'))
 
 
 class JavaClass(object):
@@ -1096,7 +1091,7 @@ class JavaClass(object):
         if imports is None:
             imports = []
         self.filename = filename
-        self.package = package
+        self.package = package if package[:3] != 'src' else package[4:]
         self.imports = OrderedSet()
         for i in range(len(imports)):
             self.imports.add(imports[i])
@@ -1218,7 +1213,7 @@ class JavaClass(object):
 
         # package and import statement goes here
         header.append('')
-        header.append('package ' + strip_first(self.package) + ';')
+        header.append('package ' + self.package + ';')
         if self.body is None:
             for method in flatten(self.attrs):
                 if hasattr(method, 'imports'):
