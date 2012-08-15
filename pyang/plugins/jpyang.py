@@ -486,11 +486,6 @@ def get_date(date_format=0):
         return '-'.join(map(str, [time.year, time.month, time.day]))
 
 
-def is_module(stmt):
-    """Returns True iff stmt is a module or submodule."""
-    return stmt.keyword == 'module' or stmt.keyword == 'submodule'
-
-
 def is_container(stmt, strict=False):
     """Returns True iff stmt is a list, container or something of the sort."""
     return (stmt.keyword == 'container' or
@@ -571,7 +566,7 @@ class SchemaNode(object):
             key = stmt.parent.search_one('key')
         isKey = key is not None and key.arg == stmt.arg
         childOfContainerOrList = (stmt.parent is not None and is_container(stmt.parent))
-        if (is_module(stmt) or isKey or
+        if (stmt in ('module', 'submodule') or isKey or
             (childOfContainerOrList and is_container(stmt, True))):
             min_occurs = '1'
             max_occurs = '1'
