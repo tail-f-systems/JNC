@@ -435,20 +435,20 @@ def make_valid_identifiers(stmt):
     return stmt
 
 
-def get_imports(generic_type):
-    """Get list of types separated by '<', '>', ',' or ' ' in generic_type."""
+def partition(string, delimiters=('<', '>', ',', ' ')):
+    """Returns list of non-empty tokens separated by delimiters in string."""
     res = []
-    delim_pos = map(generic_type.find, ('<', '>', ',', ' '))
+    delim_pos = map(string.find, delimiters)
     try:
-        next_delim = min(filter(lambda x: x >= 0, delim_pos))
+        next_delim_pos = min(filter(lambda x: x >= 0, delim_pos))
     except ValueError:
-        if generic_type:
-            res.append(generic_type)
+        if string:
+            res.append(string)
     else:
-        next_token = generic_type[:next_delim]
+        next_token = string[:next_delim_pos]
         if next_token:
             res.append(next_token)
-        res.extend(get_imports(generic_type[(next_delim + 1):]))
+        res.extend(partition(string[(next_delim_pos + 1):], delimiters))
     return res
 
 

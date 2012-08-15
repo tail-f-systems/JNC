@@ -246,8 +246,8 @@ class Test(unittest.TestCase):
         res = jpyang.get_base_type(self.c)
         assert res == None, 'was: ' + res.arg
 
-    def testGet_imports(self):
-        res = jpyang.get_imports('HashMap<Tagpath, SchemaNode>')
+    def testPartition(self):
+        res = jpyang.partition('HashMap<Tagpath, SchemaNode>')
         expected = ['HashMap', 'Tagpath', 'SchemaNode']
         assert res == expected, 'was: ' + str(res)
 
