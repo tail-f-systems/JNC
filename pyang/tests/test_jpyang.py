@@ -188,10 +188,12 @@ class Test(unittest.TestCase):
         assert res == None, 'was: ' + res.arg
 
     def testRe_split(self):
-        from re import split
+        from re import split, findall
         res = filter(None, split('[< >,]', 'HashMap<Tagpath, SchemaNode>'))
+        res2 = filter(None, findall(r'\w+', 'HashMap<Tagpath, SchemaNode>'))
         expected = ['HashMap', 'Tagpath', 'SchemaNode']
         assert res == expected, 'was: ' + str(res)
+        assert res2 == res, 'was: ' + str(res2)
 
 
 if __name__ == "__main__":
