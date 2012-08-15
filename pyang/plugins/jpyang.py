@@ -42,7 +42,6 @@ from datetime import date
 from pyang import plugin
 from pyang import util
 from pyang import error
-import re
 
 
 # TODO: Might be more efficient to use dicts instead of set and list for these
@@ -438,7 +437,8 @@ def make_valid_identifiers(stmt):
 
 def partition(string, delimiters=('< >,')):
     """Returns list of non-empty tokens separated by delimiters in string."""
-    return filter(None, re.split('[' + delimiters + ']+', string))
+    from re import split
+    return filter(None, split('[' + ''.join(delimiters) + ']', string))
 
 
 def get_types(yang_type, ctx):
