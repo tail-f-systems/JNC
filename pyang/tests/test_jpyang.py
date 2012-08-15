@@ -246,8 +246,9 @@ class Test(unittest.TestCase):
         res = jpyang.get_base_type(self.c)
         assert res == None, 'was: ' + res.arg
 
-    def testPartition(self):
-        res = jpyang.partition('HashMap<Tagpath, SchemaNode>')
+    def testRe_split(self):
+        from re import split
+        res = filter(None, split('[< >,]', 'HashMap<Tagpath, SchemaNode>'))
         expected = ['HashMap', 'Tagpath', 'SchemaNode']
         assert res == expected, 'was: ' + str(res)
 
