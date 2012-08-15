@@ -531,6 +531,7 @@ class SchemaNode(object):
 
         min_occurs = '0'
         max_occurs = '-1'
+
         mandatory = stmt.search_one('mandatory')
         isMandatory = mandatory is not None and mandatory.arg == 'true'
         unique = stmt.search_one('unique')
@@ -540,8 +541,8 @@ class SchemaNode(object):
             key = stmt.parent.search_one('key')
         isKey = key is not None and key.arg == stmt.arg
         childOfContainerOrList = (stmt.parent is not None
-                                  and stmt.parent.arg in ('container', 'list'))
-        if (isKey or stmt in ('module', 'submodule') or
+            and stmt.parent.keyword in ('container', 'list'))
+        if (isKey or stmt.keyword in ('module', 'submodule') or
             (childOfContainerOrList and stmt.keyword in ('container',))):
             min_occurs = '1'
             max_occurs = '1'
