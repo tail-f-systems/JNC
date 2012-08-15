@@ -42,7 +42,6 @@ from datetime import date
 from pyang import plugin
 from pyang import util
 from pyang import error
-from pyang import statements
 
 
 # TODO: Might be more efficient to use dicts instead of set and list for these
@@ -771,9 +770,28 @@ class ClassGenerator(object):
                     '.NAMESPACE) with prefix "' + prefix.arg + '" (' + name +
                     '.PREFIX).'),
                 source=self.src)
-        self.java_class.add_field(static_string('NAMESPACE', ns_arg))
-        self.java_class.add_field(static_string('PREFIX', prefix.arg))
-        self.java_class.add_enabler(enable(name))
+
+        root_fields = [JavaValue(), JavaValue()]
+        root_fields[0].set_name('NAMESPACE')
+        root_fields[1].set_name('PREFIX')
+        root_fields[0].value = '"' + ns_arg + '"'
+        root_fields[1].value = '"' + prefix.arg + '"'
+        for root_field in root_fields:
+            for modifier in ('public', 'static', 'final', 'String'):
+                root_field.add_modifier(modifier)
+            self.java_class.add_field(root_field)
+
+        enabler = JavaMethod(return_type='void', name='enable')
+        enabler.exceptions = ['JNCException']  # XXX: Don't use add method
+        enabler.add_dependency('com.tailf.jnc.JNCException')
+        enabler.modifiers = ['public', 'static']
+        enabler.add_javadoc('Enable the elements in this namespace to be aware')
+        enabler.add_javadoc('of the data model and use the generated classes.')
+        enabler.add_line('YangElement.setPackage(NAMESPACE, PREFIX);')
+        enabler.add_dependency('com.tailf.jnc.YangElement')
+        enabler.add_line(name + '.registerSchema();')  # XXX: Don't import name
+        self.java_class.add_enabler(enabler)
+
         self.java_class.add_schema_registrator(register_schema(name))
         self.write_to_file()
 
@@ -1247,8 +1265,6 @@ class JavaClass(object):
         if self.interfaces:
             res.append(' implements ')
             res.append(', '.join(self.interfaces))
-        if res:
-            res.append(' ')
         return ''.join(res)
 
     def as_list(self):
@@ -1305,7 +1321,7 @@ class JavaClass(object):
         header.append(''.join(['public class ',
                                self.filename.split('.')[0],
                                self.get_superclass_and_interfaces(),
-                               '{']))
+                               ' {']))
         header.append('')
         return header + self.get_body()
 
@@ -1849,7 +1865,7 @@ class MethodGenerator(object):
         if not(self.is_leaflist or self.is_list):
             return None
         res = JavaMethod(name=self.stmt.arg + 'Iterator')
-        res.add_javadoc(''.join(['Iterator method for the ', self.stmt.keyword, 
+        res.add_javadoc(''.join(['Iterator method for the ', self.stmt.keyword,
                                  ' "', self.stmt.arg, '".']))
         res.add_javadoc(''.join(['@return An iterator for the ',
                                  self.stmt.keyword, '.']))
@@ -2198,29 +2214,6 @@ class ListMethodGenerator(MethodGenerator):
         res.extend(self.parent_adders())
         res.extend(self.parent_deleters())
         return res
-
-
-def static_string(identifier, value):
-    """Returns a string representing java code for two fields"""
-    return '''    public static final String ''' + identifier + ' = "' + value + '";'
-
-
-def enable(prefix_name):
-    """Returns a string representing a java method that calls the
-    YangElement.setPackage method of the jnc library, and the registerSchema
-    method of the class with prefix == prefix_name (typically = this).
-
-    prefix_name -- The name of the class containing the registerSchema method
-
-    """
-    return '''    /**
-     * Enable the elements in this namespace to be aware
-     * of the data model and use the generated classes.
-     */
-    public static void enable() throws JNCException {
-        YangElement.setPackage(NAMESPACE, PREFIX);
-        ''' + prefix_name + '''.registerSchema();
-    }'''
 
 
 def register_schema(prefix_name):
