@@ -74,10 +74,24 @@ java_util = {'Collection', 'Enumeration', 'Iterator', 'List', 'ListIterator',
 java_built_in = java_reserved_words | java_lang
 
 
-immutable_stmts = {'type', 'typedef', 'namespace', 'prefix', 'organization',
-    'contact', 'description', 'range'}
-"""A set of statement keywords that should not have their arguments modified"""
-# TODO: add more keywords to immutable_stmts
+package_info = '''/**
+ * This class hierarchy was generated from the Yang module
+ * by the <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">JPyang</a> plugin of <a target="_top" href="http://code.google.com/p/pyang/">pyang</a>.
+ * The generated classes may be used to manipulate pieces of configuration data
+ * with NETCONF operations such as edit-config, delete-config and lock. These
+ * operations are typically accessed through the JNC Java library by
+ * instantiating Device objects and setting up NETCONF sessions with real
+ * devices using a compatible YANG model.
+ '''
+
+
+useful_links = ''' * @see <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">JPyang project page</a>
+ * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6020.txt">RFC 6020: YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF)</a>
+ * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6241.txt">RFC 6241: Network Configuration Protocol (NETCONF)</a>
+ * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>
+ * @see <a target="_top" href="http://www.tail-f.com">Tail-f Systems</a>
+ */
+ package '''
 
 
 outputted_warnings = []
@@ -236,8 +250,7 @@ class JPyangPlugin(plugin.PyangPlugin):
         # Generate javadoc
         for module in modules:
             if module.keyword == 'module':
-                pkg = d if d[:3] != src else d[4:]
-                package_info_generator = PackageInfoGenerator(pkg, module, ctx)
+                package_info_generator = PackageInfoGenerator(d, module, ctx)
                 package_info_generator.generate_package_info()
         javadir = ctx.opts.javadoc_directory
         if javadir:
@@ -481,22 +494,6 @@ def is_config(stmt):
         config = stmt.search_one('config')
         stmt = stmt.parent
     return config is None or config.arg == 'true'
-
-
-def indent(lines, level=1):
-    """Returns a string consisting of all strings in lines concatenated,
-    each string prepended by a level*4 number of spaces and appended with
-    a newline, except the last which has no newline.
-
-    lines -- list of strings
-    level -- indentation level (number of spaces divided by 4)
-
-    """
-    # TODO: implement a more efficient version using replace on strings
-    res = ''
-    for line in lines:
-        res += ' ' * level * 4 + line + '\n'
-    return res[:-1]  # Don't include the last newline character
 
 
 def java_docify(s):
@@ -915,12 +912,13 @@ class PackageInfoGenerator(object):
 
         """
         self.d = directory
+        self.pkg = directory if directory[:3] != 'src' else directory[4:]
         self.stmt = stmt
         self.ctx = ctx
 
     def generate_package_info(self):
-        """Main generator method: generates package-info content and writes it
-        to a file
+        """Main generator method: generates package-info files for self.stmt
+        and all of its substatements.
 
         """
         is_java_file = lambda s: s.endswith('.java')
@@ -936,10 +934,15 @@ class PackageInfoGenerator(object):
                 if normalize(sub.arg) == normalize(directory):
                     old_d = self.d
                     self.d += os.sep + directory
+                    old_pkg = self.pkg
+                    self.pkg += '.' + directory
                     old_stmt = self.stmt
                     self.stmt = sub
+
                     self.generate_package_info()
+
                     self.d = old_d
+                    self.pkg = old_pkg
                     self.stmt = old_stmt
 
     @staticmethod
@@ -1006,7 +1009,7 @@ class PackageInfoGenerator(object):
         if body[-1:] != '\n':
             body += '\n'
         body += '</' + tag + '>'
-        return indent(body.split('\n'), indent_level)
+        return ' ' * 4 + body.replace('\n', '\n' + ' ' * 4)
 
     def gen_package_info(self, class_hierarchy):
         """Writes a package-info.java file to the package directory with a high
@@ -1015,46 +1018,7 @@ class PackageInfoGenerator(object):
         class_hierarchy -- A tree represented as a list as in parse_hierarchy
 
         """
-        if self.ctx.opts.verbose:
-            print 'Generating package description package-info.java...'
-        src = source = ''
-        decapitalize = lambda s: s[:1].lower() + s[1:] if s else ''
-        top_level_entries = filter(self.is_not_list, class_hierarchy)
-        for entry in top_level_entries:
-            module_arg = decapitalize(entry[:-5])
-            rev = 'unknown'  # FIXME: Fetch revision
-            src += 'module "' + module_arg + '" (rev "' + rev + '"), '
-        if len(top_level_entries) > 1:
-            source += 's'
-        source += '\n' + src[:-2]
-        html_hierarchy = self.html_list(self.parse_hierarchy(class_hierarchy), 0)
-        specification = ('''
-    This class hierarchy was generated from the Yang module''' + source +
-    ' by the <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">' +
-    'JPyang</a> plugin of <a target="_top" ' +
-    '''href="http://code.google.com/p/pyang/">pyang</a>.
-    The generated classes may be used to manipulate pieces of configuration data
-    with NETCONF operations such as edit-config, delete-config and lock. These
-    operations are typically accessed through the ConfM Java library by
-    instantiating Device objects and setting up NETCONF sessions with real devices
-    using a compatible YANG model.
-
-    ''')
-        # XXX: These strings should probably be rewritten for code readability and
-        # ... to comply with the actual functionality of the class
-        return ('/**' + java_docify(specification + html_hierarchy) + ('''
-     *
-     * @see <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">''' +
-        'JPyang project page</a>\n * @see <a target="_top" ' +
-        'href="ftp://ftp.rfc-editor.org/in-notes/rfc6020.txt">' +
-        'RFC 6020: YANG - A Data Modeling Language for the Network ' +
-        'Configuration Protocol (NETCONF)</a>\n * @see <a target="_top" ' +
-        'href="ftp://ftp.rfc-editor.org/in-notes/rfc6241.txt">RFC 6241: ' +
-        'Network Configuration Protocol (NETCONF)</a>\n * @see <a ' +
-        'target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">' +
-        'RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>\n' +
-        ' * @see <a target="_top" href="http://www.tail-f.com">Tail-f ' +
-        'Systems</a>\n */\npackage ' + self.d + ';'))
+        return ''.join([package_info, '* <p>\n', useful_links, self.pkg, ';'])
 
 
 class JavaClass(object):
@@ -1513,7 +1477,7 @@ class MethodGenerator(object):
                 res.add(dependency)
                 continue
             elif dependency.endswith('>'):
-                for token in filter(None, re.split('[< >,]', dependency)):
+                for token in filter(None, re.findall(r'\w+', dependency)):
                     res.add(self.canonical_import(token, child))
             elif dependency.endswith(']'):
                 assert dependency[:-2] and dependency[-2:] == '[]'
