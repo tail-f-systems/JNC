@@ -473,29 +473,6 @@ def get_base_type(stmt):
             return type_stmt
 
 
-def extract_keys(stmt, ctx):
-    """Returns the key statement of stmt and lists containing tuples with the
-    jnc (and primitive, respectively) type of the key and its identifier.
-
-    stmt -- Typically a list statement
-    ctx  -- Context used for passing debug flags
-
-    """
-    key = stmt.search_one('key')
-    jnc_keys = []
-    primitive_keys = []
-    only_strings = True
-    for arg in key.arg.split(' '):
-        key_type = stmt.search_one('leaf', arg).search_one('type')
-        jnc, primitive = get_types(key_type, ctx)
-        jnc_keys.append((jnc, arg))
-        primitive_keys.append((primitive, arg))
-        only_strings *= primitive_keys[-1][0] == 'String'
-        # XXX: 'b *= a' is syntactically equivalent to b = b and a
-
-    return key, only_strings, jnc_keys, primitive_keys
-
-
 def extract_names(arg):
     """Returns a tuple with arg normalized and prepended with .java, and arg
     normalized.
