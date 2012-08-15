@@ -189,7 +189,6 @@ class JPyangPlugin(plugin.PyangPlugin):
         for module in modules:
             if module.keyword == 'module':
                 # Generate Java classes
-                module = make_valid_identifiers(module)
                 src = ('module "' + module.arg + '", revision: "' +
                     util.get_latest_revision(module) + '".')
                 generator = ClassGenerator(module, package=directory, src=src, ctx=ctx)
@@ -237,7 +236,6 @@ class JPyangPlugin(plugin.PyangPlugin):
         # Generate javadoc
         for module in modules:
             if module.keyword == 'module':
-                module = make_valid_identifiers(module)
                 package_info_generator = PackageInfoGenerator(d, module, ctx)
                 package_info_generator.generate_package_info()
         javadir = ctx.opts.javadoc_directory
@@ -338,7 +336,7 @@ def get_package(stmt, ctx):
     while stmt.parent is not None:
         stmt = stmt.parent
         if stmt.parent is not None:
-            sub_packages.appendleft(stmt.arg)
+            sub_packages.appendleft(camelize(stmt.arg))
     full_package = collections.deque(ctx.opts.directory.split(os.sep))
     full_package.extend(sub_packages)
     if full_package and full_package[0] == 'src':
@@ -382,7 +380,10 @@ def camelize(string):
 
 def normalize(string):
     """returns capitalize_first(camelize(string))"""
-    return capitalize_first(camelize(string))
+    if string in java_reserved_words:
+        return 'J' + capitalize_first(camelize(string))
+    else:
+        return capitalize_first(camelize(string))
 
 
 def flatten(l):
@@ -405,35 +406,6 @@ def flatten(l):
         else:
             res.extend(flatten(item))
     return res
-
-
-def make_valid_identifier(stmt):
-    """Prepends a J character to the args field of stmt if it is a Java
-    keyword. Replaces hyphens and dots with an underscore character.
-
-    """
-    if stmt and stmt.keyword not in immutable_stmts and stmt.arg:
-        stmt.arg = camelize(stmt.arg)
-        if stmt.arg in java_reserved_words:
-            stmt.arg = 'J' + stmt.arg
-    return stmt
-
-
-def make_valid_identifiers(stmt):
-    """Calls make_valid_identifier on stmt and its substatements"""
-    stmt = make_valid_identifier(stmt)
-    valid_substmts = []
-    valid_i_children = []
-    for sub in stmt.substmts:
-        valid_substmts.append(make_valid_identifiers(sub))
-    stmt.substmts = valid_substmts
-    try:
-        for ch in stmt.i_children:
-            valid_i_children.append(make_valid_identifiers(ch))
-        stmt.i_children = valid_i_children
-    except AttributeError:
-        pass
-    return stmt
 
 
 def get_types(yang_type, ctx):
@@ -935,8 +907,8 @@ class ClassGenerator(object):
         add = self.java_class.append_access_method  # XXX: add is a function
         if sub.keyword in ('list', 'container', 'typedef'):
             child_generator = ClassGenerator(stmt=sub,
-                package=self.package + '.' + sub.parent.arg,
-                path=self.path + sub.parent.arg + os.sep, ns=None,
+                package=self.package + '.' + camelize(sub.parent.arg),
+                path=self.path + camelize(sub.parent.arg) + os.sep, ns=None,
                 prefix_name=None, parent=self)
             child_generator.generate()
 #            name = extract_names(sub.arg)[1]
@@ -1029,10 +1001,7 @@ class PackageInfoGenerator(object):
             self.d.replace(os.sep, '.')), self.ctx)
         for directory in dirs:
             for sub in self.stmt.substmts:
-                # XXX: refactor
-                if(camelize(capitalize_first(sub.arg)) ==
-                   camelize(capitalize_first(directory).replace('.',
-                        '?')).replace('?', '.')):
+                if normalize(sub.arg) == normalize(directory):
                     old_d = self.d
                     self.d += os.sep + directory
                     old_stmt = self.stmt
@@ -1600,7 +1569,7 @@ class MethodGenerator(object):
         elif import_ == self.root:
             return '.'.join(self.rootpkg + [import_])
         elif import_ in self.children:
-            return '.'.join([self.pkg, self.stmt.arg, import_])
+            return '.'.join([self.pkg, camelize(self.stmt.arg), import_])
         elif child and import_ == normalize(self.stmt.arg):
             return '.'.join([self.pkg, import_])
         else:
@@ -1748,7 +1717,6 @@ class MethodGenerator(object):
                                return_type='void',
                                name='addChild',
                                parameters=[('Element', 'child')])
-        add_child.add_dependency('Element')
         add_child.add_javadoc('Support method for addChild.')
         add_child.add_javadoc('Adds a child to this object.')
         add_child.add_javadoc('')
@@ -1761,9 +1729,9 @@ class MethodGenerator(object):
             if i > 0:
                 cond = 'else '
             add_child.add_line(''.join([cond, 'if (child instanceof ',
-                    capitalize_first(fields[i]), ') ', fields[i], ' = (',
-                    capitalize_first(fields[i]), ')child;']))
-            add_child.add_dependency(capitalize_first(fields[i]))
+                    normalize(fields[i]), ') ', camelize(fields[i]), ' = (',
+                    normalize(fields[i]), ')child;']))
+            add_child.add_dependency(normalize(fields[i]))
         return self.fix_imports(add_child)
 
     def setters(self):
@@ -1881,7 +1849,7 @@ class MethodGenerator(object):
         """Returns a java iterator method"""
         if not(self.is_leaflist or self.is_list):
             return None
-        res = JavaMethod(name=self.stmt.arg + 'Iterator')
+        res = JavaMethod(name=camelize(self.stmt.arg) + 'Iterator')
         res.add_javadoc(''.join(['Iterator method for the ', self.stmt.keyword,
                                  ' "', self.stmt.arg, '".']))
         res.add_javadoc(''.join(['@return An iterator for the ',
@@ -1929,8 +1897,7 @@ class LeafMethodGenerator(MethodGenerator):
         if not self.is_string and self.is_leaflist:
             mark_methods.append(JavaMethod())
         for i, mark_method in enumerate(mark_methods):
-            mark_method.set_name('mark' + capitalize_first(self.stmt.arg)
-                                 + capitalize_first(op))
+            mark_method.set_name('mark' + normalize(self.stmt.arg) + normalize(op))
             mark_method.add_modifier('public')
             mark_method.set_return_type('void')
             mark_method.add_exception('JNCException')
@@ -1947,7 +1914,7 @@ class LeafMethodGenerator(MethodGenerator):
                     param_type = 'String'
                 mark_method.add_parameter(param_type, self.stmt.arg + 'Value')
                 mark_method.add_javadoc(javadoc)
-            mark_method.add_line('markLeaf' + capitalize_first(op) + '("' + path + '");')
+            mark_method.add_line('markLeaf' + normalize(op) + '("' + path + '");')
             self.fix_imports(mark_method, child=True)
         return mark_methods
 
@@ -1993,8 +1960,7 @@ class TypedefMethodGenerator(MethodGenerator):
             constructor.add_javadoc(''.join(javadoc))
             if self.needs_check:
                 constructor.add_line('check();')
-                exception = constructor.add_dependency('YangException')
-                constructor.add_exception(exception)
+                constructor.add_exception('YangException')
             constructors.append(self.fix_imports(constructor))
         return constructors
 
@@ -2235,10 +2201,10 @@ class ListMethodGenerator(MethodGenerator):
 
 def child_field(stmt):
     """Returns a string representing java code for a field"""
-    res = JavaValue(name=stmt.arg, value='null')
+    res = JavaValue(name=camelize(stmt.arg), value='null')
     res.add_javadoc('Field for child ' + stmt.keyword + ' "' + stmt.arg + '".')
     res.add_modifier('public')
-    res.add_modifier(capitalize_first(stmt.arg))
+    res.add_modifier(normalize(stmt.arg))
     # FIXME Add dependency: Need context (ctx) or package
 #    pkg = ctx.opts.directory
 #    if pkg.startswith('src' + os.sep):
@@ -2256,7 +2222,7 @@ def get_value(stmt, ret_type='com.tailf.jnc.YangString'):
     ret_type -- The type of the return value of the generated method
 
     """
-    name = capitalize_first(stmt.arg)
+    name = normalize(stmt.arg)
     return '''    /**
      * Return the value for child ''' + stmt.keyword + ' "' + stmt.arg + '''".
      * @return The value of the ''' + stmt.keyword + '''.
@@ -2270,15 +2236,15 @@ def get_value(stmt, ret_type='com.tailf.jnc.YangString'):
 def set_leaf_value(stmt, prefix='', arg_type='', jnc_type=''):
     """set<Identifier>Value method generator, specifically for leafs.
 
-    stmt       -- Typically a leaf statement
-    prefix     -- Namespace prefix of module, empty if the setLeafValue or
-                  setLeafListValue methods are not to be used in the method
-    arg_type   -- Type of method parameter, empty if parameter free
+    stmt     -- Typically a leaf statement
+    prefix   -- Namespace prefix of module, empty if the setLeafValue or
+                setLeafListValue methods are not to be used in the method
+    arg_type -- Type of method parameter, empty if parameter free
     jnc_type -- Type to use internally, empty if the setIdValue method is not
-                  to be used in the method
+                to be used in the method
 
     """
-    name = capitalize_first(stmt.arg)
+    name = normalize(stmt.arg)
     spec1 = spec2 = ''
     MAX_COLS = 80 - len(('     * Sets the value for child ' + stmt.keyword +
         ' "' + stmt.arg + '",.'))  # Space left to margin
@@ -2304,14 +2270,14 @@ def set_leaf_value(stmt, prefix='', arg_type='', jnc_type=''):
             body = 'setLeafValue('
         body += prefix + '''.NAMESPACE,
             "''' + stmt.arg + '''",
-            ''' + stmt.arg + '''Value,
+            ''' + camelize(stmt.arg) + '''Value,
             childrenNames());'''
     else:
-        body = ('set' + name + 'Value(new ' + jnc_type + '(' + stmt.arg +
-            'Value));')
+        body = (''.join(['set', name, 'Value(new ', jnc_type, '(',
+                         camelize(stmt.arg), 'Value));']))
 
     # Prepare method argument listing
-    argument = arg_type + ' ' + stmt.arg + 'Value'
+    argument = arg_type + ' ' + camelize(stmt.arg) + 'Value'
     if arg_type == '':
         # Special case of no argument
 
@@ -2333,7 +2299,7 @@ def set_value(stmt, nameID='', spec1='', spec2='', argument='', body=''):
     """
     if argument:
         spec1 += '''.
-     * @param ''' + stmt.arg + 'Value The ' + spec2 + 'value to set'
+     * @param ''' + camelize(stmt.arg) + 'Value The ' + spec2 + 'value to set'
     return ('''    /**
      * Sets the value for child ''' + stmt.keyword + ' "' + stmt.arg + '"' +
         spec1 + '''.
@@ -2349,7 +2315,7 @@ def unset_value(stmt):
     return '''    /**
      * Unsets the value for child ''' + stmt.keyword + ' "' + stmt.arg + '''".
      */
-    public void unset''' + capitalize_first(stmt.arg) + '''Value()
+    public void unset''' + normalize(stmt.arg) + '''Value()
         throws JNCException {
         delete("''' + stmt.arg + '''");
     }'''
@@ -2368,7 +2334,7 @@ def add_value(stmt, prefix):
     if stmt.keyword == 'leaf-list':
         name = 'Empty'
         value_type = 'List'
-    name += capitalize_first(stmt.arg)
+    name += normalize(stmt.arg)
     return ('''    /**
      * This method is used for creating a subtree filter.
      * The added "''' + stmt.arg + '" ' + stmt.keyword +
@@ -2428,7 +2394,7 @@ def delete_stmt(stmt, args=None, string=False, keys=True):
     return '''    /**
      * Deletes ''' + stmt.keyword + ' entry "' + stmt.arg + spec1 + '''"
      */
-    public void delete''' + capitalize_first(stmt.arg) + '(' + arguments[:-2] + ''')
+    public void delete''' + normalize(stmt.arg) + '(' + arguments[:-2] + ''')
         throws JNCException {
         ''' + spec2 + 'String path = "' + stmt.arg + spec3 + '''";
         delete(path);
