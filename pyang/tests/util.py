@@ -160,7 +160,7 @@ def test_method_generators(self):
         # Correct generator statement value, reference, name and root
         assert gen.stmt == stmt, 'was: ' + stmt.arg
         assert gen.stmt is stmt, 'statement of ' + genattr + ' should be ' + stmt.arg
-        assert gen.n == jpyang.extract_names(stmt.arg)[1], 'was: ' + gen.n
+        assert gen.n == jpyang.normalize(gen.stmt.arg), 'was: ' + gen.n
         assert gen.root == 'RootM', 'was: ' + gen.root
 
         # Correct values of fields

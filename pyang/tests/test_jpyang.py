@@ -144,65 +144,6 @@ class Test(unittest.TestCase):
         res = jpyang.flatten({'a': {'a': 1, 'b': 2}, 'b': [3, [4]]})
         assert res == [1, 2, 3, 4], 'was: ' + res
 
-    def testMake_valid_identifier(self):
-        """Statement arguments converts to valid Java identifiers
-
-        the make_valid_identifier function prepends keyword args
-        with a J and that the forbidden characters . and - are removed.
-
-        Some simple sanity checks are performed as well. There are no tests for
-        other forbidden characters than '.' and '-'.
-
-        """
-        # Call on statement with a lowercase arg
-        assert self.c.arg == 'c', 'was: ' + self.c.arg
-        res = jpyang.make_valid_identifier(self.c)
-        assert self.c.arg == 'c', 'was: ' + self.c.arg
-        assert res.arg == 'c', 'was: ' + res.arg
-
-        # Call on statement with arg containing hyphens
-        stmt = Statement(None, None, None, 'container', arg='test-hyphen')
-        assert stmt.arg == 'test-hyphen', 'was: ' + stmt.arg
-        res = jpyang.make_valid_identifier(stmt)
-        assert stmt.arg == 'testHyphen', 'was: ' + stmt.arg
-        assert res.arg == 'testHyphen', 'was: ' + res.arg
-
-        # Call on statement with no arg
-        stmt = Statement(None, None, None, 'container', arg=None)
-        assert stmt.arg == None, 'was: ' + stmt.arg
-        res = jpyang.make_valid_identifier(stmt)
-        assert stmt.arg == None, 'was: ' + stmt.arg
-        assert res.arg == None, 'was: ' + res.arg
-
-        # Call on statement with arg = boolean
-        stmt = Statement(None, None, None, 'container', arg='boolean')
-        assert stmt.arg == 'boolean', 'was: ' + stmt.arg
-        res = jpyang.make_valid_identifier(stmt)
-        assert stmt.arg == 'Jboolean', 'was: ' + stmt.arg
-        assert res.arg == 'Jboolean', 'was: ' + res.arg
-
-        # Check that all reserved words are handled correctly
-        assert len(jpyang.java_reserved_words) > 0
-        for word in jpyang.java_reserved_words:
-            stmt = Statement(None, None, None, 'leaf', arg=word)
-            assert stmt.arg == word, 'was: ' + stmt.arg
-            ok = 'J' + jpyang.camelize(stmt.arg)
-            jpyang.make_valid_identifier(stmt)
-            assert stmt.arg == ok, 'was: ' + stmt.arg + ' (not ' + ok + ')'
-
-    def testMake_valid_identifiers(self):
-        """Tree is recursed correctly"""
-        self.c.arg = 'interface'
-        assert self.c.arg == 'interface', 'was: ' + self.c.arg
-        self.key.arg = 'long'
-        assert self.key.arg == 'long', 'was: ' + self.c.arg
-        jpyang.make_valid_identifiers(self.k)
-        assert self.c.arg == 'interface', 'was: ' + self.c.arg
-        assert self.key.arg == 'long', 'was: ' + self.c.arg
-        jpyang.make_valid_identifiers(self.c)
-        assert self.c.arg == 'Jinterface', 'was: ' + self.c.arg
-        assert self.key.arg == 'long', 'was: ' + self.c.arg
-
     def testGet_types(self):
         """Type conversions for string, int32, etc."""
         # String
