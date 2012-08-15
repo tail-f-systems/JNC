@@ -435,6 +435,23 @@ def make_valid_identifiers(stmt):
     return stmt
 
 
+def get_imports(generic_type):
+    """Get list of types separated by '<', '>', ',' or ' ' in generic_type."""
+    res = []
+    delim_pos = map(generic_type.find, ('<', '>', ',', ' '))
+    try:
+        next_delim = min(filter(lambda x: x >= 0, delim_pos))
+    except ValueError:
+        if generic_type:
+            res.append(generic_type)
+    else:
+        next_token = generic_type[:next_delim]
+        if next_token:
+            res.append(next_token)
+        res.extend(get_imports(generic_type[(next_delim + 1):]))
+    return res
+
+
 def get_types(yang_type, ctx):
     """Returns jnc and primitive counterparts of yang_type, which is a type,
     typedef, leaf or leaf-list statement.
