@@ -874,12 +874,8 @@ class ClassGenerator(object):
                 add(sub.arg, add_value(sub, self.prefix_name))
             else:  # sub.keyword == 'leaf-list':
                 add(sub.arg, child_gen.child_iterator())
-                add(sub.arg, set_leaf_value(sub, prefix=self.prefix_name, arg_type=type_str1))
-                add(sub.arg, set_leaf_value(sub, prefix='', arg_type='String',
-                        jnc_type=type_str1))
-                if type_str2 != 'String':
-                    add(sub.arg, set_leaf_value(sub, prefix='',
-                        arg_type=type_str2, jnc_type=type_str1))
+                for setter in child_gen.setters():
+                    add(sub.arg, setter)
                 add(sub.arg, delete_stmt(sub,
                         args=[(type_str1, sub.arg + 'Value')], keys=False))
                 add(sub.arg, delete_stmt(sub, args=[(type_str1, sub.arg + 'Value')],
@@ -1628,10 +1624,7 @@ class MethodGenerator(object):
 
         """
         assert self.gen is not self, 'Avoid infinite recursion'
-        if self.is_leaf or self.is_leaflist:
-            return None
-        else:
-            return self.gen.setters()
+        return self.gen.setters()
 
     def checker(self):
         """Returns a 'check' JavaMethod for generated class for self.stmt"""
@@ -1772,6 +1765,39 @@ class LeafMethodGenerator(MethodGenerator):
         self.is_string = self.type_str[1] == 'String'
         key = stmt.parent.search_one('key')
         self.is_optional = key is None or stmt.arg not in key.arg.split(' ')
+
+    def setters(self):
+        if self.is_leaf:
+            return NotImplemented
+        name = 'set' + self.n + 'Value'
+        param_name = self.n2 + 'Value'
+        jnc_type = normalize(self.stmt_type.arg)  # FIXME Check if typedef or not in constructor!
+        res = [JavaMethod(name=name) for _ in range(2 + (not self.is_string))]
+        for i, method in enumerate(res):
+            method.add_modifier('public')
+            method.set_return_type('void')
+            method.add_exception('JNCException')
+            method.add_javadoc('Sets the value for child ' + self.stmt.keyword +
+                               ' "' + self.stmt.arg + '",')
+            if i == 0:
+                method.add_parameter('.'.join([self.pkg, jnc_type]), param_name)
+                method.add_javadoc('using a JNC type value.')
+                method.add_line(''.join(['set', normalize(self.stmt.keyword),
+                                         'Value(', self.root, '.NAMESPACE,']))
+                method.add_dependency(self.root)
+                method.add_line('    "' + self.stmt.arg + '",')
+                method.add_line('    ' + param_name + ',')
+                method.add_line('    childrenNames());')
+            else:
+                method.add_parameter(self.type_str[i - 1], param_name)
+                method.add_line(''.join([name, '(new ', jnc_type, '(',
+                                         param_name, '));']))
+                method.add_dependency(jnc_type)
+                method.add_javadoc('using a Java primitive value.')
+            method.add_javadoc(' '.join(['@param', param_name,
+                                         'The value to set.']))
+            self.fix_imports(method, child=True)
+        return res
 
     def markers(self):
         res = []
