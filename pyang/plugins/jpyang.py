@@ -486,12 +486,6 @@ def get_date(date_format=0):
         return '-'.join(map(str, [time.year, time.month, time.day]))
 
 
-def is_container(stmt, strict=False):
-    """Returns True iff stmt is a list, container or something of the sort."""
-    return (stmt.keyword == 'container' or
-        (not strict and stmt.keyword == 'list'))
-
-
 def is_config(stmt):
     """Returns True if stmt is a configuration data statement"""
     config = None
@@ -503,9 +497,8 @@ def is_config(stmt):
 
 def in_schema(stmt):
     """Returns True iff stmt is to be included in schema."""
-    return (is_container(stmt) or
-        stmt.keyword == 'module' or
-        stmt.keyword == 'leaf')
+    return stmt.keyword in ('module', 'leaf', 'container', 'list')
+    # FIXME What about leaf-list and submodule?
 
 
 def strip_first(s):
@@ -565,14 +558,15 @@ class SchemaNode(object):
         if stmt.parent is not None:
             key = stmt.parent.search_one('key')
         isKey = key is not None and key.arg == stmt.arg
-        childOfContainerOrList = (stmt.parent is not None and is_container(stmt.parent))
-        if (stmt in ('module', 'submodule') or isKey or
-            (childOfContainerOrList and is_container(stmt, True))):
+        childOfContainerOrList = (stmt.parent is not None
+                                  and stmt.parent.arg in ('container', 'list'))
+        if (isKey or stmt in ('module', 'submodule') or
+            (childOfContainerOrList and stmt.keyword in ('container',))):
             min_occurs = '1'
             max_occurs = '1'
         if isMandatory:
             min_occurs = '1'
-        if isUnique or childOfContainerOrList or is_container(stmt, True):
+        if isUnique or childOfContainerOrList or stmt.keyword in ('container',):
             max_occurs = '1'
         res.append('<min_occurs>' + min_occurs + '</min_occurs>')  # TODO: correct?
         res.append('<max_occurs>' + max_occurs + '</max_occurs>')  # TODO: correct?
