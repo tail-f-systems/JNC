@@ -984,7 +984,7 @@ class PackageInfoGenerator(object):
         """
         res = ''
         for entry in hierarchy:
-            if PackageInfoGenerator.is_not_list(entry):
+            if not isinstance(entry, list):
                 body = '    <a href="' + entry[:-5] + '.html">' + entry[:-5] + '</a>'
                 res += PackageInfoGenerator.html_list(body, 1, tag='li')
             else:
@@ -993,11 +993,6 @@ class PackageInfoGenerator(object):
             if body[-1:] != '\n':
                 res += '\n'
         return res
-
-    @staticmethod
-    def is_not_list(entry):
-        """Returns False iff entry is instance of list"""
-        return not isinstance(entry, list)
 
     @staticmethod
     def html_list(body, indent_level, tag='ul'):
