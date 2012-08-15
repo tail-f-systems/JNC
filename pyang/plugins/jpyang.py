@@ -417,7 +417,7 @@ def get_types(yang_type, ctx):
         yang_type = yang_type.search_one('type')
     assert yang_type.keyword in ('type', 'typedef'), 'argument is type, typedef or leaf'
     primitive = normalize(yang_type.arg)
-    netconf = 'com.tailf.jnc.Yang' + primitive
+    jnc = 'com.tailf.jnc.Yang' + primitive
     if yang_type.arg in ('string', 'boolean'):
         pass
     elif yang_type.arg in ('enumeration', 'binary'):
@@ -434,7 +434,7 @@ def get_types(yang_type, ctx):
         if yang_type.arg[:1] == 'u':  # Unsigned
             integer_type.pop()
             integer_type.insert(0, 'long')
-            netconf = 'com.tailf.jnc.YangUI' + yang_type.arg[2:]
+            jnc = 'com.tailf.jnc.YangUI' + yang_type.arg[2:]
         if yang_type.arg[-2:] == '64':
             primitive = integer_type[0]
         elif yang_type.arg[-2:] == '32':
@@ -452,16 +452,15 @@ def get_types(yang_type, ctx):
             type_id = get_package(yang_type, ctx) + yang_type.arg
             print_warning(key=type_id, ctx=ctx)
         else:
-            if typedef is None and ctx.opts.verbose:
-                print yang_type.keyword + ' ' + yang_type.arg
             basetype = get_base_type(typedef)
             package = get_package(typedef, ctx)
             typedef_arg = normalize(yang_type.arg)
             return package + '.' + typedef_arg, get_types(basetype, ctx)[1]
-    return netconf, primitive
+    return jnc, primitive
 
 
 def get_base_type(stmt):
+    """Returns the built in type that stmt is derived from"""
     type_stmt = stmt.search_one('type')
     try:
         typedef = type_stmt.i_typedef
