@@ -930,7 +930,7 @@ class ClassGenerator(object):
                     add(sub.arg, unset_value(sub))
                 add(sub.arg, add_value(sub, self.prefix_name))
             else:  # sub.keyword == 'leaf-list':
-                add(sub.arg, child_iterator(sub))
+                add(sub.arg, child_gen.child_iterator())
                 add(sub.arg, set_leaf_value(sub, prefix=self.prefix_name, arg_type=type_str1))
                 add(sub.arg, set_leaf_value(sub, prefix='', arg_type='String',
                         jnc_type=type_str1))
@@ -1849,9 +1849,10 @@ class MethodGenerator(object):
         if not(self.is_leaflist or self.is_list):
             return None
         res = JavaMethod(name=self.stmt.arg + 'Iterator')
-        res.add_javadoc('"'.join(['Iterator method for the list ',
-                                  self.stmt.arg, '.']))
-        res.add_javadoc('@return An iterator for the list.')
+        res.add_javadoc(''.join(['Iterator method for the ', self.stmt.keyword, 
+                                 ' "', self.stmt.arg, '".']))
+        res.add_javadoc(''.join(['@return An iterator for the ',
+                                 self.stmt.keyword, '.']))
         return_stmt = ['return new Element']
         if self.is_leaflist:
             res.set_return_type('ElementLeafListValueIterator')
@@ -2397,24 +2398,6 @@ def add_value(stmt, prefix):
             "''' + stmt.arg + '''",
             null,
             childrenNames());
-    }''')
-
-
-def child_iterator(substmt):
-    """Returns a string representing a java iterator method for the substmt"""
-    if substmt.keyword == 'leaf-list':
-        iterator_type = 'LeafListValue'
-    else:
-        iterator_type = 'Children'
-    return ('''    /**
-     * Iterator method for the ''' + substmt.keyword + ' "' + substmt.arg +
-        '''".
-     * @return An iterator for the ''' + substmt.keyword + '''.
-     */
-    public Element''' + iterator_type + 'Iterator ' + substmt.arg +
-        '''Iterator() {
-        return new Element''' + iterator_type + 'Iterator(children, "' +
-        substmt.arg + '''");
     }''')
 
 
