@@ -36,6 +36,7 @@ import os
 import errno
 import sys
 import collections
+import re
 
 from datetime import date
 
@@ -57,8 +58,8 @@ java_reserved_words = {'abstract', 'assert', 'boolean', 'break', 'byte',
 """A set of identifiers that are reserved in Java"""
 
 
-java_lang = {'Boolean', 'Byte', 'Double', 'Float', 'Integer',
-             'Long', 'Number', 'Object', 'Short', 'String'}
+java_lang = {'Boolean', 'Byte', 'Double', 'Float', 'Integer', 'Long', 'Number',
+             'Object', 'Short', 'String', 'StackTraceElement', 'ClassLoader'}
 """A subset of the java.lang classes"""
 
 
@@ -435,12 +436,6 @@ def make_valid_identifiers(stmt):
     return stmt
 
 
-def partition(string, delimiters=('< >,')):
-    """Returns list of non-empty tokens separated by delimiters in string."""
-    from re import split
-    return filter(None, split('[' + ''.join(delimiters) + ']', string))
-
-
 def get_types(yang_type, ctx):
     """Returns jnc and primitive counterparts of yang_type, which is a type,
     typedef, leaf or leaf-list statement.
@@ -798,7 +793,30 @@ class ClassGenerator(object):
         enabler.add_line(name + '.registerSchema();')  # XXX: Don't import name
         self.java_class.add_enabler(enabler)
 
-        self.java_class.add_schema_registrator(register_schema(name))
+        reg = JavaMethod(return_type='void', name='registerSchema')
+        reg.exceptions = ['JNCException']  # XXX: Don't use add method
+        reg.add_dependency('com.tailf.jnc.JNCException')
+        reg.modifiers = ['public', 'static']
+        reg.add_javadoc('Register the schema for this namespace in the global')
+        reg.add_javadoc('schema table (CsTree) making it possible to lookup')
+        reg.add_javadoc('CsNode entries for all tagpaths')
+        reg.add_line('StackTraceElement[] sTrace = (new Exception()).getStackTrace();')
+        reg.add_line('ClassLoader loader = sTrace[0].getClass().getClassLoader();')
+        reg.add_line('URL schemaUrl = loader.getResource("' + name + '.schema");')
+        enabler.add_dependency('java.net.URL')
+        reg.add_line('SchemaParser parser = new SchemaParser();')
+        enabler.add_dependency('com.tailf.jnc.SchemaParser')
+        reg.add_line('HashMap<Tagpath, SchemaNode> h = SchemaTree.create(NAMESPACE);')
+        enabler.add_dependency('java.util.HashMap')
+        enabler.add_dependency('com.tailf.jnc.Tagpath')
+        enabler.add_dependency('com.tailf.jnc.SchemaNode')
+        enabler.add_dependency('com.tailf.jnc.SchemaTree')
+        reg.add_line('if (schemaUrl == null)')
+        reg.add_line('    parser.readFile("' + name + '.schema", h);')
+        reg.add_line('else')
+        reg.add_line('    parser.readFile(schemaUrl, h);')
+        self.java_class.add_schema_registrator(reg)
+
         self.write_to_file()
 
     def generate_class(self):
@@ -1597,15 +1615,8 @@ class MethodGenerator(object):
                 res.add(dependency)
                 continue
             elif dependency.endswith('>'):
-                before, sep, after = dependency[:-1].partition('<')
-                if not sep or '<' in after or ',' in after or ',' in before:
-                    if self.ctx.opts.verbose:
-                        print_warning(' '.join(['Unable to parse', dependency,
-                                                'as a Java import']),
-                                      dependency, self.ctx)
-                    continue
-                res.add(self.canonical_import(before, child))
-                res.add(self.canonical_import(after, child))
+                for token in filter(None, re.split('[< >,]', dependency)):
+                    res.add(self.canonical_import(token, child))
             elif dependency.endswith(']'):
                 assert dependency[:-2] and dependency[-2:] == '[]'
                 res.add(self.canonical_import(dependency[:-2], child))
@@ -2220,34 +2231,6 @@ class ListMethodGenerator(MethodGenerator):
         res.extend(self.parent_adders())
         res.extend(self.parent_deleters())
         return res
-
-
-def register_schema(prefix_name):
-    """Returns a string representing a java method that creates a SchemaParser
-    and calls its readFile method with the schema corresponding to the class
-    and a hashtable obtained from a call to CsTree.create (a method in the
-    ConfM library).
-
-    prefix_name -- The name of the class containing the registerSchema method
-
-    """
-    return ('''    /**
-     * Register the schema for this namespace in the global
-     * schema table (CsTree) making it possible to lookup
-     * CsNode entries for all tagpaths
-     */
-    public static void registerSchema() throws JNCException {
-        StackTraceElement[] sTrace = (new Exception()).getStackTrace();
-        ClassLoader loader = sTrace[0].getClass().getClassLoader();
-        java.net.URL schemaUrl = loader.getResource("''' +
-            prefix_name + '''.schema");
-        SchemaParser parser = new SchemaParser();
-        HashMap<Tagpath, SchemaNode> h = SchemaTree.create(NAMESPACE);
-        if (schemaUrl == null)
-            parser.readFile("''' + prefix_name + '''.schema", h);
-        else
-            parser.readFile(schemaUrl, h);
-    }''')
 
 
 def child_field(stmt):
