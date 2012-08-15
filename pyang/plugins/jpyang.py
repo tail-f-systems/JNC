@@ -482,12 +482,6 @@ def is_config(stmt):
     return config is None or config.arg == 'true'
 
 
-def in_schema(stmt):
-    """Returns True iff stmt is to be included in schema."""
-    return stmt.keyword in ('module', 'leaf', 'container', 'list')
-    # FIXME What about leaf-list and submodule?
-
-
 def strip_first(s):
     """Returns s but with chars up to and including '.' or '/' removed"""
     return '.'.join(s.replace(os.sep, '.').split('.')[1:])
@@ -581,15 +575,16 @@ class SchemaGenerator(object):
     def schema_nodes(self):
         """Generate XML schema as a list of "node" elements"""
         res = []
-        for stmt in self.stmts:
-            if in_schema(stmt):
-                node = SchemaNode(stmt, self.tagpath + stmt.arg + '/')
-                substmt_generator = SchemaGenerator(stmt.substmts,
-                    self.tagpath + stmt.arg + '/', self.ctx)
-                if self.ctx.opts.verbose:
-                    print 'Generating schema node "' + self.tagpath + '"...'
-                res.extend(node.as_list())
-                res.extend(substmt_generator.schema_nodes())
+        isconfigdata = (lambda stmt: stmt.keyword in
+            ('module', 'submodule', 'container', 'list', 'leaf', 'leaf-list'))
+        for stmt in filter(isconfigdata, self.stmts):
+            node = SchemaNode(stmt, self.tagpath + stmt.arg + '/')
+            substmt_generator = SchemaGenerator(stmt.substmts,
+                self.tagpath + stmt.arg + '/', self.ctx)
+            if self.ctx.opts.verbose:
+                print 'Generating schema node "' + self.tagpath + '"...'
+            res.extend(node.as_list())
+            res.extend(substmt_generator.schema_nodes())
         return res
 
 
