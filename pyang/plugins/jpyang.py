@@ -849,8 +849,8 @@ class ClassGenerator(object):
                     add(sub.arg, access_method)
             elif sub.keyword == 'container':
                 fields.append(sub.arg)
-                self.java_class.add_field(child_field(sub))
                 child_gen = MethodGenerator(sub, self.ctx)
+                self.java_class.add_field(child_gen.child_field())
                 for access_method in child_gen.parent_access_methods():
                     add(sub.arg, access_method)
         elif sub.keyword in ('leaf', 'leaf-list'):
@@ -866,16 +866,14 @@ class ClassGenerator(object):
                 for setter in child_gen.setters():
                     add(sub.arg, setter)
                 if optional:
-                    add(sub.arg, unset_value(sub))
+                    add(sub.arg, child_gen.unsetter())
                 add(sub.arg, add_value(sub, self.prefix_name))
             else:  # sub.keyword == 'leaf-list':
                 add(sub.arg, child_gen.child_iterator())
                 for setter in child_gen.setters():
                     add(sub.arg, setter)
-                add(sub.arg, delete_stmt(sub,
-                        args=[(type_str1, sub.arg + 'Value')], keys=False))
-                add(sub.arg, delete_stmt(sub, args=[(type_str1, sub.arg + 'Value')],
-                        string=True, keys=False))
+                for deleter in child_gen.deleters():
+                    add(sub.arg, deleter)
                 add(sub.arg, add_value(sub, self.prefix_name))
                 optional = True
             if optional:
@@ -1626,21 +1624,25 @@ class MethodGenerator(object):
         assert self.gen is not self, 'Avoid infinite recursion'
         return self.gen.setters()
 
+    def unsetter(self):
+        """Returns an 'unset<Identifier>Value' JavaMethod for self.stmt"""
+        assert self.gen is not self, 'Avoid infinite recursion'
+        return self.gen.unsetter() if self.is_leaf else None
+
     def checker(self):
         """Returns a 'check' JavaMethod for generated class for self.stmt"""
         assert self.gen is not self, 'Avoid infinite recursion'
-        if self.is_typedef:
-            return self.gen.checker()
-        else:
-            return None
+        return self.gen.checker() if self.is_typedef else None
 
     def markers(self):
         """Generates methods that enqueues operations to be performed."""
         assert self.gen is not self, 'Avoid infinite recursion'
-        if self.is_typedef:
-            return None
-        else:
-            return self.gen.markers()
+        return None if self.is_typedef else self.gen.markers()
+
+    def child_field(self):
+        """Returns a string representing java code for a field"""
+        assert self.gen is not self, 'Avoid infinite recursion'
+        return self.gen.child_field() if self.is_container else None
 
     def _parent_template(self, method_type):
         """Returns an access method for the statement of this method generator.
@@ -1650,12 +1652,13 @@ class MethodGenerator(object):
         """
         method = JavaMethod()
         method.add_modifier('public')
-        method.set_return_type(self.n)
+        if self.is_container or self.is_list:
+            method.set_return_type(self.n)
         method.set_name(method_type + self.n)
         method.add_exception('JNCException')
         return self.fix_imports(method, child=True)
 
-    def parent_adders(self):
+    def adders(self):
         """Returns a list of methods that adds an instance of the class to be
         generated from the statement of this method generator to its parent
         class.
@@ -1704,27 +1707,24 @@ class MethodGenerator(object):
             self.fix_imports(method, child=True)
         return res
 
-    def parent_getters(self):
+    def getters(self):
         """Returns a list of JavaMethods representing getters to include
         in generated class of self.stmt.parent
 
         """
         assert self.gen is not self, 'Avoid infinite recursion'
-        if not self.is_list:
-            return None
-        else:
-            return self.gen.parent_getters()
+        return self.gen.getters() if self.is_list else None
 
-    def parent_deleters(self):
+    def deleters(self):
         """Returns a list of JavaMethods representing deleters to include
         in generated class of self.stmt.parent
 
         """
         assert self.gen is not self, 'Avoid infinite recursion'
-        if not (self.is_list or self.is_container):
+        if not (self.is_list or self.is_container or self.is_leaflist):
             return None
         else:
-            return self.gen.parent_deleters()
+            return self.gen.deleters()
 
     def child_iterator(self):
         """Returns a java iterator method"""
@@ -1823,6 +1823,59 @@ class LeafMethodGenerator(MethodGenerator):
                 method.add_javadoc('@param fractionDigits Number of decimals in value')
             self.fix_imports(method, child=True)
         return res
+
+    def unsetter(self):
+        """unset<Identifier>Value method generator"""
+        method = JavaMethod()
+        method.add_javadoc(' '.join(['Unsets the value for child',
+                                     self.stmt.keyword,
+                                     '"' + self.stmt.arg + '".']))
+        method.add_modifier('public')
+        method.set_return_type('void')
+        method.set_name('unset' + self.n + 'Value')
+        method.add_exception('JNCException')
+        method.add_line('delete("' + self.stmt.arg + '");')
+        return self.fix_imports(method, child=True)
+
+    def _parent_method(self, method_type):
+        """Returns a list of methods that either creates a value in the
+        leaf-list of the parent YangElement instance, or deletes it, depending
+        on the method_type parameter.
+
+        method_type -- either 'create' or 'delete'
+
+        """
+        res = [self._parent_template(method_type) for _ in range(2)]
+
+        for i, method in enumerate(res):
+            method.set_return_type('void')
+            method.add_javadoc(''.join([method_type.capitalize(), 's ',
+                                        self.stmt.keyword, ' entry "',
+                                        self.n2, '".']))
+            if i == 1:
+                method.add_javadoc('The value is specified as a string.')
+            method.add_javadoc(''.join(['@param ', self.n2, 'Value Value to ',
+                                     method_type, '.']))
+            param_type = 'String'
+            if i == 0:
+                param_type = self.type_str[0]
+            method.add_parameter(param_type, self.n2 + 'Value')
+            path = ['String path = "', self.n2, '[', self.n2, 'Value]";']
+            method.add_line(''.join(path))
+            if method_type == 'delete':
+                method.add_line('delete(path);')
+            else:  # get
+                method.add_line('insertChild(path);')
+            self.fix_imports(method, child=True)
+        return res
+
+    def deleters(self):
+        """Returns a list of methods that deletes the Leaf child, corresponding
+        to the statement of this method generator, from its parent YangElement
+        instance.
+
+        """
+        return self._parent_method('delete')
 
     def markers(self):
         res = []
@@ -1971,7 +2024,17 @@ class ContainerMethodGenerator(MethodGenerator):
     def markers(self):
         return NotImplemented
 
-    def parent_deleters(self):
+    def child_field(self):
+        """Returns a string representing java code for a field"""
+        res = JavaValue(name=camelize(self.stmt.arg), value='null')
+        res.add_javadoc(' '.join(['Field for child', self.stmt.keyword,
+                                  '"' + self.stmt.arg + '".']))
+        res.add_modifier('public')
+        res.add_modifier(normalize(self.stmt.arg))
+        res.add_dependency(normalize(self.stmt.arg))
+        return self.fix_imports(res, child=True)
+
+    def deleters(self):
         """Returns a list with a single method that deletes an instance of the
         class to be generated from the statement of this method generator to
         its parent class.
@@ -1990,8 +2053,8 @@ class ContainerMethodGenerator(MethodGenerator):
     def parent_access_methods(self):
         res = []
         res.append(self.access_methods_comment())
-        res.extend(self.parent_adders())
-        res.append(self.parent_deleters())
+        res.extend(self.adders())
+        res.append(self.deleters())
         return res
 
 
@@ -2112,7 +2175,7 @@ class ListMethodGenerator(MethodGenerator):
             self.fix_imports(method, child=True)
         return res
 
-    def parent_deleters(self):
+    def deleters(self):
         """Returns a list of methods that deletes an instance of the class to
         be generated from the statement of this method generator to its parent
         class.
@@ -2120,7 +2183,7 @@ class ListMethodGenerator(MethodGenerator):
         """
         return self._parent_method('delete')
 
-    def parent_getters(self):
+    def getters(self):
         """Returns a list of methods that gets an instance of the class to be
         generated from the statement of this method generator to its parent
         class.
@@ -2131,26 +2194,11 @@ class ListMethodGenerator(MethodGenerator):
     def parent_access_methods(self):
         res = []
         res.append(self.access_methods_comment())
-        res.extend(self.parent_getters())
+        res.extend(self.getters())
         res.append(self.child_iterator())
-        res.extend(self.parent_adders())
-        res.extend(self.parent_deleters())
+        res.extend(self.adders())
+        res.extend(self.deleters())
         return res
-
-
-def child_field(stmt):
-    """Returns a string representing java code for a field"""
-    res = JavaValue(name=camelize(stmt.arg), value='null')
-    res.add_javadoc('Field for child ' + stmt.keyword + ' "' + stmt.arg + '".')
-    res.add_modifier('public')
-    res.add_modifier(normalize(stmt.arg))
-    # FIXME Add dependency: Need context (ctx) or package
-#    pkg = ctx.opts.directory
-#    if pkg.startswith('src' + os.sep):
-#        pkg = pkg[len('src' + os.sep):]  # src not part of package
-#    res.add_dependency('.'.join([pkg, stmt.parent.arg,
-#                                 capitalize_first(stmt.arg)]))
-    return res
 
 
 def get_value(stmt, ret_type='com.tailf.jnc.YangString'):
@@ -2169,94 +2217,6 @@ def get_value(stmt, ret_type='com.tailf.jnc.YangString'):
     public ''' + ret_type + ' get' + name + '''Value()
         throws JNCException {
         return (''' + ret_type + ')getValue("' + stmt.arg + '''");
-    }'''
-
-
-def set_leaf_value(stmt, prefix='', arg_type='', jnc_type=''):
-    """set<Identifier>Value method generator, specifically for leafs.
-
-    stmt     -- Typically a leaf statement
-    prefix   -- Namespace prefix of module, empty if the setLeafValue or
-                setLeafListValue methods are not to be used in the method
-    arg_type -- Type of method parameter, empty if parameter free
-    jnc_type -- Type to use internally, empty if the setIdValue method is not
-                to be used in the method
-
-    """
-    name = normalize(stmt.arg)
-    spec1 = spec2 = ''
-    MAX_COLS = 80 - len(('     * Sets the value for child ' + stmt.keyword +
-        ' "' + stmt.arg + '",.'))  # Space left to margin
-
-    # Add different comments depending on argument type
-    if arg_type == 'String':
-        spec1 = ', using a string value'
-        spec2 = 'string representation of the '
-    elif arg_type == '':
-        pass
-    else:
-        spec1 = ', using the java primitive value'
-
-    # Do linebreak if neccessary
-    if len(spec1) > MAX_COLS:
-        spec1 = ',\n     * ' + spec1[2:]
-
-    # Register namespace if prefix is not empty, else use generated set-method
-    if prefix:
-        if stmt.keyword == 'leaf-list':
-            body = 'setLeafListValue('
-        else:
-            body = 'setLeafValue('
-        body += prefix + '''.NAMESPACE,
-            "''' + stmt.arg + '''",
-            ''' + camelize(stmt.arg) + '''Value,
-            childrenNames());'''
-    else:
-        body = (''.join(['set', name, 'Value(new ', jnc_type, '(',
-                         camelize(stmt.arg), 'Value));']))
-
-    # Prepare method argument listing
-    argument = arg_type + ' ' + camelize(stmt.arg) + 'Value'
-    if arg_type == '':
-        # Special case of no argument
-
-        argument = ''
-        body = 'set' + name + 'Value(new ' + name + '());'
-    return set_value(stmt, name, spec1, spec2, argument, body)
-
-
-def set_value(stmt, nameID='', spec1='', spec2='', argument='', body=''):
-    """set<Identifier>Value method generator.
-
-    stmt     -- The statement to set the value for
-    nameID   -- Identifier in method name
-    spec1    -- Text to insert before parameter listing
-    spec2    -- parameter description
-    argument -- Full argument listing of method
-    body     -- The code to be put in the method body
-
-    """
-    if argument:
-        spec1 += '''.
-     * @param ''' + camelize(stmt.arg) + 'Value The ' + spec2 + 'value to set'
-    return ('''    /**
-     * Sets the value for child ''' + stmt.keyword + ' "' + stmt.arg + '"' +
-        spec1 + '''.
-     */
-    public void set''' + nameID + 'Value(' + argument + ''')
-        throws JNCException {
-        ''' + body + '''
-    }''')
-
-
-def unset_value(stmt):
-    """unset<Identifier> method generator"""
-    return '''    /**
-     * Unsets the value for child ''' + stmt.keyword + ' "' + stmt.arg + '''".
-     */
-    public void unset''' + normalize(stmt.arg) + '''Value()
-        throws JNCException {
-        delete("''' + stmt.arg + '''");
     }'''
 
 
@@ -2286,58 +2246,6 @@ def add_value(stmt, prefix):
             null,
             childrenNames());
     }''')
-
-
-def delete_stmt(stmt, args=None, string=False, keys=True):
-    """Delete method generator. Similar to add_stmt (see above).
-
-    stmt   -- Typically a list or container statement
-    args   -- A list of tuples, each tuple containing an arg_type and an
-              arg_name. Each arg_type corresponds to a method argument type.
-              Each arg_name corresponds to a method argument name. The names of
-              the method's arguments are typically key identifiers or a single
-              lowercase stmt name. Setting args to an empty list produces a
-              method with no argument.
-    string -- If set to True, the keys are specified with the ordinary String
-              type instead of the Tail-f ConfM String type.
-
-    """
-    spec1 = spec2 = spec3 = arguments = ''
-    if args is None:
-        args = []
-    if args:
-        if keys:
-            spec1 = '", with specified keys.'
-            if string:
-                spec1 += '\n     * The keys are specified as Strings'
-        elif string:
-            spec1 += '\n     * The value is specified as a String'
-        for (arg_type, arg_name) in args:
-            # TODO: http://en.wikipedia.org/wiki/Loop_unswitching
-
-            if string:
-                arguments += 'String ' + arg_name + ', '
-            else:
-                arguments += arg_type + ' ' + arg_name + ', '
-            if keys:
-                spec1 += ('\n     * @param ' + arg_name +
-                    ' Key argument of child.')
-                spec3 += '[' + arg_name + '=\'" + ' + arg_name + ' + "\']'
-            else:
-                spec1 += ('\n     * @param ' + arg_name +
-                    ' Child to be removed.')
-                spec3 += '[name=\'" + ' + arg_name + ' + "\']'
-    else:
-        spec1 = ''
-        spec2 = 'this.' + stmt.arg + ' = null;\n        '
-    return '''    /**
-     * Deletes ''' + stmt.keyword + ' entry "' + stmt.arg + spec1 + '''"
-     */
-    public void delete''' + normalize(stmt.arg) + '(' + arguments[:-2] + ''')
-        throws JNCException {
-        ''' + spec2 + 'String path = "' + stmt.arg + spec3 + '''";
-        delete(path);
-    }'''
 
 
 class OrderedSet(collections.MutableSet):
