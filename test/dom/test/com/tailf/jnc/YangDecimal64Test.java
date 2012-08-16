@@ -17,8 +17,8 @@ public class YangDecimal64Test {
     @Before
     public void setUp() throws YangException {
         d1 = new YangDecimal64(0, 1);
-        d2 = new YangDecimal64("3.14", 2);
-        d3 = new YangDecimal64("3.14", 1);
+        d2 = new YangDecimal64("3.14");
+        d3 = new YangDecimal64(new BigDecimal("3.14"), 1);
     }
 
     @Test
@@ -46,11 +46,11 @@ public class YangDecimal64Test {
 
     @Test
     public void testYangDecimal64StringInt() throws YangException {
-        tmp1 = new YangDecimal64("0", 1);
+        tmp1 = new YangDecimal64("0");
         assertTrue(tmp1.value.intValue() == 0);
         assertTrue(tmp1.getFractionDigits() == 1);
 
-        tmp1 = new YangDecimal64("0.01", 5);
+        tmp1 = new YangDecimal64("0.01000");
         assertTrue(Math.abs(tmp1.value.doubleValue() - 0.01) < Utils.EPSILON);
         assertTrue(tmp1.getFractionDigits() == 5);
     }
@@ -105,13 +105,20 @@ public class YangDecimal64Test {
             fail("Rounding should not occur");
         } catch (YangException e) {}
         
-        // Within precision
-        (new YangDecimal64("0.9999999999999999999", 1)).exact(1);
-        (new YangDecimal64("0.999999999999999999", 1)).exact(1);
+        // Invalid fraction digits
+        try {
+            new YangDecimal64("0.9999999999999999999"); // 19
+            fail("Should not accept that high precision");
+        } catch (YangException e) {}
+
+        BigDecimal bd19 = new BigDecimal("0.9999999999999999999");
+        YangDecimal64 d18 = new YangDecimal64(bd19, 18);
+        d18.exact(1);
         
         // Outside precision
+        YangDecimal64 d17 = new YangDecimal64("0.99999999999999999");
         try {
-            (new YangDecimal64("0.99999999999999999", 1)).exact(1);
+            d17.exact(1);
             fail("Outside precision");
         } catch (YangException e) {}
     }
