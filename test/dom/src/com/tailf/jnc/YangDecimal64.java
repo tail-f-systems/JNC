@@ -34,25 +34,29 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
      * Creates a YangDecimal64 object from a String.
      * 
      * @param s The string.
-     * @param fractionDigits Number of decimals allowed.
      * @throws YangException If value is too small or too large with regard to
-     *                        the fractionDigits argument.
+     *                       the number of decimals.
      * @throws NumberFormatException If value is not a valid representation of
      *                               a java.math.BigDecimal.
      * @see java.math.BigDecimal
      */
-    public YangDecimal64(String s, int fractionDigits)
+    public YangDecimal64(String s)
             throws YangException {
         super(s);
-        this.fractionDigits = fractionDigits;
+        int decimalPos = s.lastIndexOf('.');
+        this.fractionDigits = 1;
+        if (decimalPos > 0) {
+            this.fractionDigits = s.length() - decimalPos - 1;
+        }
         setMinMax();
+        check();
     }
 
     /**
      * Creates a YangDecimal64 object from a Number. 
      * 
      * @param n The Number to initialize the value of this object with.
-     * @param fractionDigits Number of decimals allowed in value.
+     * @param fractionDigits [1, 18], Number of decimals allowed in n.
      * @throws YangException If n is too small or too large with regard to
      *                        the fractionDigits argument.
      */
@@ -66,7 +70,7 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
      * Sets the value of this object using a String.
      * 
      * @param value The string.
-     * @param fractionDigits Number of decimals allowed.
+     * @param fractionDigits [1, 18], Number of decimals allowed in value.
      * @throws YangException If value is too small or too large with regard to
      *                        the fractionDigits argument.
      * @throws NumberFormatException If value is not a valid representation of
