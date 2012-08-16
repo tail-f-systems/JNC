@@ -4,15 +4,34 @@
  * Copyright (c) 2012 Tail-F Systems AB, Stockholm, Sweden
  * All rights reserved.
  *
- * This software is the confidential and proprietary information of Tail-F
- * Systems AB. ('Confidential Information').  You shall not
- * disclose such Confidential Information and shall use it only in
- * accordance with the terms of the license agreement you entered into
- * with Tail-F Systems AB.
+ * Licensed under the BSD 3-Clause License
+ * http://opensource.org/licenses/BSD-3-Clause
  *
- * To be released under GNU General Public License.
- * Please see http://www.opensource.org/licenses/gpl-3.0.html
- * or http://www.gnu.org/licenses/gpl.html
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * - Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * - Neither the name of Tail-f Systems AB nor the names of its contributors may
+ *   be used to endorse or promote products derived from this software without
+ *   specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
 
 For complete functionality, invoke with:
 > pyang \
@@ -39,7 +58,6 @@ import collections
 import re
 
 from datetime import date
-
 from pyang import plugin, util, error
 
 
@@ -49,7 +67,15 @@ def pyang_plugin_init():
 
 
 class JPyangPlugin(plugin.PyangPlugin):
-    """The plug-in class of JPyang"""
+    """The plug-in class of JPyang.
+
+    The methods of this class are invoked by pyang during initialization. The
+    emit method is of particular interest if you are new to writing plugins to
+    pyang. It is from there that the parsing of the YANG statement tree
+    emanates, producing the generated classes that constitutes the output of
+    this plug-in.
+
+    """
 
     def add_output_format(self, fmts):
         """Adds 'java' and 'jpyang' as valid output formats"""
@@ -57,7 +83,7 @@ class JPyangPlugin(plugin.PyangPlugin):
         fmts['java'] = fmts['jpyang'] = self
 
     def add_opts(self, optparser):
-        """Adds options to pyang"""
+        """Adds options to pyang, displayed in the pyang CLI help message"""
         optlist = [
             optparse.make_option(
                 '-d', '--java-package',
@@ -118,13 +144,20 @@ class JPyangPlugin(plugin.PyangPlugin):
         ctx.implicit_errors = False
 
     def emit(self, ctx, modules, fd):
-        """Deletes any previous files in the supplied directory, creates
-        directory structure and generates Java code to it.
+        """Generates Java classes from the YANG module supplied to pyang.
 
-        ctx     -- Context used to get output directory
-        modules -- A list of pyang Statements, should be nothing else than
-                   module and/or submodule statements.
-        fd      -- File descriptor ignored.
+        The generated classes are placed in the directory specified by the '-d'
+        or '--java-package' flag, or in "gen" if no such flag was provided,
+        using the 'directory' attribute of ctx. If there are existing files
+        in the output directory with the same name as the generated classes,
+        they are silently overwritten.
+
+        ctx     -- Context used to get output directory, verbosity mode, error
+                   handling policy (the ignore attribute) and whether or not a
+                   schema file should be generated.
+        modules -- A list containing a module statement parsed from the YANG
+                   module supplied to pyang.
+        fd      -- File descriptor (ignored).
 
         """
         if not ctx.opts.ignore:
@@ -216,11 +249,46 @@ class JPyangPlugin(plugin.PyangPlugin):
         """Prints a description of what JPyang is and how to use it"""
         print '''
 The JPyang/Java output format can be used to generate a Java class hierarchy
-from a single yang data model. Each module, container, list, etc. is
-represented by a .java file which can be used to retrieve and/or edit
-configurations (e.g. by calling methods to add, delete or replace statements).
+from a single YANG data model. Together with the JNC (Java NETCONF Client)
+library, these generated Java classes may be used as the foundation for a
+NETCONF client (AKA manager) written in Java.
 
-One way to use the Java output format plug-in of pyang is to type
+The different types of generated files are:
+
+Root class  -- This class has the name of the prefix of the YANG module, and
+               contains fields with the prefix and namespace as well as methods
+               that enables the JNC library to use the other generated classes
+               when interacting with a NETCONF server.
+
+YangElement -- Each YangElement corresponds to a container or a list in the
+               YANG model. They represent tree nodes of a configuration and
+               provides methods to modify the configuration in accordance with
+               the YANG model that they were generated from.
+
+               The top-level containers or lists in the YANG model will have
+               their corresponding YangElement classes generated in the output
+               directory together with the root class. Their respective
+               subcontainers and sublists are generated in subpackages with
+               names corresponding to the name of the parent container or list.
+
+YangTypes   -- For each derived type in the YANG model, a class is generated to
+               the root of the output directory. The derived type may either
+               extend another derived type class, or the JNC type class
+               corresponding to a built-in YANG type.
+
+Packageinfo -- For each package in the generated Java class hierarchy, a
+               package-info.java file is generated, which can be useful when
+               generating javadoc for the hierarchy.
+
+Schema file -- If enabled, an XML file containing structured information about
+               the generated Java classes is generated. It contains tagpaths,
+               namespace, primitive-type and other useful meta-information.
+
+The typical use case for these classes is as part of a JAVA network management
+system (EMS), to enable retrieval and/or storing of configurations on NETCONF
+agents/servers with specific capabilities.
+
+One way to use the Java output format plug-in of pyang is
 $ pyang -f java -d output.package.dir <file.yang>
 
 The two formats java and jpyang produce identical results.
@@ -1262,7 +1330,7 @@ class JavaValue(object):
     def add_modifier(self, modifier):
         """Adds modifier to end of list of modifiers. Overwrites modifiers set
         in constructor.
-        
+
         """
         if self.default_modifiers:
             self.modifiers = []
