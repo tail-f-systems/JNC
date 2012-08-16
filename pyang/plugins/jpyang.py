@@ -856,7 +856,6 @@ class ClassGenerator(object):
         elif sub.keyword in ('leaf', 'leaf-list'):
             child_gen = MethodGenerator(sub, self.ctx)
             add(sub.arg, child_gen.access_methods_comment())
-            type_stmt = sub.search_one('type')
             if sub.keyword == 'leaf':
                 key = sub.parent.search_one('key')
                 optional = key is None or sub.arg not in key.arg.split(' ')
@@ -866,14 +865,14 @@ class ClassGenerator(object):
                     add(sub.arg, setter)
                 if optional:
                     add(sub.arg, child_gen.unsetter())
-                add(sub.arg, add_value(sub, self.prefix_name))
+                add(sub.arg, child_gen.adders())
             else:  # sub.keyword == 'leaf-list':
                 add(sub.arg, child_gen.child_iterator())
                 for setter in child_gen.setters():
                     add(sub.arg, setter)
                 for deleter in child_gen.deleters():
                     add(sub.arg, deleter)
-                add(sub.arg, add_value(sub, self.prefix_name))
+                add(sub.arg, child_gen.adders())
                 optional = True
             if optional:
                 child_gen = MethodGenerator(sub, self.ctx)
@@ -1663,7 +1662,10 @@ class MethodGenerator(object):
         class.
 
         """
-        if not (self.is_container or self.is_list):
+        if self.is_leaf or self.is_leaflist:
+            assert self.gen != self
+            return self.gen.adders()
+        elif not (self.is_container or self.is_list):
             return None
         number_of_adders = 2 * (1 + self.is_list)
         res = [self._parent_template('add') for _ in range(number_of_adders)]
@@ -1891,6 +1893,22 @@ class LeafMethodGenerator(MethodGenerator):
 
         """
         return self._parent_method('delete')
+
+    def adders(self):
+        method = JavaMethod(name=('add' + self.n))
+        method.add_modifier('public')
+        method.set_return_type('void')
+        method.add_exception('JNCException')
+        method.add_javadoc('This method is used for creating a subtree filter.')
+        method.add_javadoc(''.join(['The added "', self.stmt.arg, '" ',
+                                    self.stmt.keyword,
+                                    ' will not have a value.']))
+        method.add_line('set' + normalize(self.stmt.keyword) + 'Value(' +
+                        self.root + '.NAMESPACE,')
+        method.add_line('    "' + self.stmt.arg + '",')
+        method.add_line('    null,')
+        method.add_line('    childrenNames());')
+        return self.fix_imports(method, child=True)
 
     def markers(self):
         res = []
@@ -2214,34 +2232,6 @@ class ListMethodGenerator(MethodGenerator):
         res.extend(self.adders())
         res.extend(self.deleters())
         return res
-
-
-def add_value(stmt, prefix):
-    """add<Identifier> method generator, designed for leaf statements. Not to
-    be confused with the add_stmt function which is similar but does not
-    contain a call to the setLeafValue function.
-
-    stmt   -- Typically a leaf statement
-    prefix -- Namespace prefix of module
-
-    """
-    name = value_type = ''
-    if stmt.keyword == 'leaf-list':
-        name = 'Empty'
-        value_type = 'List'
-    name += normalize(stmt.arg)
-    return ('''    /**
-     * This method is used for creating a subtree filter.
-     * The added "''' + stmt.arg + '" ' + stmt.keyword +
-        ''' will not have a value.
-     */
-    public void add''' + name + '''()
-        throws JNCException {
-        setLeaf''' + value_type + 'Value(' + prefix + '''.NAMESPACE,
-            "''' + stmt.arg + '''",
-            null,
-            childrenNames());
-    }''')
 
 
 class OrderedSet(collections.MutableSet):
