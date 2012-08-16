@@ -165,7 +165,7 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
      *                        value argument is not {@link YangBaseInt#valid}.
      */
     protected void exact(Number value) throws YangException {
-        YangException.throwException(!valid(value), this);
+        YangException.throwException(!valid(value), value);
         Utils.restrict(this.value, value, Utils.Operator.EQ);
     }
 
