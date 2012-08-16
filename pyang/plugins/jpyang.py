@@ -40,9 +40,7 @@ import re
 
 from datetime import date
 
-from pyang import plugin
-from pyang import util
-from pyang import error
+from pyang import plugin, util, error
 
 
 def pyang_plugin_init():
@@ -1204,6 +1202,7 @@ class JavaValue(object):
         self.exact = exact
         self.value = value
         self.indent = ' ' * indent
+        self.default_modifiers = True
 
         self.javadocs = OrderedSet()
         if javadocs is not None:
@@ -1261,7 +1260,13 @@ class JavaValue(object):
         self._set_instance_data('indent', ' ' * indent)
 
     def add_modifier(self, modifier):
-        """Adds modifier to end of list of modifiers"""
+        """Adds modifier to end of list of modifiers. Overwrites modifiers set
+        in constructor.
+        
+        """
+        if self.default_modifiers:
+            self.modifiers = []
+            self.default_modifiers = False
         self._set_instance_data('modifiers', modifier)
 
     def add_javadoc(self, line):
@@ -1303,7 +1308,7 @@ class JavaValue(object):
 
 
 class JavaMethod(JavaValue):
-    """A Java method"""
+    """A Java method. Default behaviour is public void."""
 
     def __init__(self, exact=None, javadocs=None, modifiers=None,
                  return_type=None, name=None, parameters=None, exceptions=None,
@@ -1312,7 +1317,10 @@ class JavaMethod(JavaValue):
         super(JavaMethod, self).__init__(exact=exact, javadocs=javadocs,
                                          modifiers=modifiers, name=name,
                                          value=None, indent=indent)
-        self.return_type = None
+        if self.modifiers == []:
+            self.add_modifier('public')
+
+        self.return_type = 'void'
         if return_type is not None:
             self.set_return_type(return_type)
 
@@ -1333,8 +1341,8 @@ class JavaMethod(JavaValue):
 
     def set_return_type(self, return_type):
         """Sets the type of the return value of this method"""
-        self._set_instance_data('return_type',
-                                self.add_dependency(return_type))
+        retval = None if not return_type else self.add_dependency(return_type)
+        self._set_instance_data('return_type', retval)
 
     def add_parameter(self, param_type, param_name):
         """Adds a parameter to this method. The argument type is added to list
@@ -1483,6 +1491,7 @@ class MethodGenerator(object):
         """Returns a constructor invoking parent constructor, without
         parameters and javadoc."""
         constructor = JavaMethod(modifiers=['public'], name=self.n)
+        constructor.set_return_type(None)
         if self.is_container or self.is_list:
             call = ['super']
             call.extend(self._root_namespace(self.stmt.arg))
@@ -1539,7 +1548,6 @@ class MethodGenerator(object):
         for i, cloner in enumerate(cloners):
             cloner.add_javadoc('Clones this object, returning %s copy.' % a[i])
             cloner.add_javadoc('@return A clone of the object.%s' % b[i])
-            cloner.add_modifier('public')
             cloner.set_return_type('YangElement')
             cloner.set_name('clone%s' % c[i])
             cloner.add_line('return clone%sContent(new %s());' % (c[i], self.n))
@@ -1649,7 +1657,6 @@ class MethodGenerator(object):
 
         """
         method = JavaMethod()
-        method.add_modifier('public')
         if self.is_container or self.is_list:
             method.set_return_type(self.n)
         method.set_name(method_type + self.n)
@@ -1773,7 +1780,6 @@ class LeafMethodGenerator(MethodGenerator):
         """get<Identifier>Value method generator."""
         assert self.is_leaf
         method = JavaMethod()
-        method.add_modifier('public')
         method.set_return_type(self.type_str[0])
         method.set_name('get' + self.n + 'Value')
         method.add_exception('JNCException')
@@ -1794,8 +1800,6 @@ class LeafMethodGenerator(MethodGenerator):
 
         for i, method in enumerate(res):
             param_names = [self.n2 + 'Value']
-            method.add_modifier('public')
-            method.set_return_type('void')
             method.add_exception('JNCException')
             method.add_javadoc('Sets the value for child ' + self.stmt.keyword +
                                ' "' + self.stmt.arg + '",')
@@ -1846,8 +1850,6 @@ class LeafMethodGenerator(MethodGenerator):
         method.add_javadoc(' '.join(['Unsets the value for child',
                                      self.stmt.keyword,
                                      '"' + self.stmt.arg + '".']))
-        method.add_modifier('public')
-        method.set_return_type('void')
         method.set_name('unset' + self.n + 'Value')
         method.add_exception('JNCException')
         method.add_line('delete("' + self.stmt.arg + '");')
@@ -1865,7 +1867,6 @@ class LeafMethodGenerator(MethodGenerator):
         res = [self._parent_template(method_type) for _ in range(2)]
 
         for i, method in enumerate(res):
-            method.set_return_type('void')
             method.add_javadoc(''.join([method_type.capitalize(), 's ',
                                         self.stmt.keyword, ' entry "',
                                         self.n2, '".']))
@@ -1896,8 +1897,6 @@ class LeafMethodGenerator(MethodGenerator):
 
     def adders(self):
         method = JavaMethod(name=('add' + self.n))
-        method.add_modifier('public')
-        method.set_return_type('void')
         method.add_exception('JNCException')
         method.add_javadoc('This method is used for creating a subtree filter.')
         method.add_javadoc(''.join(['The added "', self.stmt.arg, '" ',
@@ -1923,8 +1922,6 @@ class LeafMethodGenerator(MethodGenerator):
             mark_methods.append(JavaMethod())
         for i, mark_method in enumerate(mark_methods):
             mark_method.set_name('mark' + normalize(self.stmt.arg) + normalize(op))
-            mark_method.add_modifier('public')
-            mark_method.set_return_type('void')
             mark_method.add_exception('JNCException')
             path = self.stmt.arg
             mark_method.add_javadoc(''.join(['Marks the ', self.stmt.keyword,
@@ -2062,7 +2059,6 @@ class ContainerMethodGenerator(MethodGenerator):
         res = JavaValue(name=camelize(self.stmt.arg), value='null')
         res.add_javadoc(' '.join(['Field for child', self.stmt.keyword,
                                   '"' + self.stmt.arg + '".']))
-        res.add_modifier('public')
         res.add_modifier(normalize(self.stmt.arg))
         res.add_dependency(normalize(self.stmt.arg))
         return self.fix_imports(res, child=True)
