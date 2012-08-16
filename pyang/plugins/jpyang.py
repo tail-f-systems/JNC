@@ -45,63 +45,6 @@ from pyang import util
 from pyang import error
 
 
-# TODO: Might be more efficient to use dicts instead of set and list for these
-java_reserved_words = {'abstract', 'assert', 'boolean', 'break', 'byte',
-    'case', 'catch', 'char', 'class', 'const*', 'continue', 'default',
-    'double', 'do', 'else', 'enum', 'extends', 'false',
-    'final', 'finally', 'float', 'for', 'goto*', 'if',
-    'implements', 'import', 'instanceof', 'int', 'interface', 'long',
-    'native', 'new', 'null', 'package', 'private', 'protected',
-    'public', 'return', 'short', 'static', 'strictfp', 'super',
-    'switch', 'synchronized', 'this', 'throw', 'throws', 'transient',
-    'true', 'try', 'void', 'volatile', 'while'}
-"""A set of identifiers that are reserved in Java"""
-
-
-java_lang = {'Boolean', 'Byte', 'Double', 'Float', 'Integer', 'Long', 'Number',
-             'Object', 'Short', 'String', 'StackTraceElement', 'ClassLoader'}
-"""A subset of the java.lang classes"""
-
-
-java_util = {'Collection', 'Enumeration', 'Iterator', 'List', 'ListIterator',
-             'Map', 'Queue', 'Set', 'ArrayList', 'Arrays', 'HashMap',
-             'HashSet', 'Hashtable', 'LinkedList', 'Properties', 'Random',
-             'Scanner', 'Stack', 'StringTokenizer', 'Timer', 'TreeMap',
-             'TreeSet', 'UUID', 'Vector'}
-"""A subset of the java.util interfaces and classes"""
-
-
-java_built_in = java_reserved_words | java_lang
-
-
-package_info = '''/**
- * This class hierarchy was generated from the Yang module
- * by the <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">JPyang</a> plugin of <a target="_top" href="http://code.google.com/p/pyang/">pyang</a>.
- * The generated classes may be used to manipulate pieces of configuration data
- * with NETCONF operations such as edit-config, delete-config and lock. These
- * operations are typically accessed through the JNC Java library by
- * instantiating Device objects and setting up NETCONF sessions with real
- * devices using a compatible YANG model.
- '''
-
-
-useful_links = ''' * @see <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">JPyang project page</a>
- * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6020.txt">RFC 6020: YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF)</a>
- * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6241.txt">RFC 6241: Network Configuration Protocol (NETCONF)</a>
- * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>
- * @see <a target="_top" href="http://www.tail-f.com">Tail-f Systems</a>
- */
- package '''
-
-
-outputted_warnings = []
-"""A list of warning message IDs that are used to avoid duplicate warnings"""
-
-
-augmented_modules = {}
-"""A dict of external modules that are augmented by this module"""
-
-
 def pyang_plugin_init():
     """Registers an instance of the jpyang plugin"""
     plugin.register_plugin(JPyangPlugin())
@@ -286,6 +229,63 @@ The two formats java and jpyang produce identical results.
 
 Type '$ pyang --help' for more details on how to use pyang.
 '''
+
+
+# TODO: Might be more efficient to use dicts instead of set and list for these
+java_reserved_words = {'abstract', 'assert', 'boolean', 'break', 'byte',
+    'case', 'catch', 'char', 'class', 'const*', 'continue', 'default',
+    'double', 'do', 'else', 'enum', 'extends', 'false',
+    'final', 'finally', 'float', 'for', 'goto*', 'if',
+    'implements', 'import', 'instanceof', 'int', 'interface', 'long',
+    'native', 'new', 'null', 'package', 'private', 'protected',
+    'public', 'return', 'short', 'static', 'strictfp', 'super',
+    'switch', 'synchronized', 'this', 'throw', 'throws', 'transient',
+    'true', 'try', 'void', 'volatile', 'while'}
+"""A set of identifiers that are reserved in Java"""
+
+
+java_lang = {'Boolean', 'Byte', 'Double', 'Float', 'Integer', 'Long', 'Number',
+             'Object', 'Short', 'String', 'StackTraceElement', 'ClassLoader'}
+"""A subset of the java.lang classes"""
+
+
+java_util = {'Collection', 'Enumeration', 'Iterator', 'List', 'ListIterator',
+             'Map', 'Queue', 'Set', 'ArrayList', 'Arrays', 'HashMap',
+             'HashSet', 'Hashtable', 'LinkedList', 'Properties', 'Random',
+             'Scanner', 'Stack', 'StringTokenizer', 'Timer', 'TreeMap',
+             'TreeSet', 'UUID', 'Vector'}
+"""A subset of the java.util interfaces and classes"""
+
+
+java_built_in = java_reserved_words | java_lang
+
+
+package_info = '''/**
+ * This class hierarchy was generated from the Yang module
+ * by the <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">JPyang</a> plugin of <a target="_top" href="http://code.google.com/p/pyang/">pyang</a>.
+ * The generated classes may be used to manipulate pieces of configuration data
+ * with NETCONF operations such as edit-config, delete-config and lock. These
+ * operations are typically accessed through the JNC Java library by
+ * instantiating Device objects and setting up NETCONF sessions with real
+ * devices using a compatible YANG model.
+ '''
+
+
+useful_links = ''' * @see <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">JPyang project page</a>
+ * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6020.txt">RFC 6020: YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF)</a>
+ * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6241.txt">RFC 6241: Network Configuration Protocol (NETCONF)</a>
+ * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>
+ * @see <a target="_top" href="http://www.tail-f.com">Tail-f Systems</a>
+ */
+ package '''
+
+
+outputted_warnings = []
+"""A list of warning message IDs that are used to avoid duplicate warnings"""
+
+
+augmented_modules = {}
+"""A dict of external modules that are augmented by this module"""
 
 
 def print_warning(msg='', key='', ctx=None):
