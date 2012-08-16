@@ -857,18 +857,14 @@ class ClassGenerator(object):
             child_gen = MethodGenerator(sub, self.ctx)
             add(sub.arg, child_gen.access_methods_comment())
             type_stmt = sub.search_one('type')
-            type_str1, type_str2 = get_types(type_stmt, self.ctx)
+            type_str1, _ = get_types(type_stmt, self.ctx)
             if sub.keyword == 'leaf':
                 key = sub.parent.search_one('key')
                 optional = key is None or sub.arg not in key.arg.split(' ')
                 # TODO: ensure that the leaf is truly optional
                 add(sub.arg, get_value(sub, ret_type=type_str1))
-                add(sub.arg, set_leaf_value(sub, prefix=self.prefix_name, arg_type=type_str1))
-                add(sub.arg, set_leaf_value(sub, prefix='', arg_type='String',
-                        jnc_type=type_str1))
-                if type_str2 != 'String':
-                    add(sub.arg, set_leaf_value(sub, prefix='',
-                        arg_type=type_str2, jnc_type=type_str1))
+                for setter in child_gen.setters():
+                    add(sub.arg, setter)
                 if optional:
                     add(sub.arg, unset_value(sub))
                 add(sub.arg, add_value(sub, self.prefix_name))
@@ -1453,6 +1449,10 @@ class MethodGenerator(object):
         elif import_ == self.root:
             return '.'.join(self.rootpkg + [import_])
         elif import_ in self.children:
+            type_child = self.stmt.search_one('type')
+            if type_child is not None and normalize(type_child.arg) == import_:
+                typedef_pkg = get_package(type_child.i_typedef, self.ctx)
+                return '.'.join([typedef_pkg, import_])
             return '.'.join([self.pkg, camelize(self.stmt.arg), import_])
         elif child and import_ == normalize(self.stmt.arg):
             return '.'.join([self.pkg, import_])
@@ -1763,39 +1763,64 @@ class LeafMethodGenerator(MethodGenerator):
         self.stmt_type = stmt.search_one('type')
         self.type_str = get_types(self.stmt_type, ctx)
         self.is_string = self.type_str[1] == 'String'
+        self.is_typedef = (hasattr(self.stmt_type, 'i_typedef')
+                           and self.stmt_type.i_typedef is not None)
         key = stmt.parent.search_one('key')
         self.is_optional = key is None or stmt.arg not in key.arg.split(' ')
 
     def setters(self):
-        if self.is_leaf:
-            return NotImplemented
         name = 'set' + self.n + 'Value'
-        param_name = self.n2 + 'Value'
-        jnc_type = normalize(self.stmt_type.arg)  # FIXME Check if typedef or not in constructor!
-        res = [JavaMethod(name=name) for _ in range(2 + (not self.is_string))]
+        num_methods = 2 + (not self.is_string)
+        value_type = normalize(self.stmt_type.arg)
+        if not self.is_typedef:
+            value_type = self.type_str[0]  # JNC type
+        res = [JavaMethod(name=name) for _ in range(num_methods)]
+
         for i, method in enumerate(res):
+            param_names = [self.n2 + 'Value']
             method.add_modifier('public')
             method.set_return_type('void')
             method.add_exception('JNCException')
             method.add_javadoc('Sets the value for child ' + self.stmt.keyword +
                                ' "' + self.stmt.arg + '",')
             if i == 0:
-                method.add_parameter('.'.join([self.pkg, jnc_type]), param_name)
-                method.add_javadoc('using a JNC type value.')
+                param_types = [value_type]
+                if not self.is_typedef:
+                    method.add_javadoc('using instance of generated typedef class.')
+                else:
+                    method.add_javadoc('using a JNC type value.')
+                method.add_javadoc(' '.join(['@param', param_names[0],
+                                             'The value to set.']))
                 method.add_line(''.join(['set', normalize(self.stmt.keyword),
                                          'Value(', self.root, '.NAMESPACE,']))
                 method.add_dependency(self.root)
                 method.add_line('    "' + self.stmt.arg + '",')
-                method.add_line('    ' + param_name + ',')
+                method.add_line('    ' + param_names[0] + ',')
                 method.add_line('    childrenNames());')
             else:
-                method.add_parameter(self.type_str[i - 1], param_name)
-                method.add_line(''.join([name, '(new ', jnc_type, '(',
-                                         param_name, '));']))
-                method.add_dependency(jnc_type)
-                method.add_javadoc('using a Java primitive value.')
-            method.add_javadoc(' '.join(['@param', param_name,
-                                         'The value to set.']))
+                line = [name, '(new ', method.add_dependency(value_type), '(',
+                        param_names[0]]
+                if not self.is_string and i == 1:
+                    param_types = [self.type_str[1]]
+                    method.add_javadoc('using Java primitive values.')
+                    if self.type_str[0] == 'com.tailf.jnc.YangDecimal64':
+                        param_types.append('int')
+                        param_names.append('fractionDigits')
+                        line.extend([', ', param_names[-1]])
+                    # FIXME: Add support for bits, leafref, instance-identifier, etc.
+                    # TODO: Write functions that returns appropriate types and names
+                    # FIXME: Some types may be incorrectly classified as
+                    # ... string, resulting in no primitive (enumeration, bits, etc)
+                else:
+                    param_types = ['String']
+                    method.add_javadoc('using a String value.')
+                line.append('));')
+                method.add_line(''.join(line))
+            for param_type, param_name in zip(param_types, param_names):
+                method.add_parameter(param_type, param_name)
+            method.add_javadoc(' '.join(['@param', param_names[0], 'The value to set.']))
+            if(len(param_types) > 1):
+                method.add_javadoc('@param fractionDigits Number of decimals in value')
             self.fix_imports(method, child=True)
         return res
 
