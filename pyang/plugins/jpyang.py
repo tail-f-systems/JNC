@@ -1262,11 +1262,45 @@ class JavaClass(object):
 
 
 class JavaValue(object):
-    """A Java value"""
+    """A Java value, typically representing a field or a method in a Java
+    class and optionally a javadoc comment.
+
+    A JavaValue can have its attributes set using the optional keyword
+    arguments of the constructor, or by using the add and set methods.
+
+    Each instance of this class has an 'as_list' method which is used to get a
+    list of strings representing lines of code that can be written to a Java
+    file once all the attributes have been set set.
+
+    """
 
     def __init__(self, exact=None, javadocs=None, modifiers=None, name=None,
                  value=None, imports=None, indent=4):
-        """Value constructor"""
+        """Initializes the attributes of a new Java value.
+
+        Keyword arguments:
+        exact (String list)     -- If supplied, the 'as_list' method will
+                                   return this list until something has been
+                                   added to this Java value.
+        javadocs (String list)  -- A list of the lines in the javadoc
+                                   declaration for this Java Value.
+        modifiers (String list) -- A list of Java modifiers such as 'public'
+                                   and 'static'. Also used to specify the type
+                                   of fields.
+        name (String)           -- The identifier used for this value.
+        value (String)          -- Not used by methods, this is placed after
+                                   the assignment operator in a field
+                                   declaration.
+        imports (String list)   -- A (possibly redundant) set of classes to
+                                   import in the class declaring this value.
+                                   This list is typically filtered by other
+                                   classes so nothing gets imported unless it
+                                   is required to for the Java class to
+                                   compile.
+        indent (Integer)        -- The indentation in the 'as_list'
+                                   representation. Defaults to 4 spaces.
+
+        """
         self.exact = exact
         self.value = value
         self.indent = ' ' * indent
@@ -1306,6 +1340,19 @@ class JavaValue(object):
         return not self.__eq__(other)
 
     def _set_instance_data(self, attr, value):
+        """Adds or assigns value to the attr attribute of this Java value.
+
+        attr (String) -- The attribute to add or assign value to. If this Java
+                         value does not have an attribute with this name, a
+                         warning is printed with the msg "Unknown attribute"
+                         followed by the attribute name. The value is added,
+                         appended or assigned, depending on if the attribute is
+                         a MutableSet, a list or something else, respectively.
+        value         -- Typically a String, but can be anything, really.
+
+        The 'exact' cache is invalidated is the attribute exists.
+
+        """
         try:
             data = getattr(self, attr)
             if isinstance(data, list):
@@ -1329,7 +1376,8 @@ class JavaValue(object):
 
     def add_modifier(self, modifier):
         """Adds modifier to end of list of modifiers. Overwrites modifiers set
-        in constructor.
+        in constructor the first time it is invoked, to enable subclasses to
+        have default modifiers.
 
         """
         if self.default_modifiers:
@@ -1379,9 +1427,43 @@ class JavaMethod(JavaValue):
     """A Java method. Default behaviour is public void."""
 
     def __init__(self, exact=None, javadocs=None, modifiers=None,
-                 return_type=None, name=None, parameters=None, exceptions=None,
+                 return_type=None, name=None, params=None, exceptions=None,
                  body=None, indent=4):
-        """Method constructor"""
+        """Initializes the attributes of a new Java method.
+
+        Keyword arguments:
+        exact (String list)     -- If supplied, the 'as_list' method will
+                                   return this list until something has been
+                                   added to this Java value.
+        javadocs (String list)  -- A list of the lines in the javadoc
+                                   declaration for this Java Value.
+        modifiers (String list) -- A list of Java modifiers such as 'public'
+                                   and 'static'. Also used to specify the type
+                                   of fields.
+        return_type (String)    -- The return type of the method. To avoid
+                                   adding the type as a required import,
+                                   assign to the return_type attribute directly
+                                   instead of using this argument.
+        name (String)           -- The identifier used for this value.
+        params (str tuple list) -- A list of 2-tuples representing the type and
+                                   name of the parameters of this method. To
+                                   avoid adding the type as a required import,
+                                   assign to the parameters attribute directly
+                                   instead of using this argument.
+        exceptions (str list)   -- A list of exceptions thrown by the method.
+        value (String)          -- Not used by methods, this is placed after
+                                   the assignment operator in a field
+                                   declaration.
+        imports (String list)   -- A (possibly redundant) set of classes to
+                                   import in the class declaring this value.
+                                   This list is typically filtered by other
+                                   classes so nothing gets imported unless it
+                                   is required to for the Java class to
+                                   compile.
+        indent (Integer)        -- The indentation in the 'as_list'
+                                   representation. Defaults to 4 spaces.
+
+        """
         super(JavaMethod, self).__init__(exact=exact, javadocs=javadocs,
                                          modifiers=modifiers, name=name,
                                          value=None, indent=indent)
@@ -1393,8 +1475,8 @@ class JavaMethod(JavaValue):
             self.set_return_type(return_type)
 
         self.parameters = OrderedSet()
-        if parameters is not None:
-            for param_type, param_name in parameters:
+        if params is not None:
+            for param_type, param_name in params:
                 self.add_parameter(param_type, param_name)
 
         self.exceptions = OrderedSet()
@@ -1672,7 +1754,7 @@ class MethodGenerator(object):
         add_child = JavaMethod(modifiers=['public'],
                                return_type='void',
                                name='addChild',
-                               parameters=[('Element', 'child')])
+                               params=[('Element', 'child')])
         add_child.add_javadoc('Support method for addChild.')
         add_child.add_javadoc('Adds a child to this object.')
         add_child.add_javadoc('')
@@ -1806,7 +1888,7 @@ class MethodGenerator(object):
         """Returns a java iterator method"""
         if not(self.is_leaflist or self.is_list):
             return None
-        res = JavaMethod(name=camelize(self.stmt.arg) + 'Iterator')
+        res = JavaMethod(name=(camelize(self.stmt.arg) + 'Iterator'))
         res.add_javadoc(''.join(['Iterator method for the ', self.stmt.keyword,
                                  ' "', self.stmt.arg, '".']))
         res.add_javadoc(''.join(['@return An iterator for the ',
