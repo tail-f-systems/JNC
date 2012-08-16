@@ -857,12 +857,11 @@ class ClassGenerator(object):
             child_gen = MethodGenerator(sub, self.ctx)
             add(sub.arg, child_gen.access_methods_comment())
             type_stmt = sub.search_one('type')
-            type_str1, _ = get_types(type_stmt, self.ctx)
             if sub.keyword == 'leaf':
                 key = sub.parent.search_one('key')
                 optional = key is None or sub.arg not in key.arg.split(' ')
                 # TODO: ensure that the leaf is truly optional
-                add(sub.arg, get_value(sub, ret_type=type_str1))
+                add(sub.arg, child_gen.getters())
                 for setter in child_gen.setters():
                     add(sub.arg, setter)
                 if optional:
@@ -1713,7 +1712,7 @@ class MethodGenerator(object):
 
         """
         assert self.gen is not self, 'Avoid infinite recursion'
-        return self.gen.getters() if self.is_list else None
+        return self.gen.getters() if self.is_list or self.is_leaf else None
 
     def deleters(self):
         """Returns a list of JavaMethods representing deleters to include
@@ -1767,6 +1766,21 @@ class LeafMethodGenerator(MethodGenerator):
                            and self.stmt_type.i_typedef is not None)
         key = stmt.parent.search_one('key')
         self.is_optional = key is None or stmt.arg not in key.arg.split(' ')
+
+    def getters(self):
+        """get<Identifier>Value method generator."""
+        assert self.is_leaf
+        method = JavaMethod()
+        method.add_modifier('public')
+        method.set_return_type(self.type_str[0])
+        method.set_name('get' + self.n + 'Value')
+        method.add_exception('JNCException')
+        method.add_javadoc('Gets the value for child ' + self.stmt.keyword +
+                           ' "' + self.stmt.arg + '".')
+        method.add_javadoc('@return The value of the ''' + self.stmt.keyword + '.')
+        method.add_line('return (' + self.type_str[0] + ')getValue("' +
+                        self.stmt.arg + '");')
+        return [self.fix_imports(method, child=True)]
 
     def setters(self):
         name = 'set' + self.n + 'Value'
@@ -1845,6 +1859,7 @@ class LeafMethodGenerator(MethodGenerator):
         method_type -- either 'create' or 'delete'
 
         """
+        assert self.is_leaflist
         res = [self._parent_template(method_type) for _ in range(2)]
 
         for i, method in enumerate(res):
@@ -2199,25 +2214,6 @@ class ListMethodGenerator(MethodGenerator):
         res.extend(self.adders())
         res.extend(self.deleters())
         return res
-
-
-def get_value(stmt, ret_type='com.tailf.jnc.YangString'):
-    """get<Identifier>Value method generator. Similar to get_stmt (see below),
-    but allows parameter-free methods to be generated.
-
-    stmt     -- Typically a leaf statement
-    ret_type -- The type of the return value of the generated method
-
-    """
-    name = normalize(stmt.arg)
-    return '''    /**
-     * Return the value for child ''' + stmt.keyword + ' "' + stmt.arg + '''".
-     * @return The value of the ''' + stmt.keyword + '''.
-     */
-    public ''' + ret_type + ' get' + name + '''Value()
-        throws JNCException {
-        return (''' + ret_type + ')getValue("' + stmt.arg + '''");
-    }'''
 
 
 def add_value(stmt, prefix):
