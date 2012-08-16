@@ -297,7 +297,6 @@ Type '$ pyang --help' for more details on how to use pyang.
 '''
 
 
-# TODO: Might be more efficient to use dicts instead of set and list for these
 java_reserved_words = {'abstract', 'assert', 'boolean', 'break', 'byte',
     'case', 'catch', 'char', 'class', 'const*', 'continue', 'default',
     'double', 'do', 'else', 'enum', 'extends', 'false',
@@ -324,26 +323,26 @@ java_util = {'Collection', 'Enumeration', 'Iterator', 'List', 'ListIterator',
 
 
 java_built_in = java_reserved_words | java_lang
+"""Identifiers that shouldn't be imported in Java"""
 
 
 package_info = '''/**
- * This class hierarchy was generated from the Yang module
+ * This class hierarchy was generated from the Yang module{0}
  * by the <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">JPyang</a> plugin of <a target="_top" href="http://code.google.com/p/pyang/">pyang</a>.
  * The generated classes may be used to manipulate pieces of configuration data
  * with NETCONF operations such as edit-config, delete-config and lock. These
  * operations are typically accessed through the JNC Java library by
  * instantiating Device objects and setting up NETCONF sessions with real
  * devices using a compatible YANG model.
- '''
-
-
-useful_links = ''' * @see <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">JPyang project page</a>
+ * <p>{1}
+ * @see <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">JPyang project page</a>
  * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6020.txt">RFC 6020: YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF)</a>
  * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6241.txt">RFC 6241: Network Configuration Protocol (NETCONF)</a>
  * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>
  * @see <a target="_top" href="http://www.tail-f.com">Tail-f Systems</a>
  */
  package '''
+"""Format string used in package-info files"""
 
 
 outputted_warnings = []
@@ -351,7 +350,7 @@ outputted_warnings = []
 
 
 augmented_modules = {}
-"""A dict of external modules that are augmented by this module"""
+"""A dict of external modules that are augmented by the YANG module"""
 
 
 def print_warning(msg='', key='', ctx=None):
@@ -1067,7 +1066,8 @@ class PackageInfoGenerator(object):
         class_hierarchy -- A tree represented as a list as in parse_hierarchy
 
         """
-        return ''.join([package_info, '* <p>\n', useful_links, self.pkg, ';'])
+        module = self.stmt.arg if not self.stmt.top else self.stmt.top.arg
+        return ''.join([package_info.format(' ' + module, ''), self.pkg, ';'])
 
 
 class JavaClass(object):
