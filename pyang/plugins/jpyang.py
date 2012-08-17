@@ -2098,21 +2098,22 @@ class TypedefMethodGenerator(MethodGenerator):
         super(TypedefMethodGenerator, self).__init__(stmt, ctx)
         assert self.gen is self
         assert self.is_typedef, 'This class is only valid for typedef stmts'
-        self.stmt_type = stmt.search_one('type')  # FIXME use get_type!
+        self.type = stmt.search_one('type')  # FIXME use get_type!
+        self.base_type = None if not self.type else get_base_type(stmt)
         self.is_string = False
         self.needs_check = True  # Set to False to avoid redundant checks
-        if self.stmt_type is not None:
-            self.is_string = self.stmt_type.arg in ('string', 'enumeration')   # FIXME use get_type!
+        if self.base_type is not None:
+            self.is_string = self.base_type.arg in ('string', 'enumeration')
             for s in ('length', 'path', 'range', 'require_instance'):
-                setattr(self, s, self.stmt_type.search_one(s))
+                setattr(self, s, self.base_type.search_one(s))
             for s in ('bit', 'enum', 'pattern'):
-                setattr(self, s, self.stmt_type.search(s))
+                setattr(self, s, self.base_type.search(s))
             # self.needs_check = self.enum or self.pattern
 
     def constructors(self):
         """Returns a list containing a single or a pair of constructors"""
         constructors = []
-        primitive = get_types(self.stmt_type, self.ctx)[1]
+        primitive = get_types(self.type, self.ctx)[1]
         javadoc = ['@param value Value to construct the ', self.n, ' from.']
 
         # Iterate once if string, twice otherwise
@@ -2139,12 +2140,12 @@ class TypedefMethodGenerator(MethodGenerator):
     def setters(self):
         """Returns a list of set_value JavaMethods"""
         setters = []
-        primitive = get_types(self.stmt_type, self.ctx)[1]
+        primitive = get_types(self.type, self.ctx)[1]
         javadoc = '@param value The value to set.'
 
         # Iterate once if string, twice otherwise
         for i in range(1 + (not self.is_string)):
-            setter = JavaMethod(modifiers=['public', 'void'], name='setValue')
+            setter = JavaMethod(name='setValue')
             javadoc2 = ['Sets the value using a ']
             if i == 0:
                 # String setter
@@ -2164,9 +2165,9 @@ class TypedefMethodGenerator(MethodGenerator):
         return setters
 
     def checker(self):
-        """Returns a 'check' JavaMethod, which checks regexp constraints"""
+        """Returns a 'check' JavaMethod, which checks constraints on values"""
         if self.needs_check:
-            checker = JavaMethod(modifiers=['public', 'void'], name='check')
+            checker = JavaMethod(name='check')
             checker.add_javadoc('Checks all restrictions (if any).')
             checker.add_exception('YangException')
             if self.enum:
