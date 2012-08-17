@@ -37,7 +37,7 @@ For complete functionality, invoke with:
 > pyang \
     --path <yang search path> \
     --format java \
-    --java-package <package.name> \
+    --jpyang-output <package.name> \
     --jpyang-verbose \
     --jpyang-ignore-errors \
     --jpyang-javadoc <javadoc directory path> \
@@ -86,7 +86,7 @@ class JPyangPlugin(plugin.PyangPlugin):
         """Adds options to pyang, displayed in the pyang CLI help message"""
         optlist = [
             optparse.make_option(
-                '-d', '--java-package',
+                '-d', '--jpyang-output',
                 dest='directory',
                 help='Generate output to DIRECTORY.'),
             optparse.make_option(
@@ -134,10 +134,12 @@ class JPyangPlugin(plugin.PyangPlugin):
         if ctx.opts.jpyang_help:
             self.print_help()
             sys.exit(0)
-        if ctx.opts.format in ['java', 'jpyang'] and not ctx.opts.directory:
-            ctx.opts.directory = 'gen'
-            print_warning(msg=('Option -d (or --java-package) not set, ' +
-                'defaulting to "gen".'))
+        if ctx.opts.format in ['java', 'jpyang']:
+            if not ctx.opts.directory:
+                ctx.opts.directory = 'gen'
+                print_warning(msg=('Option -d (or --java-package) not set, ' +
+                    'defaulting to "gen".'))
+            ctx.rootpkg = ctx.opts.directory.rpartition('src')[2][1:]
 
     def setup_fmt(self, ctx):
         """Disables implicit errors for the Context"""
@@ -289,7 +291,7 @@ system (EMS), to enable retrieval and/or storing of configurations on NETCONF
 agents/servers with specific capabilities.
 
 One way to use the Java output format plug-in of pyang is
-$ pyang -f java -d output.package.dir <file.yang>
+$ pyang -f java --jpyang-output package.dir <file.yang>
 
 The two formats java and jpyang produce identical results.
 
@@ -416,10 +418,8 @@ def get_package(stmt, ctx):
         stmt = stmt.parent
         if stmt.parent is not None:
             sub_packages.appendleft(camelize(stmt.arg))
-    full_package = collections.deque(ctx.opts.directory.split(os.sep))
+    full_package = ctx.rootpkg.split(os.sep)
     full_package.extend(sub_packages)
-    if full_package and full_package[0] == 'src':
-        full_package.popleft()  # package names may not start with 'src'
     return '.'.join(full_package)
 
 
@@ -495,7 +495,7 @@ def get_types(yang_type, ctx):
     if yang_type.keyword in ('leaf', 'leaf-list'):
         yang_type = yang_type.search_one('type')
     assert yang_type.keyword in ('type', 'typedef'), 'argument is type, typedef or leaf'
-    primitive = normalize(yang_type.arg)
+    primitive = capitalize_first(camelize(yang_type.arg))
     jnc = 'com.tailf.jnc.Yang' + primitive
     if yang_type.arg in ('string', 'boolean'):
         pass
@@ -576,7 +576,7 @@ class SchemaNode(object):
         self.tagpath = tagpath
 
     def as_list(self):
-        """Returns a string repr "node" element content for an XML schema"""
+        """Returns a string list repr "node" element content for an XML schema"""
         res = ['<node>']
         stmt = self.stmt
         res.append('<tagpath>' + self.tagpath + '</tagpath>')
@@ -654,7 +654,7 @@ class YangType(object):
         self.defined_types = ['empty', 'int8', 'int16', 'int32', 'int64',
             'uint8', 'uint16', 'uint32', 'uint64', 'binary', 'bits', 'boolean',
             'decimal64', 'enumeration', 'identityref', 'instance-identifier',
-            'leafref', 'string', 'union']
+            'leafref', 'string', 'union']  # Use set instead!
         """List of types represented by a jnc or generated class"""
 
     def defined(self, yang_type):
@@ -966,6 +966,7 @@ class PackageInfoGenerator(object):
         """
         self.d = directory
         self.pkg = directory if directory[:3] != 'src' else directory[4:]
+        self.pkg = self.pkg.replace(os.sep, '.')
         self.stmt = stmt
         self.ctx = ctx
 
@@ -1556,7 +1557,7 @@ class MethodGenerator(object):
         self.children = map(lambda s: normalize(s.arg), stmt.substmts)
         self.pkg = get_package(stmt, ctx)
         self.basepkg = self.pkg.partition('.')[0]
-        self.rootpkg = ctx.opts.directory.split(os.sep)
+        self.rootpkg = ctx.rootpkg.split(os.sep)
         if self.rootpkg[:1] == ['src']:
             self.rootpkg = self.rootpkg[1:]  # src not part of package
 
@@ -1605,7 +1606,10 @@ class MethodGenerator(object):
         elif import_ in self.children:
             type_child = self.stmt.search_one('type')
             if type_child is not None and normalize(type_child.arg) == import_:
-                typedef_pkg = get_package(type_child.i_typedef, self.ctx)
+                try:
+                    typedef_pkg = get_package(type_child.i_typedef, self.ctx)
+                except AttributeError:
+                    typedef_pkg = get_package(type_child, self.ctx)
                 return '.'.join([typedef_pkg, import_])
             return '.'.join([self.pkg, camelize(self.stmt.arg), import_])
         elif child and import_ == normalize(self.stmt.arg):
@@ -2170,6 +2174,9 @@ class TypedefMethodGenerator(MethodGenerator):
             checker = JavaMethod(name='check')
             checker.add_javadoc('Checks all restrictions (if any).')
             checker.add_exception('YangException')
+            # TODO 'length', 'path', 'range', 'require_instance'
+            if self.bit:
+                pass  # TODO
             if self.enum:
                 checker.add_line('boolean e = false;')
                 for e in self.enum:
@@ -2241,7 +2248,7 @@ class ContainerMethodGenerator(MethodGenerator):
 class ListMethodGenerator(MethodGenerator):
     """Method generator specific to classes generated from list stmts"""
 
-    def __init__(self, stmt, ctx=None):
+    def __init__(self, stmt, ctx):
         super(ListMethodGenerator, self).__init__(stmt, ctx)
         assert self.gen is self
         assert self.is_list, 'Only valid for list stmts'
@@ -2251,7 +2258,7 @@ class ListMethodGenerator(MethodGenerator):
             self.keys = self.stmt.search_one('key').arg.split(' ')
         findkey = lambda k: self.stmt.search_one('leaf', k)
         self.key_stmts = map(findkey, self.keys)
-        notstring = lambda k: k.arg != 'string'
+        notstring = lambda k: get_types(k, ctx)[1] != 'String'
         self.is_string = not filter(notstring, self.key_stmts)
 
     def value_constructors(self):
