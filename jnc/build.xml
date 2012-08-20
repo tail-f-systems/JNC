@@ -1,0 +1,28 @@
+<project name="jnc" basedir="." default="main">
+  <property environment="env" />
+  <property name="src.dir" value="src" />
+  <property name="classes.dir" value="bin" />
+  <property name="ganymed.dir" value="/usr/share/java/" />
+  <property name="jar.dir" value="lib" />
+  
+  <target name="clean">
+    <delete file="${jar.dir}/JNC.jar" />
+    <delete includeemptydirs="true">
+      <fileset dir="${classes.dir}" includes="**/*"/>
+    </delete>
+  </target>
+
+  <target name="compile">
+    <mkdir dir="${classes.dir}" />
+    <javac srcdir="${src.dir}" destdir="${classes.dir}" debug="on"
+           debuglevel="lines,vars,source" includeantruntime="false">
+      <classpath location="${ganymed.dir}/ganymed-ssh2-250.jar" />
+    </javac>
+  </target>
+  
+  <target name="jar" depends="compile">
+    <jar destfile="${jar.dir}/JNC.jar" basedir="${classes.dir}" />
+  </target>
+  
+  <target name="all" depends="clean, jar" />
+</project>

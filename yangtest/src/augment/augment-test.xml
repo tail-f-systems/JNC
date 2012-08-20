@@ -1,8 +1,0 @@
-<target xmlns="http://test.com/ns/augee/1.0">
-  <c>
-    <d>7</d>
-  </c>
-  <augmented xmlns="http://test.com/ns/aug/1.0">
-    <data>Seven</data>
-  </augmented>
-</target>

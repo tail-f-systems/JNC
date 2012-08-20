@@ -1,9 +1,6 @@
 *.pyc
 *~
 *bak
-example/
-execd/
-confm-1.9.3
 *.metadata
 *.class
 *.classpath
