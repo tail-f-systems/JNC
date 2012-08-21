@@ -79,7 +79,7 @@ public class NodeSet extends ArrayList<Element> {
     }
 
     /**
-     * Gets first element from node set.
+     * @return first element from this node set, or null if none.
      */
     public Element first() {
         if (size() > 0)
