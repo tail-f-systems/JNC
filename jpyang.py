@@ -1866,7 +1866,17 @@ class MethodGenerator(object):
                 javadoc1.append(', using an existing object.')
                 javadoc2.append(' '.join(['@param', self.n2, 'The object to add.']))
                 method.add_parameter(self.n, self.n2)
-            elif self.is_list and (i == 1 or i == 2) and len(res) == 4:
+                iter = self.n2 + 'Iterator'
+                method.add_line(iter.join(['ElementChildrenIterator ',
+                                           ' = ', '();']))
+                method.add_line('while (' + iter + '.hasNext()) {')
+                method.add_line(''.join(['    ', self.n, ' child = (', self.n,
+                                         ')', iter, '.next();']))
+                method.add_line('    if (child.name.equals(' + self.n2 + '.name)) {')
+                method.add_line('        return null;')
+                method.add_line('    }')
+                method.add_line('}')
+            elif self.is_list and i in {1, 2} and len(res) == 4:
                 # Add child with String or JNC type keys
                 javadoc1.append(', with specified keys.')
                 if i == 2:
@@ -1892,8 +1902,11 @@ class MethodGenerator(object):
             method.add_javadoc('@return The added child.')
             if self.is_container:
                 method.add_line('this.' + self.n2 + ' = ' + self.n2 + ';')
-            method.add_line('insertChild(' + self.n2 + ', childrenNames());')
-            method.add_line('return ' + self.n2 + ';')
+            if self.is_list and i in {1, 2} and len(res) == 4:
+                method.add_line('return ' + method.name + '(' + self.n2 + ');')
+            else:
+                method.add_line('insertChild(' + self.n2 + ', childrenNames());')
+                method.add_line('return ' + self.n2 + ';')
             self.fix_imports(method, child=True)
         return res
 
