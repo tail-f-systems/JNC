@@ -1,0 +1,19 @@
+<hosts xmlns="http://acme.com/ns/simple/1.0">
+  <host>
+    <name>sthlm</name>
+    <numberOfServers>57</numberOfServers>
+  </host>
+  <host>
+    <name>round hill</name>
+    <numberOfServers>7</numberOfServers>
+  </host>
+  <host>
+    <name>gbg</name>
+    <enabled>false</enabled>
+    <numberOfServers>1</numberOfServers>
+  </host>
+  <host>
+    <name>tokyo</name>
+    <numberOfServers>2</numberOfServers>
+  </host>
+</hosts>
