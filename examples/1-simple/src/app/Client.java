@@ -9,6 +9,8 @@ import com.tailf.jnc.Element;
 import com.tailf.jnc.JNCException;
 import com.tailf.jnc.NetconfSession;
 import com.tailf.jnc.NodeSet;
+import com.tailf.jnc.YangString;
+import com.tailf.jnc.YangUInt32;
 
 import gen.simple.Simple;
 import gen.simple.Hosts;
@@ -61,15 +63,24 @@ public class Client {
     public NodeSet getConfig() throws IOException, JNCException {
         return getConfig(dev);
     }
-
-    public int run() {
-        try {
-            Simple.enable();
-        } catch (JNCException e) {
-            System.err.println("Schema file not found.");
-            return -1;
+    
+    /**
+     * Gets the first configuration element in configs with name "hosts".
+     * 
+     * @param configs Set of device configuration data.
+     * @return The configuration, or null if not present.
+     */
+    public static Hosts getHostsConfig(NodeSet configs) {
+        Element hostsConfig = configs.first();
+        if (!hostsConfig.name.equals("hosts")) {
+            hostsConfig = null;
+            for (Element config : configs) {
+                if (config.name.equals("hosts")) {
+                    hostsConfig = config;
+                }
+            }
         }
-        return 0;
+        return (Hosts)hostsConfig;
     }
 
     /**
@@ -82,18 +93,32 @@ public class Client {
         Simple.enable();
         client.init();
         NodeSet configs = client.getConfig();
-        System.out.println("Initial config:");
-//        System.out.println(configs.first().toXMLString());
+        Hosts hostsConfig = getHostsConfig(configs);
+
+        System.out.println("Initial config:\n" + hostsConfig.toXMLString());
         
-        for (Element config : configs) {
-            System.out.println(config.toXMLString());
+        // Increment number of servers at each host by one
+        for (Element child : hostsConfig.getChildren()) {
+            Host h = (Host) child;
+            YangUInt32 numberOfServers = h.getNumberOfServersValue();
+            numberOfServers.setValue(numberOfServers.getValue() + 1);
+            h.setNumberOfServersValue(numberOfServers);
         }
 
-        // gen.L k = (gen.L) l.clone();
-        // System.out.println(l.getKValue());
-        // l.setRefLeafValue("test2");
-        // System.out.println(l.getKValue());
-        //
+//        System.out.println("Incremented:\n" + hostsConfig.toXMLString());
+        
+        // Add a new host
+        YangString hostName = new YangString("uppsala");
+        Host uppsala = new Host(hostName);
+        uppsala.setEnabledValue(false);
+        uppsala.setNumberOfServersValue(0);
+        hostsConfig.addHost(uppsala);
+        
+        // Add one with same name (key collision!)
+        hostsConfig.addHost(hostName);
+
+        System.out.println("After collision:\n" + hostsConfig.toXMLString());
+        
         // Element config2 = client.editConfig(l).first();
         // System.out.println("Resulting config:\n" + config2.toXMLString());
         //
