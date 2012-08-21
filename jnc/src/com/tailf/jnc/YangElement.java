@@ -77,14 +77,14 @@ public abstract class YangElement extends Element {
      * @return Dot-separated path to top-level container, or empty string.
      */
     private static String getPackage(Element elem) {
-    	if (elem != null && elem instanceof YangElement) {
+    	if (elem instanceof YangElement) {
     		YangElement c = (YangElement)elem;
     		if (c.parent instanceof YangElement) {
 	    		String pkg = getPackage(c.parent);
 	    		if (pkg != "") {
 	    			pkg += ".";
 	    		}
-	    		return pkg+c.name;
+	    		return pkg + camelize(c.name);
     		}
 			// don't add name of top-level container to package
     	}
@@ -96,6 +96,7 @@ public abstract class YangElement extends Element {
      * 
      * @param parent of YANG statement counterpart, null if none
      * @param name (non-normalized) name of class to be instantiated
+     * @param pkg The base package of the generated classes
      * @return An instance of class name, as a child of parent
      * @throws ClassNotFoundException
      *             If normalize(name) does not yield a valid class name
@@ -107,15 +108,10 @@ public abstract class YangElement extends Element {
      * @throws IllegalAccessException
      *             if the class or its nullary constructor is not accessible.
      */
-    private static Element instantiate(Element parent, String name)
+    private static Element instantiate(Element parent, String name, String pkg)
             throws ClassNotFoundException, InstantiationException,
             IllegalAccessException {
-        String className = "gen."; // FIXME: allow for other package names
-        if (parent != null) {
-        	className += getPackage(parent);
-        }
-        className += normalize(name);
-        // String className = pkg + "." + normalize(name);
+        String className = pkg + "." + getPackage(parent) + normalize(name);
         Class<?> rootClass = Class.forName(className);
         return (Element) rootClass.newInstance();
     }
@@ -127,7 +123,8 @@ public abstract class YangElement extends Element {
      */
     protected static Element createInstance(ElementHandler parser, Element parent,
             String ns, String name) throws YangException {
-        if (getPackage(ns) == null) {
+        String pkg = getPackage(ns);
+        if (pkg == null) {
             Element elem = new Element(ns, name);
             if (parent != null) {
                 parent.addChild(elem);
@@ -136,7 +133,7 @@ public abstract class YangElement extends Element {
         }
         try {
             if (parent == null) {
-                return instantiate(null, name); // Root
+                return instantiate(null, name, pkg); // Root
             } else if (parent instanceof YangElement) {
                 // YangElement child, aware
                 try {
@@ -163,7 +160,7 @@ public abstract class YangElement extends Element {
                      // This is the case where we stop parsing
                      // the NETCONF rpc data and start to create
                      // ConfM objects instead
-                Element child = instantiate(parent, name);
+                Element child = instantiate(parent, name, pkg);
                 parent.addChild(child);
                 return child;
             }
@@ -292,31 +289,49 @@ public abstract class YangElement extends Element {
         }
     }
 
-    /**
-     */
-    private static String normalize(String s) {
-        if (isReserved(s)) s = "j" + s;
-        int pos;
-        while ((pos = s.indexOf('-')) != -1) {
-            s = s.substring(0, pos) + capitalize(s.substring(pos + 1));
-        }
-        return capitalize(s);
+    private static String capitalize(String s) {
+        if (s.isEmpty()) return s;
+        return s.substring(0, 1).toUpperCase() + s.substring(1);
     }
 
-    /**
-     */
     private static boolean isReserved(String s) {
-        for (int i = 0; i < reservedWords.length; i++) {
-            if (reservedWords[i].equals(s)) return true;
+        for (String reservedWord : reservedWords) {
+            if (s.equals(reservedWord)) return true;
         }
         return false;
     }
 
-    /**
-     */
-    private static String capitalize(String s) {
-        if (s.length() == 0) return s;
-        return s.substring(0, 1).toUpperCase() + s.substring(1);
+    private static String camelize(String s) {
+        int pos;
+        while ((pos = s.indexOf('-')) != -1) {
+            s = s.substring(0, pos) + capitalize(s.substring(pos + 1));
+        }
+        if (isReserved(s)) {
+            s += "_";
+        } else if (s.matches("[0-9]")) {
+            s = "_" + s;
+        }
+        return s;
+    }
+
+    private static String normalize(String s) {
+        String res = camelize(s);
+        int start = 0, end = res.length();
+
+        if (res.startsWith("_")) {
+            start++;
+        }
+        if (res.endsWith("_")) {
+            end--;
+        }
+
+        if (end - start < 0) {
+            return "";
+        } else if (start != 0 || end != res.length()) {
+            return "J" + capitalize(res.substring(start, end));
+        } else {
+            return capitalize(res);
+        }
     }
 
     // ------------------------------------------------------------
