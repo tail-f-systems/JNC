@@ -308,15 +308,19 @@ Type '$ pyang --help' for more details on how to use pyang.
 
 
 java_reserved_words = {'abstract', 'assert', 'boolean', 'break', 'byte',
-    'case', 'catch', 'char', 'class', 'const*', 'continue', 'default',
+    'case', 'catch', 'char', 'class', 'const', 'continue', 'default',
     'double', 'do', 'else', 'enum', 'extends', 'false',
-    'final', 'finally', 'float', 'for', 'goto*', 'if',
+    'final', 'finally', 'float', 'for', 'goto', 'if',
     'implements', 'import', 'instanceof', 'int', 'interface', 'long',
     'native', 'new', 'null', 'package', 'private', 'protected',
     'public', 'return', 'short', 'static', 'strictfp', 'super',
     'switch', 'synchronized', 'this', 'throw', 'throws', 'transient',
     'true', 'try', 'void', 'volatile', 'while'}
-"""A set of identifiers that are reserved in Java"""
+"""A set of all identifiers that are reserved in Java"""
+
+
+java_literals = {'true', 'false', 'null'}
+"""The boolean and null literals of Java"""
 
 
 java_lang = {'Boolean', 'Byte', 'Double', 'Float', 'Integer', 'Long', 'Number',
@@ -332,7 +336,7 @@ java_util = {'Collection', 'Enumeration', 'Iterator', 'List', 'ListIterator',
 """A subset of the java.util interfaces and classes"""
 
 
-java_built_in = java_reserved_words | java_lang
+java_built_in = java_reserved_words | java_literals | java_lang
 """Identifiers that shouldn't be imported in Java"""
 
 
@@ -449,28 +453,42 @@ def capitalize_first(string):
 def camelize(string):
     """Removes hyphens and dots and replaces following character (if any) with
     its upper-case counterpart. Does not remove a trailing hyphen or dot.
+    
+    If the resulting string is reserved in Java, an underline is appended
 
     Returns an empty string if string argument is None.
 
     """
-    camelized_str = ''
+    camelized_str = collections.deque()
     if string is not None:
         iterator = pairwise(string)
         for character, next_character in iterator:
             if next_character and character in '-.':
-                camelized_str += capitalize_first(next_character)
+                camelized_str.append(capitalize_first(next_character))
                 iterator.next()
             else:
-                camelized_str += character
-    return camelized_str
+                camelized_str.append(character)
+    res = ''.join(camelized_str)
+    if res in java_reserved_words | java_literals:
+        camelized_str.append('_')
+    if re.match('\d', res):
+        camelized_str.appendleft('_')
+    return ''.join(camelized_str)
 
 
 def normalize(string):
-    """returns capitalize_first(camelize(string))"""
-    if string in java_reserved_words:
-        return 'J' + capitalize_first(camelize(string))
+    """returns capitalize_first(camelize(string)), except if camelize(string)
+    begins with and/or ends with a single underline: then they are/it is
+    removed and a 'J' is prepended. Mimics normalize in YangElement of JNC.
+    
+    """
+    res = camelize(string)
+    start = 1 if res.startswith('_') else 0
+    end = -1 if res.endswith('_') else 0
+    if start or end:
+        return 'J' + capitalize_first(res[start:end])
     else:
-        return capitalize_first(camelize(string))
+        return capitalize_first(res)
 
 
 def flatten(l):
@@ -503,7 +521,9 @@ def get_types(yang_type, ctx):
     if yang_type.keyword in ('leaf', 'leaf-list'):
         yang_type = yang_type.search_one('type')
     assert yang_type.keyword in ('type', 'typedef'), 'argument is type, typedef or leaf'
-    primitive = capitalize_first(camelize(yang_type.arg))
+    primitive = normalize(yang_type.arg)
+    if primitive == 'JBoolean':
+        primitive = 'Boolean'
     jnc = 'com.tailf.jnc.Yang' + primitive
     if yang_type.arg in ('string', 'boolean'):
         pass
@@ -695,7 +715,7 @@ class ClassGenerator(object):
         parent      -- ClassGenerator to copy arguments that were not supplied
                        from (if applicable)
 
-        """  # TODO: Clarify why some arguments are optional
+        """
         self.stmt = stmt
         self.package = None if not package else package.replace(os.sep, '.')
         self.src = src
@@ -708,7 +728,7 @@ class ClassGenerator(object):
         if yang_types is None:
             self.yang_types = YangType()
         if parent is not None:
-            for attr in ['package', 'src', 'ctx', 'path', 'ns', 'prefix_name', 'yang_types']:
+            for attr in ('package', 'src', 'ctx', 'path', 'ns', 'prefix_name', 'yang_types'):
                 if getattr(self, attr) is None:
                     setattr(self, attr, getattr(parent, attr))
 
@@ -765,7 +785,8 @@ class ClassGenerator(object):
         enabler.modifiers = ['public', 'static']
         enabler.add_javadoc('Enable the elements in this namespace to be aware')
         enabler.add_javadoc('of the data model and use the generated classes.')
-        enabler.add_line('YangElement.setPackage(NAMESPACE, PREFIX);')
+        enabler.add_line('"'.join(['YangElement.setPackage(NAMESPACE, ',
+                                   self.java_class.package, ');']))
         enabler.add_dependency('com.tailf.jnc.YangElement')
         enabler.add_line(name + '.registerSchema();')  # XXX: Don't import name
         self.java_class.add_enabler(enabler)
@@ -777,21 +798,15 @@ class ClassGenerator(object):
         reg.add_javadoc('Register the schema for this namespace in the global')
         reg.add_javadoc('schema table (CsTree) making it possible to lookup')
         reg.add_javadoc('CsNode entries for all tagpaths')
-        reg.add_line('StackTraceElement[] sTrace = (new Exception()).getStackTrace();')
-        reg.add_line('ClassLoader loader = sTrace[0].getClass().getClassLoader();')
-        reg.add_line('URL schemaUrl = loader.getResource("' + name + '.schema");')
-        enabler.add_dependency('java.net.URL')
         reg.add_line('SchemaParser parser = new SchemaParser();')
-        enabler.add_dependency('com.tailf.jnc.SchemaParser')
+        reg.add_dependency('com.tailf.jnc.SchemaParser')
         reg.add_line('HashMap<Tagpath, SchemaNode> h = SchemaTree.create(NAMESPACE);')
-        enabler.add_dependency('java.util.HashMap')
-        enabler.add_dependency('com.tailf.jnc.Tagpath')
-        enabler.add_dependency('com.tailf.jnc.SchemaNode')
-        enabler.add_dependency('com.tailf.jnc.SchemaTree')
-        reg.add_line('if (schemaUrl == null)')
-        reg.add_line('    parser.readFile("' + name + '.schema", h);')
-        reg.add_line('else')
-        reg.add_line('    parser.readFile(schemaUrl, h);')
+        reg.add_dependency('java.util.HashMap')
+        reg.add_dependency('com.tailf.jnc.Tagpath')
+        reg.add_dependency('com.tailf.jnc.SchemaNode')
+        reg.add_dependency('com.tailf.jnc.SchemaTree')
+        schema = os.sep.join([self.ctx.opts.directory.replace('.', os.sep), name])
+        reg.add_line('parser.readFile("' + schema + '.schema", h);')
         self.java_class.add_schema_registrator(reg)
 
         self.write_to_file()
@@ -1310,7 +1325,6 @@ class JavaValue(object):
                                    representation. Defaults to 4 spaces.
 
         """
-        self.exact = exact
         self.value = value
         self.indent = ' ' * indent
         self.default_modifiers = True
@@ -1333,6 +1347,9 @@ class JavaValue(object):
         if imports is not None:
             for import_ in imports:
                 self.imports.add(import_)
+
+        self.exact = exact
+        self.default_modifiers = True
 
     def __eq__(self, other):
         """Returns True iff self and other represents an identical value"""
@@ -1497,6 +1514,9 @@ class JavaMethod(JavaValue):
         if body is not None:
             for line in body:
                 self.add_line(line)
+
+        self.exact = exact
+        self.default_modifiers = True
 
     def set_return_type(self, return_type):
         """Sets the type of the return value of this method"""
