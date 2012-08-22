@@ -70,7 +70,7 @@ public class Client {
      * Gets the first configuration element in configs with name "hosts".
      * 
      * @param configs Set of device configuration data.
-     * @return The configuration, or null if not present.
+     * @return First hosts configuration, or null if none present.
      */
     public static Hosts getHostsConfig(NodeSet configs) {
         Element hostsConfig = configs.first();
