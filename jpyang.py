@@ -1965,6 +1965,8 @@ class LeafMethodGenerator(MethodGenerator):
         super(LeafMethodGenerator, self).__init__(stmt, ctx)
         assert self.is_leaf or self.is_leaflist
         self.stmt_type = stmt.search_one('type')
+        self.default = stmt.search_one('default')
+        self.default_value = None if not self.default else self.default.arg
         self.type_str = get_types(self.stmt_type, ctx)
         self.is_string = self.type_str[1] == 'String'
         self.is_typedef = (hasattr(self.stmt_type, 'i_typedef')
@@ -1982,7 +1984,17 @@ class LeafMethodGenerator(MethodGenerator):
         method.add_javadoc('Gets the value for child ' + self.stmt.keyword +
                            ' "' + self.stmt.arg + '".')
         method.add_javadoc('@return The value of the ''' + self.stmt.keyword + '.')
-        method.add_line('return (' + method.return_type + ')getValue("' +
+        if self.default:
+            method.add_line(method.return_type + ' ' + self.n2 + ' = (' +
+                            method.return_type + ')getValue("' +
+                            self.stmt.arg + '");')
+            method.add_line('if (' + self.n2 + ' == null) {')
+            method.add_line('    ' + self.n2 + ' = new ' + method.return_type +
+                            '(' + self.default_value + ');')
+            method.add_line('}')
+            method.add_line('return ' + self.n2 + ';')
+        else:
+            method.add_line('return (' + method.return_type + ')getValue("' +
                         self.stmt.arg + '");')
         return [self.fix_imports(method, child=True)]
 
