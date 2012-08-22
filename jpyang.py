@@ -189,12 +189,14 @@ class JPyangPlugin(plugin.PyangPlugin):
                 # Generate Java classes
                 src = ('module "' + module.arg + '", revision: "' +
                     util.get_latest_revision(module) + '".')
-                generator = ClassGenerator(module, package=directory, src=src, ctx=ctx)
+                generator = ClassGenerator(module, path=directory,
+                                           package=ctx.rootpkg, src=src, ctx=ctx)
                 generator.generate()
                 for aug_module in augmented_modules.values():
                     src = ('module "' + aug_module.arg + '", revision: "' +
                         util.get_latest_revision(aug_module) + '".')
-                    generator = ClassGenerator(aug_module, package=directory, src=src, ctx=ctx)
+                    generator = ClassGenerator(aug_module, path=directory,
+                                               package=ctx.rootpkg, src=src, ctx=ctx)
                     generator.generate()
                 if ctx.opts.debug or ctx.opts.verbose:
                     print 'Java classes generation COMPLETE.'
@@ -697,13 +699,13 @@ class YangType(object):
 class ClassGenerator(object):
     """Used to generate java classes from a yang module"""
 
-    def __init__(self, stmt, package=None, src=None, ctx=None, path='', ns='',
+    def __init__(self, stmt, path=None, package=None, src=None, ctx=None, ns='',
             prefix_name='', top_level=False, yang_types=None, parent=None):
         """Constructor.
 
         stmt        -- A statement (sub)tree, parsed from a YANG model
-        package     -- Name of Java package, also used as path to where files
-                       should be written
+        path        -- Full path to where the class should be written
+        package     -- Name of Java package
         src         -- Filename of parsed yang module, or the module name and
                        revision if filename is unknown
         ctx         -- Context used to fetch option parameters
@@ -717,10 +719,10 @@ class ClassGenerator(object):
 
         """
         self.stmt = stmt
-        self.package = None if not package else package.replace(os.sep, '.')
+        self.path = path
+        self.package = None if package is None else package.replace(os.sep, '.')
         self.src = src
         self.ctx = ctx
-        self.path = path
         self.ns = ns
         self.prefix_name = prefix_name
         self.top_level = top_level
@@ -903,8 +905,8 @@ class ClassGenerator(object):
             if type_stmt.i_typedef:
                 if not self.yang_types.defined(type_stmt.i_typedef.arg):
                     typedef_generator = ClassGenerator(type_stmt.i_typedef,
-                        package='src.' + get_package(type_stmt.i_typedef, self.ctx),
-                        path=self.package.replace('.', os.sep) + os.sep, ns=None,
+                        package=ctx.rootpkg,
+                        path=self.path.replace('.', os.sep) + os.sep, ns=None,
                         prefix_name=None, parent=self)
                     typedef_generator.generate()
                     self.yang_types.add(type_stmt.i_typedef.arg)
@@ -928,7 +930,7 @@ class ClassGenerator(object):
         if sub.keyword in ('list', 'container', 'typedef'):
             child_generator = ClassGenerator(stmt=sub,
                 package=self.package + '.' + camelize(sub.parent.arg),
-                path=self.path + camelize(sub.parent.arg) + os.sep, ns=None,
+                path=self.path + os.sep + camelize(sub.parent.arg) + os.sep, ns=None,
                 prefix_name=None, parent=self)
             child_generator.generate()
             if sub.keyword == 'list':
@@ -969,7 +971,7 @@ class ClassGenerator(object):
         return fields
 
     def write_to_file(self):
-        write_file(self.package,
+        write_file(self.path,
                    self.filename,
                    self.java_class.as_list(),
                    self.ctx)
@@ -988,7 +990,7 @@ class PackageInfoGenerator(object):
 
         """
         self.d = directory
-        self.pkg = directory if directory[:3] != 'src' else directory[4:]
+        self.pkg = directory.rpartition('src')[2][1:]
         self.pkg = self.pkg.replace(os.sep, '.')
         self.stmt = stmt
         self.ctx = ctx
@@ -1866,17 +1868,26 @@ class MethodGenerator(object):
                 javadoc1.append(', using an existing object.')
                 javadoc2.append(' '.join(['@param', self.n2, 'The object to add.']))
                 method.add_parameter(self.n, self.n2)
-                iter = self.n2 + 'Iterator'
-                method.add_line(iter.join(['ElementChildrenIterator ',
-                                           ' = ', '();']))
-                method.add_line('while (' + iter + '.hasNext()) {')
-                method.add_line(''.join(['    ', self.n, ' child = (', self.n,
-                                         ')', iter, '.next();']))
-                method.add_line('    if (child.keyCompare(' + self.n2 + ')) {')
-                method.add_line('        YangException.throwException(true, ' + self.n2 + ');')
-                method.add_dependency('com.tailf.jnc.YangException')
-                method.add_line('    }')
-                method.add_line('}')
+                
+                if self.is_list:
+                    # Check that object does not already exist
+                    iter = self.n2 + 'Iterator'
+                    method.add_line(iter.join(['ElementChildrenIterator ',
+                                               ' = ', '();']))
+                    method.add_line('while (' + iter + '.hasNext()) {')
+                    method.add_line(''.join(['    ', self.n, ' child = (',
+                                             self.n, ')', iter, '.next();']))
+                    method.add_line('    YangException.throwException(child.keyCompare(' +
+                                    self.n2 + '), ' + self.n2 + ');')
+                    method.add_dependency('com.tailf.jnc.YangException')
+                    method.add_line('}')
+                    
+                    # Check max-elements restriction
+                    if self.gen.max_elements != 'unbounded':
+                        method.add_line('YangException.throwException(children.size() >= ' +
+                                     self.gen.max_elements + ', ' + self.n2 + ');')
+                        method.add_dependency('com.tailf.jnc.YangException')
+                
             elif self.is_list and i in {1, 2} and len(res) == 4:
                 # Add child with String or JNC type keys
                 javadoc1.append(', with specified keys.')
@@ -2307,13 +2318,20 @@ class ListMethodGenerator(MethodGenerator):
         assert self.gen is self
         assert self.is_list, 'Only valid for list stmts'
         self.is_config = is_config(stmt)
+
         self.keys = []
         if self.is_config:
             self.keys = self.stmt.search_one('key').arg.split(' ')
         findkey = lambda k: self.stmt.search_one('leaf', k)
         self.key_stmts = map(findkey, self.keys)
+
         notstring = lambda k: get_types(k, ctx)[1] != 'String'
         self.is_string = not filter(notstring, self.key_stmts)
+
+        min = stmt.search_one('min-elements')
+        self.min_elements = '0' if not min else min.arg
+        max = stmt.search_one('max-elements')
+        self.max_elements = 'unbounded' if not max else max.arg
 
     def value_constructors(self):
         """Returns a list of constructors for configuration data lists"""
