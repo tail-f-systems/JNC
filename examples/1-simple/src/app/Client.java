@@ -6,9 +6,11 @@ import com.tailf.jnc.ConfDSession;
 import com.tailf.jnc.Device;
 import com.tailf.jnc.DeviceUser;
 import com.tailf.jnc.Element;
+import com.tailf.jnc.ElementChildrenIterator;
 import com.tailf.jnc.JNCException;
 import com.tailf.jnc.NetconfSession;
 import com.tailf.jnc.NodeSet;
+import com.tailf.jnc.YangException;
 import com.tailf.jnc.YangString;
 import com.tailf.jnc.YangUInt32;
 
@@ -93,16 +95,43 @@ public class Client {
         Simple.enable();
         client.init();
         NodeSet configs = client.getConfig();
+        
+        // Get (first) config with name "hosts"
         Hosts hostsConfig = getHostsConfig(configs);
 
         System.out.println("Initial config:\n" + hostsConfig.toXMLString());
         
         // Increment number of servers at each host by one
-        for (Element child : hostsConfig.getChildren()) {
-            Host h = (Host) child;
+        ElementChildrenIterator hostIterator = hostsConfig.hostIterator();
+        while (hostIterator.hasNext()) {
+            Host h = (Host) hostIterator.next();
+            
+            // Internal representation of numberOfServers
             YangUInt32 numberOfServers = h.getNumberOfServersValue();
+            
+            // Set value of the YangUInt32 with a Java long
             numberOfServers.setValue(numberOfServers.getValue() + 1);
+            
+            // Set value in local config
             h.setNumberOfServersValue(numberOfServers);
+        }
+
+        // Verify the change
+        System.out.print("NumberOfServers incremented: ");
+        hostIterator = hostsConfig.hostIterator();
+        while (hostIterator.hasNext()) {
+            Host h = (Host) hostIterator.next();
+            // Use get methods for leaf name and numberOfServersValue
+            System.out.print("(" + h.getNameValue() + ", " +
+                    h.getNumberOfServersValue() + "), ");
+        }
+        System.out.println();
+        
+        // Get "enabled"-value although not always there
+        hostIterator = hostsConfig.hostIterator();
+        while (hostIterator.hasNext()) {
+            Host h = (Host) hostIterator.next();
+            System.out.println(h.getEnabledValue());
         }
 
 //        System.out.println("Incremented:\n" + hostsConfig.toXMLString());
@@ -112,12 +141,22 @@ public class Client {
         Host uppsala = new Host(hostName);
         uppsala.setEnabledValue(false);
         uppsala.setNumberOfServersValue(0);
-        hostsConfig.addHost(uppsala);
+        try {
+            hostsConfig.addHost(uppsala);
+            System.out.println("Host " + hostName + " added: OK");
+        } catch (YangException e) {
+            System.out.println("Cannot add host " + hostName + ": Fail");
+        }
         
         // Add one with same name (key collision!)
-        hostsConfig.addHost(hostName);
+        try {
+            hostsConfig.addHost(hostName);
+            System.out.println("Host " + hostName + " added twice: Fail");
+        } catch (YangException e) {
+            System.out.println("Cannot add host " + hostName + " twice: OK");
+        }
 
-        System.out.println("After collision:\n" + hostsConfig.toXMLString());
+//        System.out.println("After collision:\n" + hostsConfig.toXMLString());
         
         // Element config2 = client.editConfig(l).first();
         // System.out.println("Resulting config:\n" + config2.toXMLString());
