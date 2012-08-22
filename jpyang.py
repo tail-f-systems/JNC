@@ -1872,8 +1872,9 @@ class MethodGenerator(object):
                 method.add_line('while (' + iter + '.hasNext()) {')
                 method.add_line(''.join(['    ', self.n, ' child = (', self.n,
                                          ')', iter, '.next();']))
-                method.add_line('    if (child.name.equals(' + self.n2 + '.name)) {')
-                method.add_line('        return null;')
+                method.add_line('    if (child.keyCompare(' + self.n2 + ')) {')
+                method.add_line('        YangException.throwException(true, ' + self.n2 + ');')
+                method.add_dependency('com.tailf.jnc.YangException')
                 method.add_line('    }')
                 method.add_line('}')
             elif self.is_list and i in {1, 2} and len(res) == 4:
