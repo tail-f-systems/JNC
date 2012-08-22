@@ -1982,7 +1982,7 @@ class LeafMethodGenerator(MethodGenerator):
         method.add_javadoc('Gets the value for child ' + self.stmt.keyword +
                            ' "' + self.stmt.arg + '".')
         method.add_javadoc('@return The value of the ''' + self.stmt.keyword + '.')
-        method.add_line('return (' + self.type_str[0] + ')getValue("' +
+        method.add_line('return (' + method.return_type + ')getValue("' +
                         self.stmt.arg + '");')
         return [self.fix_imports(method, child=True)]
 
@@ -2312,9 +2312,9 @@ class ListMethodGenerator(MethodGenerator):
         # Determine number of constructors
         number_of_value_constructors = 2 + (not self.is_string)
         javadoc1 = ['Constructor for an initialized ', self.n, ' object,']
-        javadoc2 = ['', 'with Strings for the keys.']
+        javadoc2 = ['', 'with String keys.']
         if not self.is_string:
-            javadoc2.append('with primitive Java types.')
+            javadoc2.append('with keys of built in Java types.')
 
         # Create constructors in a loop
         for i in range(number_of_value_constructors):
@@ -2325,6 +2325,7 @@ class ListMethodGenerator(MethodGenerator):
             for key in self.key_stmts:
                 javadoc = ['@param ', key.arg, 'Value Key argument of child.']
                 jnc, primitive = get_types(key, self.ctx)
+                jnc = constructor.add_dependency(jnc)
                 setValue = [key.arg, '.setValue(']
                 if i == 0:
                     # Default constructor
