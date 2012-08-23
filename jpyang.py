@@ -582,6 +582,22 @@ def get_base_type(stmt):
             return type_stmt
 
 
+def get_import(string):
+    """Returns a string representing a class that can be imported in Java.
+
+    Does not handle Generics or Array types and is data model agnostic.
+
+    """
+    if string.startswith(('java.math', 'java.util', 'com.tailf.jnc')):
+        return string
+    elif string in ('BigInteger', 'BigDecimal'):
+        return '.'.join(['java.math', string])
+    elif string in java_util:
+        return '.'.join(['java.util', string])
+    else:
+        return '.'.join(['com.tailf.jnc', string])
+
+
 def is_config(stmt):
     """Returns True if stmt is a configuration data statement"""
     config = None
@@ -1260,6 +1276,8 @@ class JavaClass(object):
                 if hasattr(method, 'exceptions'):
                     self.imports |= map(lambda s: 'com.tailf.jnc.' + s,
                                         method.exceptions)
+        if self.superclass:
+            self.imports.add(get_import(self.superclass))
         if self.imports:
             prev = ''
             for import_ in self.imports.as_sorted_list():
@@ -1624,14 +1642,7 @@ class MethodGenerator(object):
         Does not handle Generics or Array types.
 
         """
-        if import_.startswith(('java.math', 'java.util',
-                               'com.tailf.jnc', self.basepkg)):
-            return import_
-        elif import_ in ('BigInteger', 'BigDecimal'):
-            return '.'.join(['java.math', import_])
-        elif import_ in java_util:
-            return '.'.join(['java.util', import_])
-        elif import_ == self.root:
+        if import_ == self.root:
             return '.'.join(self.rootpkg + [import_])
         elif import_ in self.children:
             type_child = self.stmt.search_one('type')
@@ -1645,7 +1656,7 @@ class MethodGenerator(object):
         elif child and import_ == normalize(self.stmt.arg):
             return '.'.join([self.pkg, import_])
         else:
-            return '.'.join(['com.tailf.jnc', import_])
+            return get_import(import_)
 
     def fix_imports(self, method, child=False):
         res = set([])
@@ -1726,15 +1737,32 @@ class MethodGenerator(object):
         if self.is_typedef or self.is_leaf or self.is_leaflist:
             return []  # Typedefs, leafs and leaflists don't have clone methods
         cloners = [JavaMethod(), JavaMethod()]
-        a = ('an exact', 'a shallow')
+        a = (' an exact ', ' a shallow ')
         b = ('', ' Children are not included.')
         c = ('', 'Shallow')
+        keys = ''
+        if self.is_list:
+            getter_calls = []
+            for key_stmt in self.gen.key_stmts:
+                getter_calls.append(''.join(['get', normalize(key_stmt.arg),
+                                             'Value().toString()']))
+            keys = ', '.join(getter_calls)
         for i, cloner in enumerate(cloners):
-            cloner.add_javadoc('Clones this object, returning %s copy.' % a[i])
-            cloner.add_javadoc('@return A clone of the object.%s' % b[i])
-            cloner.set_return_type('YangElement')
-            cloner.set_name('clone%s' % c[i])
-            cloner.add_line('return clone%sContent(new %s());' % (c[i], self.n))
+            cloner.add_javadoc('Clones this object, returning' + a[i] + 'copy.')
+            cloner.add_javadoc('@return A clone of the object.' + b[i])
+            cloner.return_type = self.n
+            cloner.set_name('clone' + c[i])
+            copy = ''.join(['new ', self.n, '(', keys, ')'])
+            if self.is_list:
+                cloner.add_line(self.n + ' copy;')
+                cloner.add_line('try {')
+                cloner.add_line('    copy = ' + copy + ';')
+                cloner.add_line('} catch (JNCException e) {')
+                cloner.add_line('    copy = null;')
+                cloner.add_line('}')
+                copy = 'copy'
+            cloner.add_line(''.join(['return (', self.n, ')clone', c[i],
+                                     'Content(', copy, ');']))
             cloner = self.fix_imports(cloner)
         return cloners
 
