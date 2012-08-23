@@ -55,5 +55,14 @@ public class YangInt16 extends YangBaseInt<Short> {
     protected Short decode(String s) throws NumberFormatException {
         return Short.decode(s);
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangBaseType#cloneShallow()
+     */
+    @Override
+    protected YangInt16 cloneShallow() throws YangException {
+        return new YangInt16(toString());
+    }
 
 }

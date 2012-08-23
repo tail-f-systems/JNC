@@ -189,5 +189,14 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
         int hash = super.hashCode();
         return (fractionDigits == null) ? hash : (hash << fractionDigits);
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangBaseType#cloneShallow()
+     */
+    @Override
+    protected YangDecimal64 cloneShallow() throws YangException {
+        return new YangDecimal64(toString());
+    }
 
 }

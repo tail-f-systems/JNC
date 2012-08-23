@@ -142,11 +142,46 @@ abstract class YangBaseType<T> implements YangType<T> {
         return value.equals(obj);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
     @Override
     public int hashCode() {
         if (value == null) 
             return 0;
         return value.hashCode();
+    }
+
+    /**
+     * Clones this object without cloning its value.
+     * @return A shallow clone of this object.
+     */
+    protected abstract YangBaseType<T> cloneShallow() throws YangException;
+    
+    /*
+     * (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public YangBaseType<T> clone() {
+        YangBaseType<T> copy;
+        try {
+            copy = (YangBaseType<T>)super.clone();
+        } catch (CloneNotSupportedException e1) {
+            try {
+                copy = this.cloneShallow();
+            } catch (YangException e) {
+                return null;
+            }
+        }
+        try {
+            copy.setValue(value.toString());
+        } catch (YangException e) {
+            return null;
+        }
+        return copy;
     }
 
 }

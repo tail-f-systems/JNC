@@ -100,6 +100,15 @@ public class YangBinary extends YangBaseType<String> {
     public boolean canEqual(Object obj) {
         return obj instanceof YangBinary;
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangBaseType#cloneShallow()
+     */
+    @Override
+    protected YangBinary cloneShallow() throws YangException {
+        return new YangBinary(toString());
+    }
 
     /* ---------- Restrictions ---------- */
 

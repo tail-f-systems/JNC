@@ -25,4 +25,6 @@
   </target>
   
   <target name="all" depends="clean, jar" />
+  
+  <target name="main" depends="clean, compile" />
 </project>

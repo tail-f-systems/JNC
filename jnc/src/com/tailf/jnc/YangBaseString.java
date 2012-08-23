@@ -68,6 +68,10 @@ public class YangBaseString extends YangBaseType<String> {
     public boolean canEqual(Object obj) {
         return obj instanceof YangBaseString;
     }
+    
+    protected YangBaseString cloneShallow() throws YangException {
+        return new YangBaseString(new String(value));
+    }
 
     /* ---------- Restrictions ---------- */
 

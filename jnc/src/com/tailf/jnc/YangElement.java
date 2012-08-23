@@ -508,7 +508,7 @@ public abstract class YangElement extends Element {
      *     Elements unique to node tree B are put in uniqueB.
      *   <li>
      *     Dynamic elements that differ, but have the same keys, are put in the
-     *     third nodeset 'changed'.
+     *     respective node sets changedA and changedB.
      * </ul>
      * If the two trees are identical the three returned nodesets will be empty.
      * <p>

@@ -77,5 +77,14 @@ public class YangIdentityref extends YangBaseType<Element> {
     public boolean canEqual(Object obj) {
         return obj instanceof YangIdentityref;
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangBaseType#cloneShallow()
+     */
+    @Override
+    protected YangIdentityref cloneShallow() throws YangException {
+        return new YangIdentityref(toString());
+    }
 
 }

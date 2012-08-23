@@ -42,4 +42,10 @@ public interface YangType<T> extends java.io.Serializable{
      */
     boolean canEqual(Object obj);
     
+    /**
+     * Clones this object and its value.
+     * @return A deep clone of this object.
+     */
+    YangType<T> clone();
+    
 }

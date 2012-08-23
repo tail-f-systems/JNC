@@ -86,5 +86,14 @@ public class YangLeafref extends YangBaseType<Element> {
     public boolean canEqual(Object obj) {
         return obj instanceof YangLeafref;
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangBaseType#cloneShallow()
+     */
+    @Override
+    protected YangLeafref cloneShallow() throws YangException {
+        return new YangLeafref(toString());
+    }
 
 }

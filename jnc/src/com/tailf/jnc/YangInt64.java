@@ -55,5 +55,14 @@ public class YangInt64 extends YangBaseInt<Long> {
     protected Long decode(String s) throws NumberFormatException {
         return Long.decode(s);
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangBaseType#cloneShallow()
+     */
+    @Override
+    protected YangInt64 cloneShallow() throws YangException {
+        return new YangInt64(toString());
+    }
 
 }

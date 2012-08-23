@@ -29,6 +29,10 @@ public class YangTypeTest {
         @Override public boolean canEqual(Object obj) { 
             return value == null ? false : obj instanceof YangTypeDummy;
         }
+        @Override protected YangTypeDummy<T> cloneShallow()
+                throws YangException {
+            return new YangTypeDummy<T>(value.toString());
+        }
     }
 
     @Before

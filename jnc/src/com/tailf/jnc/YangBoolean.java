@@ -79,5 +79,14 @@ public class YangBoolean extends YangBaseType<Boolean> {
     public boolean canEqual(Object obj) {
         return obj instanceof YangBoolean;
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangBaseType#cloneShallow()
+     */
+    @Override
+    protected YangBoolean cloneShallow() throws YangException {
+        return new YangBoolean(toString());
+    }
 
 }

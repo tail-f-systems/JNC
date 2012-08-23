@@ -1326,8 +1326,11 @@ public class Element implements Serializable {
      *            The target copy to clone the value field to
      */
     protected Element cloneValue(Element copy) {
-        if (value != null)
+        if (value instanceof YangBaseType<?>) {
+            copy.value = ((YangBaseType<?>) value).clone();
+        } else if (value != null) {
             copy.value = value;
+        }
         return copy;
     }
 

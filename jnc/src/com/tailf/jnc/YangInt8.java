@@ -55,5 +55,14 @@ public class YangInt8 extends YangBaseInt<Byte> {
     protected Byte decode(String s) throws NumberFormatException {
         return Byte.decode(s);
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangBaseType#cloneShallow()
+     */
+    @Override
+    protected YangInt8 cloneShallow() throws YangException {
+        return new YangInt8(toString());
+    }
 
 }

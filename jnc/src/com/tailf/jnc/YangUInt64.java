@@ -73,5 +73,14 @@ public class YangUInt64 extends YangBaseInt<BigInteger> {
     protected BigInteger decode(String s) throws NumberFormatException {
         return new BigInteger(s);
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangBaseType#cloneShallow()
+     */
+    @Override
+    protected YangUInt64 cloneShallow() throws YangException {
+        return new YangUInt64(toString());
+    }
 
 }

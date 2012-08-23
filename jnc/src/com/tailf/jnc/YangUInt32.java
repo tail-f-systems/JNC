@@ -46,5 +46,14 @@ public class YangUInt32 extends YangInt64 {
         setMinMax(0L, 0xffffffffL);
         check();
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangBaseType#cloneShallow()
+     */
+    @Override
+    protected YangUInt32 cloneShallow() throws YangException {
+        return new YangUInt32(toString());
+    }
 
 }

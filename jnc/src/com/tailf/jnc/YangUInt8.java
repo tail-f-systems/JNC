@@ -47,4 +47,13 @@ public class YangUInt8 extends YangInt16 {
         check();
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangBaseType#cloneShallow()
+     */
+    @Override
+    protected YangUInt8 cloneShallow() throws YangException {
+        return new YangUInt8(toString());
+    }
+
 }
