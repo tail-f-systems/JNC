@@ -1,0 +1,38 @@
+TODO (in order of priority)
+===========================
+Verify correctness of this list
+Rename JPyang to JNC
+Take away max-elements-checks from add-methods
+Update the README
+Write structure template for User Manual, in LaTeX
+Write examples and tests:
+- Juniper
+- Cisco?
+- Generating classes from yang models with choice statements
+- (all) built in types
+- leaf-list (types, when, must, if-feature, ordered-by, status & units)
+- augment
+- notifications
+- rpc
+- deviation
+- extension
+- feature
+- identity
+- different revisiona of a single module
+- capabilities (test/demo of library rather than plugin)
+- deep package structures
+- name collisions (particularly typedefs) and normalization
+- inet-types and similar "standard-modules"
+Write User Manual!
+How are the generated classes affected by non-config statements?
+Make sure default values are used where appropriate for all types
+Other substatement implications... (check-list!)
+Add built in type for Inet-adresses to the JNC library
+Remove TCPSession from the JNC library
+Remove withDefaults from ConfDSession, replace with standard withDefaults
+Consider changing how different types of sessions work
+Fix existing javadoc in the JNC library
+Add complete javadoc to the JNC library and clean up code
+Check restrictions on leaf values in the JNC plugin
+Add description, reference, status, etc. to class level javadoc
+Consider removing duplicate key checks from generated classes
