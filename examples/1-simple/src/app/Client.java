@@ -2,7 +2,6 @@ package app;
 
 import java.io.IOException;
 
-import com.tailf.jnc.ConfDSession;
 import com.tailf.jnc.Device;
 import com.tailf.jnc.DeviceUser;
 import com.tailf.jnc.Element;
@@ -10,6 +9,7 @@ import com.tailf.jnc.ElementChildrenIterator;
 import com.tailf.jnc.JNCException;
 import com.tailf.jnc.NetconfSession;
 import com.tailf.jnc.NodeSet;
+import com.tailf.jnc.YangElement;
 import com.tailf.jnc.YangException;
 import com.tailf.jnc.YangString;
 import com.tailf.jnc.YangUInt32;
@@ -57,7 +57,7 @@ public class Client {
     }
 
     private NodeSet getConfig(Device d) throws IOException, JNCException {
-        ConfDSession session = d.getSession("cfg");
+        NetconfSession session = d.getSession("cfg");
         NodeSet reply = session.getConfig(NetconfSession.RUNNING);
         return reply;
     }
@@ -100,11 +100,12 @@ public class Client {
         Hosts hostsConfig = getHostsConfig(configs);
         
         // Clone a backup configuration for rollback purposes
-        Element backup = hostsConfig.clone();
+        YangElement backup = hostsConfig.clone();
 
         String configAsXML = hostsConfig.toXMLString();
         System.out.println("Initial config:\n" + configAsXML);
-        System.out.println("HashCode of the string: " + configAsXML.hashCode());
+        System.out.println("HashCode of the config XML string: " +
+                configAsXML.hashCode());
         
         // Increment number of servers at each host by one
         ElementChildrenIterator hostIterator = hostsConfig.hostIterator();
@@ -216,13 +217,61 @@ public class Client {
         System.out.println("HashCode of the new configuration: " +
                 configAsXML2.hashCode());
         
+        // Get diff between "backup" and "hostsConfig"
+        NodeSet toKeep1 = new NodeSet();
+        NodeSet toDelete1 = new NodeSet();
+        NodeSet toKeep2 = new NodeSet();
+        NodeSet toDelete2 = new NodeSet();
+        YangElement.getDiff(backup, hostsConfig,
+                toKeep1, toDelete1, toKeep2, toDelete2);
+        System.out.print("Hosts changed or unique to backup: ");
+        for (NodeSet toKeep : new NodeSet[] {toKeep1, toKeep2}) {
+            for (Element elem : toKeep) {
+                if (elem instanceof Host) {
+                    Host host = (Host) elem;
+                    System.out.print("(" + host.getNameValue() + ", " +
+                            host.getNumberOfServersValue() + "), ");
+                }
+            }
+        }
+        System.out.println();
+        System.out.print("Hosts changed or unique to hostsConfig: ");
+        for (NodeSet toDelete : new NodeSet[] {toDelete1, toDelete2}) {
+            for (Element elem : toDelete) {
+                if (elem instanceof Host) {
+                    Host host = (Host) elem;
+                    System.out.print("(" + host.getNameValue() + ", " +
+                            host.getNumberOfServersValue() + "), ");
+                }
+            }
+        }
+        System.out.println();
+        
+        // Clear remote host config
+        hostsConfig.markDelete();
+        NodeSet configs3 = client.editConfig(hostsConfig);
+        hostsConfig = getHostsConfig(configs3);
+        if (hostsConfig == null) {
+            System.out.println("Cleared the remote hosts config: OK");
+        } else {
+            System.out.println("Clear the remote hosts config: FAIL");
+        }
+        
         // Change back to original config
         client.editConfig(backup);
-        NodeSet configs3 = client.getConfig();
-        hostsConfig = getHostsConfig(configs3);
-        String configAsXML3 = hostsConfig.toXMLString();
-        System.out.println("Rollback config hashCode:" +
-                configAsXML3.hashCode());
+        NodeSet configs4 = client.getConfig();
+        hostsConfig = getHostsConfig(configs4);
+        String configAsXML4 = hostsConfig.toXMLString();
+        if (configAsXML4.equals(configAsXML)) {
+            System.out.println("Rollback config same as first one: OK");
+        } else {
+            System.out.println("Different rollback config: FAIL");
+        }
+        System.out.println("Rollback config XML string hashCode:" +
+                configAsXML4.hashCode());
+
+        // Cleanup
+        client.dev.close();
     }
 
 }
