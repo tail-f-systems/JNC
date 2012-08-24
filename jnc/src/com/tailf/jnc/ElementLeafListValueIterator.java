@@ -39,17 +39,13 @@ public class ElementLeafListValueIterator implements Iterator<Object> {
      * a specific name.
      */
     public ElementLeafListValueIterator(NodeSet children, String name) {
-        if (children != null) {
-            childrenIterator = children.iterator();
-        } else {
-            childrenIterator = null;
-        }
+        childrenIterator = (children == null) ? null : children.iterator();
         this.name = name;
     }
 
     /**
-     * Return true if there are more children, false otherwise.
-     * 
+     * @return <code>true</code> if there are more children;
+     *         <code>false</code> otherwise.
      */
     @Override
     public boolean hasNext() {
@@ -70,13 +66,11 @@ public class ElementLeafListValueIterator implements Iterator<Object> {
                 return true;
             }
         }
-        hasNextChild = false;
-        return false;
+        return hasNextChild = false;
     }
 
     /**
-     * Return next child or null.
-     * 
+     * @return next child or <code>null</code>.
      */
     public Object nextElement() {
         if (hasNextChild) {
@@ -96,7 +90,7 @@ public class ElementLeafListValueIterator implements Iterator<Object> {
     }
 
     /**
-     * Return next child or null.
+     * @return next child or <code>null</code>.
      */
     @Override
     public Object next() {
@@ -105,7 +99,6 @@ public class ElementLeafListValueIterator implements Iterator<Object> {
 
     /**
      * Remove is not supported.
-     * 
      */
     @Override
     public void remove() {

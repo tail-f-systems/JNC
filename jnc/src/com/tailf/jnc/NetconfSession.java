@@ -1,6 +1,6 @@
 /*    -*- Java -*-
  *
- *  Copyright 2012 Tail-F Systems AB. All rights reserved.
+ *  Copyright 2007 Tail-F Systems AB. All rights reserved.
  *
  *  This software is the confidential and proprietary
  *  information of Tail-F Systems AB.
@@ -231,9 +231,9 @@ public class NetconfSession {
      *            If we are using the confm package to create and manipulate
      *            objects we must instantiate the parser as an
      *            com.tailf.confm.XMLParser() If we fail to do that, we get the
-     *            YangXMLParser class from the inm package which always only
-     *            returns Element objects as opposed to the YangXMLParser from
-     *            the confm package which can return objects matching the confm
+     *            XMLParser class from the inm package which always only
+     *            returns Element objects as opposed to the XMLParser from the
+     *            confm package which can return objects matching the confm
      *            generated classes. If we use the confm Device class to create
      *            our netconf sessions, this is all done automatically, whereas
      *            if we create our netconf sessions ourselves, _and_ also want
@@ -259,7 +259,6 @@ public class NetconfSession {
      * Creates a new session object. The session need to be given a transport
      * object with {@link #setTransport(Transport)} and an initial hello needs
      * to be sent to advertise capabilities.
-     * 
      */
     public NetconfSession() throws JNCException {
         parser = new XMLParser();
@@ -427,7 +426,6 @@ public class NetconfSession {
 
     /**
      * Gets the device configuration data.
-     * 
      */
     public NodeSet getConfig() throws JNCException, IOException {
         return getConfig(RUNNING);
@@ -435,7 +433,6 @@ public class NetconfSession {
 
     /**
      * Gets the device configuration data.
-     * 
      */
     public NodeSet getConfig(int datastore) throws JNCException, IOException {
         trace("getConfig: " + datastoreToString(datastore));
@@ -446,7 +443,6 @@ public class NetconfSession {
 
     /**
      * Calls rpc method.
-     * 
      */
     public NodeSet callRpc(Element data) throws JNCException, IOException {
         trace("call: " + data.toXMLString());
@@ -666,7 +662,6 @@ public class NetconfSession {
      * </ul>
      * 
      * @param op One of {@link #MERGE}, {@link #REPLACE}, {@link #NONE}.
-     * 
      */
     public void setDefaultOperation(int op) {
         defaultOperation = op;
@@ -771,7 +766,6 @@ public class NetconfSession {
      * 
      * @param erroroption One of {@link #STOP_ON_ERROR},
      *            {@link #CONTINUE_ON_ERROR}, {@link #ROLLBACK_ON_ERROR}
-     * 
      * 
      */
     public void setErrorOption(int erroroption) {
@@ -987,9 +981,9 @@ public class NetconfSession {
      * An attempt to lock the configuration must fail if an existing session or
      * other entity holds a lock on any portion of the lock target.
      * 
+     * @param datastore datastore of which a part will be locked
      * @param select An array of selection filters
      * @return A unique lock reference which should be used to unlockPartial()
-     * 
      */
     public int lockPartial(String[] select) throws JNCException, IOException {
         trace("lockPartial");
@@ -998,7 +992,7 @@ public class NetconfSession {
                     "capability :partial-lock is not supported by server");
         }
         // Allow simple paths to instance identifiers also
-        // if (!capabilities.xpathCapability)
+        // if (!xpathCapability)
         // throw new JNCException(JNCException.SESSION_ERROR,
         // "capability :xpath is not supported by server");
         final int mid = encode_lockPartial(out, select);
@@ -1015,10 +1009,10 @@ public class NetconfSession {
     }
 
     /**
-     * Same as {@link #lockPartial(String[])} except it only takes one
+     * Same as {@link #lockPartial(int,String[])} except it only takes one
      * selection as argument.
      * 
-     * @see #lockPartial(String[])
+     * @see #lockPartial(int,String[])
      */
     public int lockPartial(String select) throws JNCException, IOException {
         return lockPartial(new String[] { select });
@@ -1029,7 +1023,7 @@ public class NetconfSession {
      * obtained with the {@link #lock} operation.
      * 
      * @param lockId Previously received lock identifier from
-     *            {@link #lockPartial(String[])}
+     *            {@link #lockPartial(int,String[])}
      */
     public void unlockPartial(int lockId) throws JNCException, IOException {
         trace("partialUnlock: " + lockId);
@@ -1065,7 +1059,6 @@ public class NetconfSession {
      * <p>
      * If the system does not have the <code>:candidate</code> capability, the
      * <code>commit</code> operation is not available.
-     * 
      * 
      */
     public void commit() throws JNCException, IOException {
@@ -1114,7 +1107,6 @@ public class NetconfSession {
      * 
      * @param timeout Time that server will wait for confirming commit before
      *            reverting config
-     * 
      */
     public void confirmedCommit(int timeout) throws JNCException, IOException {
         trace("confirmedCommit: " + timeout);
@@ -1135,7 +1127,6 @@ public class NetconfSession {
      * If the client decides that the candidate configuration should not be
      * committed, the <discard-changes> operation can be used to revert the
      * candidate configuration to the current running configuration.
-     * 
      */
     public void discardChanges() throws JNCException, IOException {
         trace("discardChanges");
@@ -1245,7 +1236,6 @@ public class NetconfSession {
      * must be supported by the server.
      * 
      * @see #createSubscription(String,String,String,String)
-     * 
      */
     public void createSubscription() throws IOException, JNCException {
         createSubscription(null, (String) null, null, null);
@@ -1261,7 +1251,6 @@ public class NetconfSession {
      * 
      * @param stream The name of the stream or 'null'
      * @see #createSubscription(String,String,String,String)
-     * 
      */
     public void createSubscription(String stream) throws IOException,
             JNCException {
@@ -1375,7 +1364,6 @@ public class NetconfSession {
      * until an entire notifications messages has been received. It's possible
      * to check if there is data to be read ahead using the ready() method on
      * the SSHSession object.
-     * 
      */
 
     public Element receiveNotification() throws IOException, JNCException {
@@ -1442,8 +1430,7 @@ public class NetconfSession {
 
     NodeSet recv_call_rpc_reply(Element e, int mid) throws JNCException,
             IOException {
-        final XMLParser parser = new XMLParser();
-        // XXX Why new parser?
+        final XMLParser parser = new XMLParser(); // XXX: Why new parser?
         return recv_rpc_reply("", parser, Integer.toString(mid));
     }
 
@@ -1533,7 +1520,6 @@ public class NetconfSession {
     /**
      * Encodes the hello message. The capabilities advertised from the client
      * side are the base NETCONF capability.
-     * 
      */
     void encode_hello(Transport out) {
         out.print("<hello xmlns=\"" + Capabilities.NS_NETCONF + "\">");
@@ -1611,11 +1597,21 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <getConfig>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <get-config>
-     * <source><running/></source> <filter type="subtree"> <top
-     * xmlns="http://example.com/schema/1.2/config"> <users/> </top> </filter>
-     * </get-config> </rpc>
+     * Encode the <getConfig>. Example:
+     * 
+     * <pre>
+     * <rpc message-id="101"
+     *        xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *     <get-config>
+     *        <source><running/></source>
+     *        <filter type="subtree">
+     *              <top xmlns="http://example.com/schema/1.2/config">
+     *                    <users/>
+     *              </top>
+     *        </filter>
+     *     </get-config>
+     * </rpc>
+     * </pre>
      */
     int encode_getConfig(Transport out, String source, Element subtreeFilter)
             throws JNCException {
@@ -1633,10 +1629,18 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <rpc>. Example: <rpc
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1"> <math
-     * xmlns="http://example.com/math"> <add> <operand>2</operand>
-     * <operand>3</operand> </add> </math> </rpc>
+     * Encode the <rpc>. Example:
+     * 
+     * <pre>
+     * <rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="1">
+     *   <math xmlns="http://example.com/math">
+     *     <add>
+     *       <operand>2</operand>
+     *       <operand>3</operand>
+     *     </add>
+     *   </math>
+     * </rpc>
+     * </pre>
      */
     int encode_rpc(Transport out, Element data) throws JNCException {
         final int mid = encode_rpc_begin(out);
@@ -1646,10 +1650,17 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <getConfig>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <get-config>
-     * <source><running/></source> <filter type="xpath"
-     * select="top/users/user[name='fred']"/> </get-config> </rpc>
+     * Encode the <getConfig>. Example:
+     * 
+     * <pre>
+     * <rpc message-id="101"
+     *        xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *     <get-config>
+     *        <source><running/></source>
+     *        <filter type="xpath" select="top/users/user[name='fred']"/>
+     *     </get-config>
+     * </rpc>
+     * </pre>
      */
     int encode_getConfig(Transport out, String source, String xpath) {
         final int mid = encode_rpc_begin(out, withDefaultsAttr);
@@ -1669,9 +1680,16 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <getConfig>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <get-config>
-     * <source><running/></source> </get-config> </rpc>
+     * Encode the <getConfig>. Example:
+     * 
+     * <pre>
+     * <rpc message-id="101"
+     *        xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *     <get-config>
+     *        <source><running/></source>
+     *     </get-config>
+     * </rpc>
+     * </pre>
      */
     int encode_getConfig(Transport out, String source) {
         final int mid = encode_rpc_begin(out, withDefaultsAttr);
@@ -1752,10 +1770,20 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <get>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <get> <filter
-     * type="subtree"> <top xmlns="http://example.com/schema/1.2/config">
-     * <users/> </top> </filter> </get> </rpc>
+     * Encode the <get>. Example:
+     * 
+     * <pre>
+     * <rpc message-id="101"
+     *        xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *     <get>
+     *        <filter type="subtree">
+     *              <top xmlns="http://example.com/schema/1.2/config">
+     *                    <users/>
+     *              </top>
+     *        </filter>
+     *     </get>
+     * </rpc>
+     * </pre>
      */
     int encode_get(Transport out, Element subtreeFilter) throws JNCException {
         final int mid = encode_rpc_begin(out, withDefaultsAttr);
@@ -1769,9 +1797,16 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <get>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <get> <filter
-     * type="xpath" select="top/users/user[name='fred']"/> </get> </rpc>
+     * Encode the <get>. Example:
+     * 
+     * <pre>
+     * <rpc message-id="101"
+     *        xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *     <get>
+     *        <filter type="xpath" select="top/users/user[name='fred']"/>
+     *     </get>
+     * </rpc>
+     * </pre>
      */
     int encode_get(Transport out, String xpath) {
         final int mid = encode_rpc_begin(out, withDefaultsAttr);
@@ -1788,13 +1823,24 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <edit-Config>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <edit-config>
-     * <target><running/></target> <config> <top
-     * xmlns="http://example.com/schema/1.2/config"> <interface>
-     * <name>Ethernet0/0</name> <mtu>1500</mtu> </interface> </top> </config>
-     * </edit-config> </rpc>
+     * Encode the <edit-Config>. Example:
      * 
+     * <pre>
+     * <rpc message-id="101"
+     *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *    <edit-config>
+     *     <target><running/></target>
+     *     <config>
+     *        <top xmlns="http://example.com/schema/1.2/config">
+     *            <interface>
+     *               <name>Ethernet0/0</name>
+     *                   <mtu>1500</mtu>
+     *            </interface>
+     *        </top>
+     *     </config>
+     *    </edit-config>
+     * </rpc>
+     * </pre>
      */
     int encode_editConfig(Transport out, String target, Element configTree)
             throws JNCException {
@@ -1821,11 +1867,17 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <edit-Config>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <edit-config>
-     * <target><running/></target> <url>file://incoming.conf"</url>
-     * </edit-config> </rpc>
+     * Encode the <edit-Config>. Example:
      * 
+     * <pre>
+     * <rpc message-id="101"
+     *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *    <edit-config>
+     *      <target><running/></target>
+     *      <url>file://incoming.conf"</url>
+     *    </edit-config>
+     * </rpc>
+     * </pre>
      */
     int encode_editConfig(Transport out, String target, String url)
             throws JNCException {
@@ -1938,13 +1990,25 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <copy-config>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <copy-config>
-     * <target><running/></target> <default-operation>none</default-operation>
-     * <config> <top xmlns="http://example.com/schema/1.2/config"> <interface>
-     * <name>Ethernet0/0</name> <mtu>1500</mtu> </interface> </top> </config>
-     * </copy-config> </rpc>
+     * Encode the <copy-config>. Example:
      * 
+     * <pre>
+     * <rpc message-id="101"
+     *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *    <copy-config>
+     *     <target><running/></target>
+     *     <default-operation>none</default-operation>
+     *     <config>
+     *        <top xmlns="http://example.com/schema/1.2/config">
+     *            <interface>
+     *               <name>Ethernet0/0</name>
+     *                   <mtu>1500</mtu>
+     *            </interface>
+     *        </top>
+     *     </config>
+     *    </copy-config>
+     * </rpc>
+     * </pre>
      */
     int encode_copyConfig(Transport out, Element sourceTree, String target)
             throws JNCException {
@@ -1974,13 +2038,25 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <copy-config>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <copy-config>
-     * <target><running/></target> <default-operation>none</default-operation>
-     * <> <top xmlns="http://example.com/schema/1.2/config"> <interface>
-     * <name>Ethernet0/0</name> <mtu>1500</mtu> </interface> </top> </config>
-     * </copy-config> </rpc>
+     * Encode the <copy-config>. Example:
      * 
+     * <pre>
+     * <rpc message-id="101"
+     *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *    <copy-config>
+     *     <target><running/></target>
+     *     <default-operation>none</default-operation>
+     *     <>
+     *        <top xmlns="http://example.com/schema/1.2/config">
+     *            <interface>
+     *               <name>Ethernet0/0</name>
+     *                   <mtu>1500</mtu>
+     *            </interface>
+     *        </top>
+     *     </config>
+     *    </copy-config>
+     * </rpc>
+     * </pre>
      */
     int encode_copyConfig(Transport out, String source, String target)
             throws JNCException {
@@ -1998,10 +2074,16 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <delete-config>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <delete-config>
-     * <target><startup/></target> </delete-config> </rpc>
+     * Encode the <delete-config>. Example:
      * 
+     * <pre>
+     * <rpc message-id="101"
+     *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *    <delete-config>
+     *     <target><startup/></target>
+     *    </delete-config>
+     * </rpc>
+     * </pre>
      */
     int encode_deleteConfig(Transport out, String target) {
         final int mid = encode_rpc_begin(out);
@@ -2015,10 +2097,16 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <lock>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <lock>
-     * <target><running/></target> </lock> </rpc>
+     * Encode the <lock>. Example:
      * 
+     * <pre>
+     * <rpc message-id="101"
+     *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *    <lock>
+     *     <target><running/></target>
+     *    </lock>
+     * </rpc>
+     * </pre>
      */
     int encode_lock(Transport out, String target) {
         final int mid = encode_rpc_begin(out);
@@ -2032,10 +2120,16 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <unlock>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <unlock>
-     * <target><running/></target> </unlock> </rpc>
+     * Encode the <unlock>. Example:
      * 
+     * <pre>
+     * <rpc message-id="101"
+     *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *    <unlock>
+     *     <target><running/></target>
+     *    </unlock>
+     * </rpc>
+     * </pre>
      */
     int encode_unlock(Transport out, String target) {
         final int mid = encode_rpc_begin(out);
@@ -2049,15 +2143,24 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <partial-lock>. Example: <nc:rpc
+     * Encode the <partial-lock>. Example:
+     * 
+     * <pre>
+     * <nc:rpc
      * xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
      * xmlns="urn:ietf:params:xml:ns:netconf:partial-lock:1.0"
      * xmlns:rte="http://example.com/ns/route">
-     * xmlns:if="http://example.com/ns/interface"> nc:message-id="135">
-     * <partial-lock> <target> <running/> </target>
-     * <select>/routing/virtualRouter['routerName=router1']</select>
-     * <select>/interfaces/['interfaceId=eth1']</select> </partial-lock> </rpc>
-     * 
+     * xmlns:if="http://example.com/ns/interface">
+     * nc:message-id="135">
+     *    <partial-lock>
+     *      <target>
+     *        <running/>
+     *      </target>
+     *      <select>/routing/virtualRouter['routerName=router1']</select>
+     *      <select>/interfaces/['interfaceId=eth1']</select>
+     *    </partial-lock>
+     * </rpc>
+     * </pre>
      */
     int encode_lockPartial(Transport out, String[] select) {
 
@@ -2079,12 +2182,15 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <partial-unlock>. Example: <nc:rpc
-     * xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
-     * xmlns="urn:ietf:params:xml:ns:netconf:partial-lock:1.0"
-     * nc:message-id="136"> <partial-unlock> <lock-id>127</lock-id>
-     * </partial-unlock>
+     * Encode the <partial-unlock>. Example:
      * 
+     * <pre>
+     * <nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+     * xmlns="urn:ietf:params:xml:ns:netconf:partial-lock:1.0"
+     *  nc:message-id="136">
+     *  <partial-unlock>
+     *      <lock-id>127</lock-id>
+     * </partial-unlock>
      */
     int encode_unlockPartial(Transport out, int lockId) {
 
@@ -2105,9 +2211,14 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <commit>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <commit/> </rpc>
+     * Encode the <commit>. Example:
      * 
+     * <pre>
+     * <rpc message-id="101"
+     *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *    <commit/>
+     * </rpc>
+     * </pre>
      */
     int encode_commit(Transport out) {
         final int mid = encode_rpc_begin(out);
@@ -2117,10 +2228,17 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <commit>. (confirmed) Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <commit> <confirmed/>
-     * <confirm-timeout>120</confirm-timeout> </commit> </rpc>
+     * Encode the <commit>. (confirmed) Example:
      * 
+     * <pre>
+     * <rpc message-id="101"
+     *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *    <commit>
+     *      <confirmed/>
+     *      <confirm-timeout>120</confirm-timeout>
+     *    </commit>
+     * </rpc>
+     * </pre>
      */
     int encode_confirmedCommit(Transport out, int timeout) {
         final int mid = encode_rpc_begin(out);
@@ -2135,10 +2253,14 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <discard-changes>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <discard-changes/>
-     * </rpc>
+     * Encode the <discard-changes>. Example:
      * 
+     * <pre>
+     * <rpc message-id="101"
+     *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *    <discard-changes/>
+     * </rpc>
+     * </pre>
      */
     int encode_discardChanges(Transport out) {
         final int mid = encode_rpc_begin(out);
@@ -2148,9 +2270,14 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <close-session>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <close-session/> </rpc>
+     * Encode the <close-session>. Example:
      * 
+     * <pre>
+     * <rpc message-id="101"
+     *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *    <close-session/>
+     * </rpc>
+     * </pre>
      */
     int encode_closeSession(Transport out) {
         final int mid = encode_rpc_begin(out);
@@ -2160,10 +2287,16 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <kill-session>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <kill-session>
-     * <session-id>4</session-id> </kill-session> </rpc>
+     * Encode the <kill-session>. Example:
      * 
+     * <pre>
+     * <rpc message-id="101"
+     *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *    <kill-session>
+     *         <session-id>4</session-id>
+     *    </kill-session>
+     * </rpc>
+     * </pre>
      */
     int encode_killSession(Transport out, int sessionId) {
         final int mid = encode_rpc_begin(out);
@@ -2177,12 +2310,25 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <validate>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <validate> <source>
-     * <config> <top xmlns="http://example.com/schema/1.2/config"> <interface>
-     * <name>Ethernet0/0</name> <mtu>1500</mtu> </interface> </top> </config>
-     * </source> </validate> </rpc>
+     * Encode the <validate>. Example:
      * 
+     * <pre>
+     * <rpc message-id="101"
+     *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *    <validate>
+     *     <source>
+     *        <config>
+     *            <top xmlns="http://example.com/schema/1.2/config">
+     *               <interface>
+     *                  <name>Ethernet0/0</name>
+     *                      <mtu>1500</mtu>
+     *               </interface>
+     *           </top>
+     *        </config>
+     *     </source>
+     *   </validate>
+     * </rpc>
+     * </pre>
      */
     int encode_validate(Transport out, Element configTree)
             throws JNCException {
@@ -2199,10 +2345,16 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <validate>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <validate>
-     * <source><candidate/></source> </validate> </rpc>
+     * Encode the <validate>. Example:
      * 
+     * <pre>
+     * <rpc message-id="101"
+     *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *    <validate>
+     *     <source><candidate/></source>
+     *   </validate>
+     * </rpc>
+     * </pre>
      */
     int encode_validate(Transport out, String source) {
         final int mid = encode_rpc_begin(out);
@@ -2216,11 +2368,16 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <create-subscription>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <create-subscription
-     * xmlns='urn:ietf:params:xml:ns:netconf:notification:1.0'>
-     * </create-subscription> </rpc>
+     * Encode the <create-subscription>. Example:
      * 
+     * <pre>
+     * <rpc message-id="101"
+     *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *    <create-subscription
+     *         xmlns='urn:ietf:params:xml:ns:netconf:notification:1.0'>
+     *    </create-subscription>
+     * </rpc>
+     * </pre>
      */
     int encode_createSubscription(Transport out, String stream,
             String filter, String startTime, String stopTime) {
@@ -2258,18 +2415,22 @@ public class NetconfSession {
     }
 
     /**
-     * Encode the <create-subscription>. Example: <rpc message-id="101"
-     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> <create-subscription
-     * xmlns='urn:ietf:params:xml:ns:netconf:notification:1.0'>
-     * </create-subscription> </rpc>
+     * Encode the <create-subscription>. Example:
      * 
+     * <pre>
+     * <rpc message-id="101"
+     *      xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *    <create-subscription
+     *         xmlns='urn:ietf:params:xml:ns:netconf:notification:1.0'>
+     *    </create-subscription>
+     * </rpc>
+     * </pre>
      */
     int encode_createSubscription(Transport out, String stream,
             NodeSet eventFilter, String startTime, String stopTime)
             throws JNCException {
-        final String noNotification = Capabilities.NS_NOTIFICATION;
         final String prefix = Element.defaultPrefixes
-                .nsToPrefix(noNotification);
+                .nsToPrefix(Capabilities.NS_NOTIFICATION);
         final String ncn = mk_prefix_colon(prefix);
 
         final int mid = encode_rpc_begin(out);
@@ -2303,22 +2464,21 @@ public class NetconfSession {
 
     /**
      * Help function to make prefix. Returns either: "PREFIX:" or "".
+     * 
+     * @param prefix
+     * @return "unknown:" if prefix is null, an empty string if prefix is
+     *         empty, otherwise prefix appended with a colon.
      */
     String mk_prefix_colon(String prefix) {
         if (prefix == null) {
             return "unknown:";
         }
-        if (prefix.equals("")) {
-            return "";
-        } else {
-            return prefix + ":";
-        }
+        return (prefix.isEmpty()) ? "" : prefix + ":";
     }
 
     /**
      * Help function to make xmlns attr from prefix and namespace. Returns
      * either: "xmlns=NAMESPACE" or "xmlns:PREFIX=NAMESPACE".
-     * 
      */
     String mk_xmlns_attr(String prefix, String ns) {
         if (prefix == null) {

@@ -51,7 +51,7 @@ public abstract class IOSubscriber {
     }
 
     /**
-     * Constructor.
+     * Empty constructor. The rawmode, inb and outb fields will be unassigned.
      */
     public IOSubscriber() {
     }

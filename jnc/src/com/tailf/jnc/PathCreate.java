@@ -16,15 +16,13 @@ package com.tailf.jnc;
  * The result of evaluating a "path create" expression is a new {@link Element}
  * node tree. A configuration tree can easily be created with this class.
  * <p>
- * Example:
  * 
+ * Example:
  * <pre>
  * PathCreate path = new PathCreate(&quot;/hosts/host[name='john', age=42]&quot;);
  * Element element_tree = path.eval(PrefixMap);
  * </pre>
- * 
- **/
-
+ */
 public class PathCreate extends Path {
 
     /**
@@ -50,8 +48,8 @@ public class PathCreate extends Path {
     public Element eval(PrefixMap prefixMap) throws JNCException {
         trace("eval(): " + this);
         Element top = null, parent = null;
-        for (int i = 0; i < locationSteps.size(); i++) {
-            final LocationStep step = locationSteps.get(i);
+
+        for (final LocationStep step : locationSteps) {
             final Element child = step.createElem(prefixMap, parent);
             if (top == null) {
                 top = child;
@@ -76,8 +74,7 @@ public class PathCreate extends Path {
         }
         final LocationStep locStep = locationSteps.get(step);
         trace("evalStep(): step=" + step + ", " + locStep);
-        final Element child = locStep.createElem(prefixMap, parent);
-        return child;
+        return locStep.createElem(prefixMap, parent);
     }
 
     /**
@@ -85,16 +82,13 @@ public class PathCreate extends Path {
      */
     @Override
     public String toString() {
-        String s = "PathCreate[";
-        final boolean comma = false;
-        for (int i = 0; i < locationSteps.size(); i++) {
-            if (comma) {
-                s = s + ",";
-            }
-            s = s + locationSteps.get(i);
+        StringBuffer s = new StringBuffer();
+        s.append("PathCreate[");
+        for (final LocationStep step : locationSteps) {
+            s.append(step);
         }
-        s = s + "]";
-        return s;
+        s.append("]");
+        return s.toString();
     }
 
     /* help functions */

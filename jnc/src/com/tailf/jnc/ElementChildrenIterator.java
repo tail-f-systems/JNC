@@ -61,7 +61,7 @@ public class ElementChildrenIterator implements Iterator<Element> {
     }
 
     /**
-     * @return <code>true</code> if there are more children
+     * @return <code>true</code> if there are more children;
      *         <code>false</code> otherwise.
      */
     @Override

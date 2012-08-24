@@ -51,8 +51,7 @@ public class NodeSet extends ArrayList<Element> {
      */
     public NodeSet get(String pathStr) throws JNCException {
         final NodeSet result = new NodeSet();
-        for (int i = 0; i < size(); i++) {
-            final Element e = getElement(i);
+        for (Element e : this) {
             final NodeSet r = e.get(pathStr);
             if (r != null && r.size() > 0) {
                 result.addAll(r);
@@ -82,38 +81,28 @@ public class NodeSet extends ArrayList<Element> {
      * @return first element from this node set, or null if none.
      */
     public Element first() {
-        if (size() > 0) {
-            return getElement(0);
-        }
-        return null;
+        return isEmpty() ? null : getElement(0);
     }
 
     /**
      * Checks if an element is a member of the NodeSet. Elements are compared
-     * with {@link Element#equals(Object) Element.equals} method.
+     * with the {@link Element#equals(Object) Element.equals} method.
      * 
-     * @param x Check if x is a member of the NodeSet.
+     * @param x Element to check for
      */
     public boolean isMember(Element x) {
-        for (int i = 0; i < size(); i++) {
-            final Element e = getElement(i);
-            if (e.equals(x)) {
-                return true;
-            }
-        }
-        return false;
+        return findMember(x) != null;
     }
 
     /**
-     * Checks if an element is a member of the NodeSet. Elements are compared
-     * with {@link Element#equals(Object) Element.equals} method.
+     * Searches for an element in this NodeSet. Elements are compared
+     * with the {@link Element#equals(Object) Element.equals} method.
      * 
-     * @param x Check if x is a member of the NodeSet
-     * @return Returns the found member or null
+     * @param x Element to find
+     * @return the found member or null
      */
     public Element findMember(Element x) {
-        for (int i = 0; i < size(); i++) {
-            final Element e = getElement(i);
+        for (final Element e : this) {
             if (e.equals(x)) {
                 return e;
             }
@@ -126,7 +115,7 @@ public class NodeSet extends ArrayList<Element> {
      * {@link Element#equals(Object) Element.equals} method.
      * 
      * @param x Removes an element equals to element x.
-     * @return 'true' if member was removed. 'false' if not found.
+     * @return <code>true</code> if member was removed. <code>false</code> if not found.
      * 
      */
     public boolean removeMember(Element x) {
@@ -141,26 +130,30 @@ public class NodeSet extends ArrayList<Element> {
     }
 
     /**
-     * This will format the NodeSet in XML format.
+     * Formats the NodeSet in XML format.
      * 
      * @return The sub-tree represented as an XML string
      */
     public String toXMLString() {
-        String s = new String();
-        for (int i = 0; i < size(); i++) {
-            final Element elem = getElement(i);
-            s = s + elem.toXMLString();
+        StringBuffer s = new StringBuffer();
+        for (final Element elem : this) {
+            s.append(elem.toXMLString());
         }
-        return s;
+        return s.toString();
     }
 
     /**
      * Encode to XML and send the sequence of elements to the provided stream.
      * 
+     * @param out NETCONF transport interface to use
+     * @param c NETCONF Capabilities supported
+     * @throws JNCException if the
+     *             {@link Element#encode(Transport, boolean, Capabilities)
+     *             Element.encode} implementation fails, for example due to
+     *             missing capability.
      */
     void encode(Transport out, Capabilities c) throws JNCException {
-        for (int i = 0; i < size(); i++) {
-            final Element elem = getElement(i);
+        for (final Element elem : this) {
             elem.encode(out, true, c);
         }
     }

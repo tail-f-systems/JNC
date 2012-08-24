@@ -282,8 +282,13 @@ public class ConfDSession extends NetconfSession {
         recv_rpc_reply_ok();
     }
 
-    /* Receive from session */
-
+    /**
+     * Receive from session
+     *
+     * @return the reply element
+     * @throws JNCException
+     * @throws IOException
+     */
     Element recv_rpc_reply() throws JNCException, IOException {
         final StringBuffer reply = in.readOne();
         trace("reply= " + reply);

@@ -1688,7 +1688,8 @@ public class Element implements Serializable {
     private void toXMLString(int indent, StringBuffer s) {
         final boolean flag = hasChildren();
         final String qName = qualifiedName();
-        s.append(String.format("%" + (indent * 2) + "s", "") + "<" + qName);
+        s.append(new String(new char[indent * 2]).replace("\0", " "));
+        s.append("<" + qName);
         // add xmlns attributes (prefixes)
         if (prefixes != null) {
             for (final Prefix p : prefixes) {
@@ -1729,8 +1730,10 @@ public class Element implements Serializable {
      *         <code>true</code>; otherwise an empty string.
      */
     private String getIndentationSpacing(boolean shouldIndent, int indent) {
-        return shouldIndent ? String.format("%" + (indent * 2) + "s", "")
-                : "";
+        if (shouldIndent) {
+            return new String(new char[indent * 2]).replace("\0", " ");
+        }
+        return "";
     }
 
     /**

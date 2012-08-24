@@ -14,16 +14,15 @@ import java.io.Serializable;
 
 /**
  * This class represents a prefix mapping of a prefix string into a namespace.
- * For example:
  * 
+ * For example:
  * <pre>
  *    xmlns:foo='http://foo.com'
  * </pre>
+ * 
  * <p>
  * Provides a mapping from prefix "foo" into the namespace "http://foo.com".
- * 
- **/
-
+ */
 public class Prefix extends Attribute implements Serializable {
 
     private static final long serialVersionUID = 1L;

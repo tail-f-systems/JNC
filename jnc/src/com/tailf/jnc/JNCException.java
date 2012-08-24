@@ -154,8 +154,8 @@ public class JNCException extends Exception {
             return "Parse error: " + opaqueData;
         case RPC_REPLY_ERROR:
             if (opaqueData != null) {
-                return "rpc-reply error: "
-                        + ((Element) opaqueData).toXMLString();
+                Element rpc = (Element) opaqueData;
+                return "rpc-reply error: " + rpc.toXMLString();
             } else {
                 return "rpc-reply error";
             }

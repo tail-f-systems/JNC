@@ -32,11 +32,12 @@ class ElementHandler extends DefaultHandler {
     public Element current;
     public Element top;
     public PrefixMap prefixes = null;
-    boolean leaf = false;
-    String leafNs;
-    String leafName;
-    String leafValue;
-    int unknownLevel = 0;
+    public int unknownLevel = 0;
+    
+    private boolean leaf = false;
+    private String leafNs;
+    private String leafName;
+    private String leafValue;
 
     @Override
     public void startElement(String uri, String localName, String qName,
@@ -46,40 +47,39 @@ class ElementHandler extends DefaultHandler {
             unkownStartElement(uri, localName, qName, attributes);
             return;
         }
+        final Element parent = current;
+        Element child = null;
 
         try {
-            final Element parent = current;
-            Element child = null;
-
             child = YangElement.createInstance(this, parent, uri, localName);
-            if (top == null) {
-                top = child;
-            }
-
-            if (child == null && unknownLevel == 1) {
-                // we're entering XML data that's not
-                // in the schema
-                unkownStartElement(uri, localName, qName, attributes);
-                return;
-            }
-
-            if (child == null) {
-                // it's a known leaf
-                // it'll be handled in the endElement method
-                leaf = true;
-                leafNs = uri;
-                leafName = localName;
-                leafValue = new String();
-                return;
-            }
-            child.prefixes = prefixes;
-            prefixes = null;
-            addOtherAttributes(attributes, child);
-            current = child; // step down
         } catch (final JNCException e) {
             e.printStackTrace();
             throw new SAXException(e.toString());
         }
+
+        if (top == null) {
+            top = child;
+        }
+
+        if (child == null && unknownLevel == 1) {
+            // we're entering XML data that's not in the schema
+            unkownStartElement(uri, localName, qName, attributes);
+            return;
+        }
+
+        if (child == null) {
+            // it's a known leaf
+            // it'll be handled in the endElement method
+            leaf = true;
+            leafNs = uri;
+            leafName = localName;
+            leafValue = new String();
+            return;
+        }
+        child.prefixes = prefixes;
+        prefixes = null;
+        addOtherAttributes(attributes, child);
+        current = child; // step down
     }
 
     private void unkownStartElement(String uri, String localName,
@@ -100,7 +100,6 @@ class ElementHandler extends DefaultHandler {
         // add other attributes
         for (int i = 0; i < attributes.getLength(); i++) {
             final String attrName = attributes.getLocalName(i);
-            // String attrType= attributes.getType(i);
             final String attrUri = attributes.getURI(i);
             final String attrValue = attributes.getValue(i);
             final Attribute attr = new Attribute(attrUri, attrName, attrValue);
@@ -127,25 +126,23 @@ class ElementHandler extends DefaultHandler {
             return;
         }
 
-        try {
-            if (leaf) {
-                // If it's a Leaf - we need to set value properly using
-                // the setLeafValue method which will check
-                // restrictions
-                ((YangElement) current).setLeafValue(leafNs, leafName,
-                        leafValue);
-            } else {
-                // check that we don't have mixed content
-                // System.out.println("XXXXXXXXXXXX" + current);
-                if (current.hasChildren() && current.value != null) {
-                    // MIXED content not allowed
-                    current.value = null;
-                }
+        if (leaf) {
+            // If it's a Leaf - we need to set value properly using
+            // the setLeafValue method which will check restrictions
+            try {
+            ((YangElement) current).setLeafValue(leafNs, leafName, leafValue);
+            } catch (final JNCException e) {
+                e.printStackTrace();
+                throw new SAXException(e.toString());
             }
-        } catch (final JNCException e) {
-            e.printStackTrace();
-            throw new SAXException(e.toString());
+        } else {
+            // check that we don't have mixed content
+            if (current.hasChildren() && current.value != null) {
+                // MIXED content not allowed
+                current.value = null;
+            }
         }
+
         // step up
         if (!leaf) {
             current = current.getParent();
