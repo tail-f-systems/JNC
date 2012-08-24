@@ -37,7 +37,7 @@ public class YangIdentityref extends YangBaseType<Element> {
     /**
      * Creates a YangIdentityref object from an Element.
      * 
-     * @param value The initial value of the new YangIdentityref object.
+     * @param identity The initial value of the new YangIdentityref object.
      * @throws YangException If an invariant was broken during initialization.
      */
     public YangIdentityref(Element identity) throws YangException {

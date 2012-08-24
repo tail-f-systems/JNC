@@ -72,7 +72,7 @@ public class TCPConnection {
     /**
      * Creates a new TCP connection object. The connection need to be
      * authenticated before it can be used. See {@link
-     * authenticate(String,String,String,String,String,String) authenticate}
+     * #authenticate(String,String,String,String,String,String) authenticate}
      */
     public TCPConnection(String host, int port) throws IOException,
             UnknownHostException, JNCException {

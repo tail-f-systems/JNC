@@ -35,7 +35,7 @@ public class YangLeafref extends YangBaseType<Element> {
     /**
      * Creates a YangLeafref object from an Element.
      * 
-     * @param value The initial value of the new YangLeafref object.
+     * @param leaf The leaf to set as value of this leafref.
      * @throws YangException If an invariant was broken during initialization.
      */
     public YangLeafref(Element leaf) throws YangException {

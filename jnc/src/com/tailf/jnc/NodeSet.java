@@ -89,7 +89,7 @@ public class NodeSet extends ArrayList<Element> {
 
     /**
      * Checks if an element is a member of the NodeSet. Elements are compared
-     * with {@link Element#equals(Element) Element.equals} method.
+     * with {@link Element#equals(Object) Element.equals} method.
      * 
      * @param x
      *            Check if x is a member of the NodeSet.
@@ -105,7 +105,7 @@ public class NodeSet extends ArrayList<Element> {
 
     /**
      * Checks if an element is a member of the NodeSet. Elements are compared
-     * with {@link Element#equals(Element) Element.equals} method.
+     * with {@link Element#equals(Object) Element.equals} method.
      * 
      * @param x
      *            Check if x is a member of the NodeSet
@@ -122,7 +122,7 @@ public class NodeSet extends ArrayList<Element> {
 
     /**
      * Removes a member element from the NodeSet. Members are compared with
-     * {@link Element#equals(Element) Element.equals} method.
+     * {@link Element#equals(Object) Element.equals} method.
      * 
      * @param x
      *            Removes an element equals to element x.

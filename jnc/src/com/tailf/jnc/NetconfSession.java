@@ -178,8 +178,7 @@ public class NetconfSession {
     /**
      * Check if a specific named capability is supported.
      * 
-     * @param uri
-     *            Name of capability to check
+     * @param uri Name of capability to check
      */
     public boolean hasCapability(String uri) {
         return capabilities.hasCapability(uri);
@@ -207,8 +206,7 @@ public class NetconfSession {
      * 
      * @see SSHSession
      * 
-     * @param transport
-     *            Transport object
+     * @param transport Transport object
      */
 
     public NetconfSession(Transport transport) throws JNCException, IOException {
@@ -225,21 +223,19 @@ public class NetconfSession {
      * 
      * @see SSHSession
      * 
-     * @param transport
-     *            Transport object
-     * @param parser
-     *            XML parser object
+     * @param transport Transport object
+     * @param parser XML parser object
      * 
      *            If we are using the confm package to create and manipulate
      *            objects we must instantiate the parser as an
      *            com.tailf.confm.XMLParser() If we fail to do that, we get the
-     *            YangXMLParser class from the inm package which always only returns
-     *            Element objects as opposed to the YangXMLParser from the confm
-     *            package which can return objects matching the confm generated
-     *            classes. If we use the confm Device class to create our
-     *            netconf sessions, this is all done automatically, whereas if
-     *            we create our netconf sessions ourselves, _and_ also want to
-     *            retrieve real confm objects we must:
+     *            YangXMLParser class from the inm package which always only
+     *            returns Element objects as opposed to the YangXMLParser from
+     *            the confm package which can return objects matching the confm
+     *            generated classes. If we use the confm Device class to create
+     *            our netconf sessions, this is all done automatically, whereas
+     *            if we create our netconf sessions ourselves, _and_ also want
+     *            to retrieve real confm objects we must:
      * 
      *            <pre>
      * SSHConnection ssh = new SSHConnection(&quot;127.0.0.1&quot;, 2022);
@@ -270,8 +266,7 @@ public class NetconfSession {
     /**
      * Sets the transport used by this session.
      * 
-     * @param transport
-     *            Transport object, for example {@link SSHSession}
+     * @param transport Transport object, for example {@link SSHSession}
      */
     public void setTransport(Transport transport) {
         this.out = transport;
@@ -337,8 +332,7 @@ public class NetconfSession {
      * <p>
      * The reply is parsed into an element tree.
      * 
-     * @param request
-     *            XML encoded NETCONF request
+     * @param request XML encoded NETCONF request
      */
     public Element rpc(String request) throws IOException, JNCException {
         out.print(request);
@@ -358,8 +352,7 @@ public class NetconfSession {
      * <p>
      * The reply is parsed into an element tree.
      * 
-     * @param request
-     *            XML element tree
+     * @param request XML element tree
      */
     public Element rpc(Element request) throws IOException, JNCException {
         // print, but no newline at the end
@@ -378,8 +371,7 @@ public class NetconfSession {
      * NetconfSession methods, and is not checked against the request-id in the
      * request parameter.
      * 
-     * @param request
-     *            XML encoded NETCONF request
+     * @param request XML encoded NETCONF request
      */
     public int sendRequest(String request) throws IOException {
         // no newline before flush
@@ -397,8 +389,7 @@ public class NetconfSession {
      * NetconfSession methods, and is not checked against the request-id in the
      * request parameter.
      * 
-     * @param request
-     *            Element tree
+     * @param request Element tree
      */
     public int sendRequest(Element request) throws IOException, JNCException {
         // print, but no newline at the end
@@ -422,8 +413,7 @@ public class NetconfSession {
     /**
      * Gets the device configuration data specified by subtree filtering.
      * 
-     * @param subtreeFilter
-     *            A subtree filter
+     * @param subtreeFilter A subtree filter
      */
     public NodeSet getConfig(Element subtreeFilter) throws JNCException,
             IOException {
@@ -464,8 +454,7 @@ public class NetconfSession {
      * Gets the device configuration data specified by an xpath expression. The
      * <code>:xpath</code> capability must be supported by the server.
      * 
-     * @param xpath
-     *            XPath expression
+     * @param xpath XPath expression
      */
     public NodeSet getConfig(String xpath) throws JNCException, IOException {
         return getConfig(RUNNING, xpath);
@@ -474,11 +463,9 @@ public class NetconfSession {
     /**
      * Gets the device configuration data specified by subtree filtering.
      * 
-     * @param datastore
-     *            The datastore. One of {@link #RUNNING}, {@link #CANDIDATE},
-     *            {@link #STARTUP}
-     * @param subtreeFilter
-     *            A subtree filter
+     * @param datastore The datastore. One of {@link #RUNNING},
+     *            {@link #CANDIDATE}, {@link #STARTUP}
+     * @param subtreeFilter A subtree filter
      */
     public NodeSet getConfig(int datastore, Element subtreeFilter)
             throws JNCException, IOException {
@@ -493,11 +480,9 @@ public class NetconfSession {
     /**
      * Gets the device configuration data specified by an xpath filter.
      * 
-     * @param datastore
-     *            The datastore. One of {@link #RUNNING}, {@link #CANDIDATE},
-     *            {@link #STARTUP}
-     * @param xpath
-     *            XPath expression
+     * @param datastore The datastore. One of {@link #RUNNING},
+     *            {@link #CANDIDATE}, {@link #STARTUP}
+     * @param xpath XPath expression
      */
     public NodeSet getConfig(int datastore, String xpath) throws JNCException,
             IOException {
@@ -524,8 +509,7 @@ public class NetconfSession {
     /**
      * Retrieves running configuration and device state information.
      * 
-     * @param subtreeFilter
-     *            A subtree filter
+     * @param subtreeFilter A subtree filter
      */
     public NodeSet get(Element subtreeFilter) throws JNCException, IOException {
         trace("get: " + subtreeFilter.toXMLString());
@@ -538,8 +522,7 @@ public class NetconfSession {
      * Retrieves running configuration and device state information. The
      * <code>:xpath</code> capability must be supported by the server.
      * 
-     * @param xpath
-     *            An xpath epxression.
+     * @param xpath An xpath epxression.
      */
     public NodeSet get(String xpath) throws JNCException, IOException {
         trace("get: \"" + xpath + "\"");
@@ -556,8 +539,7 @@ public class NetconfSession {
      * or part of a specified configuration to the {@link #RUNNING} target
      * datatore.
      * 
-     * @param configTree
-     *            Configuration tree
+     * @param configTree Configuration tree
      */
     public void editConfig(Element configTree) throws JNCException, IOException {
         editConfig(RUNNING, configTree);
@@ -579,11 +561,9 @@ public class NetconfSession {
      * or part of a specified configuration to the specified target
      * configuration.
      * 
-     * @param datastore
-     *            The target datastore. One of {@link #RUNNING},
+     * @param datastore The target datastore. One of {@link #RUNNING},
      *            {@link #CANDIDATE}, {@link #STARTUP}
-     * @param configTree
-     *            The config tree to edit.
+     * @param configTree The config tree to edit.
      */
     public void editConfig(int datastore, Element configTree)
             throws JNCException, IOException {
@@ -609,11 +589,9 @@ public class NetconfSession {
      * Edits the configuration. The <edit-config> operation loads all or part of
      * a specified configuration to the specified target configuration.
      * 
-     * @param datastore
-     *            The target datastore. One of {@link #RUNNING},
+     * @param datastore The target datastore. One of {@link #RUNNING},
      *            {@link #CANDIDATE}, {@link #STARTUP}
-     * @param url
-     *            The source url.
+     * @param url The source url.
      */
     public void editConfig(int datastore, String url) throws JNCException,
             IOException {
@@ -677,8 +655,7 @@ public class NetconfSession {
      * the element to be deleted.
      * </ul>
      * 
-     * @param op
-     *            One of {@link #MERGE}, {@link #REPLACE}, {@link #NONE}.
+     * @param op One of {@link #MERGE}, {@link #REPLACE}, {@link #NONE}.
      * 
      */
     public void setDefaultOperation(int op) {
@@ -728,8 +705,7 @@ public class NetconfSession {
      * {@link #TEST_ONLY}: Only test. (Option is not supported in the standard.)
      * </ul>
      * 
-     * @param testoption
-     *            One of {@link #SET}, {@link #TEST_THEN_SET},
+     * @param testoption One of {@link #SET}, {@link #TEST_THEN_SET},
      *            {@link #TEST_ONLY}
      */
     public void setTestOption(int testoption) {
@@ -782,9 +758,8 @@ public class NetconfSession {
      * <code>:rollback-on-error</code> capability.
      * </ul>
      * 
-     * @param erroroption
-     *            One of {@link #STOP_ON_ERROR}, {@link #CONTINUE_ON_ERROR},
-     *            {@link #ROLLBACK_ON_ERROR}
+     * @param erroroption One of {@link #STOP_ON_ERROR},
+     *            {@link #CONTINUE_ON_ERROR}, {@link #ROLLBACK_ON_ERROR}
      * 
      * 
      */
@@ -802,10 +777,8 @@ public class NetconfSession {
      * another complete configuration datastore. If the target datastore exists,
      * it is overwritten. Otherwise, a new one is created, if allowed.
      * 
-     * @param sourceTree
-     *            A config tree
-     * @param target
-     *            The target datastore
+     * @param sourceTree A config tree
+     * @param target The target datastore
      */
     public void copyConfig(Element sourceTree, int target) throws JNCException,
             IOException {
@@ -830,10 +803,8 @@ public class NetconfSession {
      * Same as {@link #copyConfig(Element,int)} but uses an url as target. Only
      * possible if <code>:url</code> capability is supported.
      * 
-     * @param sourceTree
-     *            A config tree
-     * @param targetUrl
-     *            The target URL.
+     * @param sourceTree A config tree
+     * @param targetUrl The target URL.
      */
     public void copyConfig(Element sourceTree, String targetUrl)
             throws JNCException, IOException {
@@ -855,10 +826,8 @@ public class NetconfSession {
      * another complete configuration datastore. If the target datastore exists,
      * it is overwritten. Otherwise, a new one is created, if allowed.
      * 
-     * @param source
-     *            The source datastore
-     * @param target
-     *            The target datastore
+     * @param source The source datastore
+     * @param target The target datastore
      */
     public void copyConfig(int source, int target) throws JNCException,
             IOException {
@@ -874,10 +843,8 @@ public class NetconfSession {
      * Same as {@link #copyConfig(int,int)} but uses an url as target. Only
      * possible if <code>:url</code> capability is supported.
      * 
-     * @param source
-     *            The datastore to be used as source
-     * @param targetUrl
-     *            The target URL.
+     * @param source The datastore to be used as source
+     * @param targetUrl The target URL.
      */
     public void copyConfig(int source, String targetUrl) throws JNCException,
             IOException {
@@ -892,10 +859,8 @@ public class NetconfSession {
      * Same as {@link #copyConfig(int,int)} but uses an url as target and an url
      * as a source. Only possible if <code>:url</code> capability is supported.
      * 
-     * @param sourceUrl
-     *            The source URL.
-     * @param targetUrl
-     *            The target URL.
+     * @param sourceUrl The source URL.
+     * @param targetUrl The target URL.
      */
     public void copyConfig(String sourceUrl, String targetUrl)
             throws JNCException, IOException {
@@ -909,10 +874,8 @@ public class NetconfSession {
      * Same as {@link #copyConfig(int,int)} but uses an url as the source. Only
      * possible if <code>:url</code> capability is supported.
      * 
-     * @param sourceUrl
-     *            The source URL.
-     * @param target
-     *            The target datastore
+     * @param sourceUrl The source URL.
+     * @param target The target datastore
      */
     public void copyConfig(String sourceUrl, int target) throws JNCException,
             IOException {
@@ -927,8 +890,7 @@ public class NetconfSession {
      * Deletes a configuration datastore. The <running> configuration datastore
      * cannot be deleted.
      * 
-     * @param datastore
-     *            Datastore to be deleted
+     * @param datastore Datastore to be deleted
      */
     public void deleteConfig(int datastore) throws JNCException, IOException {
         trace("deleteConfig: " + datastoreToString(datastore));
@@ -940,8 +902,7 @@ public class NetconfSession {
     /**
      * Deletes a configuration target url.
      * 
-     * @param targetUrl
-     *            Name of configuration target url to be deleted.
+     * @param targetUrl Name of configuration target url to be deleted.
      */
     public void deleteConfig(String targetUrl) throws JNCException, IOException {
         trace("deleteConfig: " + targetUrl);
@@ -960,8 +921,7 @@ public class NetconfSession {
      * An attempt to lock the configuration must fail if an existing session or
      * other entity holds a lock on any portion of the lock target.
      * 
-     * @param datastore
-     *            The datastore to lock
+     * @param datastore The datastore to lock
      */
     public void lock(int datastore) throws JNCException, IOException {
         trace("lock: " + datastoreToString(datastore));
@@ -974,8 +934,7 @@ public class NetconfSession {
      * The unlock operation is used to release a configuration lock, previously
      * obtained with the {@link #lock} operation.
      * 
-     * @param datastore
-     *            The target datastore to unlock
+     * @param datastore The target datastore to unlock
      */
     public void unlock(int datastore) throws JNCException, IOException {
         trace("unlock: " + datastoreToString(datastore));
@@ -1013,10 +972,7 @@ public class NetconfSession {
      * An attempt to lock the configuration must fail if an existing session or
      * other entity holds a lock on any portion of the lock target.
      * 
-     * @param datastore
-     *            datastore of which a part will be locked
-     * @param select
-     *            An array of selection filters
+     * @param select An array of selection filters
      * @return A unique lock reference which should be used to unlockPartial()
      * 
      */
@@ -1026,8 +982,8 @@ public class NetconfSession {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "capability :partial-lock is not supported by server");
         // Allow simple paths to instance identifiers also
-        // if (!xpathCapability)
-        // throw new INMException(INMException.SESSION_ERROR,
+        // if (!capabilities.xpathCapability)
+        // throw new JNCException(JNCException.SESSION_ERROR,
         // "capability :xpath is not supported by server");
         int mid = encode_lockPartial(out, select);
         out.flush();
@@ -1043,10 +999,10 @@ public class NetconfSession {
     }
 
     /**
-     * Same as {@link #lockPartial(int,String[])} except it only takes one
-     * selection as argument.
+     * Same as {@link #lockPartial(String[])} except it only takes one selection
+     * as argument.
      * 
-     * @see #lockPartial(int,String[])
+     * @see #lockPartial(String[])
      */
     public int lockPartial(String select) throws JNCException, IOException {
         return lockPartial(new String[] { select });
@@ -1056,9 +1012,8 @@ public class NetconfSession {
      * The unlock operation is used to release a configuration lock, previously
      * obtained with the {@link #lock} operation.
      * 
-     * @param lockId
-     *            Previously received lock identifier from
-     *            {@link #lockPartial(int,String[])}
+     * @param lockId Previously received lock identifier from
+     *            {@link #lockPartial(String[])}
      */
     public void unlockPartial(int lockId) throws JNCException, IOException {
         trace("partialUnlock: " + lockId);
@@ -1138,8 +1093,7 @@ public class NetconfSession {
      * feature with shared configuration databases, configuration locking should
      * also be used.
      * 
-     * @param timeout
-     *            Time that server will wait for confirming commit before
+     * @param timeout Time that server will wait for confirming commit before
      *            reverting config
      * 
      */
@@ -1196,10 +1150,9 @@ public class NetconfSession {
      * associated connections.
      * <p>
      * Session identifier of the NETCONF session to be terminated, if this value
-     * is the current session ID a INMException will be thrown.
+     * is the current session ID a JNCException will be thrown.
      * 
-     * @param sessionId
-     *            The id of the session to terminate
+     * @param sessionId The id of the session to terminate
      */
     public void killSession(int sessionId) throws JNCException, IOException {
         trace("killSession: " + sessionId);
@@ -1215,8 +1168,7 @@ public class NetconfSession {
      * This protocol operation validates the contents of the specified
      * configuration.
      * 
-     * @param configTree
-     *            configuration tree to validate
+     * @param configTree configuration tree to validate
      */
     public void validate(Element configTree) throws JNCException, IOException {
         trace("validate: " + configTree.toXMLString());
@@ -1232,8 +1184,7 @@ public class NetconfSession {
      * This protocol operation validates the given datastore. For example the
      * {@link #CANDIDATE} datastore.
      * 
-     * @param datastore
-     *            The datastore to validate
+     * @param datastore The datastore to validate
      */
     public void validate(int datastore) throws IOException, JNCException {
         trace("validate: " + datastoreToString(datastore));
@@ -1250,8 +1201,7 @@ public class NetconfSession {
      * be a file <code>"file://incoming.conf"</code> then file must be supported
      * by the <code>:url</code> capability.
      * 
-     * @param url
-     *            The source url to validate
+     * @param url The source url to validate
      */
     public void validate(String url) throws IOException, JNCException {
         trace("validate: " + url);
@@ -1283,8 +1233,7 @@ public class NetconfSession {
      * Subscribe on speciied stream name.
      * 
      * 
-     * @param stream
-     *            The name of the stream or 'null'
+     * @param stream The name of the stream or 'null'
      * @see #createSubscription(String,String,String,String)
      * 
      */
@@ -1322,14 +1271,11 @@ public class NetconfSession {
      * valid. The time is specified in dateTime format.
      * <p>
      * 
-     * @param streamName
-     *            The name of the stream or 'null'
-     * @param eventFilter
-     *            a subtree filter - list of events, or 'null'
-     * @param startTime
-     *            a dateTime string specifying the replay start, or 'null'
-     * @param stopTime
-     *            a dateTime string specifying the stop of replay, or 'null'
+     * @param streamName The name of the stream or 'null'
+     * @param eventFilter a subtree filter - list of events, or 'null'
+     * @param startTime a dateTime string specifying the replay start, or 'null'
+     * @param stopTime a dateTime string specifying the stop of replay, or
+     *            'null'
      * @see #receiveNotification()
      */
     public void createSubscription(String streamName, NodeSet eventFilter,
@@ -1350,14 +1296,11 @@ public class NetconfSession {
      * Same as {@link #createSubscription(String,NodeSet,String,String)} except
      * a filter in xpath format can be given instead of a subtree filter.
      * 
-     * @param streamName
-     *            The name of the stream or 'null'
-     * @param eventFilter
-     *            a filter xpath expression, or 'null'
-     * @param startTime
-     *            a dateTime string specifying the replay start, or 'null'
-     * @param stopTime
-     *            a dateTime string specifying the stop of replay, or 'null'
+     * @param streamName The name of the stream or 'null'
+     * @param eventFilter a filter xpath expression, or 'null'
+     * @param startTime a dateTime string specifying the replay start, or 'null'
+     * @param stopTime a dateTime string specifying the stop of replay, or
+     *            'null'
      * @see #receiveNotification()
      */
     public void createSubscription(String streamName, String eventFilter,
@@ -1466,7 +1409,7 @@ public class NetconfSession {
 
     NodeSet recv_call_rpc_reply(Element e, int mid) throws JNCException,
             IOException {
-        XMLParser parser = new XMLParser(); 
+        XMLParser parser = new XMLParser();
         // XXX Why new parser?
         return recv_rpc_reply("", parser, Integer.toString(mid));
     }
@@ -1529,8 +1472,7 @@ public class NetconfSession {
      * initial hello message so this method need to invoked before the
      * {@link #hello()} method to have any effect.
      * 
-     * @param capability
-     *            Add a capablity string for this client session
+     * @param capability Add a capablity string for this client session
      */
     protected void setCapability(String capability) {
         if (proprietaryClientCaps == null)
@@ -1583,8 +1525,7 @@ public class NetconfSession {
      * This method is provided to be able extend this class with proprietary
      * capabilities.
      * 
-     * @param out
-     *            Transport output stream
+     * @param out Transport output stream
      */
     protected int encode_rpc_begin(Transport out) {
         return encode_rpc_begin(out, null);
@@ -1596,10 +1537,8 @@ public class NetconfSession {
      * capabilities. The extra attribute arguement makes it possible to add an
      * extra attribute to the RPC header.
      * 
-     * @param out
-     *            Transport output stream
-     * @param attr
-     *            Extra attribute to be added to rpc header
+     * @param out Transport output stream
+     * @param attr Extra attribute to be added to rpc header
      */
     protected int encode_rpc_begin(Transport out, Attribute attr) {
         String prefix = Element.defaultPrefixes
@@ -1630,8 +1569,7 @@ public class NetconfSession {
     /**
      * Closes the rpc tag.
      * 
-     * @param out
-     *            Transport output stream
+     * @param out Transport output stream
      */
     protected void encode_rpc_end(Transport out) {
         out.print("</" + nc + "rpc>");

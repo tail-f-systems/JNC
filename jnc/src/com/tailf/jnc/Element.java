@@ -980,7 +980,6 @@ public class Element implements Serializable {
      * 
      * @param pathStr Path string to find nodes
      * @return The last element node found by the expression.
-     * @see {@link #getFirst}
      */
     public Element getLast(String pathStr) throws JNCException {
         NodeSet nodeSet = get(pathStr);

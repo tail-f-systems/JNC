@@ -223,16 +223,16 @@ public class Capabilities {
      * supported schemas will listed in {@link #urlSchemes}.
      * <p>
      * If the <code>:url</code> capability is supported an url argument may be
-     * given to the follwing methods:
+     * given to the following methods:
      * <ul>
-     * <li> {@link #editConfig(int,String)} - the <edit-config> operation can
+     * <li> editConfig - the &lt;edit-config&gt; operation can
      * accept an URL as an alternative to the config tree. The URL should
      * identify a local configuration file.
-     * <li> {@link #copyConfig(String,String)} - the <copy-config> operation can
+     * <li> copyConfig - the &lt;copy-config&gt; operation can
      * accept an URL as either the source or target parameter.
-     * <li> {@link #deleteConfig(String)} - the <delete-config> operation can
+     * <li> deleteConfig - the &lt;delete-config&gt; operation can
      * accept an URL, then it should identify a local configuration file.
-     * <li> {@link #validate(String)} - the <validate> operation can accept an
+     * <li> validate - the &lt;validate&gt; operation can accept an
      * URL as the source parameter.
      * </ul>
      */

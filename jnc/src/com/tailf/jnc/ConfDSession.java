@@ -107,8 +107,7 @@ public class ConfDSession extends NetconfSession {
      * 
      * @see SSHSession
      * 
-     * @param transport
-     *            Transport object
+     * @param transport Transport object
      */
     public ConfDSession(Transport transport) throws JNCException, IOException {
         super();
@@ -122,10 +121,8 @@ public class ConfDSession extends NetconfSession {
      * 
      * @see SSHSession
      * 
-     * @param transport
-     *            Transport object
-     * @param parse
-     *            XML parser object
+     * @param transport Transport object
+     * @param parser XML parser object
      */
 
     public ConfDSession(Transport transport, XMLParser parser)
@@ -159,8 +156,7 @@ public class ConfDSession extends NetconfSession {
      * the NETCONF agent or not. If this value is 'true', default values are
      * included. If this value is 'false', default valus are not included.
      * 
-     * @param value
-     *            Value for with-defaults.
+     * @param value Value for with-defaults.
      */
     public void setWithDefaults(boolean value) throws JNCException {
         if (!capabilities.hasWithDefaults())
@@ -175,8 +171,7 @@ public class ConfDSession extends NetconfSession {
      * replies with the standard 'ok' element. If a result value is returned, it
      * is encapsulated within a returned 'data' element.
      * 
-     * @param data
-     *            element tree with action-data
+     * @param data element tree with action-data
      */
     public Element action(Element data) throws JNCException, IOException {
         trace("action: " + data.toXMLString());
@@ -204,9 +199,8 @@ public class ConfDSession extends NetconfSession {
      * The client sends a <code>prepare-transaction</code> when all
      * modifications have been sent.
      * 
-     * @param datastore
-     *            The datastore. One of {@link #RUNNING}, {@link #CANDIDATE},
-     *            {@link #STARTUP}
+     * @param datastore The datastore. One of {@link #RUNNING},
+     *            {@link #CANDIDATE}, {@link #STARTUP}
      * 
      * @see #startTransaction(int)
      * @see #commitTransaction()
