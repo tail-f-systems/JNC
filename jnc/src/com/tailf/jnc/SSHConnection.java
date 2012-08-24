@@ -39,7 +39,6 @@ public class SSHConnection {
      * 
      * @param host Host or IP address to connect to
      */
-
     public SSHConnection(String host) throws IOException, JNCException {
         this(host, 830, 0);
     }
@@ -146,14 +145,7 @@ public class SSHConnection {
      **/
     public void authenticateWithPublicKeyFile(String user, File pemFile,
             String password) throws IOException, JNCException {
-        try {
-            if (!connection
-                    .authenticateWithPublicKey(user, pemFile, password)) {
-                throw new JNCException(JNCException.AUTH_FAILED, this);
-            }
-        } catch (final IOException e) {
-            throw e;
-        } catch (final Exception e) {
+        if (!connection.authenticateWithPublicKey(user, pemFile, password)) {
             throw new JNCException(JNCException.AUTH_FAILED, this);
         }
     }

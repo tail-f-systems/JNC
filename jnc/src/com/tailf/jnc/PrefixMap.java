@@ -37,27 +37,27 @@ public class PrefixMap extends ArrayList<Prefix> {
     /**
      * Inserts an array of prefixes initially in the new prefix map.
      */
-    public PrefixMap(Prefix[] p) {
-        for (int i = 0; i < p.length; i++) {
-            add(p[i]);
+    public PrefixMap(Prefix[] prefixes) {
+        for (Prefix p : prefixes) {
+            add(p);
         }
     }
 
     /**
-     * Merges two prefix maps. Prefix names that already exists will be
-     * unchanged.
+     * Nondestructively merges a prefix map with this object.
      * 
+     * @param prefixes The prefix map to merge with.
      */
     public void merge(PrefixMap prefixes) {
-        // trace("merge()");
-        for (int i = 0; i < prefixes.size(); i++) {
-            merge(prefixes.getPrefix(i));
+        for (Prefix p : prefixes) {
+            merge(p);
         }
     }
 
     /**
-     * Merges in a prefix in the prefix map. Will not replace already existing
-     * ones.
+     * Non-destructively merges a prefix in the prefix map.
+     * 
+     * @param prefix the prefix to add if not already present.
      */
     public void merge(Prefix prefix) {
         final int index = indexOfName(prefix.name);
@@ -74,22 +74,21 @@ public class PrefixMap extends ArrayList<Prefix> {
      */
     public void set(PrefixMap prefixes) {
         trace("set: " + prefixes);
-        for (int i = 0; i < prefixes.size(); i++) {
-            set(prefixes.getPrefix(i));
+        for (Prefix p : prefixes) {
+            set(p);
         }
     }
 
     /**
-     * Stores a prefix in the prefix map. Replace any old occurance.
+     * Stores a prefix in the prefix map. Replace any old occurrence.
      * 
      * @param prefix Prefix mapping to be set
      */
     public void set(Prefix prefix) {
         final int index = indexOfName(prefix.name);
         if (index == -1) {
-            // if default prefix, add it first in list.
             if (prefix.name.equals("")) {
-                add(0, prefix); // add first
+                add(0, prefix); // add default prefix first in the prefix map
             } else {
                 add(prefix);
             }

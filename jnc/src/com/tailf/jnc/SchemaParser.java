@@ -9,6 +9,7 @@
  */
 package com.tailf.jnc;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,16 +24,29 @@ import org.xml.sax.helpers.XMLReaderFactory;
 /**
  * A simple SAX parser, for parsing ConfD schema files with the following
  * syntax:
- * 
- * <schema> <node> <tagpath>string</tagpath> <namespace>string</namespace>
- * <primitive_type>string</primitive_type> <min_occurs>int</min_occurs>
- * <max_occurs>int</max_occurs> <children>space-separated strings</children>
- * <flags>integer</flags> <desc>string</desc> <rev> <info> <type>7</type>
- * <idata>4711</idata> <data>foo</data> <introduced>2007-10-11</introduced>
- * </info> </rev> </node> <schema>
- * 
+ * <pre>
+ * <schema>
+ *   <node>
+ *     <tagapth>string</tagpath>
+ *     <namespace>string</namespace>
+ *     <primitive_type>string</primitive_type>
+ *     <min_occurs>int</min_occurs>
+ *     <max_occurs>int</max_occurs>
+ *     <children>space-separated strings</children>
+ *     <flags>integer</flags>
+ *     <desc>string</desc>
+ *     <rev>
+ *       <info>
+ *         <type>7</type>
+ *         <idata>4711</idata>
+ *         <data>foo</data>
+ *         <introduced>2007-10-11</introduced>
+ *       </info>
+ *     </rev>
+ *   </node>
+ * <schema>
+ * </pre>
  * into a hashtable with {@link SchemaNode} elements.
- * 
  */
 public class SchemaParser {
     protected XMLReader parser;
@@ -96,7 +110,6 @@ public class SchemaParser {
                     node.tagpath = new Tagpath(0);
                 } else {
                     node.tagpath = new Tagpath(splittedTagpath.length - 1);
-
                     for (int i = 1; i < splittedTagpath.length; i++) {
                         node.tagpath.p[i - 1] = new String(splittedTagpath[i]);
                     }
@@ -152,31 +165,47 @@ public class SchemaParser {
     }
 
     /**
-     * Read in an XML file and parse it and return a hashtable with SchemaNode
+     * Read in and parse an XML file, and populate a hashtable with SchemaNode
      * objects.
+     *
+     * @param filename name of file containing the schema
+     * @param h The hashtable to populate.
+     * @throws JNCException If there is an IO or SAX parse problem.
      */
     public void readFile(String filename, HashMap<Tagpath, SchemaNode> h)
             throws JNCException {
-        try {
-            final SchemaHandler handler = new SchemaHandler(h);
-            parser.setContentHandler(handler);
-            parser.parse(filename);
-        } catch (final Exception e) {
-            e.printStackTrace();
-            throw new JNCException(JNCException.PARSER_ERROR, "parse file: "
-                    + filename + " error: " + e);
-        }
+        readFile(new InputSource(filename), h);
     }
 
+    /**
+     * Read in and parse an XML file, and populate a hashtable with SchemaNode
+     * objects.
+     *
+     * @param schemaUrl URL of the schema to parse
+     * @param h The hashtable to populate.
+     * @throws JNCException If there is an IO or SAX parse problem.
+     */
     public void readFile(URL schemaUrl, HashMap<Tagpath, SchemaNode> h)
             throws JNCException {
         try {
+            readFile(new InputSource(schemaUrl.openStream()), h);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new JNCException(JNCException.PARSER_ERROR, "Unable to open" +
+            		" file: " + schemaUrl + ": " + e);
+        }
+    }
+
+    private void readFile(InputSource inputSource,
+            HashMap<Tagpath, SchemaNode> h) throws JNCException {
+        try {
             final SchemaHandler handler = new SchemaHandler(h);
             parser.setContentHandler(handler);
-            parser.parse(new InputSource(schemaUrl.openStream()));
+            parser.parse(inputSource);
         } catch (final Exception e) {
+            e.printStackTrace();
             throw new JNCException(JNCException.PARSER_ERROR, "parse file: "
-                    + schemaUrl + " error: " + e);
+                    + inputSource + " error: " + e);
         }
     }
 }

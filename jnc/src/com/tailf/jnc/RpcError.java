@@ -114,7 +114,9 @@ public class RpcError {
     public NodeSet errorInfo;
 
     /**
-     * Constructor
+     * Constructor, initialized with an rpc-error element tree.
+     * 
+     * @param The rpc-error element tree to initialize with.
      */
     public RpcError(Element data) {
         // parse out the fields in data
@@ -158,10 +160,10 @@ public class RpcError {
     /**
      * The rpc-error element tree
      */
-    public Element data;
+    private Element data;
 
     /**
-     *
+     * @return the XML string representation of the rpc-error element tree.
      */
     @Override
     public String toString() {

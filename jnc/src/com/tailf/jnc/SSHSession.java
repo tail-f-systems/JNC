@@ -51,6 +51,9 @@ public class SSHSession implements Transport {
     private final ArrayList<IOSubscriber> ioSubscribers;
     protected long readTimeout = 0; // millisecs
 
+    private static final String endmarker = "]]>]]>";
+    private static final int end = endmarker.length() - 1;
+
     /**
      * Constructor for SSH session object. This method creates a a new SSh
      * channel on top of an existing connection. SSHSession objects imlement
@@ -89,7 +92,6 @@ public class SSHSession implements Transport {
     /**
      * Return the underlying ssh connection object
      */
-
     public SSHConnection getSSHConnection() {
         return connection;
     }
@@ -99,7 +101,6 @@ public class SSHSession implements Transport {
      * socket. If a read doesn't complete within the stipulated timeout an
      * INMException is thrown *
      */
-
     public long getReadTimeout() {
         return readTimeout;
     }
@@ -111,7 +112,6 @@ public class SSHSession implements Transport {
      *            affects all read operations. If a timeout is reached, an
      *            INMException is thrown. The socket is not closed.
      */
-
     public void setReadTimeout(int readTimeout) {
         this.readTimeout = readTimeout;
     }
@@ -125,7 +125,6 @@ public class SSHSession implements Transport {
      *         server side has closed its end of the ssh socket. To explictly
      *         just check for that, use the serverSideClosed() method.
      */
-
     @Override
     public boolean ready() throws IOException {
         if (in.ready()) {
@@ -143,7 +142,6 @@ public class SSHSession implements Transport {
      * given a live SSHSession, check if the server side has closed it's end of
      * the ssh socket
      */
-
     public boolean serverSideClosed() {
         int conditionSet = ChannelCondition.TIMEOUT & ChannelCondition.CLOSED
                 & ChannelCondition.EOF;
@@ -165,7 +163,6 @@ public class SSHSession implements Transport {
      * 
      * @return number of discarded characters
      */
-
     public int readUntilWouldBlock() {
         int ret = 0;
         while (true) {
@@ -212,42 +209,22 @@ public class SSHSession implements Transport {
                 throw new IOException("Session closed");
             }
 
-            if (ch == ']') {
-                ch = in.read();
-                if (ch == ']') {
-                    ch = in.read();
-                    if (ch == '>') {
+            for (int i=0; i < endmarker.length(); i++) {
+                if (ch == endmarker.charAt(i)) {
+                    if (i < end) {
                         ch = in.read();
-                        if (ch == ']') {
-                            ch = in.read();
-                            if (ch == ']') {
-                                ch = in.read();
-                                if (ch == '>') {
-                                    // ']]>]]>' received
-                                    // trace("]]>]]> received");
-                                    for (int i = 0; i < ioSubscribers.size(); i++) {
-                                        final IOSubscriber sub = ioSubscribers
-                                                .get(i);
-                                        sub.inputFlush("]]>]]");
-                                    }
-                                    return wr.getBuffer();
-                                } else {
-                                    subInputChar(wr, "]]>]]");
-                                }
-                            } else {
-                                subInputChar(wr, "]]>]");
-                            }
-                        } else {
-                            subInputChar(wr, "]]>");
-                        }
                     } else {
-                        subInputChar(wr, "]]");
+                        for (final IOSubscriber sub : ioSubscribers) {
+                            sub.inputFlush(endmarker.substring(0, end));
+                        }
+                        return wr.getBuffer();
                     }
                 } else {
-                    subInputChar(wr, "]");
+                    subInputChar(wr, endmarker.substring(0, i));
+                    subInputChar(wr, ch);
+                    break;
                 }
             }
-            subInputChar(wr, ch);
         }
     }
 
@@ -272,8 +249,7 @@ public class SSHSession implements Transport {
      */
     @Override
     public void print(int iVal) {
-        for (int i = 0; i < ioSubscribers.size(); i++) {
-            final IOSubscriber sub = ioSubscribers.get(i);
+        for (final IOSubscriber sub : ioSubscribers) {
             sub.outputPrint(iVal);
         }
         out.print(iVal);
@@ -286,8 +262,7 @@ public class SSHSession implements Transport {
      */
     @Override
     public void print(String s) {
-        for (int i = 0; i < ioSubscribers.size(); i++) {
-            final IOSubscriber sub = ioSubscribers.get(i);
+        for (final IOSubscriber sub : ioSubscribers) {
             sub.outputPrint(s);
         }
         out.print(s);
@@ -301,8 +276,7 @@ public class SSHSession implements Transport {
      */
     @Override
     public void println(int iVal) {
-        for (int i = 0; i < ioSubscribers.size(); i++) {
-            final IOSubscriber sub = ioSubscribers.get(i);
+        for (final IOSubscriber sub : ioSubscribers) {
             sub.outputPrintln(iVal);
         }
         out.println(iVal);
@@ -316,8 +290,7 @@ public class SSHSession implements Transport {
      */
     @Override
     public void println(String s) {
-        for (int i = 0; i < ioSubscribers.size(); i++) {
-            final IOSubscriber sub = ioSubscribers.get(i);
+        for (final IOSubscriber sub : ioSubscribers) {
             sub.outputPrintln(s);
         }
         out.println(s);
@@ -360,11 +333,9 @@ public class SSHSession implements Transport {
      */
     @Override
     public void flush() {
-        final String endmarker = "]]>]]>";
         out.print(endmarker);
         out.flush();
-        for (int i = 0; i < ioSubscribers.size(); i++) {
-            final IOSubscriber sub = ioSubscribers.get(i);
+        for (final IOSubscriber sub : ioSubscribers) {
             sub.outputFlush(endmarker);
         }
     }
