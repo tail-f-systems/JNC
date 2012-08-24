@@ -13,11 +13,11 @@ package com.tailf.jnc;
 import java.util.ArrayList;
 
 /**
- * A path expression. This is a small subset of the W3C recommendations of XPath
- * 1.0 expression evaluator and parser.
+ * A path expression. This is a small subset of the W3C recommendations of
+ * XPath 1.0 expression evaluator and parser.
  * <p>
- * The result of evaluating an expression is a set of {@link Element} nodes that
- * fulfill the location steps, with node tests, and predicates. The path
+ * The result of evaluating an expression is a set of {@link Element} nodes
+ * that fulfill the location steps, with node tests, and predicates. The path
  * expression operates on an element tree.
  * <p>
  * Example:
@@ -52,16 +52,14 @@ public class Path {
      * Makes a selection by traversing the locationSteps, return an ArrayList
      * (NodeSet) of Element nodes.
      * 
-     * @param contextNode
-     *            The context node to evaluate expressions on
+     * @param contextNode The context node to evaluate expressions on
      * @return A nodeSet of elements
      */
     public NodeSet eval(Element contextNode) throws JNCException {
         trace("eval(): " + this);
         NodeSet nodeSet = new NodeSet();
         nodeSet.add(contextNode);
-        for (int i = 0; i < locationSteps.size(); i++) {
-            LocationStep step = (LocationStep) locationSteps.get(i);
+        for (final LocationStep step : locationSteps) {
             nodeSet = step.step(nodeSet);
         }
         return nodeSet;
@@ -74,10 +72,11 @@ public class Path {
      * NodeSet of Element nodes.
      */
     NodeSet evalStep(NodeSet nodeSet, int step) throws JNCException {
-        if (step < 0 || step >= locationSteps.size())
+        if (step < 0 || step >= locationSteps.size()) {
             throw new JNCException(JNCException.PATH_ERROR,
                     "cannot eval location step: " + step + " in path");
-        LocationStep locStep = (LocationStep) locationSteps.get(step);
+        }
+        final LocationStep locStep = locationSteps.get(step);
         trace("evalStep(): step=" + step + ", " + locStep);
         nodeSet = locStep.step(nodeSet);
         return nodeSet;
@@ -91,10 +90,7 @@ public class Path {
         return locationSteps.size();
     }
 
-    /**
-     * ------------------------------------------------------------ Internal
-     * section
-     */
+    /* Internal section */
 
     /** AXIS in LocationStep */
     static final int AXIS_CHILD = 1;
@@ -125,8 +121,8 @@ public class Path {
      * <li>an axis, which specifies the tree relationship between the nodes
      * selected by the location step and the context node,
      * <li>
-     * a node test, which specifies the node type and expanded-name of the nodes
-     * selected by the location step, and
+     * a node test, which specifies the node type and expanded-name of the
+     * nodes selected by the location step, and
      * <li>
      * zero or more predicates, which use arbitrary expressions to further
      * refine the set of nodes selected by the location step.
@@ -158,18 +154,20 @@ public class Path {
          * Step down
          */
         NodeSet step(NodeSet nodes) throws JNCException {
-            NodeSet result = new NodeSet();
+            final NodeSet result = new NodeSet();
             for (int i = 0; i < nodes.size(); i++) {
-                Element node = nodes.getElement(i);
+                final Element node = nodes.getElement(i);
                 /** select axis */
                 switch (axis) {
                 case AXIS_CHILD:
-                    if (node.children != null)
+                    if (node.children != null) {
                         result.addAll(nodeTest(node.children));
+                    }
                     break;
                 case AXIS_PARENT:
-                    if (node.parent != null)
+                    if (node.parent != null) {
                         result.addAll(nodeTest(new NodeSet(node.parent)));
+                    }
                     break;
                 case AXIS_SELF:
                     result.addAll(nodeTest(new NodeSet(node)));
@@ -190,41 +188,43 @@ public class Path {
              * A simple "NameTest" Filter away those with wrong name
              */
             for (int i = 0; i < nodeSet.size(); i++) {
-                Element node = nodeSet.getElement(i);
+                final Element node = nodeSet.getElement(i);
                 if (node.name.equals(name)) {
                     /* check namespace also, if prefix is given */
                     String namespace = null;
                     if (prefix != null) {
                         namespace = node.lookupContextPrefix(prefix);
                         if (namespace != null
-                                && node.namespace.equals(namespace))
+                                && node.namespace.equals(namespace)) {
                             result.add(node);
+                        }
                     } else {
                         // skip namespace test when prefix is not given
                         result.add(node);
                     }
                 }
             }
-            if (result.size() == 0)
+            if (result.size() == 0) {
                 return result;
+            }
 
-            /**
-             * apply predicates on nodeSet in order, if any. rebuild new
+            /* Apply predicates on nodeSet in order, if any. Rebuild new
              * nodeSet, for each predicate level, since contextSet is needed as
-             * an argument we do not want to change it.
-             */
+             * an argument we do not want to change it. */
             NodeSet contextSet;
-            if (predicates != null)
+            if (predicates != null) {
                 for (int i = 0; i < predicates.size(); i++) {
-                    Expr p = (Expr) predicates.get(i);
+                    final Expr p = predicates.get(i);
                     contextSet = result;
                     result = new NodeSet();
                     for (int j = 0; j < contextSet.size(); j++) {
-                        Element node = contextSet.getElement(j);
-                        if (p.eval(node, contextSet).booleanValue())
+                        final Element node = contextSet.getElement(j);
+                        if (p.eval(node, contextSet).booleanValue()) {
                             result.add(node);
+                        }
                     }
                 }
+            }
             return result;
         }
 
@@ -240,23 +240,28 @@ public class Path {
                 return null;
             case AXIS_CHILD:
                 String ns = null;
-                if (prefix == null)
-                    if (parent != null)
+                if (prefix == null) {
+                    if (parent != null) {
                         ns = parent.namespace;
-                    else
+                    } else {
                         ns = prefixMap.prefixToNs("");
-                else
+                    }
+                } else {
                     ns = prefixMap.prefixToNs(prefix);
-                if (ns == null)
+                }
+                if (ns == null) {
                     throw new JNCException(JNCException.PATH_CREATE_ERROR,
-                            "missing namespace for prefix: \"" + prefix + "\"");
-                Element elem = new Element(ns, name);
-                /* need to do createElem on predicates as well */
-                if (predicates != null)
+                            "missing namespace for prefix: \"" + prefix
+                                    + "\"");
+                }
+                final Element elem = new Element(ns, name);
+                // need to do createElem on predicates as well
+                if (predicates != null) {
                     for (int i = 0; i < predicates.size(); i++) {
-                        Expr expr = (Expr) predicates.get(i);
+                        final Expr expr = predicates.get(i);
                         expr.evalCreate(elem);
                     }
+                }
                 return elem;
             case AXIS_SELF:
 
@@ -270,6 +275,7 @@ public class Path {
         /**
          * Return the string representation of this LocationStep.
          */
+        @Override
         public String toString() {
             String s = "LocationStep{";
             switch (axis) {
@@ -288,12 +294,15 @@ public class Path {
             default:
                 s = s + "AXIS_UNKNOWN(" + axis + ")";
             }
-            if (prefix != null)
+            if (prefix != null) {
                 s = s + ",prefix=" + prefix;
-            if (name != null)
+            }
+            if (name != null) {
                 s = s + ",name=" + name;
-            if (predicates != null && predicates.size() > 0)
+            }
+            if (predicates != null && predicates.size() > 0) {
                 s = s + "," + predicates;
+            }
             s = s + "}";
             return s;
         }
@@ -302,8 +311,9 @@ public class Path {
          *
          */
         private void trace(String s) {
-            if (Element.debugLevel >= Element.DEBUG_LEVEL_LOCATIONSTEP)
+            if (Element.debugLevel >= Element.DEBUG_LEVEL_LOCATIONSTEP) {
                 System.err.println("*LocationStep: " + s);
+            }
         }
 
     }
@@ -343,10 +353,12 @@ public class Path {
             rval = rvalue;
 
             // eval sub expressions
-            if (lval instanceof Expr)
+            if (lval instanceof Expr) {
                 lval = ((Expr) lval).eval2(node, contextSet);
-            if (rval instanceof Expr)
+            }
+            if (rval instanceof Expr) {
                 rval = ((Expr) rval).eval(node, contextSet);
+            }
 
             // the type of lval and rval is now : String | Boolean | Integer
             switch (op) {
@@ -356,55 +368,63 @@ public class Path {
                 return node.getValueOfChild((String) lval);
             case OR:
                 // rvalue not evaluated if lval is 'true'
-                if (f_boolean(lval).booleanValue())
+                if (f_boolean(lval).booleanValue()) {
                     return new Boolean(true);
-                else
+                } else {
                     return f_boolean(rval);
+                }
             case AND:
                 // rvalue not evaluated if lval is 'false'
-                if (!f_boolean(lval).booleanValue())
+                if (!f_boolean(lval).booleanValue()) {
                     return new Boolean(false);
-                else
+                } else {
                     return f_boolean(rval);
+                }
             case EQ: // '='
             case NEQ: // '!='
-                if (isBoolean(lval))
+                if (isBoolean(lval)) {
                     rval = f_boolean(rval);
-                else if (isBoolean(rval))
+                } else if (isBoolean(rval)) {
                     lval = f_boolean(lval);
-                else if (isNumber(lval))
+                } else if (isNumber(lval)) {
                     rval = f_number(rval);
-                else if (isNumber(rval))
+                } else if (isNumber(rval)) {
                     lval = f_number(lval);
-                else {
+                } else {
                     lval = f_string(lval);
                     rval = f_string(rval);
                 }
-                if (op == EQ)
-                    if (compare(lval, rval) == 0)
+                if (op == EQ) {
+                    if (compare(lval, rval) == 0) {
                         return new Boolean(true);
-                    else
+                    } else {
                         return new Boolean(false);
-                else // op==NEQ
-                if (compare(lval, rval) != 0)
+                    }
+                } else // op==NEQ
+                if (compare(lval, rval) != 0) {
                     return new Boolean(true);
-                else
+                } else {
                     return new Boolean(false);
+                }
             case GT: // '>'
-                if (compare(f_number(lval), f_number(rval)) > 0)
+                if (compare(f_number(lval), f_number(rval)) > 0) {
                     return new Boolean(true);
+                }
                 return new Boolean(false);
             case GTE: // '>='
-                if (compare(f_number(lval), f_number(rval)) >= 0)
+                if (compare(f_number(lval), f_number(rval)) >= 0) {
                     return new Boolean(true);
+                }
                 return new Boolean(false);
             case LT: // '<'
-                if (compare(f_number(lval), f_number(rval)) < 0)
+                if (compare(f_number(lval), f_number(rval)) < 0) {
                     return new Boolean(true);
+                }
                 return new Boolean(false);
             case LTE: // '<='
-                if (compare(f_number(lval), f_number(rval)) <= 0)
+                if (compare(f_number(lval), f_number(rval)) <= 0) {
                     return new Boolean(true);
+                }
                 return new Boolean(false);
 
                 // FUNCTIONS
@@ -419,20 +439,15 @@ public class Path {
             case FUN_LAST:
                 return new Integer(contextSet.size());
             case FUN_COUNT:
-                NodeSet s = f_nodeSet(lval);
-                return new Integer(s.size());
+                return new Integer(f_nodeSet(lval).size());
+
                 // STRING FUNCTIONS:
             case FUN_CONCAT:
-                String s1 = f_string(lval);
-                String s2 = f_string(rval);
-                return s1 + s2;
+                return f_string(lval) + f_string(rval);
 
                 // BOOLEAN FUNCTIONS:
             case FUN_NOT:
-                if (f_boolean(lval).booleanValue())
-                    return new Boolean(false);
-                else
-                    return new Boolean(true);
+                return new Boolean(!f_boolean(lval).booleanValue());
             case FUN_TRUE:
                 return new Boolean(true);
             case FUN_FALSE:
@@ -454,168 +469,162 @@ public class Path {
 
         /** compare */
         private int compare(Object x, Object y) throws JNCException {
-            if ((x instanceof Boolean) && (y instanceof Boolean))
+            if ((x instanceof Boolean) && (y instanceof Boolean)) {
                 if (((Boolean) x).booleanValue() == ((Boolean) y)
-                        .booleanValue())
+                        .booleanValue()) {
                     return 0;
-                else
+                } else {
                     return -1;
-            if ((x instanceof Integer) && (y instanceof Integer))
+                }
+            }
+            if ((x instanceof Integer) && (y instanceof Integer)) {
                 return ((Integer) x).compareTo((Integer) y);
-            if (x instanceof Number)
+            }
+            if (x instanceof Number) {
                 return ((Float) x).compareTo(f_float(y));
-            if ((x instanceof String) && (y instanceof String))
-                if (((String) x).equals((String) y))
+            }
+            if ((x instanceof String) && (y instanceof String)) {
+                if (((String) x).equals(y)) {
                     return 0;
-                else
+                } else {
                     return -1;
-            if (x == null)
+                }
+            }
+            if (x == null) {
                 return -1;
-            if (y == null)
+            }
+            if (y == null) {
                 return +1;
+            }
             throw new JNCException(JNCException.PATH_ERROR,
                     "badarg to compare (not of same type): " + x + ", " + y);
         }
 
         private boolean isBoolean(Object x) {
-            if (x instanceof Boolean)
-                return true;
-            return false;
+            return (x instanceof Boolean);
         }
 
         private boolean isNumber(Object x) {
-            if (x instanceof Float)
-                return true;
-            if (x instanceof Integer)
-                return true;
-            return false;
+            return (x instanceof Float) || (x instanceof Integer);
         }
 
         /** boolean() function */
         private Boolean f_boolean(Object x) throws JNCException {
-            if (x instanceof Float)
-                if (((Float) x).floatValue() > 0
-                        || ((Float) x).floatValue() < 0)
-                    return new Boolean(true);
-                else
-                    return new Boolean(false);
-            if (x instanceof Integer)
-                if (((Integer) x).intValue() > 0
-                        || ((Integer) x).intValue() < 0)
-                    return new Boolean(true);
-                else
-                    return new Boolean(false);
-            if (x instanceof String)
-                if (((String) x).length() > 0)
-                    return new Boolean(true);
-                else
-                    return new Boolean(false);
-            if (x instanceof Boolean)
+            if (x instanceof Float) {
+                final float f = (Float) x;
+                return Boolean.valueOf(f > 0.000001 || f < 0.000001);
+            } else if (x instanceof Integer) {
+                final int n = (Integer) x;
+                return Boolean.valueOf(n != 0);
+            } else if (x instanceof String) {
+                return Boolean.valueOf(((String) x).length() > 0);
+            } else if (x instanceof Boolean) {
                 return (Boolean) x;
-            if (x == null)
+            } else if (x == null) {
                 return null;
+            }
             throw new JNCException(JNCException.PATH_ERROR,
                     "badarg to function boolean(): " + x);
         }
 
         /** number() function. */
         private Number f_number(Object x) throws JNCException {
-            if (x instanceof Float)
+            if (x instanceof Float) {
                 return (Float) x;
-            if (x instanceof Integer)
+            } else if (x instanceof Integer) {
                 return (Integer) x;
-            if (x instanceof Boolean)
-                if (((Boolean) x).booleanValue())
-                    return new Integer(1);
-                else
-                    return new Integer(0);
-            if (x instanceof String) {
-                String s = (String) x;
+            } else if (x instanceof Boolean) {
+                return new Integer((((Boolean) x).booleanValue()) ? 1 : 0);
+            } else if (x instanceof String) {
+                final String s = (String) x;
                 try {
                     return new Integer(s);
-                } catch (NumberFormatException e1) {
+                } catch (final NumberFormatException e1) {
                     try {
                         return new Float(s);
-                    } catch (NumberFormatException e2) {
+                    } catch (final NumberFormatException e2) {
                         return new Float(Float.NaN);
                     }
                 }
-            }
-            if (x instanceof NodeSet)
+            } else if (x instanceof NodeSet) {
                 return f_number(f_string(x));
-            if (x == null)
+            } else if (x == null) {
                 return null;
+            }
             throw new JNCException(JNCException.PATH_ERROR,
                     "badarg to function number(): " + x);
         }
 
         /** nodeset() function */
         private NodeSet f_nodeSet(Object x) throws JNCException {
-            if (x instanceof NodeSet)
+            if (x instanceof NodeSet) {
                 return (NodeSet) x;
-            if (x == null)
+            } else if (x == null) {
                 return null;
+            }
             throw new JNCException(JNCException.PATH_ERROR,
                     "badarg to function nodeset(): " + x);
         }
 
         /** neg. Unary minus "-x" */
         private Number neg(Object x) throws JNCException {
-            if (x instanceof Integer)
+            if (x instanceof Integer) {
                 return new Integer(-((Integer) x).intValue());
-            if (x instanceof Float)
+            } else if (x instanceof Float) {
                 return new Float(-((Float) x).floatValue());
+            }
             throw new JNCException(JNCException.PATH_ERROR,
                     "badarg to function neg(): " + x);
         }
 
         /** minus "x - y" */
         private Number minus(Number x, Number y) throws JNCException {
-            if ((x instanceof Integer) && (y instanceof Integer))
+            if ((x instanceof Integer) && (y instanceof Integer)) {
                 return new Integer(((Integer) x).intValue()
                         - ((Integer) y).intValue());
-            Float xf = f_float(x);
-            Float yf = f_float(y);
+            }
+            final Float xf = f_float(x);
+            final Float yf = f_float(y);
             return new Float(xf.floatValue() - yf.floatValue());
         }
 
         /** plus "x + y" */
         private Number plus(Number x, Number y) throws JNCException {
-            if ((x instanceof Integer) && (y instanceof Integer))
+            if ((x instanceof Integer) && (y instanceof Integer)) {
                 return new Integer(((Integer) x).intValue()
                         + ((Integer) y).intValue());
-            Float xf = f_float(x);
-            Float yf = f_float(y);
+            }
+            final Float xf = f_float(x);
+            final Float yf = f_float(y);
             return new Float(xf.floatValue() + yf.floatValue());
         }
 
         /** the float() function. */
         private Float f_float(Object x) throws JNCException {
-            if (x instanceof Float)
+            if (x instanceof Float) {
                 return (Float) x;
-            if (x instanceof Integer)
+            } else if (x instanceof Integer) {
                 return new Float(((Integer) x).floatValue());
-            if (x == null)
+            } else if (x == null) {
                 return null;
+            }
             throw new JNCException(JNCException.PATH_ERROR,
                     "badarg to function float(): " + x);
         }
 
         /** the string() function. */
         private String f_string(Object x) throws JNCException {
-            if (x instanceof Integer)
+            if (x instanceof Integer) {
                 return ((Integer) x).toString();
-            if (x instanceof Float)
+            } else if (x instanceof Float) {
                 return ((Float) x).toString();
-            if (x instanceof String)
+            } else if (x instanceof String) {
                 return (String) x;
-            if (x instanceof Boolean)
-                if (((Boolean) x).booleanValue())
-                    return new String("true");
-                else
-                    return new String("false");
-            if (x == null)
+            } else if (x instanceof Boolean) {
+                return new String(((Boolean) x) ? "true" : "false");
+            } else if (x == null) {
                 return null;
+            }
             return x.toString();
         }
 
@@ -630,10 +639,11 @@ public class Path {
             rval = rvalue;
 
             // eval sub expressions
-            if (lval instanceof Expr)
+            if (lval instanceof Expr) {
                 lval = ((Expr) lval).evalCreate(node);
-            // if (rval instanceof Expr)
-            // rval = ((Expr)rval).eval(node);
+                // if (rval instanceof Expr)
+                // rval = ((Expr)rval).eval(node);
+            }
 
             // the type of lval and rval is now : String | Boolean | Integer
             switch (op) {
@@ -641,7 +651,7 @@ public class Path {
                 // create child value, inherit namnespace from parent
                 // TODO: match out prefix possible here?
                 String name = (String) lval;
-                String ns = node.namespace;
+                final String ns = node.namespace;
                 Element elem = new Element(ns, name);
                 node.addChild(elem);
                 return elem;
@@ -655,7 +665,7 @@ public class Path {
                     return elem;
                 }
                 if (lval instanceof Attribute) {
-                    Attribute attr = (Attribute) lval;
+                    final Attribute attr = (Attribute) lval;
                     attr.setValue(f_string(rval));
                     return attr;
                 }
@@ -670,6 +680,7 @@ public class Path {
         /**
          * Returns a string representation of this Expr.
          */
+        @Override
         public String toString() {
             switch (op) {
             case AND:
@@ -727,16 +738,14 @@ public class Path {
          *
          */
         private void trace(String s) {
-            if (Element.debugLevel >= Element.DEBUG_LEVEL_EXPR)
+            if (Element.debugLevel >= Element.DEBUG_LEVEL_EXPR) {
                 System.err.println("*Expr: " + s);
+            }
         }
 
     }
 
-    /**
-     * ------------------------------------------------------------ Parser
-     * ------------------------------------------------------------
-     */
+    /* Parser */
 
     /** OP codes in Expr (Predicate) */
     static final int AND = 1;
@@ -768,7 +777,7 @@ public class Path {
      * 
      */
     ArrayList<LocationStep> parse(TokenList tokens) throws JNCException {
-        ArrayList<LocationStep> steps = new ArrayList<LocationStep>();
+        final ArrayList<LocationStep> steps = new ArrayList<LocationStep>();
         try {
             Token tok1, tok2, tok3, tok4, tok5;
             LocationStep step;
@@ -777,26 +786,31 @@ public class Path {
             while (sz > 0) {
                 trace("parse(): " + tokens);
                 /* peek at tokens */
-                if (sz >= 1)
+                if (sz >= 1) {
                     tok1 = tokens.getToken(0);
-                else
+                } else {
                     tok1 = new Token();
-                if (sz >= 2)
+                }
+                if (sz >= 2) {
                     tok2 = tokens.getToken(1);
-                else
+                } else {
                     tok2 = new Token();
-                if (sz >= 3)
+                }
+                if (sz >= 3) {
                     tok3 = tokens.getToken(2);
-                else
+                } else {
                     tok3 = new Token();
-                if (sz >= 4)
+                }
+                if (sz >= 4) {
                     tok4 = tokens.getToken(3);
-                else
+                } else {
                     tok4 = new Token();
-                if (sz >= 5)
+                }
+                if (sz >= 5) {
                     tok5 = tokens.getToken(4);
-                else
+                } else {
                     tok5 = new Token();
+                }
 
                 /* "/" (root) */
                 if (tok1.type == SLASH) {
@@ -808,8 +822,8 @@ public class Path {
                 else if (tok1.type == ATOM && tok2.type == COLONCOLON
                         && tok3.type == ATOM && tok4.type == COLON
                         && tok5.type == ATOM) {
-                    step = new LocationStep(parseAxis(tok1.value), tok3.value,
-                            tok5.value);
+                    step = new LocationStep(parseAxis(tok1.value),
+                            tok3.value, tok5.value);
                     steps.add(step);
                     tokens.removeRange(0, 5);
                     parsePredicates(tokens, step);
@@ -825,7 +839,8 @@ public class Path {
                 /* PREFIX:TAG */
                 else if (tok1.type == ATOM && tok2.type == COLON
                         && tok3.type == ATOM) {
-                    step = new LocationStep(AXIS_CHILD, tok1.value, tok3.value);
+                    step = new LocationStep(AXIS_CHILD, tok1.value,
+                            tok3.value);
                     steps.add(step);
                     tokens.removeRange(0, 3);
                     parsePredicates(tokens, step);
@@ -855,11 +870,12 @@ public class Path {
                 // trace("parse(): sz= "+tokens.size());
                 sz = tokens.size();
             }
-        } catch (JNCException conf_exception) {
-            throw conf_exception;
-        } catch (Exception e) {
-            // trace("got exception: "+e);
-            throw new JNCException(JNCException.PATH_ERROR, "parse error: " + e);
+        } catch (final Exception e) {
+            if (e instanceof JNCException) {
+                throw (JNCException) e;
+            }
+            final int errorCode = JNCException.PATH_ERROR;
+            throw new JNCException(errorCode, "parse error: " + e);
         }
         trace("parse() -> " + steps);
         return steps;
@@ -869,10 +885,12 @@ public class Path {
      * check axis
      */
     int parseAxis(String str) throws JNCException {
-        if (str.equals("child"))
+        if (str.equals("child")) {
             return AXIS_CHILD;
-        if (str.equals("self"))
+        }
+        if (str.equals("self")) {
             return AXIS_SELF;
+        }
         throw new JNCException(JNCException.PATH_ERROR,
                 "unsupported or unknown axis: " + str);
     }
@@ -883,42 +901,41 @@ public class Path {
     void parsePredicates(TokenList tokens, LocationStep step)
             throws JNCException {
         trace("parsePredicates(): " + tokens);
-        int sz = tokens.size();
+        final int sz = tokens.size();
         if (sz >= 1) {
             Token tok1 = tokens.getToken(0);
             if (tok1.type == LPRED) {
                 /* search for matching RPRED */
                 int i = 1;
                 try {
-                    while ((tokens.getToken(i)).type != RPRED)
+                    while ((tokens.getToken(i)).type != RPRED) {
                         i++;
-                } catch (Exception e) {
+                    }
+                } catch (final Exception e) {
                     throw new JNCException(JNCException.PATH_ERROR,
                             "unmatched '[' in expression");
                 }
-                if (step.predicates == null)
+                if (step.predicates == null) {
                     step.predicates = new ArrayList<Expr>();
+                }
                 /* search for sequence */
                 int start = 1;
                 for (int j = 1; (j + 1) < i; j++) {
                     tok1 = tokens.getToken(j);
-                    Token tok2 = tokens.getToken(j + 1);
+                    final Token tok2 = tokens.getToken(j + 1);
                     if (tok1.type == COMMA && tok2.type != COMMA) {
-                        Expr pred = parsePredicate(tokens, start, j);
+                        final Expr pred = parsePredicate(tokens, start, j);
                         step.predicates.add(pred);
                         start = j + 1;
                     }
                 }
-                Expr pred = parsePredicate(tokens, start, i);
+                final Expr pred = parsePredicate(tokens, start, i);
                 step.predicates.add(pred);
                 tokens.removeRange(0, i + 1);
                 parsePredicates(tokens, step);
             } else if (tok1.type == SLASH) {
                 tokens.remove(0);
-                return;
-            } else if (tok1.type == SLASHSLASH) {
-                return;
-            } else {
+            } else if (tok1.type != SLASHSLASH) {
                 parseError(tokens);
             }
         }
@@ -929,39 +946,43 @@ public class Path {
      * Parses a predicate expression. must consume all tokens from 'from' to
      * 'to'.
      */
-    Expr parsePredicate(TokenList tokens, int from, int to) throws JNCException {
+    Expr parsePredicate(TokenList tokens, int from, int to)
+            throws JNCException {
         Token tok1, tok2, tok3;
-        int i = from;
+        final int i = from;
         while (i < to) {
             /* peek at tokens */
             tok1 = tokens.getToken(i);
-            if ((i + 1) < to)
+            if ((i + 1) < to) {
                 tok2 = tokens.getToken(i + 1);
-            else
+            } else {
                 tok2 = null;
-            if ((i + 2) < to)
+            }
+            if ((i + 2) < to) {
                 tok3 = tokens.getToken(i + 2);
-            else
+            } else {
                 tok3 = null;
+            }
 
-            trace("parsePredicate(): from=" + from + " to=" + to + " [" + tok1
-                    + "," + tok2 + "," + tok3 + ", ...]");
+            trace("parsePredicate(): from=" + from + " to=" + to + " ["
+                    + tok1 + "," + tok2 + "," + tok3 + ", ...]");
 
             /* ATOM = */
             if (tok1.type == ATOM && tok2.type == COMPARE && tok3 != null) {
-                Object rexpr = parsePredicate_rvalue(tokens, i + 2, to);
+                final Object rexpr = parsePredicate_rvalue(tokens, i + 2, to);
                 return new Expr(tok2.op, new Expr(CHILD_VALUE, tok1.value),
                         rexpr);
             }
             /* ATTR = */
-            else if (tok1.type == ATTR && tok2.type == COMPARE && tok3 != null) {
-                Object rexpr = parsePredicate_rvalue(tokens, i + 2, to);
+            else if (tok1.type == ATTR && tok2.type == COMPARE
+                    && tok3 != null) {
+                final Object rexpr = parsePredicate_rvalue(tokens, i + 2, to);
                 return new Expr(tok2.op, new Expr(ATTR_VALUE, tok1.value),
                         rexpr);
             }
-            /* It's a parse error */
-            else
+            /* It's a parse error */else {
                 parseError(tokens, from, to);
+            }
         }
         return null;
     }
@@ -973,48 +994,42 @@ public class Path {
     Object parsePredicate_rvalue(TokenList tokens, int from, int to)
             throws JNCException {
         Token tok1, tok2, tok3;
-        int i = from;
+        final int i = from;
         while (i < to) {
             /* peek at tokens */
             tok1 = tokens.getToken(i);
-            if ((i + 1) < to)
+            if ((i + 1) < to) {
                 tok2 = tokens.getToken(i + 1);
-            else
+            } else {
                 tok2 = null;
-            if ((i + 2) < to)
+            }
+            if ((i + 2) < to) {
                 tok3 = tokens.getToken(i + 2);
-            else
+            } else {
                 tok3 = null;
+            }
 
-            trace("parsePredicate_rvalue(): from=" + from + " to=" + to + " ["
-                    + tok1 + "," + tok2 + "," + tok3 + ", ...]");
+            trace("parsePredicate_rvalue(): from=" + from + " to=" + to
+                    + " [" + tok1 + "," + tok2 + "," + tok3 + ", ...]");
 
-            /* ATOM */
             if (tok1.type == ATOM && tok2 == null) {
                 return new Expr(CHILD_VALUE, tok1.value);
-            }
-            /* ATTR */
-            else if (tok1.type == ATTR && tok2 == null) {
+            } else if (tok1.type == ATTR && tok2 == null) {
                 return new Expr(ATTR_VALUE, tok1.value);
-            }
-            /* STRING */
-            else if (tok1.type == STRING && tok2 == null) {
+            } else if (tok1.type == STRING && tok2 == null) {
+                return tok1.value;
+            } else if (tok1.type == NUMBER && tok2 == null) {
                 return tok1.value;
             }
-            /* NUMBER */
-            else if (tok1.type == NUMBER && tok2 == null) {
-                return tok1.value;
-            }
-            /* It's a parse error */
-            else
+            else {
                 parseError(tokens, from, to);
+            }
         }
         return null;
     }
 
     /**
      * Throws a parse error exception.
-     * 
      */
     void parseError(TokenList tokens) throws JNCException {
         /* show 5 next tokens */
@@ -1023,21 +1038,19 @@ public class Path {
 
     void parseError(TokenList tokens, int from, int to) throws JNCException {
         String errStr = "parse error: \"";
-        int sz = tokens.size();
+        final int sz = tokens.size();
         for (int i = from; i < to; i++) {
-            if (i < sz)
+            if (i < sz) {
                 errStr = errStr + tokens.getToken(i).value;
-            else
+            } else {
                 break;
+            }
         }
         errStr = errStr + "...\"";
         throw new JNCException(JNCException.PATH_ERROR, errStr);
     }
 
-    /**
-     * ------------------------------------------------------------ Tokenizer
-     * ------------------------------------------------------------
-     */
+    /* Tokenizer */
 
     /** Tokens */
     static final int SLASH = 1;
@@ -1066,19 +1079,22 @@ public class Path {
         private static final long serialVersionUID = 1L;
 
         public Token getToken(int i) {
-            return (Token) super.get(i);
+            return super.get(i);
         }
 
+        @Override
         public void removeRange(int from, int to) {
             super.removeRange(from, to);
         }
 
+        @Override
         public String toString() {
             String s = "TokenList[";
             boolean comma = false;
             for (int i = 0; i < size(); i++) {
-                if (comma)
+                if (comma) {
                     s = s + ",";
+                }
                 s = s + getToken(i);
                 comma = true;
             }
@@ -1117,6 +1133,7 @@ public class Path {
         String value;
         Number number;
 
+        @Override
         public String toString() {
             switch (type) {
             case SLASH:
@@ -1163,17 +1180,18 @@ public class Path {
      * Returns a TokenList (ArrayList) of Tokens.
      */
     TokenList tokenize(String s) throws JNCException {
-        TokenList tokens = new TokenList();
-        byte[] buf = s.getBytes();
+        final TokenList tokens = new TokenList();
+        final byte[] buf = s.getBytes();
         byte curr, next = 0;
         int i = 0, j = 0;
 
         while (i < s.length()) {
 
-            if ((i + 1) < buf.length)
+            if ((i + 1) < buf.length) {
                 next = buf[i + 1];
-            else
+            } else {
                 next = 0;
+            }
             curr = buf[i];
             if (curr == ' ' || curr == '\t' || curr == '\n') {
                 // whitespace - ignore
@@ -1188,13 +1206,14 @@ public class Path {
                                 || (buf[j] >= '0' && buf[j] <= '9')
                                 || (buf[j] == '-') || (buf[j] == '_')
                                 || (buf[j] == '\\') || escape)) {
-                    if (buf[j] == '\\')
+                    if (buf[j] == '\\') {
                         escape = true;
-                    else if (escape)
+                    } else if (escape) {
                         escape = false;
+                    }
                     j++;
                 }
-                String newToken = new String(buf, i, j - i);
+                final String newToken = new String(buf, i, j - i);
                 tokens.add(new Token(ATOM, newToken.replaceAll("\\\\", "")));
                 i = j;
             } else if (curr == '@'
@@ -1206,43 +1225,50 @@ public class Path {
                         && ((buf[j] >= 'a' && buf[j] <= 'z')
                                 || (buf[j] >= 'A' && buf[j] <= 'Z')
                                 || (buf[j] >= '0' && buf[j] <= '9')
-                                || (buf[j] == '-') || (buf[j] == '_')))
+                                || (buf[j] == '-') || (buf[j] == '_'))) {
                     j++;
+                }
                 tokens.add(new Token(ATTR, new String(buf, i, j - i)));
                 i = j;
             } else if (curr == '\'') {
                 i++;
                 j = i;
-                while (j < buf.length && buf[j] != '\'')
+                while (j < buf.length && buf[j] != '\'') {
                     j++;
-                if (j == buf.length)
+                }
+                if (j == buf.length) {
                     throw new JNCException(JNCException.PATH_ERROR,
                             "unterminated value: "
                                     + new String(buf, i, buf.length - i));
+                }
                 tokens.add(new Token(STRING, new String(buf, i, j - i)));
                 i = j + 1;
             } else if (curr == '\"') {
                 i++;
                 j = i;
-                while (j < buf.length && buf[j] != '\"')
+                while (j < buf.length && buf[j] != '\"') {
                     j++;
-                if (j == buf.length)
+                }
+                if (j == buf.length) {
                     throw new JNCException(JNCException.PATH_ERROR,
                             "unterminated value: "
                                     + new String(buf, i, buf.length - i));
+                }
                 tokens.add(new Token(STRING, new String(buf, i, j - i)));
                 i = j + 1;
             } else if (curr >= '0' && curr <= '9') {
                 j = i + 1;
-                while (j < buf.length && (buf[j] >= '0' && buf[j] <= '9'))
+                while (j < buf.length && (buf[j] >= '0' && buf[j] <= '9')) {
                     j++;
+                }
                 String value;
                 Number number;
                 if ((j + 1) < buf.length && buf[j] == '.'
                         && (buf[j + 1] >= '0' && buf[j + 1] <= '9')) { // float
                     j++;
-                    while (j < buf.length && (buf[j] >= '0' && buf[j] <= '9'))
+                    while (j < buf.length && (buf[j] >= '0' && buf[j] <= '9')) {
                         j++;
+                    }
                     value = new String(buf, i, j - i);
                     number = new Float(value);
                 } else {
@@ -1266,22 +1292,25 @@ public class Path {
                     if (next == '/') {
                         tokens.add(new Token(SLASHSLASH, "//"));
                         i++;
-                    } else
+                    } else {
                         tokens.add(new Token(SLASH, "/"));
+                    }
                     break;
                 case ':':
                     if (next == ':') {
                         tokens.add(new Token(COLONCOLON, "::"));
                         i++;
-                    } else
+                    } else {
                         tokens.add(new Token(COLON, ":"));
+                    }
                     break;
                 case '.':
                     if (next == '.') {
                         tokens.add(new Token(DOTDOT, ".."));
                         i++;
-                    } else
+                    } else {
                         tokens.add(new Token(DOT, "."));
+                    }
                     break;
                 case ',':
                     tokens.add(new Token(COMMA, ","));
@@ -1298,22 +1327,25 @@ public class Path {
                     } else if (next == '<') {
                         tokens.add(new Token(COMPARE, LTE, "<="));
                         i++;
-                    } else
+                    } else {
                         tokens.add(new Token(COMPARE, EQ, "="));
+                    }
                     break;
                 case '>':
                     if (next == '=') {
                         tokens.add(new Token(COMPARE, GTE, ">="));
                         i++;
-                    } else
+                    } else {
                         tokens.add(new Token(COMPARE, GT, ">"));
+                    }
                     break;
                 case '<':
                     if (next == '=') {
                         tokens.add(new Token(COMPARE, LTE, "<="));
                         i++;
-                    } else
+                    } else {
                         tokens.add(new Token(COMPARE, LT, "="));
+                    }
                     break;
                 default:
                     throw new JNCException(JNCException.PATH_ERROR,
@@ -1326,32 +1358,26 @@ public class Path {
         return tokens;
     }
 
-    /**
-     * ------------------------------------------------------------ help
-     * functions ------------------------------------------------------------
-     */
+    /* help functions */
 
     /**
      * Returns a string representation of this Path. It's a parse tree.
      */
+    @Override
     public String toString() {
-        String s = "Path[";
-        boolean comma = false;
-        for (int i = 0; i < locationSteps.size(); i++) {
-            if (comma)
-                s = s + ",";
-            s = s + locationSteps.get(i);
+        StringBuffer s = new StringBuffer();
+        s.append("Path[");
+        for (LocationStep lstep : locationSteps) {
+            s.append(lstep);
         }
-        s = s + "]";
-        return s;
+        s.append("]");
+        return s.toString();
     }
 
-    /**
-     *
-     */
     private static void trace(String s) {
-        if (Element.debugLevel >= Element.DEBUG_LEVEL_PATH)
+        if (Element.debugLevel >= Element.DEBUG_LEVEL_PATH) {
             System.err.println("*Path: " + s);
+        }
     }
 
 }

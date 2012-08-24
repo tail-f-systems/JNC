@@ -11,7 +11,6 @@
 
 package com.tailf.jnc;
 
-
 /**
  * Implements the built-in YANG data type "boolean".
  * 
@@ -23,7 +22,7 @@ public class YangBoolean extends YangBaseType<Boolean> {
 
     /**
      * Creates a YangBoolean object from a String.
-     *
+     * 
      * @param s The string.
      * @throws YangException If value is not one of "true" or "false".
      */
@@ -53,12 +52,13 @@ public class YangBoolean extends YangBaseType<Boolean> {
     @Override
     protected Boolean fromString(String s) throws YangException {
         s = Utils.wsCollapse(s);
-        if (s.equals("true"))
+        if (s.equals("true")) {
             return true;
-        else if (s.equals("false"))
+        } else if (s.equals("false")) {
             return false;
-        else
+        } else {
             throw new YangException(YangException.BAD_VALUE, this);
+        }
     }
 
     /**
@@ -79,9 +79,10 @@ public class YangBoolean extends YangBaseType<Boolean> {
     public boolean canEqual(Object obj) {
         return obj instanceof YangBoolean;
     }
-    
+
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangBaseType#cloneShallow()
      */
     @Override

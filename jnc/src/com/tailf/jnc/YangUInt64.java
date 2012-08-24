@@ -13,7 +13,6 @@ package com.tailf.jnc;
 
 import java.math.BigInteger;
 
-
 /**
  * Implements the built-in YANG data type "uint64".
  * 
@@ -28,7 +27,7 @@ public class YangUInt64 extends YangBaseInt<BigInteger> {
      * 
      * @param s The string.
      * @throws YangException If value could not be parsed from s or if it is
-     *                        negative or larger than 18446744073709551615.
+     *             negative or larger than 18446744073709551615.
      */
     public YangUInt64(String s) throws YangException {
         super(s);
@@ -42,7 +41,7 @@ public class YangUInt64 extends YangBaseInt<BigInteger> {
      * 
      * @param n The initial value of the new YangUInt64 object.
      * @throws YangException If value is negative or if it is larger than
-     *                        18446744073709551615.
+     *             18446744073709551615.
      */
     public YangUInt64(Number n) throws YangException {
         super(Utils.bigDecimalValueOf(n).toBigInteger());
@@ -54,28 +53,30 @@ public class YangUInt64 extends YangBaseInt<BigInteger> {
      * Sets the value of this object using a Number.
      * 
      * @param n The new value to set.
-     * @throws YangException If an invariant was broken during assignment or
-     *                        if the number has a non-zero fractional part.
+     * @throws YangException If an invariant was broken during assignment or if
+     *             the number has a non-zero fractional part.
      */
     public void setValue(Number n) throws YangException {
         try {
             super.setValue(Utils.bigDecimalValueOf(n).toBigIntegerExact());
-        } catch (ArithmeticException e) {
+        } catch (final ArithmeticException e) {
             YangException.throwException(true, e);
         }
     }
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.yang.YangInt#parse(java.lang.String)
      */
     @Override
     protected BigInteger decode(String s) throws NumberFormatException {
         return new BigInteger(s);
     }
-    
+
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangBaseType#cloneShallow()
      */
     @Override

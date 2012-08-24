@@ -11,9 +11,10 @@
 
 package com.tailf.jnc;
 
-import java.io.IOException;
-import ch.ethz.ssh2.Connection;
 import java.io.File;
+import java.io.IOException;
+
+import ch.ethz.ssh2.Connection;
 
 /**
  * A SSH NETCONF connection class. Can be used whenever {@link NetconfSession}
@@ -36,8 +37,7 @@ public class SSHConnection {
      * By default we connect to the IANA registered port for NETCONF which is
      * 830
      * 
-     * @param host
-     *            Host or IP address to connect to
+     * @param host Host or IP address to connect to
      */
 
     public SSHConnection(String host) throws IOException, JNCException {
@@ -48,10 +48,8 @@ public class SSHConnection {
      * This method establishes an SSH connection to a host, once the connection
      * is established it must be authenticated.
      * 
-     * @param host
-     *            Host name.
-     * @param port
-     *            Port number to connect to.
+     * @param host Host name.
+     * @param port Port number to connect to.
      */
     public SSHConnection(String host, int port) throws IOException,
             JNCException {
@@ -62,10 +60,8 @@ public class SSHConnection {
      * This method establishes an SSH connection to a host, once the connection
      * is established it must be authenticated.
      * 
-     * @param host
-     *            Host name.
-     * @param port
-     *            Port number to connect to.
+     * @param host Host name.
+     * @param port Port number to connect to.
      * @param connectTimeout
      */
     public SSHConnection(String host, int port, int connectTimeout)
@@ -79,27 +75,23 @@ public class SSHConnection {
      * This method establishes an SSH connection to a host, once the connection
      * is established it must be authenticated.
      * 
-     * @param host
-     *            Host name.
-     * @param port
-     *            Port number to connect to.
-     * @param connectTimeout
-     *            Connection timeout timer. Connect the underlying TCP socket to
-     *            the server with the given timeout value (non-negative, in
-     *            milliseconds). Zero means no timeout.
-     * @param kexTimeout
-     *            Key exchange timeout timer. Timeout for complete connection
-     *            establishment (non-negative, in milliseconds). Zero means no
-     *            timeout. The timeout counts until the first key-exchange round
-     *            has finished.
-     * @throws IOException
-     *             In case of a timeout (either connectTimeout or kexTimeout) a
-     *             SocketTimeoutException is thrown.
+     * @param host Host name.
+     * @param port Port number to connect to.
+     * @param connectTimeout Connection timeout timer. Connect the underlying
+     *            TCP socket to the server with the given timeout value
+     *            (non-negative, in milliseconds). Zero means no timeout.
+     * @param kexTimeout Key exchange timeout timer. Timeout for complete
+     *            connection establishment (non-negative, in milliseconds).
+     *            Zero means no timeout. The timeout counts until the first
+     *            key-exchange round has finished.
+     * @throws IOException In case of a timeout (either connectTimeout or
+     *             kexTimeout) a SocketTimeoutException is thrown.
      *             <p>
-     *             An exception may also be thrown if the connection was already
-     *             successfully connected (no matter if the connection broke in
-     *             the mean time) and you invoke <code>connect()</code> again
-     *             without having called {@link #close()} first.
+     *             An exception may also be thrown if the connection was
+     *             already successfully connected (no matter if the connection
+     *             broke in the mean time) and you invoke
+     *             <code>connect()</code> again without having called
+     *             {@link #close()} first.
      */
     public SSHConnection(String host, int port, int connectTimeout,
             int kexTimeout) throws IOException, JNCException {
@@ -108,8 +100,8 @@ public class SSHConnection {
     }
 
     /**
-     * @return the underlying Ganymed connection object This is required if wish
-     *         to use the addConnectionMonitor() method in the ganymed
+     * @return the underlying Ganymed connection object This is required if
+     *         wish to use the addConnectionMonitor() method in the ganymed
      *         Connection class.
      * 
      */
@@ -132,16 +124,15 @@ public class SSHConnection {
     /**
      * Authenticate with regular username pass.
      * 
-     * @param user
-     *            User name.
-     * @param password
-     *            Password.
+     * @param user User name.
+     * @param password Password.
      * 
      **/
     public void authenticateWithPassword(String user, String password)
             throws IOException, JNCException {
-        if (!connection.authenticateWithPassword(user, password))
+        if (!connection.authenticateWithPassword(user, password)) {
             throw new JNCException(JNCException.AUTH_FAILED, this);
+        }
     }
 
     /**
@@ -149,22 +140,20 @@ public class SSHConnection {
      * ganymed docs for full explanation, use null for password if the key
      * doesn't have a passphrase.
      * 
-     * @param user
-     *            User name.
-     * @param pemFile
-     *            Fila name.
-     * @param password
-     *            Password.
+     * @param user User name.
+     * @param pemFile Fila name.
+     * @param password Password.
      **/
     public void authenticateWithPublicKeyFile(String user, File pemFile,
             String password) throws IOException, JNCException {
         try {
-            if (!connection.authenticateWithPublicKey(user, pemFile, password)) {
+            if (!connection
+                    .authenticateWithPublicKey(user, pemFile, password)) {
                 throw new JNCException(JNCException.AUTH_FAILED, this);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new JNCException(JNCException.AUTH_FAILED, this);
         }
     }
@@ -173,12 +162,9 @@ public class SSHConnection {
      * Authenticate with a private key. See ganymed docs for full explanation,
      * use null for password if the key doesn't have a passphrase.
      * 
-     * @param user
-     *            User name.
-     * @param pemPrivateKey
-     *            Private key.
-     * @param pass
-     *            Passphrase.
+     * @param user User name.
+     * @param pemPrivateKey Private key.
+     * @param pass Passphrase.
      **/
     public void authenticateWithPublicKey(String user, char[] pemPrivateKey,
             String pass) throws IOException, JNCException {

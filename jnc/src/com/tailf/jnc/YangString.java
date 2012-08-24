@@ -11,7 +11,6 @@
 
 package com.tailf.jnc;
 
-
 /**
  * Implements the built-in YANG data type "string".
  * 
@@ -35,8 +34,7 @@ public class YangString extends YangBaseString {
      * Compares type of obj with this object to see if they can be equal.
      * 
      * @param obj Object to compare type with.
-     * @return true if obj is an instance of YangString;
-     *         false otherwise.
+     * @return true if obj is an instance of YangString; false otherwise.
      */
     @Override
     public boolean canEqual(Object obj) {

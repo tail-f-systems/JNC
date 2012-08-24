@@ -28,6 +28,7 @@ public class YangException extends JNCException {
     public static final int BAD_VALUE = -1026;
     public static final int BAD_SESSION_NAME = -1032;
 
+    @Override
     public String toString() {
         switch (errorCode) {
         case ELEMENT_MISSING:
@@ -50,8 +51,9 @@ public class YangException extends JNCException {
      */
     public static void throwException(boolean fail, Object o)
             throws YangException {
-        if (fail)
+        if (fail) {
             throw new YangException(BAD_VALUE, o);
+        }
     }
-    
+
 }

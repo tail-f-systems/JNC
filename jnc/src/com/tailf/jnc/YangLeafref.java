@@ -11,7 +11,6 @@
 
 package com.tailf.jnc;
 
-
 /**
  * Implements the built-in YANG data type "leafref".
  * 
@@ -20,7 +19,7 @@ package com.tailf.jnc;
 public class YangLeafref extends YangBaseType<Element> {
 
     private static final long serialVersionUID = 1L;
-    
+
     /**
      * Creates a YangLeafref object from a String, formatted as described in
      * {@link YangLeafref#fromString(String)}.
@@ -31,7 +30,7 @@ public class YangLeafref extends YangBaseType<Element> {
     public YangLeafref(String s) throws YangException {
         super(s);
     }
-    
+
     /**
      * Creates a YangLeafref object from an Element.
      * 
@@ -41,11 +40,11 @@ public class YangLeafref extends YangBaseType<Element> {
     public YangLeafref(Element leaf) throws YangException {
         super(leaf);
     }
-    
+
     /**
-     * Creates a YangLeafref object from three strings: Leaf namespace, prefix and
-     * argument/identifier.
-     *
+     * Creates a YangLeafref object from three strings: Leaf namespace, prefix
+     * and argument/identifier.
+     * 
      * @param ns Leaf module namespace
      * @param prefix Leaf module prefix
      * @param id Leaf argument/identifier
@@ -63,14 +62,14 @@ public class YangLeafref extends YangBaseType<Element> {
      * prefix and argument/identifier.
      * 
      * @param s The string.
-     * @return  An Element representing the referenced Leaf, parsed from s.
+     * @return An Element representing the referenced Leaf, parsed from s.
      * @throws YangException If s is improperly formatted.
      */
     @Override
     protected Element fromString(String s) throws YangException {
-        String[] ss = s.split(" ");
+        final String[] ss = s.split(" ");
         if (ss.length == 3) {
-            Element leaf = new Element(ss[0], ss[2]);
+            final Element leaf = new Element(ss[0], ss[2]);
             leaf.setPrefix(new Prefix(ss[1], ss[0]));
             return leaf;
         } else {
@@ -80,15 +79,17 @@ public class YangLeafref extends YangBaseType<Element> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangBaseType#canEqual(java.lang.Object)
      */
     @Override
     public boolean canEqual(Object obj) {
         return obj instanceof YangLeafref;
     }
-    
+
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangBaseType#cloneShallow()
      */
     @Override

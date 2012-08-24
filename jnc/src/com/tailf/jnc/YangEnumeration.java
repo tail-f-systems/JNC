@@ -11,7 +11,6 @@
 
 package com.tailf.jnc;
 
-
 /**
  * Implements the built-in YANG data type "enumeration".
  * <p>
@@ -51,8 +50,8 @@ public class YangEnumeration extends YangBaseString {
      * Compares type of obj with this object to see if they can be equal.
      * 
      * @param obj Object to compare type with.
-     * @return true if obj is an instance of YangEnumeration or java.lang.String;
-     *         false otherwise.
+     * @return true if obj is an instance of YangEnumeration or
+     *         java.lang.String; false otherwise.
      */
     @Override
     public boolean canEqual(Object obj) {

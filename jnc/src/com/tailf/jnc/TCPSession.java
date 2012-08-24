@@ -11,24 +11,24 @@
 
 package com.tailf.jnc;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.StringWriter;
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
  * A TCP NETCONF transport class. Can be used whenever {@link NetconfSession}
  * intends to use TCP for its transport.
  * <p>
- * <b>Note:</b> TCP is not a standardized way to connect to a NETCONF device. It
- * will only work when connecting to a ConfD agent and should only be used for
- * testing. Use {@link SSHSession} instead.
+ * <b>Note:</b> TCP is not a standardized way to connect to a NETCONF device.
+ * It will only work when connecting to a ConfD agent and should only be used
+ * for testing. Use {@link SSHSession} instead.
  * <p>
  * Example:
  * 
@@ -43,12 +43,12 @@ import java.util.ArrayList;
  */
 public class TCPSession implements Transport {
 
-    private Socket socket;
+    private final Socket socket;
 
     private BufferedReader in = null;
     private PrintWriter out = null;
 
-    private ArrayList<IOSubscriber> ioSubscribers;
+    private final ArrayList<IOSubscriber> ioSubscribers;
 
     /**
      * Creates a new TCP session object. This only works towards ConfD agent
@@ -63,12 +63,13 @@ public class TCPSession implements Transport {
             throws IOException, UnknownHostException, JNCException {
         socket = new Socket(host, port);
         // initStreams
-        InputStream is = socket.getInputStream();
-        OutputStream os = socket.getOutputStream();
+        final InputStream is = socket.getInputStream();
+        final OutputStream os = socket.getOutputStream();
         in = new BufferedReader(new InputStreamReader(is));
         out = new PrintWriter(os, false);
-        String header = "[" + username + ";" + host + ";tcp;" + uid + ";" + gid
-                + ";" + suplgids + ";" + dir + ";" + groups + ";]";
+        final String header = "[" + username + ";" + host + ";tcp;" + uid
+                + ";" + gid + ";" + suplgids + ";" + dir + ";" + groups
+                + ";]";
         trace("sending: " + header);
         out.println(header);
         ioSubscribers = new ArrayList<IOSubscriber>();
@@ -85,8 +86,9 @@ public class TCPSession implements Transport {
      */
     public TCPSession(TCPConnection conn) throws IOException,
             UnknownHostException, JNCException {
-        if (conn.hasSession == true)
+        if (conn.hasSession == true) {
             throw new IOException("multiple session not supported");
+        }
         conn.hasSession = true;
         socket = conn.socket;
 
@@ -99,6 +101,7 @@ public class TCPSession implements Transport {
     /**
      * Tell whether this transport is ready to be read.
      */
+    @Override
     public boolean ready() throws IOException {
         return in.ready();
     }
@@ -108,8 +111,9 @@ public class TCPSession implements Transport {
      * <em>]]&gt;]]&gt;</em> character sequence is used to separate multiple
      * replies.
      */
+    @Override
     public StringBuffer readOne() throws IOException {
-        StringWriter wr = new StringWriter();
+        final StringWriter wr = new StringWriter();
         int ch;
         while (true) {
             ch = in.read();
@@ -132,21 +136,26 @@ public class TCPSession implements Transport {
                                     // ']]>]]>' received
                                     // trace("]]>]]> received");
                                     for (int i = 0; i < ioSubscribers.size(); i++) {
-                                        IOSubscriber sub = (IOSubscriber) ioSubscribers
+                                        final IOSubscriber sub = ioSubscribers
                                                 .get(i);
                                         sub.inputFlush("]]>]]");
                                     }
                                     return wr.getBuffer();
-                                } else
+                                } else {
                                     subInputChar(wr, "]]>]]");
-                            } else
+                                }
+                            } else {
                                 subInputChar(wr, "]]>]");
-                        } else
+                            }
+                        } else {
                             subInputChar(wr, "]]>");
-                    } else
+                        }
+                    } else {
                         subInputChar(wr, "]]");
-                } else
+                    }
+                } else {
                     subInputChar(wr, "]");
+                }
             }
             subInputChar(wr, ch);
         }
@@ -155,25 +164,26 @@ public class TCPSession implements Transport {
     private void subInputChar(StringWriter wr, int ch) {
         wr.write(ch);
         for (int i = 0; i < ioSubscribers.size(); i++) {
-            IOSubscriber sub = (IOSubscriber) ioSubscribers.get(i);
+            final IOSubscriber sub = ioSubscribers.get(i);
             sub.inputChar(ch);
         }
     }
 
     private void subInputChar(StringWriter wr, String s) {
-        for (int i = 0; i < s.length(); i++)
+        for (int i = 0; i < s.length(); i++) {
             subInputChar(wr, s.charAt(i));
+        }
     }
 
     /**
      * Prints an integer (as text) to the output stream.
      * 
-     * @param iVal
-     *            Text to send to the stream.
+     * @param iVal Text to send to the stream.
      */
+    @Override
     public void print(int iVal) {
         for (int i = 0; i < ioSubscribers.size(); i++) {
-            IOSubscriber sub = (IOSubscriber) ioSubscribers.get(i);
+            final IOSubscriber sub = ioSubscribers.get(i);
             sub.outputPrint(iVal);
         }
         out.print(iVal);
@@ -182,12 +192,12 @@ public class TCPSession implements Transport {
     /**
      * Prints text to the output stream.
      * 
-     * @param s
-     *            Text to send to the stream.
+     * @param s Text to send to the stream.
      */
+    @Override
     public void print(String s) {
         for (int i = 0; i < ioSubscribers.size(); i++) {
-            IOSubscriber sub = (IOSubscriber) ioSubscribers.get(i);
+            final IOSubscriber sub = ioSubscribers.get(i);
             sub.outputPrint(s);
         }
         out.print(s);
@@ -197,27 +207,27 @@ public class TCPSession implements Transport {
      * Prints an integer (as text) to the output stream. A newline char is
      * appended to end of the output stream.
      * 
-     * @param iVal
-     *            Text to send to the stream.
+     * @param iVal Text to send to the stream.
      */
+    @Override
     public void println(int iVal) {
         for (int i = 0; i < ioSubscribers.size(); i++) {
-            IOSubscriber sub = (IOSubscriber) ioSubscribers.get(i);
+            final IOSubscriber sub = ioSubscribers.get(i);
             sub.outputPrintln(iVal);
         }
         out.println(iVal);
     }
 
     /**
-     * Print text to the output stream. A newline char is appended to end of the
-     * output stream.
+     * Print text to the output stream. A newline char is appended to end of
+     * the output stream.
      * 
-     * @param s
-     *            Text to send to the stream.
+     * @param s Text to send to the stream.
      */
+    @Override
     public void println(String s) {
         for (int i = 0; i < ioSubscribers.size(); i++) {
-            IOSubscriber sub = (IOSubscriber) ioSubscribers.get(i);
+            final IOSubscriber sub = ioSubscribers.get(i);
             sub.outputPrintln(s);
         }
         out.println(s);
@@ -227,9 +237,8 @@ public class TCPSession implements Transport {
      * Add an IO Subscriber for this transport. This is useful for tracing the
      * messages.
      * 
-     * @param s
-     *            An IOSUbscriber that will be called whenever there is
-     *            something received or sent on this transport.
+     * @param s An IOSUbscriber that will be called whenever there is something
+     *            received or sent on this transport.
      */
     public void addSubscriber(IOSubscriber s) {
         ioSubscribers.add(s);
@@ -238,12 +247,11 @@ public class TCPSession implements Transport {
     /**
      * Removes an IO subscriber.
      * 
-     * @param s
-     *            The IO subscriber to remove.
+     * @param s The IO subscriber to remove.
      */
     public void delSubscriber(IOSubscriber s) {
         for (int i = 0; i < ioSubscribers.size(); i++) {
-            IOSubscriber x = (IOSubscriber) ioSubscribers.get(i);
+            final IOSubscriber x = ioSubscribers.get(i);
             if (s == x) {
                 ioSubscribers.remove(i);
                 return;
@@ -259,12 +267,13 @@ public class TCPSession implements Transport {
      * A <em>]]&gt;]]&gt;</em> character sequence is added to signal that the
      * last part of the reply has been sent.
      */
+    @Override
     public void flush() {
-        String endmarker = "]]>]]>";
+        final String endmarker = "]]>]]>";
         out.print(endmarker);
         out.flush();
         for (int i = 0; i < ioSubscribers.size(); i++) {
-            IOSubscriber sub = (IOSubscriber) ioSubscribers.get(i);
+            final IOSubscriber sub = ioSubscribers.get(i);
             sub.outputFlush(endmarker);
         }
     }
@@ -272,24 +281,23 @@ public class TCPSession implements Transport {
     /**
      * Closes the TCP session/connection.
      */
+    @Override
     public void close() {
         trace("closeSession");
         try {
             socket.close();
-        } catch (Exception e) {
+        } catch (final Exception e) {
         }
     }
 
-    /**
-     * ------------------------------------------------------------ help
-     * functions
-     */
+    /* help functions */
 
     /**
      * Printout trace if 'debug'-flag is enabled.
      */
     private static void trace(String s) {
-        if (Element.debugLevel >= Element.DEBUG_LEVEL_TRANSPORT)
+        if (Element.debugLevel >= Element.DEBUG_LEVEL_TRANSPORT) {
             System.err.println("*TCPSession: " + s);
+        }
     }
 }

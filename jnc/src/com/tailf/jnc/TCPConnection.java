@@ -11,22 +11,22 @@
 
 package com.tailf.jnc;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.io.PrintWriter;
 
 /**
  * A TCP NETCONF connection class. This is a symmetrical class to the
  * {@link SSHConnection}.
  * <p>
- * <b>Note:</b> TCP is not a standardized way to connect to a NETCONF device. It
- * will only work when connecting to a ConfD agent and should only be used for
- * testing. Use {@link SSHConnection} and {@link SSHSession} instead.
+ * <b>Note:</b> TCP is not a standardized way to connect to a NETCONF device.
+ * It will only work when connecting to a ConfD agent and should only be used
+ * for testing. Use {@link SSHConnection} and {@link SSHSession} instead.
  * <p>
  * Example:
  * 
@@ -41,7 +41,7 @@ import java.io.PrintWriter;
 public class TCPConnection {
 
     private String host;
-    private int port;
+    private final int port;
 
     // package private
     boolean hasSession = false;
@@ -71,8 +71,9 @@ public class TCPConnection {
 
     /**
      * Creates a new TCP connection object. The connection need to be
-     * authenticated before it can be used. See {@link
-     * #authenticate(String,String,String,String,String,String) authenticate}
+     * authenticated before it can be used. See
+     * {@link #authenticate(String,String,String,String,String,String)
+     * authenticate}
      */
     public TCPConnection(String host, int port) throws IOException,
             UnknownHostException, JNCException {
@@ -81,8 +82,8 @@ public class TCPConnection {
         this.port = port;
         socket = new Socket(host, port);
         // initStreams
-        InputStream is = socket.getInputStream();
-        OutputStream os = socket.getOutputStream();
+        final InputStream is = socket.getInputStream();
+        final OutputStream os = socket.getOutputStream();
         in = new BufferedReader(new InputStreamReader(is));
         out = new PrintWriter(os, false);
     }
@@ -93,8 +94,7 @@ public class TCPConnection {
      * The Initial connection string towards ConfD to authenticate looks like:
      * <code>[Username;127.0.0.1;tcp;UID;GID;SUPLGIDS;DIR;GROUPS;]</code>
      * 
-     * @param username
-     *            The user name
+     * @param username The user name
      * @param uid
      * @param gid
      * @param suplgids
@@ -103,10 +103,12 @@ public class TCPConnection {
      */
     public void authenticate(String username, String uid, String gid,
             String suplgids, String dir, String groups) {
-        if (host.equals("localhost"))
+        if (host.equals("localhost")) {
             host = "127.0.0.1";
-        String header = "[" + username + ";" + host + ";tcp;" + uid + ";" + gid
-                + ";" + suplgids + ";" + dir + ";" + groups + ";]";
+        }
+        final String header = "[" + username + ";" + host + ";tcp;" + uid
+                + ";" + gid + ";" + suplgids + ";" + dir + ";" + groups
+                + ";]";
         out.println(header);
     }
 
@@ -122,22 +124,23 @@ public class TCPConnection {
      * Printout trace if 'debug'-flag is enabled.
      */
     private static void trace(String s) {
-        if (Element.debugLevel >= Element.DEBUG_LEVEL_TRANSPORT)
+        if (Element.debugLevel >= Element.DEBUG_LEVEL_TRANSPORT) {
             System.err.println("*TCPConnection: " + s);
+        }
     }
-    
+
     /**
      * @return The external host address as a String.
      */
     public String getHost() {
         return host;
     }
-    
+
     /**
      * @return The external host port number of this connection.
      */
     public int getPort() {
         return port;
     }
-    
+
 }

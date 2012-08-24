@@ -13,7 +13,6 @@ package com.tailf.jnc;
 
 import java.math.BigDecimal;
 
-
 /**
  * Extended by implementations of the Integer, decimal64 and binary built-in
  * YANG data types.
@@ -30,14 +29,14 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
      * @serial
      */
     protected BigDecimal MIN_VALUE = null;
-    
+
     /**
      * An upper bound for the value of this object, or null if none.
      * 
      * @serial
      */
     protected BigDecimal MAX_VALUE = null;
-    
+
     /**
      * Creates a YangBaseInt object from a String.
      * 
@@ -45,11 +44,10 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
      * @param minValue Lower bound for the value of this object.
      * @param maxValue Upper bound for the value of this object.
      * @throws YangException If an invariant was broken during initialization,
-     *                        if value could not be parsed from s, or if
-     *                        minValue is larger than maxValue.
+     *             if value could not be parsed from s, or if minValue is
+     *             larger than maxValue.
      */
-    public YangBaseInt(String s)
-            throws YangException {
+    public YangBaseInt(String s) throws YangException {
         super(s);
     }
 
@@ -58,14 +56,13 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
      * 
      * @param value The initial value of the new YangBaseInt object.
      * @throws YangException If an invariant was broken during initialization,
-     *                        or if minValue is larger than maxValue.
+     *             or if minValue is larger than maxValue.
      */
-    public YangBaseInt(T value)
-            throws YangException {
+    public YangBaseInt(T value) throws YangException {
         super(value);
         YangException.throwException(!valid(value.longValue()), this);
     }
-    
+
     /**
      * Sets the MIN_VALUE and MAX_VALUE fields of this object.
      * 
@@ -80,7 +77,8 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
         if (MIN_VALUE == null || MAX_VALUE == null) {
             return;
         }
-        YangException.throwException(MIN_VALUE.compareTo(MAX_VALUE) > 0, this);
+        YangException
+                .throwException(MIN_VALUE.compareTo(MAX_VALUE) > 0, this);
     }
 
     /**
@@ -91,7 +89,7 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
         if (MIN_VALUE == null && MAX_VALUE == null) {
             return true;
         }
-        BigDecimal bd = Utils.bigDecimalValueOf(n);
+        final BigDecimal bd = Utils.bigDecimalValueOf(n);
         boolean res = true;
         if (MIN_VALUE != null) {
             res &= bd.compareTo(MIN_VALUE) >= 0;
@@ -101,11 +99,11 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
         }
         return res;
     }
-    
+
     /**
-     * Checks that the value of this object is not null and valid. Called in 
-     * constructors and value setters. Subclasses that have state invariants
-     * in addition to those handled by the {@link YangBaseInt#valid} method should
+     * Checks that the value of this object is not null and valid. Called in
+     * constructors and value setters. Subclasses that have state invariants in
+     * addition to those handled by the {@link YangBaseInt#valid} method should
      * override this method and throw a YangException if such an invariant has
      * been violated.
      * 
@@ -116,7 +114,7 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
         super.check();
         YangException.throwException(!valid(getValue()), this);
     }
-    
+
     /**
      * Returns a value of type T given a String. No implementation should use
      * this.value - this method would be static if Java allowed for abstract
@@ -127,16 +125,17 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
      * @throws NumberFormatException If unable to parse a value of type T.
      */
     protected abstract T decode(String s) throws NumberFormatException;
-    
+
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.yang.YangType#fromString(java.lang.String)
      */
     @Override
     protected final T fromString(String s) throws YangException {
         try {
             return decode(s);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             throw new YangException(YangException.BAD_VALUE, e);
         }
     }
@@ -162,7 +161,7 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
      * 
      * @param value The value to compare against.
      * @throws YangException If comparison does not evaluate to true or if the
-     *                        value argument is not {@link YangBaseInt#valid}.
+     *             value argument is not {@link YangBaseInt#valid}.
      */
     protected void exact(Number value) throws YangException {
         YangException.throwException(!valid(value), value);

@@ -11,8 +11,6 @@
 
 package com.tailf.jnc;
 
-import java.lang.Exception;
-import java.lang.StringBuffer;
 
 /**
  * The IO subscriber is used for tracing, auditing, and logging of messages
@@ -43,9 +41,8 @@ public abstract class IOSubscriber {
     /**
      * Constructor.
      * 
-     * @param rawmode
-     *            If true 'raw' text will appear instead of pretty formatted
-     *            XML.
+     * @param rawmode If true 'raw' text will appear instead of pretty
+     *            formatted XML.
      */
     public IOSubscriber(boolean rawmode) {
         inb = new StringBuffer(1024);
@@ -62,21 +59,19 @@ public abstract class IOSubscriber {
     /**
      * Will get called as soon as we have input (data which is received).
      * 
-     * @param s
-     *            Text being received
+     * @param s Text being received
      */
     abstract public void input(String s);
 
     /**
      * Will get called as soon as we have output (data which is being sent).
      * 
-     * @param s
-     *            Text being sent
+     * @param s Text being sent
      */
     abstract public void output(String s);
 
     void inputChar(int i) {
-        char ch = (char) i;
+        final char ch = (char) i;
         inb.append(ch);
         if (ch == '\n' && rawmode) {
             // call usercode
@@ -88,33 +83,34 @@ public abstract class IOSubscriber {
     private void xmlFlush(StringBuffer buf, boolean isInput) {
         String res;
         try {
-            XMLParser p = new XMLParser();
-            Element e = p.parse(buf.toString());
+            final XMLParser p = new XMLParser();
+            final Element e = p.parse(buf.toString());
             res = e.toXMLString();
             buf.setLength(0);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             res = buf.toString();
             buf.setLength(0);
         }
-        if (isInput)
+        if (isInput) {
             input(res);
-        else
+        } else {
             output(res);
+        }
     }
 
     void inputFlush(String endMarker) {
-        if (!rawmode)
+        if (!rawmode) {
             xmlFlush(inb, true);
-        else {
+        } else {
             input(inb.toString() + endMarker + "\n");
             inb.setLength(0);
         }
     }
 
     void outputFlush(String endMarker) {
-        if (!rawmode)
+        if (!rawmode) {
             xmlFlush(outb, false);
-        else {
+        } else {
             output(outb.toString() + endMarker + "\n");
             outb.setLength(0);
         }
@@ -130,7 +126,7 @@ public abstract class IOSubscriber {
     }
 
     void outputPrint(int iVal) {
-        StringBuffer tmp = new StringBuffer(16);
+        final StringBuffer tmp = new StringBuffer(16);
         tmp.append(iVal);
         for (int i = 0; i < tmp.length(); i++) {
             outputChar(tmp.charAt(i));
@@ -138,7 +134,7 @@ public abstract class IOSubscriber {
     }
 
     void outputPrint(String s) {
-        StringBuffer tmp = new StringBuffer(64);
+        final StringBuffer tmp = new StringBuffer(64);
         tmp.append(s);
         for (int i = 0; i < tmp.length(); i++) {
             outputChar(tmp.charAt(i));
@@ -146,7 +142,7 @@ public abstract class IOSubscriber {
     }
 
     void outputPrintln(String s) {
-        StringBuffer tmp = new StringBuffer(64);
+        final StringBuffer tmp = new StringBuffer(64);
         tmp.append(s);
         tmp.append('\n');
         for (int i = 0; i < tmp.length(); i++) {
@@ -155,7 +151,7 @@ public abstract class IOSubscriber {
     }
 
     void outputPrintln(int iVal) {
-        StringBuffer tmp = new StringBuffer(16);
+        final StringBuffer tmp = new StringBuffer(16);
         tmp.append(iVal);
         tmp.append('\n');
         for (int i = 0; i < tmp.length(); i++) {

@@ -10,7 +10,8 @@
  */
 package com.tailf.jnc;
 
-import java.io.*;
+import java.io.File;
+import java.io.Serializable;
 
 /**
  * This class represents a user to be used with the {@link Device} class. The
@@ -19,23 +20,23 @@ import java.io.*;
  * concept of users logged on to the element manager. These usere names are
  * typically not the same user names used at the managed devices. Thus this
  * class provides a mapping from local users to device users. In the
- * {@link Device} class we can install several users and then at connection time
- * pick the DeviceUser associated to the user currently logged in to the element
- * manager.
+ * {@link Device} class we can install several users and then at connection
+ * time pick the DeviceUser associated to the user currently logged in to the
+ * element manager.
  * 
  * 
  */
 public class DeviceUser implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
-    String localUser;
-    String remoteUser;
 
-    String password = null;
-    File pemFile = null;
-    char[] pemPrivateKey = null;
-    String keyPassPhrase = null;
+    private String localUser;
+    private String remoteUser;
+
+    private String password = null;
+    private File pemFile = null;
+    private char[] pemPrivateKey = null;
+    private String keyPassPhrase = null;
 
     /**
      * Constructor. Creates a user with a local name, remote user name, and
@@ -49,7 +50,6 @@ public class DeviceUser implements Serializable {
 
     /**
      * Constructor. Creates a user with a local user name, remote user name.
-     * 
      */
     public DeviceUser(String localUser, String remoteUser, File pemFile,
             String keyPassPhrase) {

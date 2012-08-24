@@ -18,6 +18,7 @@ class DummyElement extends YangElement {
     /**
      * Structure information. An array of the children names.
      */
+    @Override
     protected String[] childrenNames() {
         return new String[0];
     }
@@ -25,6 +26,7 @@ class DummyElement extends YangElement {
     /**
      * Structure information. An array of the names of the key children.
      */
+    @Override
     protected String[] keyNames() {
         return new String[0];
     }
@@ -34,11 +36,11 @@ class DummyElement extends YangElement {
      * 
      * @return A clone of the object.
      */
+    @Override
     public Object clone() {
         try {
-            return (DummyElement) cloneContent(new DummyElement(namespace,
-                    name));
-        } catch (Exception e) {
+            return cloneContent(new DummyElement(namespace, name));
+        } catch (final Exception e) {
             return null;
         }
     }
@@ -48,10 +50,11 @@ class DummyElement extends YangElement {
      * 
      * @return A clone of the object. Children are not included.
      */
+    @Override
     protected Element cloneShallow() {
         try {
             return cloneShallowContent(new DummyElement(namespace, name));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return null;
         }
     }

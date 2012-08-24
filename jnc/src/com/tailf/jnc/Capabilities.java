@@ -24,98 +24,116 @@ public class Capabilities {
      * The NETCONF notifications namespace.
      * "urn:ietf:params:xml:ns:netconf:notification:1.0"
      */
-    public static String NS_NOTIFICATION = "urn:ietf:params:xml:ns:netconf:notification:1.0";
+    public static String NS_NOTIFICATION = "urn:ietf:params:xml:ns:netconf:" +
+    		"notification:1.0";
 
     /**
      * The NETCONF partial lock namespace.
      * "urn:ietf:params:xml:ns:netconf:partial-lock:1.0"
      */
-    public static String NS_PARTIAL_LOCK = "urn:ietf:params:xml:ns:netconf:partial-lock:1.0";
+    public static String NS_PARTIAL_LOCK = "urn:ietf:params:xml:ns:netconf:" +
+    		"partial-lock:1.0";
 
     /**
      * String constant for the NETCONF base capability.
      * "urn:ietf:params:netconf:base:1.0".
      */
-    public static String NETCONF_BASE_CAPABILITY = "urn:ietf:params:netconf:base:1.0";
+    public static String NETCONF_BASE_CAPABILITY = "urn:ietf:params:" +
+    		"netconf:base:1.0";
 
     /**
      * String constant for the <code>:writable-running</code> capability.
      * "urn:ietf:params:netconf:capability:writable-running:1.0".
      */
-    public static String WRITABLE_RUNNING_CAPABILITY = "urn:ietf:params:netconf:capability:writable-running:1.0";
+    public static String WRITABLE_RUNNING_CAPABILITY = "urn:ietf:params:" +
+    		"netconf:capability:writable-running:1.0";
 
     /**
      * String constant for the <code>:candidate</code> capability.
      * "urn:ietf:params:netconf:capability:candidate:1.0".
      */
-    public static String CANDIDATE_CAPABILITY = "urn:ietf:params:netconf:capability:candidate:1.0";
+    public static String CANDIDATE_CAPABILITY = "urn:ietf:params:netconf:" +
+    		"capability:candidate:1.0";
 
     /**
      * String constant for the <code>:confirmed-commit</code> capability.
      * "urn:ietf:params:netconf:capability:confirmed-commit:1.0".
      */
-    public static String CONFIRMED_COMMIT_CAPABILITY = "urn:ietf:params:netconf:capability:confirmed-commit:1.0";
+    public static String CONFIRMED_COMMIT_CAPABILITY = "urn:ietf:params:" +
+    		"netconf:capability:confirmed-commit:1.0";
 
     /**
      * String constant for the <code>:rollback-on-error</code> capability.
      * "urn:ietf:params:netconf:capability:rollback-on-error:1.0".
      */
-    public static String ROLLBACK_ON_ERROR_CAPABILITY = "urn:ietf:params:netconf:capability:rollback-on-error:1.0";
+    public static String ROLLBACK_ON_ERROR_CAPABILITY = "urn:ietf:params:" +
+    		"netconf:capability:rollback-on-error:1.0";
 
     /**
      * String constant for the <code>:validate</code> capability.
      * "urn:ietf:params:netconf:capability:validate:1.0".
      */
-    public static String VALIDATE_CAPABILITY = "urn:ietf:params:netconf:capability:validate:1.0";
+    public static String VALIDATE_CAPABILITY = "urn:ietf:params:netconf:" +
+    		"capability:validate:1.0";
 
     /**
      * String constant for the <code>:startup</code> capability.
      * "urn:ietf:params:netconf:capability:startup:1.0".
      */
-    public static String STARTUP_CAPABILITY = "urn:ietf:params:netconf:capability:startup:1.0";
+    public static String STARTUP_CAPABILITY = "urn:ietf:params:netconf:" +
+    		"capability:startup:1.0";
 
     /**
      * String constant for the <code>:url</code> capability.
      * "urn:ietf:params:netconf:capability:url:1.0".
      */
-    public static String URL_CAPABILITY = "urn:ietf:params:netconf:capability:url:1.0";
+    public static String URL_CAPABILITY = "urn:ietf:params:netconf:" +
+    		"capability:url:1.0";
 
-    public static String URL_CAPABILITY_SCHEME = "urn:ietf:params:netconf:capability:url:1.0?scheme=";
+    public static String URL_CAPABILITY_SCHEME = "urn:ietf:params:netconf:" +
+    		"capability:url:1.0?scheme=";
 
     /**
      * String constant for the <code>:xpath</code> capability.
      * "urn:ietf:params:netconf:capability:xpath:1.0".
      */
-    public static String XPATH_CAPABILITY = "urn:ietf:params:netconf:capability:xpath:1.0";
+    public static String XPATH_CAPABILITY = "urn:ietf:params:netconf:" +
+    		"capability:xpath:1.0";
 
     /**
      * String constant for the <code>:notification</code> capability.
      * "urn:ietf:params:netconf:capability:notification:1.0".
      */
-    public static String NOTIFICATION_CAPABILITY = "urn:ietf:params:netconf:capability:notification:1.0";
+    public static String NOTIFICATION_CAPABILITY = "urn:ietf:params:netconf:" +
+    		"capability:notification:1.0";
 
     /**
      * String constant for the <code>:interleave</code> capability.
      * "urn:ietf:params:netconf:capability:interleave:1.0".
      */
-    public static String INTERLEAVE_CAPABILITY = "urn:ietf:params:netconf:capability:interleave:1.0";
+    public static String INTERLEAVE_CAPABILITY = "urn:ietf:params:netconf:" +
+    		"capability:interleave:1.0";
 
     /**
      * String constant for the <code>:partial-lock</code> capability.
      * "urn:ietf:params:netconf:capability:partial-lock:1.0"
      */
-    public static String PARTIAL_LOCK_CAPABILITY = "urn:ietf:params:netconf:capability:partial-lock:1.0";
+    public static String PARTIAL_LOCK_CAPABILITY = "urn:ietf:params:netconf:" +
+    		"capability:partial-lock:1.0";
 
     /**
-     * The NETCONF actions namespace. "http://tail-f.com/ns/netconf/actions/1.0"
+     * The NETCONF actions namespace.
+     * "http://tail-f.com/ns/netconf/actions/1.0"
      */
-    public static final String NS_ACTIONS = "http://tail-f.com/ns/netconf/actions/1.0";
+    public static final String NS_ACTIONS = "http://tail-f.com/" +
+    		"ns/netconf/actions/1.0";
 
     /**
      * The NETCONF transactions namespace.
      * "http://tail-f.com/ns/netconf/transactions/1.0"
      */
-    public static final String NS_TRANSACTIONS = "http://tail-f.com/ns/netconf/transactions/1.0";
+    public static final String NS_TRANSACTIONS = "http://tail-f.com/" +
+    		"ns/netconf/transactions/1.0";
 
     // A set of Tail-f proprietary capabilities
     // that we also check and code for
@@ -124,19 +142,22 @@ public class Capabilities {
      * String constant for the <code>:actions</code> capability.
      * "http://tail-f.com/ns/netconf/actions/1.0".
      */
-    public static final String ACTIONS_CAPABILITY = "http://tail-f.com/ns/netconf/actions/1.0";
+    public static final String ACTIONS_CAPABILITY = "http://tail-f.com/" +
+    		"ns/netconf/actions/1.0";
 
     /**
      * String constant for the <code>:transactions</code> capability.
      * "http://tail-f.com/ns/netconf/transactions/1.0".
      */
-    public static final String TRANSACTIONS_CAPABILITY = "http://tail-f.com/ns/netconf/transactions/1.0";
+    public static final String TRANSACTIONS_CAPABILITY = "http://tail-f.com/" +
+    		"ns/netconf/transactions/1.0";
 
     /**
      * String constant for the <code>:with-defaults</code> capability.
      * "http://tail-f.com/ns/netconf/with-defaults/1.0".
      */
-    public static final String WITH_DEFAULTS_CAPABILITY = "http://tail-f.com/ns/netconf/with-defaults/1.0";
+    public static final String WITH_DEFAULTS_CAPABILITY = "http://tail-f.com/" +
+    		"ns/netconf/with-defaults/1.0";
 
     /**
      * Capabilites
@@ -219,21 +240,21 @@ public class Capabilities {
      * <p>
      * The <code>:url</code> capability URI must contain a "scheme" argument
      * assigned a comma-separated list of scheme names indicating which schemes
-     * the NETCONF peer supports. If the <code>:url</code> capability is set the
-     * supported schemas will listed in {@link #urlSchemes}.
+     * the NETCONF peer supports. If the <code>:url</code> capability is set
+     * the supported schemas will listed in {@link #urlSchemes}.
      * <p>
      * If the <code>:url</code> capability is supported an url argument may be
      * given to the following methods:
      * <ul>
-     * <li> editConfig - the &lt;edit-config&gt; operation can
-     * accept an URL as an alternative to the config tree. The URL should
-     * identify a local configuration file.
-     * <li> copyConfig - the &lt;copy-config&gt; operation can
-     * accept an URL as either the source or target parameter.
-     * <li> deleteConfig - the &lt;delete-config&gt; operation can
-     * accept an URL, then it should identify a local configuration file.
-     * <li> validate - the &lt;validate&gt; operation can accept an
-     * URL as the source parameter.
+     * <li>editConfig - the &lt;edit-config&gt; operation can accept an URL as
+     * an alternative to the config tree. The URL should identify a local
+     * configuration file.
+     * <li>copyConfig - the &lt;copy-config&gt; operation can accept an URL as
+     * either the source or target parameter.
+     * <li>deleteConfig - the &lt;delete-config&gt; operation can accept an
+     * URL, then it should identify a local configuration file.
+     * <li>validate - the &lt;validate&gt; operation can accept an URL as the
+     * source parameter.
      * </ul>
      */
     public boolean hasUrl() {
@@ -258,6 +279,7 @@ public class Capabilities {
      * Predicate for the <code>:xpath</code> capability.
      */
     public boolean hasXPath() {
+        new Integer(23523421);
         return xpathCapability;
     }
 
@@ -293,8 +315,8 @@ public class Capabilities {
         return urlSchemes;
     }
 
-    private ArrayList<Capa> capas;
-    private ArrayList<Capa> data_capas;
+    private final ArrayList<Capa> capas;
+    private final ArrayList<Capa> data_capas;
 
     static private class Capa {
         String uri;
@@ -307,119 +329,109 @@ public class Capabilities {
     }
 
     protected Capabilities(Element e) throws JNCException {
-        NodeSet caps = e.get("capability");
+        final NodeSet caps = e.get("capability");
         capas = new ArrayList<Capa>(caps.size());
         data_capas = new ArrayList<Capa>(caps.size());
 
         for (int i = 0; i < caps.size(); i++) {
-            Element cap = caps.getElement(i);
+            final Element cap = caps.getElement(i);
 
             // Do we have a query part
-            String parts[] = cap.value.toString().split("\\?");
+            final String parts[] = cap.value.toString().split("\\?");
             String rev = null;
-            String uri = parts[0];
+            final String uri = parts[0];
             if (parts.length == 2) {
-                // we have a some query part data
+                // we have some query part data
+                final String q = parts[1];
+                final String pairs[] = q.split("&");
 
-                String q = parts[1];
-                String pairs[] = q.split("&");
-
-                for (int j = 0; j < pairs.length; j++) {
-                    String pair = pairs[j];
-                    String kv[] = pair.split("=");
-                    if (kv[0].equals("revision"))
+                for (final String pair : pairs) {
+                    final String kv[] = pair.split("=");
+                    if (kv[0].equals("revision")) {
                         rev = kv[1];
+                    }
                 }
             }
-            Capa c = new Capa(uri, rev);
-            capas.add(c);
-            if (uri.equals(NETCONF_BASE_CAPABILITY))
+            capas.add(new Capa(uri, rev));
+            if (uri.equals(NETCONF_BASE_CAPABILITY)) {
                 baseCapability = true;
-            else if (uri.equals(WRITABLE_RUNNING_CAPABILITY))
+            } else if (uri.equals(WRITABLE_RUNNING_CAPABILITY)) {
                 writableRunningCapability = true;
-            else if (uri.equals(CANDIDATE_CAPABILITY))
+            } else if (uri.equals(CANDIDATE_CAPABILITY)) {
                 candidateCapability = true;
-            else if (uri.equals(CONFIRMED_COMMIT_CAPABILITY))
+            } else if (uri.equals(CONFIRMED_COMMIT_CAPABILITY)) {
                 confirmedCommitCapability = true;
-            else if (uri.equals(ROLLBACK_ON_ERROR_CAPABILITY))
+            } else if (uri.equals(ROLLBACK_ON_ERROR_CAPABILITY)) {
                 rollbackOnErrorCapability = true;
-            else if (uri.equals(VALIDATE_CAPABILITY))
+            } else if (uri.equals(VALIDATE_CAPABILITY)) {
                 validateCapability = true;
-            else if (uri.equals(NOTIFICATION_CAPABILITY))
+            } else if (uri.equals(NOTIFICATION_CAPABILITY)) {
                 notificationCapability = true;
-            else if (uri.equals(INTERLEAVE_CAPABILITY))
+            } else if (uri.equals(INTERLEAVE_CAPABILITY)) {
                 interleaveCapability = true;
-            else if (uri.equals(STARTUP_CAPABILITY))
+            } else if (uri.equals(STARTUP_CAPABILITY)) {
                 startupCapability = true;
-            else if (cap.value.toString().startsWith(URL_CAPABILITY_SCHEME)) {
+            } else if (cap.value.toString().startsWith(URL_CAPABILITY_SCHEME)) {
                 urlCapability = true;
-                String schemes = cap.value.toString().substring(
+                final String schemes = cap.value.toString().substring(
                         URL_CAPABILITY_SCHEME.length());
                 urlSchemes = schemes.split(",");
-            } else if (uri.equals(XPATH_CAPABILITY))
+            } else if (uri.equals(XPATH_CAPABILITY)) {
                 xpathCapability = true;
-            else if (uri.equals(PARTIAL_LOCK_CAPABILITY))
+            } else if (uri.equals(PARTIAL_LOCK_CAPABILITY)) {
                 partialLockCapability = true;
-
-            /**
-             * JUNIPER has an erroneous naming of the capabilities let's accept
-             * their capabilities also.
-             */
-            else if (uri.equals("urn:ietf:params:xml:ns:netconf:base:1.0"))
+            } else if (uri.equals("urn:ietf:params:xml:ns:netconf:base:1.0")) {
                 baseCapability = true;
-            else if (uri
-                    .equals("urn:ietf:params:xml:ns:netconf:capability:candidate:1.0"))
+            } else if (uri.equals("urn:ietf:params:xml:ns:netconf:" +
+            		"capability:candidate:1.0")) {
                 candidateCapability = true;
-            else if (uri
-                    .equals("urn:ietf:params:xml:ns:netconf:capability:confirmed-commit:1.0"))
+            } else if (uri.equals("urn:ietf:params:xml:ns:netconf:" +
+            		"capability:confirmed-commit:1.0")) {
                 confirmedCommitCapability = true;
-            else if (uri
-                    .equals("urn:ietf:params:xml:ns:netconf:capability:validate:1.0"))
+            } else if (uri.equals("urn:ietf:params:xml:ns:netconf:" +
+            		"capability:validate:1.0")) {
                 validateCapability = true;
-            else if (uri
-                    .equals("urn:ietf:params:xml:ns:netconf:capability:url:1.0")) {
+            } else if (uri.equals("urn:ietf:params:xml:ns:netconf:" +
+            		"capability:url:1.0")) {
                 urlCapability = true;
-                if (parts[1] != null)
+                if (parts[1] != null) {
                     urlSchemes = parts[1].split(",");
+                }
             }
 
-            // / tail-f proprietary capas
-            else if (uri.equals(WITH_DEFAULTS_CAPABILITY))
+            // tail-f proprietary capas
+            else if (uri.equals(WITH_DEFAULTS_CAPABILITY)) {
                 withDefaultsCapability = true;
-            else if (uri.equals(ACTIONS_CAPABILITY))
+            } else if (uri.equals(ACTIONS_CAPABILITY)) {
                 actionsCapability = true;
-            else if (uri.equals(TRANSACTIONS_CAPABILITY))
+            } else if (uri.equals(TRANSACTIONS_CAPABILITY)) {
                 transactionsCapability = true;
-
-            else {
+            } else {
                 // It's either a proper data schema capability or some
                 // homegrown agent capability
                 data_capas.add(new Capa(uri, rev));
-
             }
-
         }
     }
 
-    /* Check all capabilities including the rfc 4711 ones */
+    /** Checks all capabilities including the rfc 4711 ones */
     public boolean hasCapability(String uri) {
-        for (int i = 0; i < capas.size(); i++) {
-            Capa c = (Capa) capas.get(i);
-            if (c.uri.equals(uri))
+        for (final Capa c : capas) {
+            if (c.uri.equals(uri)) {
                 return true;
+            }
         }
         return false;
     }
 
-    /*
-     * Return the revision for a specific uri, return null if no revision found.
-     * Only check the user data capabilities.
+    /**
+     * Returns the revision for a specific uri, return null if no revision
+     * found. Only check the user data capabilities.
      */
-
     public String getRevision(String uri) {
-        for (int i = 0; i < data_capas.size(); i++) {
-            if (((Capa) data_capas.get(i)).uri.equals(uri)) {
-                return ((Capa) data_capas.get(i)).revision;
+        for (Capa capa : data_capas) {
+            if (capa.uri.equals(uri)) {
+                return capa.revision;
             }
         }
         return null;

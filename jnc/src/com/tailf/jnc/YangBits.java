@@ -13,16 +13,14 @@ package com.tailf.jnc;
 
 import java.math.BigInteger;
 
-
 /**
  * Implements the built-in YANG data type "bits".
- *
+ * 
  * @author emil@tail-f.com
  */
 public abstract class YangBits extends YangBaseInt<BigInteger> {
 
     private static final long serialVersionUID = 1L;
-
 
     /**
      * Constructor using string arguments.
@@ -67,7 +65,7 @@ public abstract class YangBits extends YangBaseInt<BigInteger> {
      * @param mask The bit mask to use.
      * @throws YangException If value does not match mask.
      */
-    public void setValue(BigInteger value, BigInteger mask) 
+    public void setValue(BigInteger value, BigInteger mask)
             throws YangException {
         super.setValue(value);
         check(mask);
@@ -75,6 +73,7 @@ public abstract class YangBits extends YangBaseInt<BigInteger> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.yang.YangInt#parse(java.lang.String)
      */
     @Override
@@ -84,17 +83,19 @@ public abstract class YangBits extends YangBaseInt<BigInteger> {
 
     /**
      * Checks that the value space matches mask.
+     * 
      * @param mask Bit mask.
      * @throws YangException if value space does not match mask.
      */
     public void check(BigInteger mask) throws YangException {
-        boolean fail = mask.or(value).compareTo(mask) == 0;
+        final boolean fail = mask.or(value).compareTo(mask) == 0;
         YangException.throwException(fail, this);
         check();
     }
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.yang.YangType#canEqual(java.lang.Object)
      */
     @Override
@@ -104,6 +105,7 @@ public abstract class YangBits extends YangBaseInt<BigInteger> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.yang.YangInt#valid(java.lang.Number)
      */
     @Override
@@ -117,7 +119,7 @@ public abstract class YangBits extends YangBaseInt<BigInteger> {
      * @param v YangBits instance to fetch value from.
      */
     public void AND(YangBits v) {
-        this.value = this.value.and(v.getValue());
+        value = value.and(v.getValue());
     }
 
     /**
@@ -126,7 +128,7 @@ public abstract class YangBits extends YangBaseInt<BigInteger> {
      * @param v YangBits instance to fetch value from.
      */
     public void OR(YangBits v) {
-        this.value = this.value.or(v.getValue());
+        value = value.or(v.getValue());
     }
 
     /**
@@ -135,7 +137,7 @@ public abstract class YangBits extends YangBaseInt<BigInteger> {
      * @param v YangBits instance to fetch value from.
      */
     public void XOR(YangBits v) {
-        this.value = this.value.xor(v.getValue());
+        value = value.xor(v.getValue());
     }
 
 }

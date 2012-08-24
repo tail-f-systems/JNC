@@ -34,8 +34,7 @@ public class PathCreate extends Path {
      * See {@link PathCreate} for more information about path create
      * expressions.
      * 
-     * @param pathStr
-     *            A "path create" string
+     * @param pathStr A "path create" string
      */
     public PathCreate(String pathStr) throws JNCException {
         create = true;
@@ -45,20 +44,21 @@ public class PathCreate extends Path {
     /**
      * Evaluates the path expression and build a new Element subtree.
      * 
-     * @param prefixMap
-     *            Prefix mappings
+     * @param prefixMap Prefix mappings
      * @return A new element tree
      */
     public Element eval(PrefixMap prefixMap) throws JNCException {
         trace("eval(): " + this);
         Element top = null, parent = null;
         for (int i = 0; i < locationSteps.size(); i++) {
-            LocationStep step = (LocationStep) locationSteps.get(i);
-            Element child = step.createElem(prefixMap, parent);
-            if (top == null)
+            final LocationStep step = locationSteps.get(i);
+            final Element child = step.createElem(prefixMap, parent);
+            if (top == null) {
                 top = child;
-            if (parent != null)
+            }
+            if (parent != null) {
                 parent.addChild(child);
+            }
             parent = child;
         }
         return top;
@@ -70,46 +70,39 @@ public class PathCreate extends Path {
      */
     Element evalStep(PrefixMap prefixMap, int step, Element parent)
             throws JNCException {
-        if (step < 0 || step >= locationSteps.size())
+        if (step < 0 || step >= locationSteps.size()) {
             throw new JNCException(JNCException.PATH_CREATE_ERROR,
                     "cannot eval location step: " + step + " in create path");
-        LocationStep locStep = (LocationStep) locationSteps.get(step);
+        }
+        final LocationStep locStep = locationSteps.get(step);
         trace("evalStep(): step=" + step + ", " + locStep);
-        Element child = locStep.createElem(prefixMap, parent);
+        final Element child = locStep.createElem(prefixMap, parent);
         return child;
     }
 
     /**
-     * ------------------------------------------------------------
-     * 
-     */
-
-    /**
      * Returns a string representation of this PathCreate. It's a parse tree.
      */
+    @Override
     public String toString() {
         String s = "PathCreate[";
-        boolean comma = false;
+        final boolean comma = false;
         for (int i = 0; i < locationSteps.size(); i++) {
-            if (comma)
+            if (comma) {
                 s = s + ",";
+            }
             s = s + locationSteps.get(i);
         }
         s = s + "]";
         return s;
     }
 
-    /**
-     * ------------------------------------------------------------ help
-     * functions
-     */
+    /* help functions */
 
-    /**
-     *
-     */
     private static void trace(String s) {
-        if (Element.debugLevel >= Element.DEBUG_LEVEL_PATHCREATE)
+        if (Element.debugLevel >= Element.DEBUG_LEVEL_PATHCREATE) {
             System.err.println("*PathCreate: " + s);
+        }
     }
 
 }

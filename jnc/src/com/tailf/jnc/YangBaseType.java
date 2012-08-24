@@ -28,7 +28,7 @@ abstract class YangBaseType<T> implements YangType<T> {
      * @serial
      */
     protected T value;
-    
+
     /**
      * Empty constructor for a YangType object. The value will not be
      * initialized when calling this method.
@@ -41,7 +41,7 @@ abstract class YangBaseType<T> implements YangType<T> {
      * 
      * @param s The string.
      * @throws YangException If an invariant was broken during initialization,
-     *                        or if value could not be parsed from s.
+     *             or if value could not be parsed from s.
      */
     public YangBaseType(String s) throws YangException {
         setValue(s);
@@ -59,6 +59,7 @@ abstract class YangBaseType<T> implements YangType<T> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangType#setValue(java.lang.String)
      */
     @Override
@@ -69,32 +70,37 @@ abstract class YangBaseType<T> implements YangType<T> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangType#setValue(T)
      */
     @Override
     public void setValue(T value) throws YangException {
-        assert !(value instanceof YangType): "Avoid circular value chain";
-        YangException.throwException(value == null, new NullPointerException());
+        assert !(value instanceof YangType) : "Avoid circular value chain";
+        YangException.throwException(value == null,
+                new NullPointerException());
         this.value = value;
         check();
     }
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangType#getValue()
      */
     @Override
     public T getValue() {
         return value;
     }
-    
+
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangType#check()
      */
     @Override
     public void check() throws YangException {
-        YangException.throwException(value == null, new NullPointerException());
+        YangException.throwException(value == null,
+                new NullPointerException());
     }
 
     /**
@@ -129,14 +135,17 @@ abstract class YangBaseType<T> implements YangType<T> {
             return false;
         }
         if (obj instanceof YangBaseType<?>) {
-            YangBaseType<?> other = (YangBaseType<?>) obj;
-            if (!other.canEqual(this))
+            final YangBaseType<?> other = (YangBaseType<?>) obj;
+            if (!other.canEqual(this)) {
                 return false;
+            }
             obj = other.getValue();
         }
         if (value instanceof Number && obj instanceof Number) {
-            BigDecimal valueNumber = Utils.bigDecimalValueOf((Number) value);
-            BigDecimal objNumber = Utils.bigDecimalValueOf((Number) obj);
+            final BigDecimal valueNumber = Utils
+                    .bigDecimalValueOf((Number) value);
+            final BigDecimal objNumber = Utils
+                    .bigDecimalValueOf((Number) obj);
             return valueNumber.compareTo(objNumber) == 0;
         }
         return value.equals(obj);
@@ -144,23 +153,27 @@ abstract class YangBaseType<T> implements YangType<T> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
     public int hashCode() {
-        if (value == null) 
+        if (value == null) {
             return 0;
+        }
         return value.hashCode();
     }
 
     /**
      * Clones this object without cloning its value.
+     * 
      * @return A shallow clone of this object.
      */
     protected abstract YangBaseType<T> cloneShallow() throws YangException;
-    
+
     /*
      * (non-Javadoc)
+     * 
      * @see java.lang.Object#clone()
      */
     @SuppressWarnings("unchecked")
@@ -168,17 +181,17 @@ abstract class YangBaseType<T> implements YangType<T> {
     public YangBaseType<T> clone() {
         YangBaseType<T> copy;
         try {
-            copy = (YangBaseType<T>)super.clone();
-        } catch (CloneNotSupportedException e1) {
+            copy = (YangBaseType<T>) super.clone();
+        } catch (final CloneNotSupportedException e1) {
             try {
                 copy = this.cloneShallow();
-            } catch (YangException e) {
+            } catch (final YangException e) {
                 return null;
             }
         }
         try {
             copy.setValue(value.toString());
-        } catch (YangException e) {
+        } catch (final YangException e) {
             return null;
         }
         return copy;

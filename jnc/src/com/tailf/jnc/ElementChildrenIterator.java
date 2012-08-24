@@ -10,7 +10,7 @@
 
 package com.tailf.jnc;
 
-import java.util.*;
+import java.util.Iterator;
 
 /**
  * This is an iterator class that is used for iterating over all the children
@@ -33,16 +33,17 @@ public class ElementChildrenIterator implements Iterator<Element> {
     private Iterator<Element> childrenIterator;
     private Element nextChild;
     private boolean hasNextChild = false;
-    private String name;
+    private final String name;
 
     /**
      * Constructor to create new children iterator for all children.
      */
     public ElementChildrenIterator(NodeSet children) {
-        if (children != null)
+        if (children != null) {
             childrenIterator = children.iterator();
-        else
+        } else {
             childrenIterator = null;
+        }
         name = null;
     }
 
@@ -51,26 +52,31 @@ public class ElementChildrenIterator implements Iterator<Element> {
      * name.
      */
     public ElementChildrenIterator(NodeSet children, String name) {
-        if (children != null)
+        if (children != null) {
             childrenIterator = children.iterator();
-        else
+        } else {
             childrenIterator = null;
+        }
         this.name = name;
     }
 
     /**
-     * Return true if there are more children, false otherwise.
-     * 
+     * @return <code>true</code> if there are more children
+     *         <code>false</code> otherwise.
      */
+    @Override
     public boolean hasNext() {
-        if (hasNextChild)
+        if (hasNextChild) {
             return true;
-        if (childrenIterator == null)
+        }
+        if (childrenIterator == null) {
             return false;
+        }
         while (childrenIterator.hasNext()) {
-            if (name == null)
+            if (name == null) {
                 return true;
-            Element child = (Element) childrenIterator.next();
+            }
+            final Element child = childrenIterator.next();
             if (child.name.equals(name)) {
                 hasNextChild = true;
                 nextChild = child;
@@ -82,36 +88,40 @@ public class ElementChildrenIterator implements Iterator<Element> {
     }
 
     /**
-     * Return next child or null.
+     * Iterates the Node set.
      * 
+     * @return next element with this.name in set or null if none.
      */
     public Element nextElement() {
         if (hasNextChild) {
             hasNextChild = false;
             return nextChild;
         }
-        hasNextChild = false;
         while (childrenIterator.hasNext()) {
-            Element child = (Element) childrenIterator.next();
-            if (name == null)
+            final Element child = childrenIterator.next();
+            if (name == null) {
                 return child;
-            else if (child.name.equals(name))
+            } else if (child.name.equals(name)) {
                 return child;
+            }
         }
         return null;
     }
 
     /**
-     * Return next child or null.
+     * Iterates the Node set.
+     * 
+     * @return next element with this.name in set or null if none.
      */
+    @Override
     public Element next() {
         return nextElement();
     }
 
     /**
      * Remove is not supported.
-     * 
      */
+    @Override
     public void remove() {
     }
 }

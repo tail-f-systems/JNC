@@ -11,7 +11,6 @@
 
 package com.tailf.jnc;
 
-
 /**
  * The Leaf is the leaf of a sub-tree.
  * <p>
@@ -33,17 +32,20 @@ public class Leaf extends Element {
     private Tagpath tp = null;
     private SchemaNode n = null;
 
+    @Override
     protected void encode(Transport out, boolean newline_at_end,
             Capabilities capas) throws JNCException {
         if (RevisionInfo.olderRevisionSupportEnabled && capas != null) {
-            if (tp == null)
+            if (tp == null) {
                 tp = tagpath();
-            if (n == null)
+            }
+            if (n == null) {
                 n = SchemaTree.lookup(namespace, tp);
-            String rev = capas.getRevision(namespace);
+            }
+            final String rev = capas.getRevision(namespace);
             if (n != null && n.revInfo != null) {
                 for (int i = 0; i < n.revInfo.length; i++) {
-                    RevisionInfo r = n.revInfo[i];
+                    final RevisionInfo r = n.revInfo[i];
                     if (r.introduced.compareTo(rev) > 0) {
                         // This node was somehow modified
                         switch (r.type) {
@@ -86,8 +88,9 @@ public class Leaf extends Element {
         super.encode(out, newline_at_end, capas);
     }
 
+    @Override
     public Leaf clone() {
-        Leaf copy = new Leaf(namespace, name);
+        final Leaf copy = new Leaf(namespace, name);
         cloneAttrs(copy);
         cloneValue(copy);
         return copy;
@@ -98,13 +101,15 @@ public class Leaf extends Element {
      */
 
     public boolean isKey() {
-        YangElement p = (YangElement) getParent();
-        String[] keys = p.keyNames();
-        if (keys == null)
+        final YangElement p = (YangElement) getParent();
+        final String[] keys = p.keyNames();
+        if (keys == null) {
             return false;
+        }
         for (int i = 0; i < keys.length; i++) {
-            if (this.name.equals(keys[i]))
+            if (name.equals(keys[i])) {
                 return true;
+            }
         }
         return false;
     }

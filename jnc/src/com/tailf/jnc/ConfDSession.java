@@ -31,9 +31,9 @@ import java.io.IOException;
  * included.
  * <p>
  * The <code>:action</code> capability introduces one new rpc method which is
- * used to invoke actions (methods) defined in the data model. When an action is
- * invoked, the instance on which the action is invoked is explicitly identified
- * by an hierarchy of configuration or state data.
+ * used to invoke actions (methods) defined in the data model. When an action
+ * is invoked, the instance on which the action is invoked is explicitly
+ * identified by an hierarchy of configuration or state data.
  * <p>
  * Here's a simple example which resets an interface.
  * 
@@ -142,9 +142,11 @@ public class ConfDSession extends NetconfSession {
         /**
          * set defaultPrefixes for NS_ACTIONS NS_TRANSACTIONS
          */
-        if (Element.defaultPrefixes == null)
+        if (Element.defaultPrefixes == null) {
             Element.defaultPrefixes = new PrefixMap();
-        Element.defaultPrefixes.set(new Prefix("nca", Capabilities.NS_ACTIONS));
+        }
+        Element.defaultPrefixes
+                .set(new Prefix("nca", Capabilities.NS_ACTIONS));
         Element.defaultPrefixes.set(new Prefix("nctr",
                 Capabilities.NS_TRANSACTIONS));
     }
@@ -159,17 +161,19 @@ public class ConfDSession extends NetconfSession {
      * @param value Value for with-defaults.
      */
     public void setWithDefaults(boolean value) throws JNCException {
-        if (!capabilities.hasWithDefaults())
+        if (!capabilities.hasWithDefaults()) {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "server does not support the :with-defaults capability");
-        withDefaultsAttr = new Attribute(Capabilities.WITH_DEFAULTS_CAPABILITY,
-                "with-defaults", new Boolean(value).toString());
+        }
+        withDefaultsAttr = new Attribute(
+                Capabilities.WITH_DEFAULTS_CAPABILITY, "with-defaults",
+                new Boolean(value).toString());
     }
 
     /**
      * Action capability. An action that does not return any result value,
-     * replies with the standard 'ok' element. If a result value is returned, it
-     * is encapsulated within a returned 'data' element.
+     * replies with the standard 'ok' element. If a result value is returned,
+     * it is encapsulated within a returned 'data' element.
      * 
      * @param data element tree with action-data
      */
@@ -191,10 +195,10 @@ public class ConfDSession extends NetconfSession {
      * <code>edit-config</code> with another <code>target</code>, an error must
      * be returned with an <code>error-tag</code> set to "invalid-value".
      * <p>
-     * The modifications sent in the <code>edit-config</code> operations are not
-     * immediately applied to the configuration datastore. Instead they are kept
-     * in the transaction state of the server. The transaction state is only
-     * applied when a <code>commit-transaction</code> is received.
+     * The modifications sent in the <code>edit-config</code> operations are
+     * not immediately applied to the configuration datastore. Instead they are
+     * kept in the transaction state of the server. The transaction state is
+     * only applied when a <code>commit-transaction</code> is received.
      * <p>
      * The client sends a <code>prepare-transaction</code> when all
      * modifications have been sent.
@@ -220,10 +224,11 @@ public class ConfDSession extends NetconfSession {
      * if the combined changes would result in an invalid configuration
      * datastore.
      * <p>
-     * After a successful <code>prepare-transaction</code>, the next transaction
-     * related rpc operation must be <code>commit-transaction</code> or
-     * <code>abort-transaction</code>. Note that an <code>edit-config</code>
-     * cannot be sent before the transaction is either committed or aborted.
+     * After a successful <code>prepare-transaction</code>, the next
+     * transaction related rpc operation must be
+     * <code>commit-transaction</code> or <code>abort-transaction</code>. Note
+     * that an <code>edit-config</code> cannot be sent before the transaction
+     * is either committed or aborted.
      * <p>
      * Care must be taken by the server to make sure that if
      * <code>prepare-transaction</code> succeeds then the
@@ -262,8 +267,8 @@ public class ConfDSession extends NetconfSession {
 
     /**
      * Aborts the ongoing transaction, and all pending changes are discarded.
-     * <code>abort-transaction</code> can be given at any time during an ongoing
-     * transaction.
+     * <code>abort-transaction</code> can be given at any time during an
+     * ongoing transaction.
      * 
      * 
      * @see #startTransaction(int)
@@ -277,28 +282,25 @@ public class ConfDSession extends NetconfSession {
         recv_rpc_reply_ok();
     }
 
-    /**
-     * ------------------------------------------------------------ Receive from
-     * session
-     */
+    /* Receive from session */
 
     Element recv_rpc_reply() throws JNCException, IOException {
-        StringBuffer reply = in.readOne();
+        final StringBuffer reply = in.readOne();
         trace("reply= " + reply);
-        Element t = parser.parse(reply.toString());
-        Element ok = t.getFirst("self::rpc-reply/ok");
-        if (ok != null)
+        final Element t = parser.parse(reply.toString());
+        final Element ok = t.getFirst("self::rpc-reply/ok");
+        if (ok != null) {
             return ok;
-        Element data = t.getFirst("self::rpc-reply/data");
-        if (data != null)
+        }
+        final Element data = t.getFirst("self::rpc-reply/data");
+        if (data != null) {
             return data;
+        }
         /* rpc-error */
         throw new JNCException(JNCException.RPC_REPLY_ERROR, t);
     }
 
-    /**
-     * ------------------------------------------------------------ Encoding
-     */
+    /* Encoding */
 
     /**
      * Example: <rpc message-id="101"
@@ -308,10 +310,11 @@ public class ConfDSession extends NetconfSession {
      * <reset/> </interface> </interfaces> </data> </action> </rpc>
      */
     void encode_action(Transport out, Element data) throws JNCException {
-        String prefix = Element.defaultPrefixes
+        final String prefix = Element.defaultPrefixes
                 .nsToPrefix(Capabilities.NS_ACTIONS);
-        String act = mk_prefix_colon(prefix);
-        String xmlnsAttr = mk_xmlns_attr(prefix, Capabilities.NS_ACTIONS);
+        final String act = mk_prefix_colon(prefix);
+        final String xmlnsAttr = mk_xmlns_attr(prefix,
+                Capabilities.NS_ACTIONS);
         encode_rpc_begin(out);
         out.println("<" + act + "action " + xmlnsAttr + ">");
         out.print("<" + act + "data>");
@@ -328,10 +331,11 @@ public class ConfDSession extends NetconfSession {
      * <target><running/></target> </start-transaction> </rpc>
      */
     void encode_startTransaction(Transport out, String target) {
-        String prefix = Element.defaultPrefixes
+        final String prefix = Element.defaultPrefixes
                 .nsToPrefix(Capabilities.NS_TRANSACTIONS);
-        String tr = mk_prefix_colon(prefix);
-        String xmlnsAttr = mk_xmlns_attr(prefix, Capabilities.NS_TRANSACTIONS);
+        final String tr = mk_prefix_colon(prefix);
+        final String xmlnsAttr = mk_xmlns_attr(prefix,
+                Capabilities.NS_TRANSACTIONS);
 
         encode_rpc_begin(out);
         out.println("<" + tr + "start-transaction " + xmlnsAttr + ">");
@@ -348,10 +352,11 @@ public class ConfDSession extends NetconfSession {
      * xmlns="http://tail-f.com/ns/netconf/transactions/1.0"/> </rpc>
      */
     void encode_prepareTransaction(Transport out) {
-        String prefix = Element.defaultPrefixes
+        final String prefix = Element.defaultPrefixes
                 .nsToPrefix(Capabilities.NS_TRANSACTIONS);
-        String tr = mk_prefix_colon(prefix);
-        String xmlnsAttr = mk_xmlns_attr(prefix, Capabilities.NS_TRANSACTIONS);
+        final String tr = mk_prefix_colon(prefix);
+        final String xmlnsAttr = mk_xmlns_attr(prefix,
+                Capabilities.NS_TRANSACTIONS);
 
         encode_rpc_begin(out);
         out.println("<" + tr + "prepare-transaction " + xmlnsAttr + "/>");
@@ -365,10 +370,11 @@ public class ConfDSession extends NetconfSession {
      * 
      */
     void encode_commitTransaction(Transport out) {
-        String prefix = Element.defaultPrefixes
+        final String prefix = Element.defaultPrefixes
                 .nsToPrefix(Capabilities.NS_TRANSACTIONS);
-        String tr = mk_prefix_colon(prefix);
-        String xmlnsAttr = mk_xmlns_attr(prefix, Capabilities.NS_TRANSACTIONS);
+        final String tr = mk_prefix_colon(prefix);
+        final String xmlnsAttr = mk_xmlns_attr(prefix,
+                Capabilities.NS_TRANSACTIONS);
 
         encode_rpc_begin(out);
         out.println("<" + tr + "commit-transaction " + xmlnsAttr + "/>");
@@ -381,27 +387,26 @@ public class ConfDSession extends NetconfSession {
      * xmlns="http://tail-f.com/ns/netconf/transactions/1.0"/> </rpc>
      */
     void encode_abortTransaction(Transport out) {
-        String prefix = Element.defaultPrefixes
+        final String prefix = Element.defaultPrefixes
                 .nsToPrefix(Capabilities.NS_TRANSACTIONS);
-        String tr = mk_prefix_colon(prefix);
-        String xmlnsAttr = mk_xmlns_attr(prefix, Capabilities.NS_TRANSACTIONS);
+        final String tr = mk_prefix_colon(prefix);
+        final String xmlnsAttr = mk_xmlns_attr(prefix,
+                Capabilities.NS_TRANSACTIONS);
 
         encode_rpc_begin(out);
         out.println("<" + tr + "abort-transaction " + xmlnsAttr + "/>");
         encode_rpc_end(out);
     }
 
-    /**
-     * ------------------------------------------------------------ help
-     * functions
-     */
+    /* help functions */
 
     /**
      * Printout trace if 'debug'-flag is enabled.
      */
     private static void trace(String s) {
-        if (Element.debugLevel >= Element.DEBUG_LEVEL_SESSION)
+        if (Element.debugLevel >= Element.DEBUG_LEVEL_SESSION) {
             System.err.println("*ConfDSession: " + s);
+        }
     }
 
 }

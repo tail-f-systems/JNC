@@ -11,7 +11,6 @@
 
 package com.tailf.jnc;
 
-
 /**
  * Implements the built-in YANG data type "int32".
  * 
@@ -49,15 +48,17 @@ public class YangInt32 extends YangBaseInt<Integer> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.yang.YangInt#parse(java.lang.String)
      */
     @Override
     protected Integer decode(String s) throws NumberFormatException {
         return Integer.decode(s);
     }
-    
+
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangBaseType#cloneShallow()
      */
     @Override

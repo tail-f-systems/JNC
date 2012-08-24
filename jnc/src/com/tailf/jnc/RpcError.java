@@ -78,22 +78,23 @@ public class RpcError {
 
     /**
      * Contains a string identifying the data-model-specific or
-     * implementation-specific error condition, if one exists. This element will
-     * not be present if no appropriate application error tag can be associated
-     * with a particular error condition.
+     * implementation-specific error condition, if one exists. This element
+     * will not be present if no appropriate application error tag can be
+     * associated with a particular error condition.
      * 
      */
     public String errorAppTag;
 
     /**
      * Contains the absolute XPath expression identifying the element path to
-     * the node that is associated with the error being reported in a particular
-     * rpc-error element. This element will not be present if no appropriate
-     * payload element can be associated with a particular error condition, or
-     * if the 'bad-element' string returned in the 'error-info' container is
-     * sufficient to identify the node associated with the error. When the XPath
-     * expression is interpreted, the set of namespace declarations are those in
-     * scope on the rpc-error element, including the default namespace.
+     * the node that is associated with the error being reported in a
+     * particular rpc-error element. This element will not be present if no
+     * appropriate payload element can be associated with a particular error
+     * condition, or if the 'bad-element' string returned in the 'error-info'
+     * container is sufficient to identify the node associated with the error.
+     * When the XPath expression is interpreted, the set of namespace
+     * declarations are those in scope on the rpc-error element, including the
+     * default namespace.
      * 
      */
     public String errorPath;
@@ -107,8 +108,8 @@ public class RpcError {
 
     /**
      * Contains protocol- or data-model-specific error content. This element
-     * will not be present if no such error content is provided for a particular
-     * error condition.
+     * will not be present if no such error content is provided for a
+     * particular error condition.
      */
     public NodeSet errorInfo;
 
@@ -120,27 +121,34 @@ public class RpcError {
         this.data = data;
         try {
             Element e = data.getFirst("self::rpc-error/error-type");
-            if (e != null)
+            if (e != null) {
                 errorType = (String) e.getValue();
+            }
             e = data.getFirst("self::rpc-error/error-tag");
-            if (e != null)
+            if (e != null) {
                 errorTag = (String) e.getValue();
+            }
             e = data.getFirst("self::rpc-error/error-severity");
-            if (e != null)
+            if (e != null) {
                 errorSeverity = (String) e.getValue();
+            }
             e = data.getFirst("self::rpc-error/error-info");
-            if (e != null)
+            if (e != null) {
                 errorInfo = e.getChildren();
+            }
             e = data.getFirst("self::rpc-error/error-message");
-            if (e != null)
+            if (e != null) {
                 errorMessage = (String) e.getValue();
+            }
             e = data.getFirst("self::rpc-error/error-app-tag");
-            if (e != null)
+            if (e != null) {
                 errorAppTag = (String) e.getValue();
+            }
             e = data.getFirst("self::rpc-error/error-path");
-            if (e != null)
+            if (e != null) {
                 errorPath = (String) e.getValue();
-        } catch (JNCException e1) {
+            }
+        } catch (final JNCException e1) {
             System.err.println("Error decoding rpc-error element: "
                     + data.toXMLString() + "\ngot exception: " + e1);
             e1.printStackTrace();
@@ -155,6 +163,7 @@ public class RpcError {
     /**
      *
      */
+    @Override
     public String toString() {
         return data.toXMLString();
     }

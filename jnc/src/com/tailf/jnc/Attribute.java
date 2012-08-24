@@ -14,8 +14,8 @@ import java.io.Serializable;
 
 /**
  * This class represents an attribute for an XML element. An attribute belongs
- * to a namespace and has a name and a value. An attribute is typically assigned
- * to a {@link Element} using its setAttr method.
+ * to a namespace and has a name and a value. An attribute is typically
+ * assigned to a {@link Element} using its setAttr method.
  * <p>
  * Example:
  * 
@@ -28,7 +28,7 @@ import java.io.Serializable;
 public class Attribute implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     /**
      * The Attribute name.
      */
@@ -45,15 +45,15 @@ public class Attribute implements Serializable {
     String ns;
 
     /**
-     *
+     * Constructor without namespace or value
      */
     public Attribute(String name) {
         this.name = name;
-        this.value = null; // means not set.
+        value = null; // means not set.
     }
 
     /**
-     *
+     * Constructor without namespace
      */
     public Attribute(String name, String value) {
         this.name = name;
@@ -79,8 +79,7 @@ public class Attribute implements Serializable {
     /**
      * Sets the attribute value.
      * 
-     * @param value
-     *            Set the value of the attribute
+     * @param value Set the value of the attribute
      */
     public void setValue(String value) {
         trace("setValue: " + name + "=\"" + value + "\"");
@@ -90,6 +89,7 @@ public class Attribute implements Serializable {
     /**
      * Clones the attribute, returning an exact copy.
      */
+    @Override
     public Object clone() {
         return new Attribute(ns, name, value);
     }
@@ -97,6 +97,7 @@ public class Attribute implements Serializable {
     /**
      * Returns a string representation of this Attribute object.
      */
+    @Override
     public String toString() {
         return new String("Attribute{name=" + name + ",ns=" + ns + ",value="
                 + value + "}");
@@ -109,11 +110,13 @@ public class Attribute implements Serializable {
     String toXMLString(Element contextnode) {
         // NOTE! Namespace is allowed to be "" for attributes
         if (ns != null && ns.length() > 0) {
-            String prefix = contextnode.nsToPrefix(ns);
-            if (prefix == null)
+            final String prefix = contextnode.nsToPrefix(ns);
+            if (prefix == null) {
                 return "unknown:" + name + "=\"" + value + "\"";
-            if (prefix.length() > 0)
+            }
+            if (prefix.length() > 0) {
                 return prefix + ":" + name + "=\"" + value + "\"";
+            }
         }
         return name + "=\"" + value + "\"";
     }
@@ -135,46 +138,35 @@ public class Attribute implements Serializable {
         // NOTE: Namespace is allowed to be "" for attributes
         if (ns != null && ns.length() > 0) {
             String prefix = null;
-            if (contextnode != null)
+            if (contextnode != null) {
                 prefix = contextnode.nsToPrefix(ns);
-            else
+            } else {
                 // use default prefix map
                 prefix = Element.defaultPrefixes.nsToPrefix(ns);
+            }
             if (prefix == null) {
-                if (contextnode != null)
+                if (contextnode != null) {
                     out.print("unknown:");
-                out.print(name);
-                out.print("=\"");
-                out.print(value);
-                out.print("\"");
+                }
+                out.print(name + "=\"" + value + "\"");
                 return;
             }
             if (prefix.length() > 0) {
-                out.print(prefix);
-                out.print(":");
-                out.print(name);
-                out.print("=\"");
-                out.print(value);
-                out.print("\"");
+                out.print(prefix + ":" + name + "=\"" + value + "\"");
                 return;
             }
         }
-        out.print(name);
-        out.print("=\"");
-        out.print(value);
-        out.print("\"");
+        out.print(name + "=\"" + value + "\"");
     }
 
-    /**
-     * ------------------------------------------------------------ help
-     * functions
-     */
+    /* help functions */
 
     /**
      * Printout trace if 'debug'-flag is enabled.
      */
     private static void trace(String s) {
-        if (Element.debugLevel >= Element.DEBUG_LEVEL_ATTRIBUTE)
+        if (Element.debugLevel >= Element.DEBUG_LEVEL_ATTRIBUTE) {
             System.err.println("*Attribute: " + s);
+        }
     }
 }

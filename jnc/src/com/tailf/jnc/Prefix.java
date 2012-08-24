@@ -42,23 +42,22 @@ public class Prefix extends Attribute implements Serializable {
     /**
      * Constructs a new Prefix object which represents a prefix mapping.
      * 
-     * @param name
-     *            The prefix name
-     * @param nsValue
-     *            the uri namespace that the prefix is mapped to
+     * @param name The prefix name
+     * @param nsValue the uri namespace that the prefix is mapped to
      */
     public Prefix(String name, String nsValue) {
         super(name, nsValue);
-        this.ns = XMLNS_NAMESPACE;
-        if (name == "")
+        ns = XMLNS_NAMESPACE;
+        if (name == "") {
             qName = "xmlns";
-        else
+        } else {
             qName = "xmlns:" + name;
+        }
     }
 
     /**
-     * Returns a string representation of this prefix. as: xmlns:prefix="uri" or
-     * xmlns="uri"
+     * Returns a string representation of this prefix. as: xmlns:prefix="uri"
+     * or xmlns="uri"
      */
     public String toXMLString() {
         return qName + "=\"" + value + "\"";
@@ -67,6 +66,7 @@ public class Prefix extends Attribute implements Serializable {
     /**
      * Returns a string representation of this Attribute object.
      */
+    @Override
     public String toString() {
         return new String("Prefix{\"" + name + "\", \"" + value + "\"}");
     }
@@ -75,6 +75,7 @@ public class Prefix extends Attribute implements Serializable {
      * Encodes to XML and send it to the provided stream. Similar to the
      * toXMLString(), but without the pretty printing.
      */
+    @Override
     void encode(Transport out) {
         out.print(qName);
         out.print("=\"");

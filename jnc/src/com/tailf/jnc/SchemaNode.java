@@ -11,12 +11,11 @@
 
 package com.tailf.jnc;
 
-
 /**
- * The SchemaNode class is used to represent individual nodes in the schema tree.
- * Each generated ConfM namespace gets its schema, as a set of SchemaNode objects
- * generated in its top class All the SchemaNode's for a namespace are put into
- * hashtable that is held by the SchemaTree class.
+ * The SchemaNode class is used to represent individual nodes in the schema
+ * tree. Each generated ConfM namespace gets its schema, as a set of SchemaNode
+ * objects generated in its top class All the SchemaNode's for a namespace are
+ * put into hashtable that is held by the SchemaTree class.
  */
 
 public class SchemaNode {
@@ -85,13 +84,14 @@ public class SchemaNode {
     }
 
     // print as /foo/bar style
+    @Override
     public String toString() {
         return "SchemaNode{" + tagpath + "}";
     }
 
     /*
-     * Given an Element, find the SchemaNode, i.e. the schema class for the data
-     * element
+     * Given an Element, find the SchemaNode, i.e. the schema class for the
+     * data element
      */
 
     public static SchemaNode get(Element e) {

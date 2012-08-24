@@ -11,7 +11,6 @@
 
 package com.tailf.jnc;
 
-
 /**
  * Implements the built-in YANG data type "int16".
  * 
@@ -49,15 +48,17 @@ public class YangInt16 extends YangBaseInt<Short> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.yang.YangInt#parse(java.lang.String)
      */
     @Override
     protected Short decode(String s) throws NumberFormatException {
         return Short.decode(s);
     }
-    
+
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangBaseType#cloneShallow()
      */
     @Override

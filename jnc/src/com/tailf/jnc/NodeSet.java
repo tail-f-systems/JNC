@@ -40,23 +40,23 @@ public class NodeSet extends ArrayList<Element> {
      * Gets an element from the node set.
      */
     public Element getElement(int index) {
-        return (Element) super.get(index);
+        return super.get(index);
     }
 
     /**
      * 'Get' using path expression on nodes within the set. returning new
      * NodeSet
      * 
-     * @param pathStr
-     *            Path string to find nodes within the nodes
+     * @param pathStr Path string to find nodes within the nodes
      */
     public NodeSet get(String pathStr) throws JNCException {
-        NodeSet result = new NodeSet();
+        final NodeSet result = new NodeSet();
         for (int i = 0; i < size(); i++) {
-            Element e = getElement(i);
-            NodeSet r = e.get(pathStr);
-            if (r != null && r.size() > 0)
+            final Element e = getElement(i);
+            final NodeSet r = e.get(pathStr);
+            if (r != null && r.size() > 0) {
                 result.addAll(r);
+            }
         }
         return result;
     }
@@ -65,15 +65,15 @@ public class NodeSet extends ArrayList<Element> {
      * 'Get' using path expression on nodes within the set. returning the first
      * Element that matches
      * 
-     * @param pathStr
-     *            Path string to find an element within the nodes
+     * @param pathStr Path string to find an element within the nodes
      */
     public Element getFirst(String pathStr) throws JNCException {
         for (int i = 0; i < size(); i++) {
-            Element e = getElement(i);
-            Element r = e.getFirst(pathStr);
-            if (r != null)
+            final Element e = getElement(i);
+            final Element r = e.getFirst(pathStr);
+            if (r != null) {
                 return r;
+            }
         }
         return null;
     }
@@ -82,8 +82,9 @@ public class NodeSet extends ArrayList<Element> {
      * @return first element from this node set, or null if none.
      */
     public Element first() {
-        if (size() > 0)
+        if (size() > 0) {
             return getElement(0);
+        }
         return null;
     }
 
@@ -91,14 +92,14 @@ public class NodeSet extends ArrayList<Element> {
      * Checks if an element is a member of the NodeSet. Elements are compared
      * with {@link Element#equals(Object) Element.equals} method.
      * 
-     * @param x
-     *            Check if x is a member of the NodeSet.
+     * @param x Check if x is a member of the NodeSet.
      */
     public boolean isMember(Element x) {
         for (int i = 0; i < size(); i++) {
-            Element e = getElement(i);
-            if (e.equals(x))
+            final Element e = getElement(i);
+            if (e.equals(x)) {
                 return true;
+            }
         }
         return false;
     }
@@ -107,15 +108,15 @@ public class NodeSet extends ArrayList<Element> {
      * Checks if an element is a member of the NodeSet. Elements are compared
      * with {@link Element#equals(Object) Element.equals} method.
      * 
-     * @param x
-     *            Check if x is a member of the NodeSet
+     * @param x Check if x is a member of the NodeSet
      * @return Returns the found member or null
      */
     public Element findMember(Element x) {
         for (int i = 0; i < size(); i++) {
-            Element e = getElement(i);
-            if (e.equals(x))
+            final Element e = getElement(i);
+            if (e.equals(x)) {
                 return e;
+            }
         }
         return null;
     }
@@ -124,14 +125,13 @@ public class NodeSet extends ArrayList<Element> {
      * Removes a member element from the NodeSet. Members are compared with
      * {@link Element#equals(Object) Element.equals} method.
      * 
-     * @param x
-     *            Removes an element equals to element x.
+     * @param x Removes an element equals to element x.
      * @return 'true' if member was removed. 'false' if not found.
      * 
      */
     public boolean removeMember(Element x) {
         for (int i = 0; i < size(); i++) {
-            Element e = getElement(i);
+            final Element e = getElement(i);
             if (e.equals(x)) {
                 remove(i);
                 return true;
@@ -148,7 +148,7 @@ public class NodeSet extends ArrayList<Element> {
     public String toXMLString() {
         String s = new String();
         for (int i = 0; i < size(); i++) {
-            Element elem = getElement(i);
+            final Element elem = getElement(i);
             s = s + elem.toXMLString();
         }
         return s;
@@ -160,7 +160,7 @@ public class NodeSet extends ArrayList<Element> {
      */
     void encode(Transport out, Capabilities c) throws JNCException {
         for (int i = 0; i < size(); i++) {
-            Element elem = getElement(i);
+            final Element elem = getElement(i);
             elem.encode(out, true, c);
         }
     }

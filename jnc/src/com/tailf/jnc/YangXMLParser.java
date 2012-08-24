@@ -9,7 +9,7 @@
  */
 package com.tailf.jnc;
 
-import org.xml.sax.*;
+import org.xml.sax.InputSource;
 
 /**
  * A SAX parser, for parsing for example NETCONF messages, into a simple
@@ -31,13 +31,14 @@ public class YangXMLParser extends com.tailf.jnc.XMLParser {
     /**
      * Read in an XML file and parse it and return an element tree.
      */
+    @Override
     public YangElement readFile(String filename) throws JNCException {
         try {
-            ElementHandler handler = new ElementHandler();
+            final ElementHandler handler = new ElementHandler();
             parser.setContentHandler(handler);
             parser.parse(filename);
             return (YangElement) handler.top;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new JNCException(JNCException.PARSER_ERROR, "parse file: "
                     + filename + " error: " + e);
         }
@@ -46,16 +47,16 @@ public class YangXMLParser extends com.tailf.jnc.XMLParser {
     /**
      * Parses an XML string returning a configuration tree from it.
      * 
-     * @param is
-     *            Inputsource (byte stream) where the XML text is read from
+     * @param is Inputsource (byte stream) where the XML text is read from
      */
+    @Override
     public Element parse(InputSource is) throws JNCException {
         try {
-            ElementHandler handler = new ElementHandler();
+            final ElementHandler handler = new ElementHandler();
             parser.setContentHandler(handler);
             parser.parse(is);
             return handler.top;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             throw new JNCException(JNCException.PARSER_ERROR, "parse error: "
                     + e);

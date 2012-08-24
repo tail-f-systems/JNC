@@ -14,14 +14,12 @@ package com.tailf.jnc;
 import java.util.HashMap;
 import java.util.Set;
 
-
 /**
  * The SchemaTree class is used to represent the schemas of all namespaces
  */
 public class SchemaTree {
 
-    private static HashMap<String, HashMap<Tagpath, SchemaNode>> namespaces =
-               new HashMap<String, HashMap<Tagpath, SchemaNode>>();
+    private static HashMap<String, HashMap<Tagpath, SchemaNode>> namespaces = new HashMap<String, HashMap<Tagpath, SchemaNode>>();
 
     /**
      * If no hashmap exists for namespace, it is created. Used by generated
@@ -34,7 +32,7 @@ public class SchemaTree {
         if (namespaces.containsKey(namespace)) {
             return namespaces.get(namespace);
         }
-        HashMap<Tagpath, SchemaNode> h = new HashMap<Tagpath, SchemaNode>();
+        final HashMap<Tagpath, SchemaNode> h = new HashMap<Tagpath, SchemaNode>();
         namespaces.put(namespace, h);
         return h;
     }
@@ -64,7 +62,7 @@ public class SchemaTree {
      *         namespace, or null if not found.
      */
     public static SchemaNode lookup(String namespace, Tagpath tp) {
-        HashMap<Tagpath, SchemaNode> t = getHashMap(namespace);
+        final HashMap<Tagpath, SchemaNode> t = getHashMap(namespace);
         return t == null ? null : t.get(tp);
     }
 

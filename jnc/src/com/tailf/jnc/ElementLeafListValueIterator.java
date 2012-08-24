@@ -10,12 +10,12 @@
 
 package com.tailf.jnc;
 
-import java.util.*;
+import java.util.Iterator;
 
 /**
  * This is an iterator class that is used for iterating over all leaf-list
- * children with a specified name in a NodeSet. An object of this iterator class
- * is obtained from the {@link Element#iterator} method.
+ * children with a specified name in a NodeSet. An object of this iterator
+ * class is obtained from the {@link Element#iterator} method.
  * <p>
  * Example usage:
  * 
@@ -32,17 +32,18 @@ public class ElementLeafListValueIterator implements Iterator<Object> {
     private Iterator<Element> childrenIterator;
     private Element nextChild;
     private boolean hasNextChild = false;
-    private String name;
+    private final String name;
 
     /**
-     * Constructor to create a new children iterator for leaf-list children of a
-     * specific name.
+     * Constructor to create a new children iterator for leaf-list children of
+     * a specific name.
      */
     public ElementLeafListValueIterator(NodeSet children, String name) {
-        if (children != null)
+        if (children != null) {
             childrenIterator = children.iterator();
-        else
+        } else {
             childrenIterator = null;
+        }
         this.name = name;
     }
 
@@ -50,15 +51,19 @@ public class ElementLeafListValueIterator implements Iterator<Object> {
      * Return true if there are more children, false otherwise.
      * 
      */
+    @Override
     public boolean hasNext() {
-        if (hasNextChild)
+        if (hasNextChild) {
             return true;
-        if (childrenIterator == null)
+        }
+        if (childrenIterator == null) {
             return false;
+        }
         while (childrenIterator.hasNext()) {
-            if (name == null)
+            if (name == null) {
                 return true;
-            Element child = (Element) childrenIterator.next();
+            }
+            final Element child = childrenIterator.next();
             if (child.name.equals(name)) {
                 hasNextChild = true;
                 nextChild = child;
@@ -80,11 +85,12 @@ public class ElementLeafListValueIterator implements Iterator<Object> {
         }
         hasNextChild = false;
         while (childrenIterator.hasNext()) {
-            Element child = (Element) childrenIterator.next();
-            if (name == null)
+            final Element child = childrenIterator.next();
+            if (name == null) {
                 return child.value;
-            else if (child.name.equals(name))
+            } else if (child.name.equals(name)) {
                 return child.value;
+            }
         }
         return null;
     }
@@ -92,6 +98,7 @@ public class ElementLeafListValueIterator implements Iterator<Object> {
     /**
      * Return next child or null.
      */
+    @Override
     public Object next() {
         return nextElement();
     }
@@ -100,6 +107,7 @@ public class ElementLeafListValueIterator implements Iterator<Object> {
      * Remove is not supported.
      * 
      */
+    @Override
     public void remove() {
     }
 }

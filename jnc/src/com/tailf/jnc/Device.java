@@ -10,8 +10,9 @@
  */
 package com.tailf.jnc;
 
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.io.*;
 
 /**
  * This is a help class to provide features for managing a device with NETCONF.
@@ -38,8 +39,8 @@ import java.io.*;
  * Once we have a new session, we also get a configTree (Element) that we can
  * use to accumulate changes in for the session. This usually handy since the
  * manager code typically consists of bits and pieces that manipulate different
- * parts of the configuration. Then it is convenient to let all manager code add
- * Elements to the session specifig config tree. The tree can be accessed
+ * parts of the configuration. Then it is convenient to let all manager code
+ * add Elements to the session specifig config tree. The tree can be accessed
  * through the getConfig(String) method.
  * </p>
  * 
@@ -62,9 +63,9 @@ public class Device implements Serializable {
         ConfDSession session;
 
         SessionConnData(String n, SSHSession t, ConfDSession s) {
-            this.sessionName = n;
-            this.session = s;
-            this.sshSession = t;
+            sessionName = n;
+            session = s;
+            sshSession = t;
         }
     }
 
@@ -74,8 +75,8 @@ public class Device implements Serializable {
         Element configTree;
 
         SessionTree(String n) {
-            this.sessionName = n;
-            this.configTree = null;
+            sessionName = n;
+            configTree = null;
         }
     }
 
@@ -181,12 +182,11 @@ public class Device implements Serializable {
     /**
      * Clears the accumulation config tree for a named NETCONF session
      * 
-     * @param sessionName
-     *            symbolic Name of the session
+     * @param sessionName symbolic Name of the session
      * 
      */
     public void clearConfig(String sessionName) {
-        SessionTree t = getTreeData(sessionName);
+        final SessionTree t = getTreeData(sessionName);
         t.configTree = null;
     }
 
@@ -200,66 +200,60 @@ public class Device implements Serializable {
      * associated to the session. This method retieves this data although the
      * ssh socket to the server may be dead.
      * 
-     * @param sessionName
-     *            symbolic Name of the session
+     * @param sessionName symbolic Name of the session
      * 
      */
     public Element getConfig(String sessionName) {
-        SessionTree t = getTreeData(sessionName);
+        final SessionTree t = getTreeData(sessionName);
         return t.configTree;
     }
 
     /**
      * Sets the readTimeout associated to a named session
      * 
-     * @param sessionName
-     *            symbolic Name of the session
-     * @param readTimeout
-     *            timeout in milliseconds
+     * @param sessionName symbolic Name of the session
+     * @param readTimeout timeout in milliseconds
      */
 
     public void setReadTimeout(String sessionName, int readTimeout) {
-        SessionConnData p = getConnData(sessionName);
+        final SessionConnData p = getConnData(sessionName);
         p.sshSession.setReadTimeout(readTimeout);
     }
 
     /**
      * Gets the readTimeout associated to a named session
      * 
-     * @param sessionName
-     *            symbolic Name of the session
+     * @param sessionName symbolic Name of the session
      * @return timeout in milliseconds
      */
 
     public long getReadTimeout(String sessionName) {
-        SessionConnData p = getConnData(sessionName);
+        final SessionConnData p = getConnData(sessionName);
         return p.sshSession.getReadTimeout();
     }
 
     /**
      * Check if the named session have a saved configuration tree.
      * 
-     * @param sessionName
-     *            symbolic Name of the session
+     * @param sessionName symbolic Name of the session
      */
 
     public boolean hasConfig(String sessionName) {
-        SessionTree t = getTreeData(sessionName);
-        if (t.configTree != null)
+        final SessionTree t = getTreeData(sessionName);
+        if (t.configTree != null) {
             return true;
+        }
         return false;
     }
 
     /**
      * Sets the accumulation config tree for a named session
      * 
-     * @param sessionName
-     *            symbolic Name of the session
-     * @param e
-     *            The config tree to insert.
+     * @param sessionName symbolic Name of the session
+     * @param e The config tree to insert.
      */
     public void setConfig(String sessionName, Element e) {
-        SessionTree t = getTreeData(sessionName);
+        final SessionTree t = getTreeData(sessionName);
         t.configTree = e;
     }
 
@@ -287,18 +281,17 @@ public class Device implements Serializable {
      * cheaper operation. The method also clears any accumulated configuration
      * data we have.
      * 
-     * @param sessionName
-     *            symbolic Name of the session
+     * @param sessionName symbolic Name of the session
      * 
      */
 
     public void closeSession(String sessionName) {
-        SessionConnData data = removeConnData(sessionName);
+        final SessionConnData data = removeConnData(sessionName);
         if (data.session != null) {
             try {
                 // data.session.closeSession();
                 data.sshSession.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
             }
         }
         clearConfig(sessionName);
@@ -311,15 +304,15 @@ public class Device implements Serializable {
 
     public void close() {
         for (int i = 0; i < connSessions.size(); i++) {
-            SessionConnData d = connSessions.get(i);
+            final SessionConnData d = connSessions.get(i);
             try {
                 d.session.closeSession();
-            } catch (Exception e) {
+            } catch (final Exception e) {
             }
         }
         connSessions = new ArrayList<SessionConnData>();
         for (int i = 0; i < trees.size(); i++) {
-            SessionTree t = (SessionTree) trees.get(i);
+            final SessionTree t = trees.get(i);
             t.configTree = null;
         }
         // we keep the named config trees
@@ -347,14 +340,13 @@ public class Device implements Serializable {
      * Session s = ((SSHSession) d.getSession(&quot;cfg&quot;).getTransport()).getSession();
      * </pre>
      * 
-     * This is required if we wish to monitor the ganymed Session object for EOF
+     * This is required if we wish to monitor the ganymed Session object for
+     * EOF
      */
 
     public ConfDSession getSession(String sessionName) {
-        SessionConnData data = getConnData(sessionName);
-        if (data == null)
-            return null;
-        return data.session;
+        final SessionConnData data = getConnData(sessionName);
+        return (data == null) ? null : data.session;
     }
 
     /**
@@ -364,16 +356,14 @@ public class Device implements Serializable {
      */
 
     public SSHSession getSSHSession(String sessionName) {
-        SessionConnData data = getConnData(sessionName);
-        if (data == null)
-            return null;
-        return data.sshSession;
+        final SessionConnData data = getConnData(sessionName);
+        return (data == null) ? null : data.sshSession;
     }
 
     /**
-     * This method finds the {@link DeviceUser} associated to the localUser user
-     * name and SSH connects to the device, this method must be called prior to
-     * establishing any sessions (channels)
+     * This method finds the {@link DeviceUser} associated to the localUser
+     * user name and SSH connects to the device, this method must be called
+     * prior to establishing any sessions (channels)
      */
     public void connect(String localUser) throws IOException, JNCException {
         connect(localUser, 0);
@@ -381,26 +371,26 @@ public class Device implements Serializable {
 
     /**
      * This connect() method has an additional timeout paramater. This is not
-     * the same thing as the readTimeout. The connectTimeout only applies to the
-     * actual connect.
+     * the same thing as the readTimeout. The connectTimeout only applies to
+     * the actual connect.
      * 
-     * @param localUser
-     *            The name of a local (for the EMS) user
+     * @param localUser The name of a local (for the EMS) user
      */
 
     public void connect(String localUser, int connectTimeout)
             throws IOException, JNCException {
         DeviceUser u = null;
         for (int i = 0; i < users.size(); i++) {
-            DeviceUser u2 = (DeviceUser) users.get(i);
-            if (u2.localUser.equals(localUser)) {
+            final DeviceUser u2 = users.get(i);
+            if (u2.getLocalUser().equals(localUser)) {
                 u = u2;
                 break;
             }
         }
-        if (u == null)
+        if (u == null) {
             throw new JNCException(JNCException.AUTH_FAILED, "No such user: "
                     + localUser);
+        }
         con = new SSHConnection(mgmt_ip, mgmt_port, connectTimeout);
         auth(u);
         return;
@@ -415,18 +405,17 @@ public class Device implements Serializable {
      * in a list of configTrees, thus we can have named configTrees although
      * there is no existing session towards the device.
      */
-
     public void newSessionConfigTree(String sessionName) {
-        if (getTreeData(sessionName) == null)
+        if (getTreeData(sessionName) == null) {
             trees.add(new SessionTree(sessionName));
+        }
     }
 
     /**
      * Creates a new named NETCONF session. Each named session corresponds to
      * one SSH channel towards the agent
      * 
-     * @param sessionName
-     *            symbolic Name of the session
+     * @param sessionName symbolic Name of the session
      * 
      */
     public void newSession(String sessionName) throws JNCException,
@@ -439,42 +428,42 @@ public class Device implements Serializable {
      * with the same name. Thus when we reconnect a Device, we must first call
      * closeSession(sessionName);
      * 
-     * @param sub
-     *            IO subscriber for trace messages.
-     * @param sessionName
-     *            symbolic Name of the session
+     * @param sub IO subscriber for trace messages.
+     * @param sessionName symbolic Name of the session
      */
     public void newSession(IOSubscriber sub, String sessionName)
             throws JNCException, IOException, YangException {
-        SessionConnData data = getConnData(sessionName);
+        final SessionConnData data = getConnData(sessionName);
         // always create the configTree
         newSessionConfigTree(sessionName);
 
         // Check that we don't already have a session with
         // that name
-        if (data != null)
+        if (data != null) {
             throw new YangException(YangException.BAD_SESSION_NAME,
                     sessionName);
+        }
 
-        YangXMLParser parser = new com.tailf.jnc.YangXMLParser();
-        SSHSession sshSession = new SSHSession(con, defaultReadTimeout);
-        if (sub != null)
+        final YangXMLParser parser = new com.tailf.jnc.YangXMLParser();
+        final SSHSession sshSession = new SSHSession(con, defaultReadTimeout);
+        if (sub != null) {
             sshSession.addSubscriber(sub);
-        ConfDSession session = new ConfDSession(sshSession, parser);
-        SessionConnData d = new SessionConnData(sessionName, sshSession,
-                session);
+        }
+        final ConfDSession session = new ConfDSession(sshSession, parser);
+        final SessionConnData d = new SessionConnData(sessionName,
+                sshSession, session);
         connSessions.add(d);
 
-        if (backlog.size() > 0)
+        if (backlog.size() > 0) {
             runBacklog(sessionName);
+        }
         return;
     }
 
     /**
      * Adds the given configuration tree to the list of backlogs.
      * 
-     * @param e
-     *            Config tree to be saved.
+     * @param e Config tree to be saved.
      */
     public void addBackLog(Element e) {
         backlog.add(e);
@@ -485,31 +474,32 @@ public class Device implements Serializable {
      */
     public Element[] getBacklog() {
         if (backlog != null && backlog.size() > 0) {
-            Element[] a = new Element[backlog.size()];
-            return (Element[]) backlog.toArray(a);
+            final Element[] a = new Element[backlog.size()];
+            return backlog.toArray(a);
         }
         return null;
     }
 
     /**
-     * Run the backlog. A backlog is typically saved when a configuration change
-     * is made (for several devices) and the device is down. The backlog saves
-     * the configuration update so that it can be re-sent later. This method
-     * runs the saved backlog. It is automatically run whenever we succeeed in
-     * creating a new sesssion.
+     * Run the backlog. A backlog is typically saved when a configuration
+     * change is made (for several devices) and the device is down. The backlog
+     * saves the configuration update so that it can be re-sent later. This
+     * method runs the saved backlog. It is automatically run whenever we
+     * succeeed in creating a new sesssion.
      * 
-     * @param sessionName
-     *            symbolic Name of the session
+     * @param sessionName symbolic Name of the session
      * 
      */
-    public void runBacklog(String sessionName) throws IOException, JNCException {
+    public void runBacklog(String sessionName) throws IOException,
+            JNCException {
         System.out.println("Running backlog ");
-        SessionConnData data = getConnData(sessionName);
-        if (data == null)
+        final SessionConnData data = getConnData(sessionName);
+        if (data == null) {
             throw new YangException(YangException.BAD_SESSION_NAME,
                     sessionName);
+        }
         for (int i = 0; i < backlog.size(); i++) {
-            Element e = (Element) backlog.get(i);
+            final Element e = backlog.get(i);
             System.out.println("Bacloh " + e.toXMLString());
             data.session.editConfig(e);
             backlog.remove(i);
@@ -520,38 +510,37 @@ public class Device implements Serializable {
      * Returns a string with information about this device.
      * 
      */
+    @Override
     public String toString() {
-
         String s = "Device: " + name + " " + mgmt_ip + ":" + mgmt_port + "\n";
-        for (int i = 0; i < connSessions.size(); i++) {
-            SessionConnData p = (SessionConnData) connSessions.get(i);
+        for (final SessionConnData p : connSessions) {
             s += ("   session: " + p.sessionName);
         }
         return s;
     }
 
     private SessionConnData getConnData(String sessionName) {
-        for (int i = 0; i < connSessions.size(); i++) {
-            SessionConnData p = (SessionConnData) connSessions.get(i);
-            if (p.sessionName.compareTo(sessionName) == 0)
+        for (final SessionConnData p : connSessions) {
+            if (p.sessionName.equals(sessionName)) {
                 return p;
+            }
         }
         return null;
     }
 
     private SessionTree getTreeData(String sessionName) {
-        for (int i = 0; i < trees.size(); i++) {
-            SessionTree t = (SessionTree) trees.get(i);
-            if (t.sessionName.equals(sessionName))
+        for (final SessionTree t : trees) {
+            if (t.sessionName.equals(sessionName)) {
                 return t;
+            }
         }
         return null;
     }
 
     private SessionConnData removeConnData(String sessionName) {
         for (int i = 0; i < connSessions.size(); i++) {
-            SessionConnData p = (SessionConnData) connSessions.get(i);
-            if (p.sessionName.compareTo(sessionName) == 0) {
+            final SessionConnData p = connSessions.get(i);
+            if (p.sessionName.equals(sessionName)) {
                 connSessions.remove(i);
                 return p;
             }
@@ -559,16 +548,23 @@ public class Device implements Serializable {
         return null;
     }
 
-    private void auth(DeviceUser currentUser) throws IOException, JNCException {
-        if (currentUser.password != null)
-            con.authenticateWithPassword(currentUser.remoteUser,
-                    currentUser.password);
-        else if (currentUser.pemPrivateKey != null)
-            con.authenticateWithPublicKey(currentUser.remoteUser,
-                    currentUser.pemPrivateKey, currentUser.keyPassPhrase);
-        else if (currentUser.pemFile != null)
-            con.authenticateWithPublicKeyFile(currentUser.remoteUser,
-                    currentUser.pemFile, currentUser.keyPassPhrase);
+    private void auth(DeviceUser currentUser)
+            throws IOException, JNCException {
+        if (currentUser.getPassword() != null) {
+            con.authenticateWithPassword(
+                    currentUser.getRemoteuser(),
+                    currentUser.getPassword());
+        } else if (currentUser.getPemPrivateKey() != null) {
+            con.authenticateWithPublicKey(
+                    currentUser.getRemoteuser(),
+                    currentUser.getPemPrivateKey(),
+                    currentUser.getKeyPassPhrase());
+        } else if (currentUser.getPemFile() != null) {
+            con.authenticateWithPublicKeyFile(
+                    currentUser.getRemoteuser(),
+                    currentUser.getPemFile(),
+                    currentUser.getKeyPassPhrase());
+        }
     }
 
 }

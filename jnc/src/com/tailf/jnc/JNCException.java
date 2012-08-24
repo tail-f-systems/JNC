@@ -28,16 +28,16 @@ public class JNCException extends Exception {
         this.opaqueData = opaqueData;
         if (errorCode == RPC_REPLY_ERROR) {
             // set rpcErrors array to the returned errors
-            Element t = (Element) opaqueData;
+            final Element t = (Element) opaqueData;
             try {
-                NodeSet errors = t.get("self::rpc-reply/rpc-error");
+                final NodeSet errors = t.get("self::rpc-reply/rpc-error");
                 if (errors != null) {
                     rpcErrors = new RpcError[errors.size()];
                     for (int i = 0; i < errors.size(); i++) {
-                        rpcErrors[i] = new RpcError((Element) errors.get(i));
+                        rpcErrors[i] = new RpcError(errors.get(i));
                     }
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 System.err.println("rpc-error can't be parsed: "
                         + t.toXMLString());
                 e.printStackTrace();
@@ -62,20 +62,20 @@ public class JNCException extends Exception {
      * <li> {@link #REVISION_ERROR}
      * </ul>
      * <p>
-     * Depending on the value the opaqueData field may be set accordingly. If so
-     * this is described below for each possible value.
+     * Depending on the value the opaqueData field may be set accordingly. If
+     * so this is described below for each possible value.
      */
     protected int errorCode;
 
     /**
-     * Contextual information describing the error. The meaning of this field as
-     * is described for each possible errorCode value.
+     * Contextual information describing the error. The meaning of this field
+     * as is described for each possible errorCode value.
      */
     protected Object opaqueData = null;
 
     /**
-     * If errorCode is RPC_REPLY_ERROR the rpc-error is parsed and the rpcErrors
-     * array will contain the returned error information.
+     * If errorCode is RPC_REPLY_ERROR the rpc-error is parsed and the
+     * rpcErrors array will contain the returned error information.
      */
     private RpcError[] rpcErrors;
 
@@ -98,8 +98,8 @@ public class JNCException extends Exception {
     public static final int SESSION_ERROR = -7;
 
     /**
-     * This element has already been used. The opaqueData field is the offending
-     * Element object.
+     * This element has already been used. The opaqueData field is the
+     * offending Element object.
      */
     public static final int ELEMENT_ALREADY_IN_USE = -8;
 
@@ -122,10 +122,10 @@ public class JNCException extends Exception {
 
     /**
      * Revision error. When we tried to encode a configuration tree in order to
-     * send it to a device - A revision error was encountered. This only applies
-     * to ConfM code. A revision error occurs when we try to encode something
-     * the receiving node doesn't understand, such as an enumeration/bit value
-     * the node cannot understand
+     * send it to a device - A revision error was encountered. This only
+     * applies to ConfM code. A revision error occurs when we try to encode
+     * something the receiving node doesn't understand, such as an
+     * enumeration/bit value the node cannot understand
      */
     public static final int REVISION_ERROR = -12;
 
@@ -141,6 +141,7 @@ public class JNCException extends Exception {
      * generate an appropriate error string.
      */
 
+    @Override
     public String toString() {
         switch (errorCode) {
         case AUTH_FAILED:
@@ -152,11 +153,12 @@ public class JNCException extends Exception {
         case PARSER_ERROR:
             return "Parse error: " + opaqueData;
         case RPC_REPLY_ERROR:
-            if (opaqueData != null)
+            if (opaqueData != null) {
                 return "rpc-reply error: "
                         + ((Element) opaqueData).toXMLString();
-            else
+            } else {
                 return "rpc-reply error";
+            }
         case SESSION_ERROR:
             return "Session error: " + opaqueData;
         case ELEMENT_ALREADY_IN_USE:

@@ -13,8 +13,8 @@ package com.tailf.jnc;
 
 /**
  * The Tagpath class is used to represent the name of individual schema nodes.
- * Each ConfM SchemaNode is identified by a Tagpath. This class really belongs to
- * the ConfM package, but resides here nevertheless.
+ * Each ConfM SchemaNode is identified by a Tagpath. This class really belongs
+ * to the ConfM package, but resides here nevertheless.
  */
 
 public class Tagpath {
@@ -29,22 +29,26 @@ public class Tagpath {
     }
 
     public Tagpath(String s) {
-        String[] tags = s.split("/");
+        final String[] tags = s.split("/");
         p = new String[tags.length];
-        for (int i = 0; i < tags.length; i++)
+        for (int i = 0; i < tags.length; i++) {
             p[i] = new String(tags[i]);
+        }
     }
 
+    @Override
     public String toString() {
         String ret = "";
         for (int i = 0; i < p.length; i++) {
             ret += p[i];
-            if (i != p.length - 1)
+            if (i != p.length - 1) {
                 ret += "/";
+            }
         }
         return ret;
     }
 
+    @Override
     public int hashCode() {
         int h = 0;
         for (int i = 0; i < p.length; i++) {
@@ -53,13 +57,15 @@ public class Tagpath {
         return h;
     }
 
+    @Override
     public boolean equals(Object o) {
         if ((o instanceof Tagpath)) {
-            Tagpath tp = (Tagpath) o;
+            final Tagpath tp = (Tagpath) o;
             if (tp.p.length == p.length) {
                 for (int i = 0; i < tp.p.length; i++) {
-                    if (!tp.p[i].equals(p[i]))
+                    if (!tp.p[i].equals(p[i])) {
                         return false;
+                    }
                 }
                 return true;
             }

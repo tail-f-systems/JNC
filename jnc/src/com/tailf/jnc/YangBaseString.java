@@ -41,13 +41,15 @@ public class YangBaseString extends YangBaseType<String> {
      */
     @Override
     public void setValue(String value) throws YangException {
-        YangException.throwException(value == null, new NullPointerException());
+        YangException.throwException(value == null,
+                new NullPointerException());
         this.value = value;
         check();
     }
 
     /**
-     * Identity method provided because this class extends the YangBaseType class.
+     * Identity method provided because this class extends the YangBaseType
+     * class.
      * 
      * @param s A string.
      * @return s.
@@ -61,14 +63,15 @@ public class YangBaseString extends YangBaseType<String> {
      * Compares type of obj with this object to see if they can be equal.
      * 
      * @param obj Object to compare type with.
-     * @return true if obj is an instance of YangBaseString or java.lang.String;
-     *         false otherwise.
+     * @return true if obj is an instance of YangBaseString or
+     *         java.lang.String; false otherwise.
      */
     @Override
     public boolean canEqual(Object obj) {
         return obj instanceof YangBaseString;
     }
-    
+
+    @Override
     protected YangBaseString cloneShallow() throws YangException {
         return new YangBaseString(new String(value));
     }
@@ -82,7 +85,7 @@ public class YangBaseString extends YangBaseType<String> {
      * @throws YangException If regexp has a syntax error or does not match.
      */
     protected void pattern(String regex) throws YangException {
-        pattern(new String[] {regex});
+        pattern(new String[] { regex });
     }
 
     /**
@@ -90,7 +93,7 @@ public class YangBaseString extends YangBaseType<String> {
      * 
      * @param regexes The regular expressions.
      * @throws YangException If any regexp in regexes has a syntax error or
-     *         does not match.
+     *             does not match.
      */
     protected void pattern(String[] regexes) throws YangException {
         YangException.throwException(!Utils.matches(value, regexes), value);
@@ -121,7 +124,7 @@ public class YangBaseString extends YangBaseType<String> {
      * @throws YangException If the comparison does not evaluate to true.
      */
     protected void exact(int length) throws YangException {
-        Utils.restrict(this.value, length, Utils.Operator.EQ);
+        Utils.restrict(value, length, Utils.Operator.EQ);
     }
 
     /**

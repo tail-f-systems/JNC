@@ -11,7 +11,6 @@
 
 package com.tailf.jnc;
 
-
 /**
  * Implements the built-in YANG data type "uint8".
  * 
@@ -26,7 +25,7 @@ public class YangUInt8 extends YangInt16 {
      * 
      * @param s The string.
      * @throws YangException If value could not be parsed from s or if the
-     *                        parsed value is negative or larger than 0xff.
+     *             parsed value is negative or larger than 0xff.
      */
     public YangUInt8(String s) throws YangException {
         super(s);
@@ -49,6 +48,7 @@ public class YangUInt8 extends YangInt16 {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangBaseType#cloneShallow()
      */
     @Override

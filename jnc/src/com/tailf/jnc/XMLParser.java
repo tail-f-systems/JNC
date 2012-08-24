@@ -9,9 +9,14 @@
  */
 package com.tailf.jnc;
 
-import java.io.*;
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
+import java.io.ByteArrayInputStream;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
  * A simple SAX parser, for parsing NETCONF messages, into a simple
@@ -28,14 +33,14 @@ public class XMLParser {
      */
     public XMLParser() throws JNCException {
         try {
-            String javaVersion = System.getProperty("java.version");
+            final String javaVersion = System.getProperty("java.version");
             if (javaVersion.startsWith("1.4")) {
                 parser = XMLReaderFactory
                         .createXMLReader("org.apache.crimson.parser.XMLReaderImpl");
             } else {
                 parser = XMLReaderFactory.createXMLReader();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new JNCException(JNCException.PARSER_ERROR,
                     "failed to initialize parser: " + e);
         }
@@ -43,8 +48,8 @@ public class XMLParser {
     }
 
     /**
-     * The handler with hooks for startElement etc. The SAX parser will build up
-     * the parse tree, by calling these hooks.
+     * The handler with hooks for startElement etc. The SAX parser will build
+     * up the parse tree, by calling these hooks.
      */
     private class ConfHandler extends DefaultHandler {
 
@@ -53,19 +58,21 @@ public class XMLParser {
         public Element top;
         public PrefixMap prefixes = null;
 
+        @Override
         public void startElement(String uri, String localName, String qName,
                 Attributes attributes) throws SAXException {
-            Element child = new Element(uri, localName);
+            final Element child = new Element(uri, localName);
             child.prefixes = prefixes;
             prefixes = null;
 
             // add other attributes
             for (int i = 0; i < attributes.getLength(); i++) {
-                String attrName = attributes.getLocalName(i);
+                final String attrName = attributes.getLocalName(i);
                 // String attrType= attributes.getType(i);
-                String attrUri = attributes.getURI(i);
-                String attrValue = attributes.getValue(i);
-                Attribute attr = new Attribute(attrUri, attrName, attrValue);
+                final String attrUri = attributes.getURI(i);
+                final String attrValue = attributes.getValue(i);
+                final Attribute attr = new Attribute(attrUri, attrName,
+                        attrValue);
                 // System.out.println("ATTRIBUTE: "+attributes.getQName(i)+
                 // "  URI="+attributes.getURI(i));
                 trace("add attr: " + attr);
@@ -81,6 +88,7 @@ public class XMLParser {
             current = child; // step down
         }
 
+        @Override
         public void endElement(String uri, String localName, String qName) {
             // check that we don't have mixed content
             if (current.hasChildren() && current.value != null) {
@@ -91,16 +99,20 @@ public class XMLParser {
             current = current.getParent();
         }
 
+        @Override
         public void characters(char[] ch, int start, int length) {
-            if (current.value == null)
+            if (current.value == null) {
                 current.value = new String();
+            }
             current.value = current.value + new String(ch, start, length);
         }
 
+        @Override
         public void startPrefixMapping(String prefix, String uri) {
             trace("startPrefixMapping: uri=\"" + uri + "\" prefix=" + prefix);
-            if (prefixes == null)
+            if (prefixes == null) {
                 prefixes = new PrefixMap();
+            }
             prefixes.add(new Prefix(prefix, uri));
             trace("added prefixmapping: " + prefix);
         }
@@ -111,13 +123,13 @@ public class XMLParser {
      */
     public Element readFile(String filename) throws JNCException {
         try {
-            ConfHandler handler = new ConfHandler();
+            final ConfHandler handler = new ConfHandler();
             parser.setContentHandler(handler);
             parser.parse(filename);
             return handler.top;
             // } catch (INMException e) {
             // throw e;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new JNCException(JNCException.PARSER_ERROR, "parse file: "
                     + filename + " error: " + e);
         }
@@ -126,18 +138,17 @@ public class XMLParser {
     /**
      * Parses an XML string returning an element tree from it.
      * 
-     * @param is
-     *            Inputsource (byte stream) where the XML text is read from
+     * @param is Inputsource (byte stream) where the XML text is read from
      */
     public Element parse(InputSource is) throws JNCException {
         try {
-            ConfHandler handler = new ConfHandler();
+            final ConfHandler handler = new ConfHandler();
             parser.setContentHandler(handler);
             parser.parse(is);
             return handler.top;
             // } catch (INMException e) {
             // throw e;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new JNCException(JNCException.PARSER_ERROR, "parse error: "
                     + e);
         }
@@ -147,12 +158,12 @@ public class XMLParser {
      * Parses an XML String, returning a Element tree representing the XML
      * structure.
      * 
-     * @param str
-     *            String containing the XML text to parse
+     * @param str String containing the XML text to parse
      */
     public Element parse(String str) throws JNCException {
-        ByteArrayInputStream istream = new ByteArrayInputStream(str.getBytes());
-        InputSource is = new InputSource(istream);
+        final ByteArrayInputStream istream = new ByteArrayInputStream(
+                str.getBytes());
+        final InputSource is = new InputSource(istream);
         return parse(is);
     }
 
@@ -160,7 +171,8 @@ public class XMLParser {
      * trace
      */
     protected void trace(String s) {
-        if (Element.debugLevel >= Element.DEBUG_LEVEL_PARSER)
+        if (Element.debugLevel >= Element.DEBUG_LEVEL_PARSER) {
             System.err.println("*XMLParser: " + s);
+        }
     }
 }

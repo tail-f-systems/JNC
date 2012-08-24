@@ -9,8 +9,9 @@
  */
 package com.tailf.jnc;
 
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * A SAX parser, for parsing for example NETCONF messages,
@@ -22,8 +23,8 @@ import org.xml.sax.helpers.*;
  */
 
 /**
- * The handler with hooks for startElement etc. The SAX parser will build up the
- * parse tree, by calling these hooks.
+ * The handler with hooks for startElement etc. The SAX parser will build up
+ * the parse tree, by calling these hooks.
  */
 class ElementHandler extends DefaultHandler {
 
@@ -37,6 +38,7 @@ class ElementHandler extends DefaultHandler {
     String leafValue;
     int unknownLevel = 0;
 
+    @Override
     public void startElement(String uri, String localName, String qName,
             Attributes attributes) throws SAXException {
 
@@ -46,12 +48,13 @@ class ElementHandler extends DefaultHandler {
         }
 
         try {
-            Element parent = current;
+            final Element parent = current;
             Element child = null;
 
             child = YangElement.createInstance(this, parent, uri, localName);
-            if (top == null)
+            if (top == null) {
                 top = child;
+            }
 
             if (child == null && unknownLevel == 1) {
                 // we're entering XML data that's not
@@ -73,15 +76,15 @@ class ElementHandler extends DefaultHandler {
             prefixes = null;
             addOtherAttributes(attributes, child);
             current = child; // step down
-        } catch (JNCException e) {
+        } catch (final JNCException e) {
             e.printStackTrace();
             throw new SAXException(e.toString());
         }
     }
 
-    private void unkownStartElement(String uri, String localName, String qName,
-            Attributes attributes) throws SAXException {
-        Element child = new Element(uri, localName);
+    private void unkownStartElement(String uri, String localName,
+            String qName, Attributes attributes) throws SAXException {
+        final Element child = new Element(uri, localName);
         child.prefixes = prefixes;
         prefixes = null;
         addOtherAttributes(attributes, child);
@@ -96,11 +99,11 @@ class ElementHandler extends DefaultHandler {
     private void addOtherAttributes(Attributes attributes, Element child) {
         // add other attributes
         for (int i = 0; i < attributes.getLength(); i++) {
-            String attrName = attributes.getLocalName(i);
+            final String attrName = attributes.getLocalName(i);
             // String attrType= attributes.getType(i);
-            String attrUri = attributes.getURI(i);
-            String attrValue = attributes.getValue(i);
-            Attribute attr = new Attribute(attrUri, attrName, attrValue);
+            final String attrUri = attributes.getURI(i);
+            final String attrValue = attributes.getValue(i);
+            final Attribute attr = new Attribute(attrUri, attrName, attrValue);
             child.addAttr(attr);
         }
     }
@@ -115,6 +118,7 @@ class ElementHandler extends DefaultHandler {
         current = current.getParent();
     }
 
+    @Override
     public void endElement(String uri, String localName, String qName)
             throws SAXException {
         if (unknownLevel > 0) {
@@ -128,7 +132,8 @@ class ElementHandler extends DefaultHandler {
                 // If it's a Leaf - we need to set value properly using
                 // the setLeafValue method which will check
                 // restrictions
-                ((YangElement) current).setLeafValue(leafNs, leafName, leafValue);
+                ((YangElement) current).setLeafValue(leafNs, leafName,
+                        leafValue);
             } else {
                 // check that we don't have mixed content
                 // System.out.println("XXXXXXXXXXXX" + current);
@@ -137,23 +142,26 @@ class ElementHandler extends DefaultHandler {
                     current.value = null;
                 }
             }
-        } catch (JNCException e) {
+        } catch (final JNCException e) {
             e.printStackTrace();
             throw new SAXException(e.toString());
         }
         // step up
-        if (!leaf)
+        if (!leaf) {
             current = current.getParent();
-        else
+        } else {
             leaf = false;
+        }
     }
 
     private void unknownCharacters(char[] ch, int start, int length) {
-        if (current.value == null)
+        if (current.value == null) {
             current.value = new String();
+        }
         current.value = current.value + new String(ch, start, length);
     }
 
+    @Override
     public void characters(char[] ch, int start, int length) {
         if (unknownLevel > 0) {
             unknownCharacters(ch, start, length);
@@ -163,15 +171,18 @@ class ElementHandler extends DefaultHandler {
         if (leaf) {
             leafValue = leafValue + new String(ch, start, length);
         } else {
-            if (current.value == null)
+            if (current.value == null) {
                 current.value = new String();
+            }
             current.value = current.value + new String(ch, start, length);
         }
     }
 
+    @Override
     public void startPrefixMapping(String prefix, String uri) {
-        if (prefixes == null)
+        if (prefixes == null) {
             prefixes = new PrefixMap();
+        }
         prefixes.add(new Prefix(prefix, uri));
     }
 }
