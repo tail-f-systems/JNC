@@ -1784,7 +1784,9 @@ class MethodGenerator(object):
         else:
             method.add_line('return new String[] {')
             for key_stmt in self.gen.key_stmts:
-                method.add_line('"'.join([' ' * 4, key_stmt.arg, ',']))
+                method.add_line('"'.join([' ' * 4,
+                                          camelize(key_stmt.arg),
+                                          ',']))
             method.add_line('};')
         return self.fix_imports(method)
 
@@ -1824,7 +1826,7 @@ class MethodGenerator(object):
             fields = []
         for i in range(len(fields) - 1, -1, -1):
             cond = ''
-            if i > 0:
+            if i < len(fields) - 1:
                 cond = 'else '
             add_child.add_line(''.join([cond, 'if (child instanceof ',
                     normalize(fields[i]), ') ', camelize(fields[i]), ' = (',
@@ -1920,12 +1922,12 @@ class MethodGenerator(object):
                 if i == 2:
                     javadoc2.append('The keys are specified as strings.')
                 for key_stmt in self.gen.key_stmts:
-                    javadoc2.append(''.join(['@param ', key_stmt.arg,
+                    javadoc2.append(''.join(['@param ', camelize(key_stmt.arg),
                         'Value Key argument of child.']))
                     param_type, _ = get_types(key_stmt, self.ctx)
                     if i == 2:
                         param_type = 'String'
-                    method.add_parameter(param_type, key_stmt.arg)
+                    method.add_parameter(param_type, camelize(key_stmt.arg))
                 new_child = [self.n, ' ', self.n2, ' = new ', self.n, '(']
                 new_child.append(', '.join([s.arg for s in self.gen.key_stmts]))
                 new_child.append(');')
@@ -1971,7 +1973,7 @@ class MethodGenerator(object):
         """Returns a java iterator method"""
         if not(self.is_leaflist or self.is_list):
             return None
-        res = JavaMethod(name=(camelize(self.stmt.arg) + 'Iterator'))
+        res = JavaMethod(name=(self.n2 + 'Iterator'))
         res.add_javadoc(''.join(['Iterator method for the ', self.stmt.keyword,
                                  ' "', self.stmt.arg, '".']))
         res.add_javadoc(''.join(['@return An iterator for the ',
@@ -2077,12 +2079,6 @@ class LeafMethodGenerator(MethodGenerator):
                         param_types.append('int')
                         param_names.append('fractionDigits')
                         line.extend([', ', param_names[-1]])
-                    elif self.type_str[0] == 'com.tailf.jnc.YangUnion':
-                        line.append(', new String[] {')
-                        for type_stmt in self.stmt_type.search('type'):
-                            member_type, _ = get_types(type_stmt, self.ctx)
-                            line.append('"' + member_type + '", ')
-                        line.append('}')
                     # FIXME: Add support for bits, leafref, instance-identifier, etc.
                     # TODO: Write functions that returns appropriate types and names
                     # FIXME: Some types may be incorrectly classified as
@@ -2090,6 +2086,12 @@ class LeafMethodGenerator(MethodGenerator):
                 else:
                     param_types = ['String']
                     method.add_javadoc('using a String value.')
+                if self.type_str[0] == 'com.tailf.jnc.YangUnion':
+                    line.append(', new String[] {')
+                    for type_stmt in self.stmt_type.search('type'):
+                        member_type, _ = get_types(type_stmt, self.ctx)
+                        line.append('"' + member_type + '", ')
+                    line.append('}')
                 line.append('));')
                 method.add_line(''.join(line))
             for param_type, param_name in zip(param_types, param_names):
@@ -2177,20 +2179,20 @@ class LeafMethodGenerator(MethodGenerator):
         if not self.is_string and self.is_leaflist:
             mark_methods.append(JavaMethod())
         for i, mark_method in enumerate(mark_methods):
-            mark_method.set_name('mark' + normalize(self.stmt.arg) + normalize(op))
+            mark_method.set_name('mark' + self.n + normalize(op))
             mark_method.add_exception('JNCException')
-            path = self.stmt.arg
+            path = self.n2
             mark_method.add_javadoc(''.join(['Marks the ', self.stmt.keyword,
                                              ' "', self.stmt.arg,
                                              '" with operation "', op, '".']))
             if self.is_leaflist:
-                path += '[name=\'" + ' + self.stmt.arg + 'Value + "\']'
-                javadoc = '@param ' + self.stmt.arg + 'Value The value to mark'
+                path += '[name=\'" + ' + self.n2 + 'Value + "\']'
+                javadoc = '@param ' + self.n2 + 'Value The value to mark'
                 param_type = self.type_str[0]
                 if i == 1:
                     javadoc += ', given as a String'
                     param_type = 'String'
-                mark_method.add_parameter(param_type, self.stmt.arg + 'Value')
+                mark_method.add_parameter(param_type, self.n2 + 'Value')
                 mark_method.add_javadoc(javadoc)
             mark_method.add_line('markLeaf' + normalize(op) + '("' + path + '");')
             self.fix_imports(mark_method, child=True)
@@ -2316,11 +2318,11 @@ class ContainerMethodGenerator(MethodGenerator):
 
     def child_field(self):
         """Returns a string representing java code for a field"""
-        res = JavaValue(name=camelize(self.stmt.arg), value='null')
+        res = JavaValue(name=self.n2, value='null')
         res.add_javadoc(' '.join(['Field for child', self.stmt.keyword,
                                   '"' + self.stmt.arg + '".']))
-        res.add_modifier(normalize(self.stmt.arg))
-        res.add_dependency(normalize(self.stmt.arg))
+        res.add_modifier(self.n)
+        res.add_dependency(self.n)
         return self.fix_imports(res, child=True)
 
     def deleters(self):
@@ -2405,7 +2407,7 @@ class ListMethodGenerator(MethodGenerator):
                     setValue.extend(['new ', jnc, '(', key.arg, 'Value'])
                     if jnc == 'YangUnion':
                         setValue.append(', new String [] {')
-                        for type_stmt in key.search('type'):
+                        for type_stmt in key.search_one('type').search('type'):
                             member_type, _ = get_types(type_stmt, self.ctx)
                             setValue.append('"' + member_type + '", ')
                         setValue.append('}')
