@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: latin-1 -*-
-"""JPyang: Java output plug-in
+"""JNC: Java NETCONF Client plug-in
  * Copyright (c) 2012 Tail-F Systems AB, Stockholm, Sweden
  * All rights reserved.
  *
@@ -36,15 +36,15 @@
 For complete functionality, invoke with:
 > pyang \
     --path <yang search path> \
-    --format java \
-    --jpyang-output <package.name> \
-    --jpyang-verbose \
-    --jpyang-ignore-errors \
-    --jpyang-javadoc <javadoc directory path> \
+    --format jnc \
+    --jnc-output <package.name> \
+    --jnc-verbose \
+    --jnc-ignore-errors \
+    --jnc-javadoc <javadoc directory path> \
     <file.yang>
 
 Or, if you like to keep things simple:
-> pyang -f jpyang -d <package.name> <file.yang>
+> pyang -f jnc -d <package.name> <file.yang>
 
 """
 
@@ -62,12 +62,12 @@ from pyang import plugin, util, error
 
 
 def pyang_plugin_init():
-    """Registers an instance of the jpyang plugin"""
-    plugin.register_plugin(JPyangPlugin())
+    """Registers an instance of the jnc plugin"""
+    plugin.register_plugin(JNCPlugin())
 
 
-class JPyangPlugin(plugin.PyangPlugin):
-    """The plug-in class of JPyang.
+class JNCPlugin(plugin.PyangPlugin):
+    """The plug-in class of JNC.
 
     The methods of this class are invoked by pyang during initialization. The
     emit method is of particular interest if you are new to writing plugins to
@@ -78,71 +78,71 @@ class JPyangPlugin(plugin.PyangPlugin):
     """
 
     def add_output_format(self, fmts):
-        """Adds 'java' and 'jpyang' as valid output formats and sets the format
-        to jpyang if the --jpyang-output option is set
+        """Adds 'jnc' as a valid output format and sets the format to jnc if
+        the --jnc-output option is set, but --format is not.
         
         """
         self.multiple_modules = False
-        fmts['java'] = fmts['jpyang'] = self
+        fmts['jnc'] = self
 
         args = sys.argv[1:]
         if not any(x in args for x in ('-f', '--format')):
-            if any(x in args for x in ('-d', '--jpyang-output')):
+            if any(x in args for x in ('-d', '--jnc-output')):
                 sys.argv.insert(1, '--format')
-                sys.argv.insert(2, 'jpyang')
+                sys.argv.insert(2, 'jnc')
 
     def add_opts(self, optparser):
         """Adds options to pyang, displayed in the pyang CLI help message"""
         optlist = [
             optparse.make_option(
-                '-d', '--jpyang-output',
+                '-d', '--jnc-output',
                 dest='directory',
                 help='Generate output to DIRECTORY.'),
             optparse.make_option(
-                '--jpyang-help',
-                dest='jpyang_help',
+                '--jnc-help',
+                dest='jnc_help',
                 action='store_true',
-                help='Print help on java format/JPyang usage and exit'),
+                help='Print help on usage of the JNC plugin and exit'),
             optparse.make_option(
-                '--jpyang-debug',
+                '--jnc-debug',
                 dest='debug',
                 action='store_true',
                 help='Print debug messages. Redundant if verbose mode is on.'),
             optparse.make_option(
-                '--jpyang-javadoc',
+                '--jnc-javadoc',
                 dest='javadoc_directory',
                 help='Generate javadoc to JAVADOC_DIRECTORY.'),
             optparse.make_option(
-                '--jpyang-no-schema',
+                '--jnc-no-schema',
                 dest='no_schema',
                 action='store_true',
                 help='Do not generate schema.'),
             optparse.make_option(
-                '--jpyang-verbose',
+                '--jnc-verbose',
                 dest='verbose',
                 action='store_true',
                 help='Verbose mode: Print detailed debug messages.'),
             optparse.make_option(
-                '--jpyang-ignore-errors',
+                '--jnc-ignore-errors',
                 dest='ignore',
                 action='store_true',
                 help='Ignore errors from validation.'),
             ]
-        g = optparser.add_option_group('JPyang output specific options')
+        g = optparser.add_option_group('JNC output specific options')
         g.add_options(optlist)
 
     def setup_ctx(self, ctx):
         """Called after ctx has been set up in main module. Checks if the
-        jpyang help option was supplied and if not, that the -d or
+        jnc help option was supplied and if not, that the -d or
         --java-package was used.
 
         ctx -- Context object as defined in __init__.py
 
         """
-        if ctx.opts.jpyang_help:
+        if ctx.opts.jnc_help:
             self.print_help()
             sys.exit(0)
-        if ctx.opts.format in ['java', 'jpyang']:
+        if ctx.opts.format == 'jnc':
             if not ctx.opts.directory:
                 ctx.opts.directory = 'gen'
                 print_warning(msg=('Option -d (or --java-package) not set, ' +
@@ -258,12 +258,12 @@ class JPyangPlugin(plugin.PyangPlugin):
         raise error.EmitError(self, exitCode)
 
     def print_help(self):
-        """Prints a description of what JPyang is and how to use it"""
+        """Prints a description of what JNC is and how to use it"""
         print '''
-The JPyang/Java output format can be used to generate a Java class hierarchy
-from a single YANG data model. Together with the JNC (Java NETCONF Client)
-library, these generated Java classes may be used as the foundation for a
-NETCONF client (AKA manager) written in Java.
+The JNC (Java NETCONF Client) plug-in can be used to generate a Java class
+hierarchy from a single YANG data model. Together with the JNC library, these
+generated Java classes may be used as the foundation for a NETCONF client
+(AKA manager) written in Java.
 
 The different types of generated files are:
 
@@ -300,10 +300,8 @@ The typical use case for these classes is as part of a JAVA network management
 system (EMS), to enable retrieval and/or storing of configurations on NETCONF
 agents/servers with specific capabilities.
 
-One way to use the Java output format plug-in of pyang is
-$ pyang -f java --jpyang-output package.dir <file.yang>
-
-The two formats java and jpyang produce identical results.
+One way to use the JNC plug-in of pyang is
+$ pyang -f jnc --jnc-output package.dir <file.yang>
 
 Type '$ pyang --help' for more details on how to use pyang.
 '''
@@ -344,14 +342,14 @@ java_built_in = java_reserved_words | java_literals | java_lang
 
 package_info = '''/**
  * This class hierarchy was generated from the Yang module{0}
- * by the <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">JPyang</a> plugin of <a target="_top" href="http://code.google.com/p/pyang/">pyang</a>.
+ * by the <a target="_top" href="https://github.com/Emil-Tail-f/JNC">JNC</a> plugin of <a target="_top" href="http://code.google.com/p/pyang/">pyang</a>.
  * The generated classes may be used to manipulate pieces of configuration data
  * with NETCONF operations such as edit-config, delete-config and lock. These
  * operations are typically accessed through the JNC Java library by
  * instantiating Device objects and setting up NETCONF sessions with real
  * devices using a compatible YANG model.
  * <p>{1}
- * @see <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">JPyang project page</a>
+ * @see <a target="_top" href="https://github.com/Emil-Tail-f/JNC">JNC project page</a>
  * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6020.txt">RFC 6020: YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF)</a>
  * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6241.txt">RFC 6241: Network Configuration Protocol (NETCONF)</a>
  * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>
@@ -424,7 +422,7 @@ def write_file(d, file_name, file_content, ctx):
 
 def get_package(stmt, ctx):
     """Returns a string representing the package name of a java class generated
-    from stmt, assuming that it has been or will be generated by JPyang.
+    from stmt, assuming that it has been or will be generated by JNC.
 
     """
     sub_packages = collections.deque()
@@ -1261,7 +1259,7 @@ class JavaClass(object):
         header = [' '.join(['/* \n * @(#)' + self.filename, '      ',
                             self.version, date.today().strftime('%d/%m/%y')])]
         header.append(' *')
-        header.append(' * This file has been auto-generated by JPyang, the')
+        header.append(' * This file has been auto-generated by JNC, the')
         header.append(' * Java output format plug-in of pyang.')
         header.append(' * Origin: ' + self.source)
         header.append(' */')
