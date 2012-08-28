@@ -1672,9 +1672,12 @@ class MethodGenerator(object):
             children = self.stmt.substmts[:]
             if hasattr(self.stmt, 'i_children'):
                 children.extend(self.stmt.i_children)
-            if (not child and (self.stmt.search_one('list', children=children)
-                    or self.stmt.search_one('container', children=children))):
-                res.add('.'.join([self.pkg, self.n2, '*']))
+            if (self.stmt.search_one('list', children=children)
+                    or self.stmt.search_one('container', children=children)):
+                if child:
+                    res.add('.'.join([self.pkg, '*']))
+                else:
+                    res.add('.'.join([self.pkg, self.n2, '*']))
             for dependency in method.imports:
                 pkg = dependency.rpartition('.')[0]
                 if pkg:
