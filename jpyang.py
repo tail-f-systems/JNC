@@ -527,7 +527,7 @@ def get_types(yang_type, ctx):
     jnc = 'com.tailf.jnc.Yang' + primitive
     if yang_type.arg in ('string', 'boolean'):
         pass
-    elif yang_type.arg in ('enumeration', 'binary'):
+    elif yang_type.arg in ('enumeration', 'binary', 'union'):
         primitive = 'String'
     elif yang_type.arg in ('bits',):
         primitive = 'BigInteger'
@@ -919,7 +919,7 @@ class ClassGenerator(object):
             if type_stmt.i_typedef:
                 if not self.yang_types.defined(type_stmt.i_typedef.arg):
                     typedef_generator = ClassGenerator(type_stmt.i_typedef,
-                        package=ctx.rootpkg,
+                        package=self.ctx.rootpkg,
                         path=self.path.replace('.', os.sep) + os.sep, ns=None,
                         prefix_name=None, parent=self)
                     typedef_generator.generate()
@@ -1897,22 +1897,22 @@ class MethodGenerator(object):
                 
                 if self.is_list:
                     # Check that object does not already exist
-                    iter = self.n2 + 'Iterator'
-                    method.add_line(iter.join(['ElementChildrenIterator ',
+                    iter_ = self.n2 + 'Iterator'
+                    method.add_line(iter_.join(['ElementChildrenIterator ',
                                                ' = ', '();']))
-                    method.add_line('while (' + iter + '.hasNext()) {')
+                    method.add_line('while (' + iter_ + '.hasNext()) {')
                     method.add_line(''.join(['    ', self.n, ' child = (',
-                                             self.n, ')', iter, '.next();']))
+                                             self.n, ')', iter_, '.next();']))
                     method.add_line('    YangException.throwException(child.keyCompare(' +
                                     self.n2 + '), ' + self.n2 + ');')
                     method.add_dependency('com.tailf.jnc.YangException')
                     method.add_line('}')
                     
-                    # Check max-elements restriction
-                    if self.gen.max_elements != 'unbounded':
-                        method.add_line('YangException.throwException(children.size() >= ' +
-                                     self.gen.max_elements + ', ' + self.n2 + ');')
-                        method.add_dependency('com.tailf.jnc.YangException')
+#                    # Check max-elements restriction
+#                    if self.gen.max_elements != 'unbounded':
+#                        method.add_line('YangException.throwException(children.size() >= ' +
+#                                     self.gen.max_elements + ', ' + self.n2 + ');')
+#                        method.add_dependency('com.tailf.jnc.YangException')
                 
             elif self.is_list and i in {1, 2} and len(res) == 4:
                 # Add child with String or JNC type keys
@@ -2001,7 +2001,12 @@ class LeafMethodGenerator(MethodGenerator):
     def __init__(self, stmt, ctx):
         super(LeafMethodGenerator, self).__init__(stmt, ctx)
         assert self.is_leaf or self.is_leaflist
-        self.stmt_type = stmt.search_one('type')
+        children = stmt.substmts[:]
+        try:
+            children.extend(stmt.i_children)
+        except AttributeError:
+            pass  # Statement does not have i_children attr
+        self.stmt_type = stmt.search_one('type', children=children)
         self.default = stmt.search_one('default')
         self.default_value = None if not self.default else self.default.arg
         self.type_str = get_types(self.stmt_type, ctx)
@@ -2072,6 +2077,12 @@ class LeafMethodGenerator(MethodGenerator):
                         param_types.append('int')
                         param_names.append('fractionDigits')
                         line.extend([', ', param_names[-1]])
+                    elif self.type_str[0] == 'com.tailf.jnc.YangUnion':
+                        line.append(', new String[] {')
+                        for type_stmt in self.stmt_type.search('type'):
+                            member_type, _ = get_types(type_stmt, self.ctx)
+                            line.append('"' + member_type + '", ')
+                        line.append('}')
                     # FIXME: Add support for bits, leafref, instance-identifier, etc.
                     # TODO: Write functions that returns appropriate types and names
                     # FIXME: Some types may be incorrectly classified as
@@ -2348,16 +2359,18 @@ class ListMethodGenerator(MethodGenerator):
         self.keys = []
         if self.is_config:
             self.keys = self.stmt.search_one('key').arg.split(' ')
-        findkey = lambda k: self.stmt.search_one('leaf', k)
+        chs = stmt.substmts[:]
+        try:
+            chs.extend(stmt.i_children)
+        except AttributeError:
+            pass  # Statement does not have i_children attr
+        findkey = lambda k: self.stmt.search_one('leaf', arg=k, children=chs)
         self.key_stmts = map(findkey, self.keys)
-
+        
         notstring = lambda k: get_types(k, ctx)[1] != 'String'
         self.is_string = not filter(notstring, self.key_stmts)
-
-        min = stmt.search_one('min-elements')
-        self.min_elements = '0' if not min else min.arg
-        max = stmt.search_one('max-elements')
-        self.max_elements = 'unbounded' if not max else max.arg
+#        max_ = stmt.search_one('max-elements')
+#        self.max_elements = 'unbounded' if not max_ else max_.arg
 
     def value_constructors(self):
         """Returns a list of constructors for configuration data lists"""
@@ -2389,7 +2402,14 @@ class ListMethodGenerator(MethodGenerator):
                     setValue.extend([key.arg, 'Value);'])
                 else:
                     # String or primitive constructor
-                    setValue.extend(['new ', jnc, '(', key.arg, 'Value));'])
+                    setValue.extend(['new ', jnc, '(', key.arg, 'Value'])
+                    if jnc == 'YangUnion':
+                        setValue.append(', new String [] {')
+                        for type_stmt in key.search('type'):
+                            member_type, _ = get_types(type_stmt, self.ctx)
+                            setValue.append('"' + member_type + '", ')
+                        setValue.append('}')
+                    setValue.append('));')
                     if i == 1:
                         param_type = 'String'
                     else:
