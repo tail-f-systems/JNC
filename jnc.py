@@ -1682,10 +1682,6 @@ class MethodGenerator(object):
                     res.add('.'.join([self.pkg, '*']))
                 else:
                     res.add('.'.join([self.pkg, self.n2, '*']))
-            for dependency in method.imports:
-                pkg = dependency.rpartition('.')[0]
-                if pkg:
-                    res.add(pkg + '.*')
         else:
             for dependency in method.imports:
                 if dependency.startswith(('java.math', 'java.util',
