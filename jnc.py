@@ -601,6 +601,18 @@ def get_import(string):
         return '.'.join(['com.tailf.jnc', string])
 
 
+def produced_subpackage(stmt):
+    subpkg = None
+    if stmt.keyword in ('list', 'container'):
+        subpkg = camelize(stmt.arg)
+        children = stmt.substmts[:]
+        if hasattr(stmt, 'i_children'):
+            children.extend(stmt.i_children)
+        if stmt.search('list', children) or stmt.search('container', children):
+            return subpkg
+    return None
+
+
 def is_config(stmt):
     """Returns True if stmt is a configuration data statement"""
     config = None
