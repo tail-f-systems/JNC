@@ -885,7 +885,8 @@ class ClassGenerator(object):
             if self.ctx.opts.import_on_demand:
                 subpkg = produced_subpackage(ch)
                 if subpkg:
-                    import_ = '.'.join([self.package, subpkg, '*'])
+                    import_ = '.'.join([self.package, camelize(self.stmt.arg),
+                                        subpkg, '*'])
                     self.java_class.imports.add(import_)
                     if stmt.parent.keyword == 'module':
                         print import_
