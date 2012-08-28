@@ -1,8 +1,8 @@
 <project name="simple" basedir="." default="main">
   <property environment="env" />
   <property name="src.dir"     value="src" />
-  <property name="gen.dir"     value="src/gen" />
-  <property name="main-class"  value="simple.Main" />
+  <property name="gen.dir"     value="src/simple" />
+  <property name="main-class"  value="simple.Client" />
   <property name="build.dir"   value="build" />
   <property name="classes.dir" value="${build.dir}/classes" />
   <property name="jar.dir"     value="${build.dir}/jar" />
@@ -19,7 +19,7 @@
   <target name="generate">
     <mkdir dir="${gen.dir}" />
     <exec executable="${pyang}" failonerror="true">
-      <arg line="-f jpyang --jpyang-output ${gen.dir}/simple simple.yang" />
+      <arg line="-f jnc --jnc-output ${gen.dir} simple.yang" />
     </exec>
   </target>
 
