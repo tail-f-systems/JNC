@@ -1,15 +1,14 @@
-JNC
-===
+JPyang
+======
 
-JNC (Java NETCONF Client) is the name of both a Java library for NETCONF client
-code and a Java output format plugin for pyang, an extensible YANG validator
-and converter in python. You need an installation of pyang to use the JNC
-plugin. Get it here: http://code.google.com/p/pyang/
+JPyang is the Java output format plugin for pyang, an extensible YANG validator
+and converter in python. You need an installation of pyang to use JPyang.
+Get it here: http://code.google.com/p/pyang/
 
-The JNC plugin can be used to generate Java class hierarchies from YANG data
-models. Together with the JNC library, these generated Java classes may be used
-as the foundation for a NETCONF client (AKA manager) written in Java. The JNC
-library is distributed along with the JNC plugin script.
+JPyang can be used to generate Java class hierarchies from YANG data models.
+Together with the JNC (Java NETCONF Client) library, these generated
+Java classes may be used as the foundation for a NETCONF client (AKA manager)
+written in Java. The JNC library is distributed along with the JPyang plugin.
 
 JNC uses Ganymed SSH-2 to communicate with NETCONF servers/agents, you may get
 it from here: http://www.cleondris.ch/opensource/ssh2/ or by using aptitude
@@ -22,9 +21,9 @@ Linux and don't want to use eclipse, feel free to skip the following section.
 
 ----- Get started using eclipse:
 
-Make sure you have pyang installed, and that jnc.py is in the plugins directory
-of your installation. For instructions on how to use pyang, please see the
-pyang man page.
+Make sure you have pyang installed, and that jpyang.py is in the plugins
+directory of your installation. For instructions on how to use pyang, please
+see the pyang man page.
 
 http://www.yang-central.org/twiki/pub/Main/YangTools/pyang.1.html
 
@@ -43,43 +42,43 @@ have errors, pressing Ctrl+1, choosing "Fix project setup..." and then OK when
 eclipse proposes to add the library. You should now be able to run the tests
 by right clicking on the test source folder and selecting Run As -> JUnit test.
 
-The next step is to generate some Java classes using the JNC pyang plugin and
-write a client that uses them together with the JNC library. Please see the
-user manual for instructions on how to do this.
+The next step is to generate some Java classes using JPyang and write a client
+that uses them together with the JNC library. Please see the user manual for
+instructions on how to do this.
 
 
 ----- Get started in Linux (without eclipse):
 
-Add the JNC plugin to your existing pyang installation. This may be done in one
-of the following three ways:
+Add the JPyang plugin to your existing pyang installation. This may be done in
+one of the following three ways:
 
-1. Add jnc.py to pyang/plugins in your pyang installation,
-2. Add the location of jnc.py to the $PYANG_PLUGINPATH environment variable, or
-3. Use the --plugindir option of pyang each time you want to use JNC
+1. Add jpyang.py to pyang/plugins in the pyang installation
+2. Add the location of JPyang to the $PYANG_PLUGINPATH environment variable
+3. Use the --plugindir option of pyang each time you want to use JPyang
 
 If more than one of these approaches is used, you will end up with optparse
 conflicts so please choose one and stick with it. From here on, we will assume
 that you went for (1), but using (2) or (3) should be anologous.
 
-JNC can be used to generate Java classes from a YANG file of your choice.
+JPyang can be used to generate Java classes from a YANG file of your choice.
 There are a collection of yang files in the 'examples/yang' directory. To
 generate classes for a YANG file, open a terminal, change directory to where
-you want the classes to be generated, launch pyang with the jnc format,
-specifying the output folder and the yang model file.
+you want the classes to be generated, launch pyang with the jpyang or java
+format, specifying the output folder and the yang model file.
 
 For example, to generate the classes for simple.yang to the 'examples'
 directory with base package gen.simple, type:
 
-$ pyang -f jnc --jnc-output src/gen/simple yang/simple.yang
+$ pyang -f jpyang --jpyang-output src/gen/simple yang/simple.yang
 
 There should now be a newly generated 'src' folder in the current directory,
 containing a directory structure with the generated classes. Note that 'src' is
 special treated so that it does not become part of the package names of the
 generated classes.
 
-To get more detailed information on how the generation proceeds the --jnc-debug
-or --jnc-verbose options can be used. Rerunning JNC silently overwrites any old
-classes in the output directory.
+To get more detailed information on how the generation proceeds the
+--jpyang-debug or --jpyang-verbose options can be used. Rerunning JPyang
+silently overwrites any old classes in the output directory.
 
 To actually use the generated classes, you need to compile Java client code
 using the JNC library. It might be convenient to make a Jar file with the JNC
@@ -101,7 +100,8 @@ To run the JNC tests, see the previous section or run them with JUnit 4 from
 commandline if you so prefer. The tests resides in the jnc/test folder.
 
 Please see the user manual for tutorials and further information on how to
-write a client and how to run it against a server using JNC.
+write a client and how to run it against a server using JNC and classes
+generated by JPyang.
 
 
 ----- High level description

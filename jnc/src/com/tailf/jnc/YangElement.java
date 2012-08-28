@@ -19,7 +19,7 @@ import java.util.ArrayList;
  * The YangElement is a configuration sub-tree like the
  * {@link com.tailf.jnc.Element Element}. It is an extension of the Element
  * class to make the configuration sub-tree data model aware. Classes generated
- * from the JNC compiler are either Containers, Leafs, or derived data types.
+ * from the ConfM compiler are either Containers, Leafs, or derived data types.
  * <p>
  * Thus the YangElement which is an abstract class is never used directly.
  * <p>
@@ -146,6 +146,7 @@ public abstract class YangElement extends Element {
                 } catch (final NoSuchMethodException e) {
                     if (((YangElement) parent).isChild(name)) {
                         // known existing leaf will be handled by endElement
+                        // code
                         return null;
                     }
                     // It's an unknown container or child
@@ -161,7 +162,7 @@ public abstract class YangElement extends Element {
             } else { // YangElement is aware but parent is not
                      // This is the case where we stop parsing
                      // the NETCONF rpc data and start to create
-                     // JNC objects instead
+                     // ConfM objects instead
                 final Element child = instantiate(parent, name, pkg);
                 parent.addChild(child);
                 return child;
@@ -196,8 +197,10 @@ public abstract class YangElement extends Element {
         final String methodName = "set" + normalize(name) + "Value";
         final Class<?>[] types = new Class[] { String.class };
         try {
-            Method setLeafValue = getClass().getMethod(methodName, types);
-            setLeafValue.invoke(this, new Object[] { value });
+            final Method setLeafValue = getClass().getMethod(methodName,
+                    types);
+            final Object[] args = { value };
+            setLeafValue.invoke(this, args);
         } catch (final NoSuchMethodException e) {
             if (!RevisionInfo.newerRevisionSupportEnabled) {
                 // e.printStackTrace();
@@ -926,7 +929,7 @@ public abstract class YangElement extends Element {
      * Clones the contents of this container into a target copy. All content is
      * copied except children (shallow).
      * <p>
-     * Note: Used by the generated JNC classes The key children are already
+     * Note: Used by the generated ConfM classes The key children are already
      * cloned.
      * 
      * @param copy The target copy to clone the contents to
@@ -940,7 +943,7 @@ public abstract class YangElement extends Element {
      * Clones the content of this container into a target copy. Key children
      * are not copied.
      * <p>
-     * Note: Used by the generated JNC classes The key children are already
+     * Note: Used by the generated ConfM classes The key children are already
      * cloned.
      * 
      * @param copy The target copy to clone the contents into

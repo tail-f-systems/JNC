@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: latin-1 -*-
-"""JNC: Java NETCONF Client plug-in
+"""JPyang: Java output plug-in
  * Copyright (c) 2012 Tail-F Systems AB, Stockholm, Sweden
  * All rights reserved.
  *
@@ -36,15 +36,15 @@
 For complete functionality, invoke with:
 > pyang \
     --path <yang search path> \
-    --format jnc \
-    --jnc-output <package.name> \
-    --jnc-verbose \
-    --jnc-ignore-errors \
-    --jnc-javadoc <javadoc directory path> \
+    --format java \
+    --jpyang-output <package.name> \
+    --jpyang-verbose \
+    --jpyang-ignore-errors \
+    --jpyang-javadoc <javadoc directory path> \
     <file.yang>
 
 Or, if you like to keep things simple:
-> pyang -f jnc -d <package.name> <file.yang>
+> pyang -f jpyang -d <package.name> <file.yang>
 
 """
 
@@ -62,12 +62,12 @@ from pyang import plugin, util, error
 
 
 def pyang_plugin_init():
-    """Registers an instance of the jnc plugin"""
-    plugin.register_plugin(JNCPlugin())
+    """Registers an instance of the jpyang plugin"""
+    plugin.register_plugin(JPyangPlugin())
 
 
-class JNCPlugin(plugin.PyangPlugin):
-    """The plug-in class of JNC.
+class JPyangPlugin(plugin.PyangPlugin):
+    """The plug-in class of JPyang.
 
     The methods of this class are invoked by pyang during initialization. The
     emit method is of particular interest if you are new to writing plugins to
@@ -78,71 +78,71 @@ class JNCPlugin(plugin.PyangPlugin):
     """
 
     def add_output_format(self, fmts):
-        """Adds 'jnc' as a valid output format and sets the format to jnc if
-        the --jnc-output option is set, but --format is not.
+        """Adds 'java' and 'jpyang' as valid output formats and sets the format
+        to jpyang if the --jpyang-output option is set
         
         """
         self.multiple_modules = False
-        fmts['jnc'] = self
+        fmts['java'] = fmts['jpyang'] = self
 
         args = sys.argv[1:]
         if not any(x in args for x in ('-f', '--format')):
-            if any(x in args for x in ('-d', '--jnc-output')):
+            if any(x in args for x in ('-d', '--jpyang-output')):
                 sys.argv.insert(1, '--format')
-                sys.argv.insert(2, 'jnc')
+                sys.argv.insert(2, 'jpyang')
 
     def add_opts(self, optparser):
         """Adds options to pyang, displayed in the pyang CLI help message"""
         optlist = [
             optparse.make_option(
-                '-d', '--jnc-output',
+                '-d', '--jpyang-output',
                 dest='directory',
                 help='Generate output to DIRECTORY.'),
             optparse.make_option(
-                '--jnc-help',
-                dest='jnc_help',
+                '--jpyang-help',
+                dest='jpyang_help',
                 action='store_true',
-                help='Print help on usage of the JNC plugin and exit'),
+                help='Print help on java format/JPyang usage and exit'),
             optparse.make_option(
-                '--jnc-debug',
+                '--jpyang-debug',
                 dest='debug',
                 action='store_true',
                 help='Print debug messages. Redundant if verbose mode is on.'),
             optparse.make_option(
-                '--jnc-javadoc',
+                '--jpyang-javadoc',
                 dest='javadoc_directory',
                 help='Generate javadoc to JAVADOC_DIRECTORY.'),
             optparse.make_option(
-                '--jnc-no-schema',
+                '--jpyang-no-schema',
                 dest='no_schema',
                 action='store_true',
                 help='Do not generate schema.'),
             optparse.make_option(
-                '--jnc-verbose',
+                '--jpyang-verbose',
                 dest='verbose',
                 action='store_true',
                 help='Verbose mode: Print detailed debug messages.'),
             optparse.make_option(
-                '--jnc-ignore-errors',
+                '--jpyang-ignore-errors',
                 dest='ignore',
                 action='store_true',
                 help='Ignore errors from validation.'),
             ]
-        g = optparser.add_option_group('JNC output specific options')
+        g = optparser.add_option_group('JPyang output specific options')
         g.add_options(optlist)
 
     def setup_ctx(self, ctx):
         """Called after ctx has been set up in main module. Checks if the
-        jnc help option was supplied and if not, that the -d or
+        jpyang help option was supplied and if not, that the -d or
         --java-package was used.
 
         ctx -- Context object as defined in __init__.py
 
         """
-        if ctx.opts.jnc_help:
+        if ctx.opts.jpyang_help:
             self.print_help()
             sys.exit(0)
-        if ctx.opts.format == 'jnc':
+        if ctx.opts.format in ['java', 'jpyang']:
             if not ctx.opts.directory:
                 ctx.opts.directory = 'gen'
                 print_warning(msg=('Option -d (or --java-package) not set, ' +
@@ -258,12 +258,12 @@ class JNCPlugin(plugin.PyangPlugin):
         raise error.EmitError(self, exitCode)
 
     def print_help(self):
-        """Prints a description of what JNC is and how to use it"""
+        """Prints a description of what JPyang is and how to use it"""
         print '''
-The JNC (Java NETCONF Client) plug-in can be used to generate a Java class
-hierarchy from a single YANG data model. Together with the JNC library, these
-generated Java classes may be used as the foundation for a NETCONF client
-(AKA manager) written in Java.
+The JPyang/Java output format can be used to generate a Java class hierarchy
+from a single YANG data model. Together with the JNC (Java NETCONF Client)
+library, these generated Java classes may be used as the foundation for a
+NETCONF client (AKA manager) written in Java.
 
 The different types of generated files are:
 
@@ -300,8 +300,10 @@ The typical use case for these classes is as part of a JAVA network management
 system (EMS), to enable retrieval and/or storing of configurations on NETCONF
 agents/servers with specific capabilities.
 
-One way to use the JNC plug-in of pyang is
-$ pyang -f jnc --jnc-output package.dir <file.yang>
+One way to use the Java output format plug-in of pyang is
+$ pyang -f java --jpyang-output package.dir <file.yang>
+
+The two formats java and jpyang produce identical results.
 
 Type '$ pyang --help' for more details on how to use pyang.
 '''
@@ -342,14 +344,14 @@ java_built_in = java_reserved_words | java_literals | java_lang
 
 package_info = '''/**
  * This class hierarchy was generated from the Yang module{0}
- * by the <a target="_top" href="https://github.com/Emil-Tail-f/JNC">JNC</a> plugin of <a target="_top" href="http://code.google.com/p/pyang/">pyang</a>.
+ * by the <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">JPyang</a> plugin of <a target="_top" href="http://code.google.com/p/pyang/">pyang</a>.
  * The generated classes may be used to manipulate pieces of configuration data
  * with NETCONF operations such as edit-config, delete-config and lock. These
  * operations are typically accessed through the JNC Java library by
  * instantiating Device objects and setting up NETCONF sessions with real
  * devices using a compatible YANG model.
  * <p>{1}
- * @see <a target="_top" href="https://github.com/Emil-Tail-f/JNC">JNC project page</a>
+ * @see <a target="_top" href="https://github.com/Emil-Tail-f/JPyang">JPyang project page</a>
  * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6020.txt">RFC 6020: YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF)</a>
  * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6241.txt">RFC 6241: Network Configuration Protocol (NETCONF)</a>
  * @see <a target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc6242.txt">RFC 6242: Using the NETCONF Protocol over Secure Shell (SSH)</a>
@@ -422,7 +424,7 @@ def write_file(d, file_name, file_content, ctx):
 
 def get_package(stmt, ctx):
     """Returns a string representing the package name of a java class generated
-    from stmt, assuming that it has been or will be generated by JNC.
+    from stmt, assuming that it has been or will be generated by JPyang.
 
     """
     sub_packages = collections.deque()
@@ -527,7 +529,7 @@ def get_types(yang_type, ctx):
     jnc = 'com.tailf.jnc.Yang' + primitive
     if yang_type.arg in ('string', 'boolean'):
         pass
-    elif yang_type.arg in ('enumeration', 'binary', 'union'):
+    elif yang_type.arg in ('enumeration', 'binary'):
         primitive = 'String'
     elif yang_type.arg in ('bits',):
         primitive = 'BigInteger'
@@ -554,16 +556,6 @@ def get_types(yang_type, ctx):
         primitive = 'BigDecimal'
     else:
         try:
-            print yang_type.keyword + ' ' + yang_type.arg
-            chs = yang_type.substmts
-            try:
-                chs.extend(yang_type.i_children)
-            except AttributeError:
-                pass
-            for ch in chs:
-                print '  ' + ch.keyword + ' ' + ch.arg
-            if yang_type.i_typedef:
-                print '  i_typedef: ' + yang_type.i_typedef.arg
             typedef = yang_type.i_typedef
         except AttributeError:
             type_id = get_package(yang_type, ctx) + yang_type.arg
@@ -929,7 +921,7 @@ class ClassGenerator(object):
             if type_stmt.i_typedef:
                 if not self.yang_types.defined(type_stmt.i_typedef.arg):
                     typedef_generator = ClassGenerator(type_stmt.i_typedef,
-                        package=self.ctx.rootpkg,
+                        package=ctx.rootpkg,
                         path=self.path.replace('.', os.sep) + os.sep, ns=None,
                         prefix_name=None, parent=self)
                     typedef_generator.generate()
@@ -1269,7 +1261,7 @@ class JavaClass(object):
         header = [' '.join(['/* \n * @(#)' + self.filename, '      ',
                             self.version, date.today().strftime('%d/%m/%y')])]
         header.append(' *')
-        header.append(' * This file has been auto-generated by JNC, the')
+        header.append(' * This file has been auto-generated by JPyang, the')
         header.append(' * Java output format plug-in of pyang.')
         header.append(' * Origin: ' + self.source)
         header.append(' */')
@@ -1907,22 +1899,22 @@ class MethodGenerator(object):
                 
                 if self.is_list:
                     # Check that object does not already exist
-                    iter_ = self.n2 + 'Iterator'
-                    method.add_line(iter_.join(['ElementChildrenIterator ',
+                    iter = self.n2 + 'Iterator'
+                    method.add_line(iter.join(['ElementChildrenIterator ',
                                                ' = ', '();']))
-                    method.add_line('while (' + iter_ + '.hasNext()) {')
+                    method.add_line('while (' + iter + '.hasNext()) {')
                     method.add_line(''.join(['    ', self.n, ' child = (',
-                                             self.n, ')', iter_, '.next();']))
+                                             self.n, ')', iter, '.next();']))
                     method.add_line('    YangException.throwException(child.keyCompare(' +
                                     self.n2 + '), ' + self.n2 + ');')
                     method.add_dependency('com.tailf.jnc.YangException')
                     method.add_line('}')
                     
-#                    # Check max-elements restriction
-#                    if self.gen.max_elements != 'unbounded':
-#                        method.add_line('YangException.throwException(children.size() >= ' +
-#                                     self.gen.max_elements + ', ' + self.n2 + ');')
-#                        method.add_dependency('com.tailf.jnc.YangException')
+                    # Check max-elements restriction
+                    if self.gen.max_elements != 'unbounded':
+                        method.add_line('YangException.throwException(children.size() >= ' +
+                                     self.gen.max_elements + ', ' + self.n2 + ');')
+                        method.add_dependency('com.tailf.jnc.YangException')
                 
             elif self.is_list and i in {1, 2} and len(res) == 4:
                 # Add child with String or JNC type keys
@@ -2011,12 +2003,7 @@ class LeafMethodGenerator(MethodGenerator):
     def __init__(self, stmt, ctx):
         super(LeafMethodGenerator, self).__init__(stmt, ctx)
         assert self.is_leaf or self.is_leaflist
-        children = stmt.substmts[:]
-        try:
-            children.extend(stmt.i_children)
-        except AttributeError:
-            pass  # Statement does not have i_children attr
-        self.stmt_type = stmt.search_one('type', children=children)
+        self.stmt_type = stmt.search_one('type')
         self.default = stmt.search_one('default')
         self.default_value = None if not self.default else self.default.arg
         self.type_str = get_types(self.stmt_type, ctx)
@@ -2087,12 +2074,6 @@ class LeafMethodGenerator(MethodGenerator):
                         param_types.append('int')
                         param_names.append('fractionDigits')
                         line.extend([', ', param_names[-1]])
-                    elif self.type_str[0] == 'com.tailf.jnc.YangUnion':
-                        line.append(', new String[] {')
-                        for type_stmt in self.stmt_type.search('type'):
-                            member_type, _ = get_types(type_stmt, self.ctx)
-                            line.append('"' + member_type + '", ')
-                        line.append('}')
                     # FIXME: Add support for bits, leafref, instance-identifier, etc.
                     # TODO: Write functions that returns appropriate types and names
                     # FIXME: Some types may be incorrectly classified as
@@ -2369,18 +2350,16 @@ class ListMethodGenerator(MethodGenerator):
         self.keys = []
         if self.is_config:
             self.keys = self.stmt.search_one('key').arg.split(' ')
-        chs = stmt.substmts[:]
-        try:
-            chs.extend(stmt.i_children)
-        except AttributeError:
-            pass  # Statement does not have i_children attr
-        findkey = lambda k: self.stmt.search_one('leaf', arg=k, children=chs)
+        findkey = lambda k: self.stmt.search_one('leaf', k)
         self.key_stmts = map(findkey, self.keys)
-        
+
         notstring = lambda k: get_types(k, ctx)[1] != 'String'
         self.is_string = not filter(notstring, self.key_stmts)
-#        max_ = stmt.search_one('max-elements')
-#        self.max_elements = 'unbounded' if not max_ else max_.arg
+
+        min = stmt.search_one('min-elements')
+        self.min_elements = '0' if not min else min.arg
+        max = stmt.search_one('max-elements')
+        self.max_elements = 'unbounded' if not max else max.arg
 
     def value_constructors(self):
         """Returns a list of constructors for configuration data lists"""
@@ -2412,14 +2391,7 @@ class ListMethodGenerator(MethodGenerator):
                     setValue.extend([key.arg, 'Value);'])
                 else:
                     # String or primitive constructor
-                    setValue.extend(['new ', jnc, '(', key.arg, 'Value'])
-                    if jnc == 'YangUnion':
-                        setValue.append(', new String [] {')
-                        for type_stmt in key.search('type'):
-                            member_type, _ = get_types(type_stmt, self.ctx)
-                            setValue.append('"' + member_type + '", ')
-                        setValue.append('}')
-                    setValue.append('));')
+                    setValue.extend(['new ', jnc, '(', key.arg, 'Value));'])
                     if i == 1:
                         param_type = 'String'
                     else:

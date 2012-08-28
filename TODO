@@ -1,6 +1,7 @@
 TODO (in order of priority)
 ===========================
 Verify correctness of this list
+Rename JPyang to JNC
 Take away max-elements-checks from add-methods
 Update the README
 Write structure template for User Manual, in LaTeX
