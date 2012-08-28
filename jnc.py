@@ -874,30 +874,21 @@ class ClassGenerator(object):
                 augmented_modules[target.top.arg] = target.top
             return  # XXX: Do not generate a class for the augment statement
 
-        # TODO: preserve correct order in generated class
-        expanded_i_children = []
+        children = set(stmt.substmts)
         if i_children_exists:
-            for ch in stmt.i_children:
-                fields.extend(self.generate_child(ch))
+            children.update(stmt.i_children)
 
-            def expand(children):
-                res = []
-                res.extend(children)
-                for ch in children:
-                    sub_children = []
-                    try:
-                        sub_children.extend(ch.i_children)
-                    except AttributeError:
-                        pass
-                    sub_children.extend(ch.substmts)
-                    res.extend(expand(sub_children))
-                return res
-            expanded_i_children = expand(stmt.i_children)
-
-        # TODO: Avoid quadratic time duplication check (maybe use a set)
-        for sub in stmt.substmts:
-            if sub not in expanded_i_children:
-                fields.extend(self.generate_child(sub))
+        for ch in children:
+            field = self.generate_child(ch)
+            if field:
+                fields.append(field)
+            if self.ctx.opts.import_on_demand:
+                subpkg = produced_subpackage(ch)
+                if subpkg:
+                    import_ = '.'.join([self.package, subpkg, '*'])
+                    self.java_class.imports.add(import_)
+                    if stmt.parent.keyword == 'module':
+                        print import_
 
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + self.filename + '"...'
@@ -956,7 +947,7 @@ class ClassGenerator(object):
         sub -- A data model subtree statement. Its parent most not be None.
 
         """
-        fields = []
+        field = None
         add = self.java_class.append_access_method  # XXX: add is a function
         if sub.keyword in ('list', 'container', 'typedef'):
             child_generator = ClassGenerator(stmt=sub,
@@ -969,7 +960,7 @@ class ClassGenerator(object):
                 for access_method in child_gen.parent_access_methods():
                     add(sub.arg, access_method)
             elif sub.keyword == 'container':
-                fields.append(sub.arg)
+                field = sub.arg
                 child_gen = MethodGenerator(sub, self.ctx)
                 self.java_class.add_field(child_gen.child_field())
                 for access_method in child_gen.parent_access_methods():
@@ -999,7 +990,7 @@ class ClassGenerator(object):
                 child_gen = MethodGenerator(sub, self.ctx)
                 for mark_method in child_gen.markers():
                     add(sub.arg, mark_method)
-        return fields
+        return field
 
     def write_to_file(self):
         write_file(self.path,
