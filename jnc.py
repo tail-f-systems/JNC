@@ -2093,16 +2093,27 @@ class LeafMethodGenerator(MethodGenerator):
         method.set_return_type(self.type_str[0])
         method.set_name('get' + self.n + 'Value')
         method.add_exception('JNCException')
-        method.add_javadoc('Gets the value for child ' + self.stmt.keyword +
-                           ' "' + self.stmt.arg + '".')
-        method.add_javadoc('@return The value of the ''' + self.stmt.keyword + '.')
+
+        # YangEmpty type needs to be special treated
+        if self.type_str[0] == 'com.tailf.jnc.YangEmpty':
+            method.add_javadoc('Searches for ' + self.stmt.keyword + ' "' +
+                               self.stmt.arg + '".')
+            method.add_javadoc('@return A YangEmpty object if ' +
+                               self.stmt.keyword +
+                               ' exists; <code>null</code> otherwise.')
+        else:
+            method.add_javadoc('Gets the value for child ' + self.stmt.keyword +
+                               ' "' + self.stmt.arg + '".')
+            method.add_javadoc('@return The value of the ' + self.stmt.keyword + '.')
+        
+        # Leaves with a default value returns it instead of null 
         if self.default:
             method.add_line(method.return_type + ' ' + self.n2 + ' = (' +
                             method.return_type + ')getValue("' +
                             self.stmt.arg + '");')
             method.add_line('if (' + self.n2 + ' == null) {')
             method.add_line('    ' + self.n2 + ' = new ' + method.return_type +
-                            '(' + self.default_value + ');')
+                            '("' + self.default_value + '");')
             method.add_line('}')
             method.add_line('return ' + self.n2 + ';')
         else:
@@ -2137,6 +2148,11 @@ class LeafMethodGenerator(MethodGenerator):
                 method.add_line('    "' + self.stmt.arg + '",')
                 method.add_line('    ' + param_names[0] + ',')
                 method.add_line('    childrenNames());')
+            elif self.type_str[0] == 'com.tailf.jnc.YangEmpty':
+                method.add_javadoc('by instantiating it (value n/a).')
+                param_types = []  # Parameterless
+                l = [name, '(new ', method.add_dependency(value_type), '());']
+                method.add_line(''.join(l))
             else:
                 line = [name, '(new ', method.add_dependency(value_type), '(',
                         param_names[0]]
