@@ -328,8 +328,15 @@ java_literals = {'true', 'false', 'null'}
 """The boolean and null literals of Java"""
 
 
-java_lang = {'Boolean', 'Byte', 'Double', 'Float', 'Integer', 'Long', 'Number',
-             'Object', 'Short', 'String', 'StackTraceElement', 'ClassLoader'}
+java_lang = {'Appendable', 'CharSequence', 'Cloneable', 'Comparable',
+             'Iterable', 'Readable', 'Runnable', 'Boolean', 'Byte',
+             'Character', 'Class', 'ClassLoader', 'Compiler', 'Double',
+             'Enum', 'Float', 'Integer', 'Long', 'Math', 'Number',
+             'Object', 'Package', 'Process', 'ProcessBuilder',
+             'Runtime', 'RuntimePermission', 'SecurityManager',
+             'Short', 'StackTraceElement', 'StrictMath', 'String',
+             'StringBuffer', 'StringBuilder', 'System', 'Thread',
+             'ThreadGroup', 'ThreadLocal', 'Throwable', 'Void'}
 """A subset of the java.lang classes"""
 
 
