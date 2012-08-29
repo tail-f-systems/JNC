@@ -183,3 +183,12 @@ JNC, java.util, java.math and generated classes that they use, and no other.
 2012-08-20
 The JPyang project repository is cleaned up, removing all non-comprehensible
 files and adding a new README and ant build files.
+
+2012-08-23 Meeting at Tail-f about the future of the project. The marketing and
+product management VP seems inclined to release as open source once the most
+basic functionality has been tested and the documentation is complete.
+
+2012-08-28 JPyang is renamed to JNC. So now there is both a JNC library and a
+JNC pyang plugin.
+
+2012-08-29 The GitHub repository is renamed to JNC and its readme is updated.
