@@ -379,6 +379,18 @@ augmented_modules = {}
 """A dict of external modules that are augmented by the YANG module"""
 
 
+camelized_stmt_args = {}
+"""Cache containing camelized versions of statement identifiers"""
+
+
+normalized_stmt_args = {}
+"""Cache containing normalized versions of statement identifiers"""
+
+
+flattened = {}
+"""Cache with iterables ids mapped to flattened versions of the iterables"""
+
+
 def print_warning(msg='', key='', ctx=None):
     """Prints msg to stderr if ctx is None or the debug or verbose flags are
     set in context ctx and key is empty or not in outputted_warnings. If key is
@@ -471,6 +483,10 @@ def camelize(string):
     Returns an empty string if string argument is None.
 
     """
+    try:  # Fetch from cache
+        return camelized_stmt_args[string]
+    except KeyError:
+        pass
     camelized_str = collections.deque()
     if string is not None:
         iterator = pairwise(string)
@@ -485,7 +501,9 @@ def camelize(string):
         camelized_str.append('_')
     if re.match('\d', res):
         camelized_str.appendleft('_')
-    return ''.join(camelized_str)
+    res = ''.join(camelized_str)
+    camelized_stmt_args[string] = res  # Add to cache
+    return res
 
 
 def normalize(string):
@@ -494,13 +512,19 @@ def normalize(string):
     removed and a 'J' is prepended. Mimics normalize in YangElement of JNC.
     
     """
+    try:  # Fetch from cache
+        return normalized_stmt_args[string]
+    except KeyError:
+        pass
     res = camelize(string)
     start = 1 if res.startswith('_') else 0
     end = -1 if res.endswith('_') else 0
     if start or end:
-        return 'J' + capitalize_first(res[start:end])
+        res = 'J' + capitalize_first(res[start:end])
     else:
-        return capitalize_first(res)
+        res = capitalize_first(res)
+    normalized_stmt_args[string] = res  # Add to cache
+    return res
 
 
 def flatten(l):
@@ -511,6 +535,10 @@ def flatten(l):
 
     Example: flatten([['12', '34'], ['56', ['7']]]) = ['12', '34', '56', '7']
     """
+    try:
+        return flattened[id(l)]
+    except KeyError:
+        pass
     res = []
     while hasattr(l, 'values'):
         l = l.values()
@@ -522,6 +550,7 @@ def flatten(l):
             res.append(item)
         else:
             res.extend(flatten(item))
+    flattened[id(l)] = l
     return res
 
 
