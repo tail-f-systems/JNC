@@ -792,10 +792,16 @@ class ClassGenerator(object):
         self.prefix_name = prefix_name
         self.top_level = top_level
         self.yang_types = yang_types
+        
+        self.n = normalize(stmt.arg)
+        self.n2 = camelize(stmt.arg)
+        self.filename = self.n + '.java'
+        
         if yang_types is None:
             self.yang_types = YangType()
         if parent is not None:
-            for attr in ('package', 'src', 'ctx', 'path', 'ns', 'prefix_name', 'yang_types'):
+            for attr in ('package', 'src', 'ctx', 'path', 'ns',
+                         'prefix_name', 'yang_types'):
                 if getattr(self, attr) is None:
                     setattr(self, attr, getattr(parent, attr))
 
@@ -818,21 +824,19 @@ class ClassGenerator(object):
             parent_module = self.stmt.search_one('belongs-to')
             prefix = parent_module.search_one('prefix')
             ns_arg = '<unknown/prefix: ' + prefix.arg + '>'
-        name = normalize(prefix.arg)
-        self.filename = name + '.java'
 
         for stmt in self.stmt.substmts:
             if stmt.keyword in ('container', 'list', 'augment', 'typedef'):
                 child_generator = ClassGenerator(stmt, ns=ns_arg,
-                    prefix_name=name, top_level=True, parent=self)
+                    prefix_name=self.n, top_level=True, parent=self)
                 child_generator.generate()
 
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + self.filename + '"...'
         self.java_class = JavaClass(filename=self.filename,
                 package=self.package, description=('The root class for namespace ' +
-                    ns_arg + ' (accessible from \n * ' + name +
-                    '.NAMESPACE) with prefix "' + prefix.arg + '" (' + name +
+                    ns_arg + ' (accessible from \n * ' + self.n +
+                    '.NAMESPACE) with prefix "' + prefix.arg + '" (' + self.n +
                     '.PREFIX).'),
                 source=self.src)
 
@@ -855,7 +859,7 @@ class ClassGenerator(object):
         enabler.add_line('"'.join(['YangElement.setPackage(NAMESPACE, ',
                                    self.java_class.package, ');']))
         enabler.add_dependency('com.tailf.jnc.YangElement')
-        enabler.add_line(name + '.registerSchema();')  # XXX: Don't import name
+        enabler.add_line(self.n + '.registerSchema();')  # XXX: Don't import name
         self.java_class.add_enabler(enabler)
 
         reg = JavaMethod(return_type='void', name='registerSchema')
@@ -872,7 +876,7 @@ class ClassGenerator(object):
         reg.add_dependency('com.tailf.jnc.Tagpath')
         reg.add_dependency('com.tailf.jnc.SchemaNode')
         reg.add_dependency('com.tailf.jnc.SchemaTree')
-        schema = os.sep.join([self.ctx.opts.directory.replace('.', os.sep), name])
+        schema = os.sep.join([self.ctx.opts.directory.replace('.', os.sep), self.n])
         reg.add_line('parser.readFile("' + schema + '.schema", h);')
         self.java_class.add_schema_registrator(reg)
 
