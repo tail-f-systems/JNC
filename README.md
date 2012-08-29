@@ -23,34 +23,34 @@ JNC has not yet been released as open source, but stay tuned!
 
 The different types of generated files are:
 
-Root class  -- This class has the name of the prefix of the YANG module, and
--              contains fields with the prefix and namespace as well as methods
--              that enables the JNC library to use the other generated classes
--              when interacting with a NETCONF server.
+- Root class  :  This class has the name of the prefix of the YANG module, and
+ contains fields with the prefix and namespace as well as methods
+ that enables the JNC library to use the other generated classes
+ when interacting with a NETCONF server.
 
-YangElement -- Each YangElement corresponds to a container or a list in the
--              YANG model. They represent tree nodes of a configuration and
--              provides methods to modify the configuration in accordance with
--              the YANG model that they were generated from.
--
--              The top-level containers or lists in the YANG model will have
--              their corresponding YangElement classes generated in the output
--              directory together with the root class. Their respective
--              subcontainers and sublists are generated in subpackages with
--              names corresponding to the name of the parent container or list.
+- YangElement :  Each YangElement corresponds to a container or a list in the
+ YANG model. They represent tree nodes of a configuration and
+ provides methods to modify the configuration in accordance with
+ the YANG model that they were generated from.
+ 
+ The top-level containers or lists in the YANG model will have
+ their corresponding YangElement classes generated in the output
+ directory together with the root class. Their respective
+ subcontainers and sublists are generated in subpackages with
+ names corresponding to the name of the parent container or list.
 
-YangTypes   -- For each derived type in the YANG model, a class is generated to
--              the root of the output directory. The derived type may either
--              extend another derived type class, or the JNC type class
--              corresponding to a built-in YANG type.
+- YangTypes   :  For each derived type in the YANG model, a class is generated to
+ the root of the output directory. The derived type may either
+ extend another derived type class, or the JNC type class
+ corresponding to a built-in YANG type.
 
-Packageinfo -- For each package in the generated Java class hierarchy, a
--              package-info.java file is generated, which can be useful when
--              generating javadoc for the hierarchy.
+- Packageinfo :  For each package in the generated Java class hierarchy, a
+ package-info.java file is generated, which can be useful when
+ generating javadoc for the hierarchy.
 
-Schema file -- If enabled, an XML file containing structured information about
--              the generated Java classes is generated. It contains tagpaths,
--              namespace, primitive-type and other useful meta-information.
+- Schema file :  If enabled, an XML file containing structured information about
+ the generated Java classes is generated. It contains tagpaths,
+ namespace, primitive-type and other useful meta-information.
 
 The typical use case for these classes is as part of a JAVA network management
 system (EMS), to enable retrieval and/or storing of configurations on NETCONF
