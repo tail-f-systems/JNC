@@ -568,14 +568,12 @@ def get_types(yang_type, ctx):
     jnc = 'com.tailf.jnc.Yang' + primitive
     if yang_type.arg in ('string', 'boolean'):
         pass
-    elif yang_type.arg in ('enumeration', 'binary', 'union'):
+    elif yang_type.arg in ('enumeration', 'binary', 'union', 'empty'):
         primitive = 'String'
     elif yang_type.arg in ('bits',):
         primitive = 'BigInteger'
     elif yang_type.arg in ('instance-identifier', 'leafref', 'identityref'):
         primitive = 'Element'
-    elif yang_type.arg in ('empty',):
-        primitive = 'boolean'
     elif yang_type.arg in ('int8', 'int16', 'int32', 'int64', 'uint8',
             'uint16', 'uint32', 'uint64'):
         integer_type = ['long', 'int', 'short', 'byte']
