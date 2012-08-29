@@ -16,7 +16,7 @@ package com.tailf.jnc;
  * 
  * @author emil@tail-f.com
  */
-public class YangEmpty implements YangType<Void> {
+public class YangEmpty implements YangType<YangEmpty> {
 
     private static final long serialVersionUID = 1L;
 
@@ -53,20 +53,43 @@ public class YangEmpty implements YangType<Void> {
     public boolean canEqual(Object obj) {
         return obj instanceof YangEmpty;
     }
-  
+
+    /**
+     * This method doesn't do anything, but is part of the interface
+     * 
+     * @param s ignored
+     * @throws YangException always, since this object is immutable
+     */
     @Override
     public void setValue(String s) throws YangException {
-        throw new YangException(YangException.BAD_VALUE, s);
+        // throw new YangException(YangException.BAD_VALUE, s);
     }
 
+    /**
+     * This method doesn't do anything, but is part of the interface
+     * 
+     * @param value ignored
+     * @throws YangException always, since this object is immutable
+     */
     @Override
-    public void setValue(Void value) throws YangException {
-        throw new YangException(YangException.BAD_VALUE, value);
+    public void setValue(YangEmpty value) throws YangException {
+        // throw new YangException(YangException.BAD_VALUE, value);
     }
 
+    /**
+     * @return this object, since an empty leaf is it's own value.
+     */
     @Override
-    public Void getValue() {
-        return null; // An empty leaf has no value
+    public YangEmpty getValue() {
+        return this;
+    }
+    
+    /**
+     * @return An empty string.
+     */
+    @Override
+    public String toString() {
+        return "";
     }
 
 }
