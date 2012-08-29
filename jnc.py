@@ -387,10 +387,6 @@ normalized_stmt_args = {}
 """Cache containing normalized versions of statement identifiers"""
 
 
-flattened = {}
-"""Cache with iterables ids mapped to flattened versions of the iterables"""
-
-
 def print_warning(msg='', key='', ctx=None):
     """Prints msg to stderr if ctx is None or the debug or verbose flags are
     set in context ctx and key is empty or not in outputted_warnings. If key is
@@ -535,10 +531,6 @@ def flatten(l):
 
     Example: flatten([['12', '34'], ['56', ['7']]]) = ['12', '34', '56', '7']
     """
-    try:
-        return flattened[id(l)]
-    except KeyError:
-        pass
     res = []
     while hasattr(l, 'values'):
         l = l.values()
@@ -550,7 +542,6 @@ def flatten(l):
             res.append(item)
         else:
             res.extend(flatten(item))
-    flattened[id(l)] = l
     return res
 
 
