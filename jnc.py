@@ -920,14 +920,11 @@ class ClassGenerator(object):
             field = self.generate_child(ch)
             if field:
                 fields.append(field)
-            if self.ctx.opts.import_on_demand:
-                subpkg = produced_subpackage(ch)
-                if subpkg:
-                    import_ = '.'.join([self.package, camelize(self.stmt.arg),
-                                        subpkg, '*'])
+                if (not self.ctx.opts.import_on_demand
+                        or normalize(field) in java_lang):
+                    # Need to do explicit import
+                    import_ = '.'.join([self.package, self.n2, field])
                     self.java_class.imports.add(import_)
-                    if stmt.parent.keyword == 'module':
-                        print import_
 
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + self.filename + '"...'
@@ -957,6 +954,14 @@ class ClassGenerator(object):
         if stmt.keyword != 'typedef':  # TODO: Only add key name getter when relevant
             self.java_class.add_name_getter(gen.key_names())
             self.java_class.add_name_getter(gen.children_names())
+            
+            if self.ctx.opts.import_on_demand:
+                self.java_class.imports.add('com.tailf.jnc.*')
+                self.java_class.imports.add('java.math.*')
+                self.java_class.imports.add('java.util.*')
+                self.java_class.imports.add(self.package.partition('.')[0] + '.*')
+                import_ = '.'.join([self.package, self.n2, '*'])
+                self.java_class.imports.add(import_)
         elif stmt.keyword == 'typedef':
             type_stmt = stmt.search_one('type')
             super_type = get_types(type_stmt, self.ctx)[0]
@@ -1707,19 +1712,20 @@ class MethodGenerator(object):
         res = set([])
 
         if self.ctx.opts.import_on_demand:
-            res.add('java.math.*')
-            res.add('java.util.*')
-            res.add('com.tailf.jnc.*')
-            res.add(self.basepkg + '.*')
-            children = self.stmt.substmts[:]
-            if hasattr(self.stmt, 'i_children'):
-                children.extend(self.stmt.i_children)
-            if (self.stmt.search_one('list', children=children)
-                    or self.stmt.search_one('container', children=children)):
-                if child:
-                    res.add('.'.join([self.pkg, '*']))
-                else:
-                    res.add('.'.join([self.pkg, self.n2, '*']))
+            pass
+#            res.add('java.math.*')
+#            res.add('java.util.*')
+#            res.add('com.tailf.jnc.*')
+#            res.add(self.basepkg + '.*')
+#            children = self.stmt.substmts[:]
+#            if hasattr(self.stmt, 'i_children'):
+#                children.extend(self.stmt.i_children)
+#            if (self.stmt.search_one('list', children=children)
+#                    or self.stmt.search_one('container', children=children)):
+#                if child:
+#                    res.add('.'.join([self.pkg, '*']))
+#                else:
+#                    res.add('.'.join([self.pkg, self.n2, '*']))
         else:
             for dependency in method.imports:
                 if dependency.startswith(('java.math', 'java.util',
