@@ -907,14 +907,16 @@ class ClassGenerator(object):
         if i_children_exists:
             children.update(stmt.i_children)
 
+        package_generated = False
         for ch in children:
             field = self.generate_child(ch)
+            package_generated |= field is not None
             if field:
                 fields.append(field)
                 if (not self.ctx.opts.import_on_demand
                         or normalize(field) in java_lang):
                     # Need to do explicit import
-                    import_ = '.'.join([self.package, self.n2, field])
+                    import_ = '.'.join([self.package, self.n2, normalize(field)])
                     self.java_class.imports.add(import_)
 
         if self.ctx.opts.verbose:
@@ -951,8 +953,9 @@ class ClassGenerator(object):
                 self.java_class.imports.add('java.math.*')
                 self.java_class.imports.add('java.util.*')
                 self.java_class.imports.add(self.package.partition('.')[0] + '.*')
-                import_ = '.'.join([self.package, self.n2, '*'])
-                self.java_class.imports.add(import_)
+                if package_generated:
+                    import_ = '.'.join([self.package, self.n2, '*'])
+                    self.java_class.imports.add(import_)
         elif stmt.keyword == 'typedef':
             type_stmt = stmt.search_one('type')
             super_type = get_types(type_stmt, self.ctx)[0]
@@ -985,6 +988,8 @@ class ClassGenerator(object):
         field = None
         add = self.java_class.append_access_method  # XXX: add is a function
         if sub.keyword in ('list', 'container', 'typedef'):
+            if sub.keyword != 'typedef':
+                field = ''
             child_generator = ClassGenerator(stmt=sub,
                 package=self.package + '.' + camelize(sub.parent.arg),
                 path=self.path + os.sep + camelize(sub.parent.arg) + os.sep, ns=None,
