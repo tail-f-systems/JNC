@@ -615,8 +615,9 @@ def get_types(yang_type, ctx):
         try:
             typedef = yang_type.i_typedef
         except AttributeError:
-            type_id = get_package(yang_type, ctx) + yang_type.arg
-            print_warning(key=type_id, ctx=ctx)
+            if yang_type.keyword != 'typedef':
+                pkg = get_package(yang_type, ctx)
+                print_warning(key=pkg  + '.' + normalize(yang_type), ctx=ctx)
         else:
             basetype = get_base_type(typedef)
             package = get_package(typedef, ctx)
