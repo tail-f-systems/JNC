@@ -229,7 +229,7 @@ class JNCPlugin(plugin.PyangPlugin):
                             schema_nodes[i] = ' ' * 8 + schema_nodes[i]
                     schema_nodes.append('</schema>')
 
-                    name = capitalize_first(module.search_one('prefix').arg)
+                    name = capitalize_first(search_one(module, 'prefix').arg)
                     write_file(d, name + '.schema', '\n'.join(schema_nodes), ctx)
                     if ctx.opts.debug or ctx.opts.verbose:
                         print 'Schema generation COMPLETE.'
@@ -561,7 +561,7 @@ def get_types(yang_type, ctx):
 
     """
     if yang_type.keyword in ('leaf', 'leaf-list'):
-        yang_type = yang_type.search_one('type')
+        yang_type = search_one(yang_type, 'type')
     assert yang_type.keyword in ('type', 'typedef'), 'argument is type, typedef or leaf'
     primitive = normalize(yang_type.arg)
     if primitive == 'JBoolean':
@@ -608,7 +608,7 @@ def get_types(yang_type, ctx):
 
 def get_base_type(stmt):
     """Returns the built in type that stmt is derived from"""
-    type_stmt = stmt.search_one('type')
+    type_stmt = search_one(stmt, 'type')
     try:
         typedef = type_stmt.i_typedef
     except AttributeError:
@@ -702,23 +702,21 @@ class SchemaNode(object):
         res = ['<node>']
         stmt = self.stmt
         res.append('<tagpath>' + self.tagpath + '</tagpath>')
-        if stmt.top is None:
-            ns = stmt.search_one('namespace').arg
-        else:
-            ns = stmt.top.search_one('namespace').arg
+        top_stmt = stmt if stmt.top is None else stmt.top
+        ns = search_one(top_stmt, 'namespace').arg
         res.append('<namespace>' + ns + '</namespace>')
         res.append('<primitive_type>0</primitive_type>')
 
         min_occurs = '0'
         max_occurs = '-1'
 
-        mandatory = stmt.search_one('mandatory')
+        mandatory = search_one(stmt, 'mandatory')
         isMandatory = mandatory is not None and mandatory.arg == 'true'
-        unique = stmt.search_one('unique')
+        unique = search_one(stmt, 'unique')
         isUnique = unique is not None and unique.arg == 'true'
         key = None
         if stmt.parent is not None:
-            key = stmt.parent.search_one('key')
+            key = search_one(stmt.parent, 'key')
         isKey = key is not None and key.arg == stmt.arg
         childOfContainerOrList = (stmt.parent is not None
             and stmt.parent.keyword in ('container', 'list'))
@@ -845,11 +843,11 @@ class ClassGenerator(object):
 
         """
         if self.stmt.keyword == 'module':
-            ns_arg = self.stmt.search_one('namespace').arg
-            prefix = self.stmt.search_one('prefix')
+            ns_arg = search_one(self.stmt, 'namespace').arg
+            prefix = search_one(self.stmt, 'prefix')
         elif self.stmt.keyword == 'submodule':
-            parent_module = self.stmt.search_one('belongs-to')
-            prefix = parent_module.search_one('prefix')
+            parent_module = search_one(self.stmt, 'belongs-to')
+            prefix = search_one(parent_module, 'prefix')
             ns_arg = '<unknown/prefix: ' + prefix.arg + '>'
 
         for stmt in self.stmt.substmts:
@@ -925,10 +923,6 @@ class ClassGenerator(object):
                 source=self.src,
                 superclass='YangElement')
 
-        i_children_exists = (hasattr(stmt, 'i_children')
-            and stmt.i_children is not None
-            and stmt.i_children != [])
-
         # If augment, add target module to augmented_modules dict
         if stmt.keyword == 'augment':
             if not hasattr(stmt, "i_target_node"):  # TODO: EAFP
@@ -939,18 +933,16 @@ class ClassGenerator(object):
                 augmented_modules[target.top.arg] = target.top
             return  # XXX: Do not generate a class for the augment statement
 
-        children = set(stmt.substmts)
-        if i_children_exists:
-            children.update(stmt.i_children)
-
         package_generated = False
-        for ch in children:
+        for ch in search(stmt, ('list', 'container', 'typedef',
+                                'leaf', 'leaf-list')):
             field = self.generate_child(ch)
             package_generated |= field is not None
             if field:
                 fields.append(field)
                 if (not self.ctx.opts.import_on_demand
-                        or normalize(field) in java_lang):
+                        or normalize(field) in java_lang
+                        or normalize(field) in generated_in_root):
                     # Need to do explicit import
                     import_ = '.'.join([self.package, self.n2, normalize(field)])
                     self.java_class.imports.add(import_)
@@ -988,14 +980,15 @@ class ClassGenerator(object):
                 self.java_class.imports.add('com.tailf.jnc.*')
                 self.java_class.imports.add('java.math.*')
                 self.java_class.imports.add('java.util.*')
-                self.java_class.imports.add(self.package.partition('.')[0] + '.*')
+                self.java_class.imports.add(self.ctx.rootpkg.replace(os.sep, '.') + '.*')
                 if package_generated:
                     import_ = '.'.join([self.package, self.n2, '*'])
                     self.java_class.imports.add(import_)
         elif stmt.keyword == 'typedef':
-            type_stmt = stmt.search_one('type')
+            type_stmt = search_one(stmt, 'type')
             super_type = get_types(type_stmt, self.ctx)[0]
-            self.java_class.superclass = super_type
+            self.java_class.superclass = super_type.rpartition('.')[2]
+            self.java_class.imports.add(super_type)
 
             # If supertype is derived, make sure a class for it is generated
             if type_stmt.i_typedef:
@@ -1045,7 +1038,7 @@ class ClassGenerator(object):
             child_gen = MethodGenerator(sub, self.ctx)
             add(sub.arg, child_gen.access_methods_comment())
             if sub.keyword == 'leaf':
-                key = sub.parent.search_one('key')
+                key = search_one(sub.parent, 'key')
                 optional = key is None or sub.arg not in key.arg.split(' ')
                 # TODO: ensure that the leaf is truly optional
                 add(sub.arg, child_gen.getters())
@@ -1695,7 +1688,7 @@ class MethodGenerator(object):
         self.root = None
         prefix = None
         if stmt.top is not None:
-            prefix = self.stmt.top.search_one('prefix')
+            prefix = search_one(self.stmt.top, 'prefix')
         if prefix is not None:
             self.root = normalize(prefix.arg)
 
@@ -1727,7 +1720,7 @@ class MethodGenerator(object):
         if import_ == self.root:
             return '.'.join(self.rootpkg + [import_])
         elif import_ in self.children:
-            type_child = self.stmt.search_one('type')
+            type_child = search_one(self.stmt, 'type')
             if type_child is not None and normalize(type_child.arg) == import_:
                 try:
                     typedef_pkg = get_package(type_child.i_typedef, self.ctx)
@@ -2103,19 +2096,14 @@ class LeafMethodGenerator(MethodGenerator):
     def __init__(self, stmt, ctx):
         super(LeafMethodGenerator, self).__init__(stmt, ctx)
         assert self.is_leaf or self.is_leaflist
-        children = stmt.substmts[:]
-        try:
-            children.extend(stmt.i_children)
-        except AttributeError:
-            pass  # Statement does not have i_children attr
-        self.stmt_type = stmt.search_one('type', children=children)
-        self.default = stmt.search_one('default')
+        self.stmt_type = search_one(stmt, 'type')
+        self.default = search_one(stmt, 'default')
         self.default_value = None if not self.default else self.default.arg
         self.type_str = get_types(self.stmt_type, ctx)
         self.is_string = self.type_str[1] == 'String'
         self.is_typedef = (hasattr(self.stmt_type, 'i_typedef')
                            and self.stmt_type.i_typedef is not None)
-        key = stmt.parent.search_one('key')
+        key = search_one(stmt.parent, 'key')
         self.is_optional = key is None or stmt.arg not in key.arg.split(' ')
 
     def getters(self):
@@ -2204,7 +2192,7 @@ class LeafMethodGenerator(MethodGenerator):
                     method.add_javadoc('using a String value.')
                 if self.type_str[0] == 'com.tailf.jnc.YangUnion':
                     line.append(', new String[] {')
-                    for type_stmt in self.stmt_type.search('type'):
+                    for type_stmt in search(self.stmt_type, 'type'):
                         member_type, _ = get_types(type_stmt, self.ctx)
                         line.append('"' + member_type + '", ')
                     line.append('}')
@@ -2476,18 +2464,14 @@ class ListMethodGenerator(MethodGenerator):
 
         self.keys = []
         if self.is_config:
-            self.keys = self.stmt.search_one('key').arg.split(' ')
-        chs = stmt.substmts[:]
-        try:
-            chs.extend(stmt.i_children)
-        except AttributeError:
-            pass  # Statement does not have i_children attr
-        findkey = lambda k: self.stmt.search_one('leaf', arg=k, children=chs)
+            key = search_one(self.stmt, 'key')
+            self.keys = key.arg.split(' ')
+        findkey = lambda k: search_one(self.stmt, 'leaf', arg=k)
         self.key_stmts = map(findkey, self.keys)
         
         notstring = lambda k: get_types(k, ctx)[1] != 'String'
         self.is_string = not filter(notstring, self.key_stmts)
-#        max_ = stmt.search_one('max-elements')
+#        max_ = search_one(stmt, 'max-elements')
 #        self.max_elements = 'unbounded' if not max_ else max_.arg
 
     def value_constructors(self):
@@ -2549,7 +2533,7 @@ class ListMethodGenerator(MethodGenerator):
     def constructors(self):
         # Number of constructors depends on the type of the key
         constructors = [self.empty_constructor()]
-        if self.is_config or self.stmt.search_one('key') is not None:
+        if self.is_config or self.keys:
             constructors.extend(self.value_constructors())
         return constructors
 
