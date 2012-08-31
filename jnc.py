@@ -1773,36 +1773,30 @@ class MethodGenerator(object):
 
     def fix_imports(self, method, child=False):
         res = set([])
-
+        imports = method.imports
         if self.ctx.opts.import_on_demand:
-            pass
-#            res.add('java.math.*')
-#            res.add('java.util.*')
-#            res.add('com.tailf.jnc.*')
-#            res.add(self.basepkg + '.*')
-#            children = self.stmt.substmts[:]
-#            if hasattr(self.stmt, 'i_children'):
-#                children.extend(self.stmt.i_children)
-#            if (self.stmt.search_one('list', children=children)
-#                    or self.stmt.search_one('container', children=children)):
-#                if child:
-#                    res.add('.'.join([self.pkg, '*']))
-#                else:
-#                    res.add('.'.join([self.pkg, self.n2, '*']))
-        else:
-            for dependency in method.imports:
-                if dependency.startswith(('java.math', 'java.util',
-                                          'com.tailf.jnc', self.basepkg)):
-                    res.add(dependency)
-                    continue
-                elif dependency.endswith('>'):
-                    for token in filter(None, re.findall(r'\w+', dependency)):
-                        res.add(self.canonical_import(token, child))
-                elif dependency.endswith(']'):
-                    assert dependency[:-2] and dependency[-2:] == '[]'
-                    res.add(self.canonical_import(dependency[:-2], child))
-                else:
-                    res.add(self.canonical_import(dependency, child))
+            imports = set([])  # method.crucial_imports
+            pkg = self.pkg
+            if child:
+                pkg = pkg.rpartition('.')[0]
+            pkg_classes = class_hierarchy.get(pkg, [])
+            for import_ in method.imports:
+                if import_.rpartition('.')[2] in pkg_classes:
+                    imports.add(import_)
+
+        for dependency in imports:
+            if dependency.startswith(('java.math', 'java.util',
+                                      'com.tailf.jnc', self.basepkg)):
+                res.add(dependency)
+                continue
+            elif dependency.endswith('>'):
+                for token in filter(None, re.findall(r'\w+', dependency)):
+                    res.add(self.canonical_import(token, child))
+            elif dependency.endswith(']'):
+                assert dependency[:-2] and dependency[-2:] == '[]'
+                res.add(self.canonical_import(dependency[:-2], child))
+            else:
+                res.add(self.canonical_import(dependency, child))
 
         method.imports = res
         return method
