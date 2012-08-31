@@ -314,6 +314,25 @@ Type '$ pyang --help' for more details on how to use pyang.
 '''
 
 
+jnc_java_classes = {'Attribute', 'Capabilities', 'ConfDSession',
+                    'DefaultIOSubscriber', 'Device', 'DeviceUser',
+                    'DummyElement', 'Element', 'ElementChildrenIterator',
+                    'ElementHandler', 'ElementLeafListValueIterator',
+                    'IOSubscriber', 'JNCException', 'Leaf', 'NetconfSession',
+                    'NodeSet', 'Path', 'PathCreate', 'Prefix', 'PrefixMap',
+                    'RevisionInfo', 'RpcError', 'SchemaNode', 'SchemaParser',
+                    'SchemaTree', 'SSHConnection', 'SSHSession', 'Tagpath',
+                    'TCPConnection', 'TCPSession', 'Transport', 'Utils',
+                    'XMLParser', 'YangBaseInt', 'YangBaseString',
+                    'YangBaseType', 'YangBinary', 'YangBits', 'YangBoolean',
+                    'YangDecimal64', 'YangElement', 'YangEmpty',
+                    'YangEnumeration', 'YangException', 'YangIdentityref',
+                    'YangInt16', 'YangInt32', 'YangInt64', 'YangInt8',
+                    'YangLeafref', 'YangString', 'YangType', 'YangUInt16',
+                    'YangUInt32', 'YangUInt64', 'YangUInt8', 'YangUnion',
+                    'YangXMLParser'}
+
+
 java_reserved_words = {'abstract', 'assert', 'boolean', 'break', 'byte',
     'case', 'catch', 'char', 'class', 'const', 'continue', 'default',
     'double', 'do', 'else', 'enum', 'extends', 'false',
