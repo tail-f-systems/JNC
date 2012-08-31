@@ -947,7 +947,6 @@ class ClassGenerator(object):
 
         """
         stmt = self.stmt
-        self.filename = normalize(stmt.arg) + '.java'
         fields = []
 
         self.java_class = JavaClass(filename=self.filename,
@@ -1739,11 +1738,11 @@ class MethodGenerator(object):
         if type(self) is MethodGenerator:
             if self.is_typedef:
                 self.gen = TypedefMethodGenerator(stmt, ctx)
-            if self.is_container:
+            elif self.is_container:
                 self.gen = ContainerMethodGenerator(stmt, ctx)
-            if self.is_list:
+            elif self.is_list:
                 self.gen = ListMethodGenerator(stmt, ctx)
-            if self.is_leaf or self.is_leaflist:
+            elif self.is_leaf or self.is_leaflist:
                 self.gen = LeafMethodGenerator(stmt, ctx)
 
     def canonical_import(self, import_, child=False):
