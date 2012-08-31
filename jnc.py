@@ -1477,6 +1477,8 @@ class JavaValue(object):
             for import_ in imports:
                 self.imports.add(import_)
 
+        self.crucial_imports = set([])
+
         self.exact = exact
         self.default_modifiers = True
 
@@ -1550,6 +1552,8 @@ class JavaValue(object):
         if sep:
             if class_name not in java_built_in:
                 self.imports.add(import_)
+                if class_name in generated_in_root:
+                    self.crucial_imports.add(import_)
                 return class_name
         elif not any(x in java_built_in for x in (import_, import_[:-2])):
             self.imports.add(import_)
@@ -2056,6 +2060,8 @@ class MethodGenerator(object):
                         param_type = 'String'
                     method.add_parameter(param_type, camelize(key_stmt.arg))
                 new_child = [self.n, ' ', self.n2, ' = new ', self.n, '(']
+                if self.n in generated_in_root:
+                    method.add_dependency(self.n)
                 new_child.append(', '.join([s.arg for s in self.gen.key_stmts]))
                 new_child.append(');')
                 method.add_line(''.join(new_child))
