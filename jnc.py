@@ -636,23 +636,49 @@ def get_import(string):
         return '.'.join(['com.tailf.jnc', string])
 
 
-def produced_subpackage(stmt):
-    subpkg = None
-    if stmt.keyword in ('list', 'container'):
-        subpkg = camelize(stmt.arg)
-        children = stmt.substmts[:]
-        if hasattr(stmt, 'i_children'):
-            children.extend(stmt.i_children)
-        if stmt.search('list', children) or stmt.search('container', children):
-            return subpkg
-    return None
+def search(stmt, keywords):
+    """Utility for calling Statement.search. If stmt has an i_children
+    attribute, they are searched for keywords as well.
+
+    stmt     -- Statement to search for children in
+    keywords -- A string, or a tuple, list or set of strings, to search for
+
+    Returns a set (without duplicates) of children with matching keywords
+
+    """
+    if isinstance(keywords, basestring):
+        keywords = [keywords]
+    res = set([])
+    for keyword in keywords:
+        # Avoid copying the substmt and i_children lists
+        for ch in stmt.substmts:
+            if ch.keyword == keyword:
+                res.add(ch)
+        try:
+            for ch in stmt.i_children:
+                if ch.keyword == keyword:
+                    res.add(ch)
+        except AttributeError:
+            continue
+    return res
+
+
+def search_one(stmt, keyword, arg=None):
+    """Utility for calling Statement.search_one, including i_children."""
+    res = stmt.search_one(keyword, arg=arg)
+    if res is None:
+        try:
+            res = stmt.search_one(keyword, arg=arg, children=stmt.i_children)
+        except AttributeError:
+            pass
+    return res
 
 
 def is_config(stmt):
     """Returns True if stmt is a configuration data statement"""
     config = None
     while config is None and stmt is not None:
-        config = stmt.search_one('config')
+        config = search_one(stmt, 'config')
         stmt = stmt.parent
     return config is None or config.arg == 'true'
 
