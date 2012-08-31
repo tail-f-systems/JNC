@@ -2344,22 +2344,25 @@ class TypedefMethodGenerator(MethodGenerator):
         super(TypedefMethodGenerator, self).__init__(stmt, ctx)
         assert self.gen is self
         assert self.is_typedef, 'This class is only valid for typedef stmts'
-        self.type = stmt.search_one('type')  # FIXME use get_type!
-        self.base_type = None if not self.type else get_base_type(stmt)
+        self.type = search_one(stmt, 'type')
+        self.jnc_type, self.primitive = get_types(stmt, ctx)
+        self.base_type = get_base_type(stmt) if self.type else None
+        self.base_primitive = None
+        if self.base_type:
+            self.base_primitive = get_types(self.base_type, ctx)[1]
         self.is_string = False
         self.needs_check = True  # Set to False to avoid redundant checks
         if self.base_type is not None:
-            self.is_string = self.base_type.arg in ('string', 'enumeration')
+            self.is_string = self.base_type.arg == 'string'
             for s in ('length', 'path', 'range', 'require_instance'):
-                setattr(self, s, self.base_type.search_one(s))
+                setattr(self, s, search_one(self.base_type, s))
             for s in ('bit', 'enum', 'pattern'):
-                setattr(self, s, self.base_type.search(s))
+                setattr(self, s, search(self.base_type, s))
             # self.needs_check = self.enum or self.pattern
 
     def constructors(self):
         """Returns a list containing a single or a pair of constructors"""
         constructors = []
-        primitive = get_types(self.type, self.ctx)[1]
         javadoc = ['@param value Value to construct the ', self.n, ' from.']
 
         # Iterate once if string, twice otherwise
@@ -2372,8 +2375,8 @@ class TypedefMethodGenerator(MethodGenerator):
                 constructor.add_parameter('String', 'value')
             else:
                 # i == 1, Primitive constructor
-                javadoc2.extend([' object from a ', primitive, '.'])
-                tmp_primitive = constructor.add_dependency(primitive)
+                javadoc2.extend([' object from a ', self.base_primitive, '.'])
+                tmp_primitive = constructor.add_dependency(self.base_primitive)
                 constructor.add_parameter(tmp_primitive, 'value')
             constructor.add_javadoc(''.join(javadoc2))
             constructor.add_javadoc(''.join(javadoc))
@@ -2386,7 +2389,6 @@ class TypedefMethodGenerator(MethodGenerator):
     def setters(self):
         """Returns a list of set_value JavaMethods"""
         setters = []
-        primitive = get_types(self.type, self.ctx)[1]
         javadoc = '@param value The value to set.'
 
         # Iterate once if string, twice otherwise
@@ -2399,8 +2401,9 @@ class TypedefMethodGenerator(MethodGenerator):
                 setter.add_parameter('String', 'value')
             else:
                 # i == 1, Primitive setter
-                javadoc2.extend(['value of type ', primitive, '.'])
-                setter.add_parameter(primitive, 'value')
+                javadoc2.extend(['value of type ', self.base_primitive, '.'])
+                tmp_primitive = setter.add_dependency(self.base_primitive)
+                setter.add_parameter(tmp_primitive, 'value')
             setter.add_javadoc(''.join(javadoc2))
             setter.add_javadoc(javadoc)
             setter.add_line('super.setValue(value);')
@@ -2426,7 +2429,9 @@ class TypedefMethodGenerator(MethodGenerator):
                 checker.add_line('throwException( !e );')
             if self.pattern:
                 if len(self.pattern) == 1:
-                    checker.add_line('pattern("' + self.pattern[0].arg + '");')
+                    p = self.pattern.pop()  # Set has no peek method
+                    self.pattern.add(p)  # So we need to remove and add
+                    checker.add_line('pattern("' + p.arg + '");')
                 else:
                     checker.add_line('java.lang.String[] regexs = {')
                     for p in self.pattern:
