@@ -2533,20 +2533,21 @@ class ListMethodGenerator(MethodGenerator):
             constructor.add_javadoc(javadoc2[i])
             constructor.add_exception('JNCException')  # TODO: Add only if needed
             for key in self.key_stmts:
-                javadoc = ['@param ', key.arg, 'Value Key argument of child.']
+                key_arg = camelize(key.arg)
+                javadoc = ['@param ', key_arg, 'Value Key argument of child.']
                 jnc, primitive = get_types(key, self.ctx)
                 jnc = constructor.add_dependency(jnc)
-                setValue = [key.arg, '.setValue(']
+                setValue = [key_arg, '.setValue(']
                 if i == 0:
                     # Default constructor
                     param_type = jnc
-                    setValue.extend([key.arg, 'Value);'])
+                    setValue.extend([key_arg, 'Value);'])
                 else:
                     # String or primitive constructor
-                    setValue.extend(['new ', jnc, '(', key.arg, 'Value'])
+                    setValue.extend(['new ', jnc, '(', key_arg, 'Value'])
                     if jnc == 'YangUnion':
                         setValue.append(', new String [] {')
-                        for type_stmt in key.search_one('type').search('type'):
+                        for type_stmt in search(search_one(key, 'type'), 'type'):
                             member_type, _ = get_types(type_stmt, self.ctx)
                             setValue.append('"' + member_type + '", ')
                         setValue.append('}')
@@ -2555,13 +2556,13 @@ class ListMethodGenerator(MethodGenerator):
                         param_type = 'String'
                     else:
                         param_type = primitive
-                newLeaf = ['Leaf ', key.arg, ' = new Leaf']
+                newLeaf = ['Leaf ', key_arg, ' = new Leaf']
                 constructor.add_dependency('Leaf')
                 newLeaf.extend(self._root_namespace(key.arg))
                 constructor.add_dependency(self.root)
-                insertChild = ['insertChild(', key.arg, ', childrenNames());']
+                insertChild = ['insertChild(', key_arg, ', childrenNames());']
                 constructor.add_javadoc(''.join(javadoc))
-                constructor.add_parameter(param_type, key.arg + 'Value')
+                constructor.add_parameter(param_type, key_arg + 'Value')
                 constructor.add_line(''.join(newLeaf))
                 constructor.add_line(''.join(setValue))
                 constructor.add_line(''.join(insertChild))
@@ -2601,13 +2602,14 @@ class ListMethodGenerator(MethodGenerator):
                 javadoc2.append('The keys are specified as strings.')
 
             for key in self.gen.key_stmts:
-                javadoc2.append(''.join(['@param ', key.arg,
+                key_arg = camelize(key.arg)
+                javadoc2.append(''.join(['@param ', key_arg,
                     'Value Key argument of child.']))
                 param_type = 'String'
                 if i == 0:
                     param_type, _ = get_types(key, self.ctx)
-                method.add_parameter(param_type, key.arg)
-                path.extend(['[', key.arg, '=\'" + ', key.arg, ' + "\']'])
+                method.add_parameter(param_type, key_arg)
+                path.extend(['[', key_arg, '=\'" + ', key_arg, ' + "\']'])
             path.append('";')
 
             method.add_javadoc(''.join(javadoc1))
