@@ -883,11 +883,11 @@ class ClassGenerator(object):
             prefix = search_one(parent_module, 'prefix')
             ns_arg = '<unknown/prefix: ' + prefix.arg + '>'
 
-        for stmt in self.stmt.substmts:
-            if stmt.keyword in ('container', 'list', 'augment', 'typedef'):
-                child_generator = ClassGenerator(stmt, ns=ns_arg,
-                    prefix_name=self.n, top_level=True, parent=self)
-                child_generator.generate()
+        for stmt in search(self.stmt, ('container', 'list',
+                                       'augment', 'typedef')):
+            child_generator = ClassGenerator(stmt, ns=ns_arg,
+                prefix_name=self.n, top_level=True, parent=self)
+            child_generator.generate()
 
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + self.filename + '"...'
