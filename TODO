@@ -1,8 +1,9 @@
 TODO (in order of priority)
 ===========================
 Verify correctness of this list
-Take away max-elements-checks from add-methods
 Update the README
+Add line-number and path to comments in add-methods, etc.
+Take away code that's commented out
 Write structure template for User Manual, in LaTeX
 Write examples and tests:
 - Juniper
