@@ -852,6 +852,19 @@ class ClassGenerator(object):
 
     def generate(self):
         """Generates class(es) for self.stmt"""
+        if self.package not in class_hierarchy:
+            s = set([])
+            s.add('<< No generated classes >>')
+            class_hierarchy[self.package] = s
+        if ('<< No generated classes >>' in class_hierarchy[self.package]
+                and self.stmt.keyword in ('container', 'list')):
+            s = class_hierarchy[self.package]
+            s.discard('<< No generated classes >>')
+            for stmt in search(self.stmt.parent, ('container', 'list')):
+                s.add(normalize(stmt.arg))
+        elif self.stmt.keyword in ('module', 'submodule', 'typedef'):
+            class_hierarchy[self.package].add(self.n)
+
         if self.stmt.keyword in ('module', 'submodule'):
             self.generate_classes()
         else:
@@ -925,6 +938,7 @@ class ClassGenerator(object):
         reg.add_line('parser.readFile("' + schema + '.schema", h);')
         self.java_class.add_schema_registrator(reg)
 
+        generated_in_root.add(self.n)
         self.write_to_file()
 
     def generate_class(self):
@@ -1020,6 +1034,7 @@ class ClassGenerator(object):
                     typedef_generator.generate()
                     self.yang_types.add(type_stmt.i_typedef.arg)
             self.yang_types.add(stmt.arg)
+            generated_in_root.add(self.n)
 
         self.write_to_file()
 
