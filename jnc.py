@@ -389,6 +389,14 @@ normalized_stmt_args = {}
 """Cache containing normalized versions of statement identifiers"""
 
 
+generated_in_root = set([])
+"""Set of names of classes generated in the top package level"""
+
+
+class_hierarchy = {}
+"""Dict that map package names to sets of names of classes to be generated"""
+
+
 def print_warning(msg='', key='', ctx=None):
     """Prints msg to stderr if ctx is None or the debug or verbose flags are
     set in context ctx and key is empty or not in outputted_warnings. If key is
