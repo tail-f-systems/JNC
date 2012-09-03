@@ -837,6 +837,7 @@ class ClassGenerator(object):
         self.n = normalize(stmt.arg)
         self.n2 = camelize(stmt.arg)
         self.filename = self.n + '.java'
+        self.rootpkg = ctx.rootpkg.replace(os.sep, '.')
         
         if yang_types is None:
             self.yang_types = YangType()
@@ -848,7 +849,6 @@ class ClassGenerator(object):
 
     def generate(self):
         """Generates class(es) for self.stmt"""
-        rootpkg = self.ctx.rootpkg.replace(os.sep, '.')
         if self.package not in class_hierarchy:
             s = set([])
             s.add('<< No generated classes >>')
@@ -861,7 +861,7 @@ class ClassGenerator(object):
                 s.add(normalize(stmt.arg))
         elif self.stmt.keyword in ('module', 'submodule', 'typedef'):
             # class_hierarchy[self.package].add(self.n)
-            class_hierarchy[rootpkg].add(self.n)
+            class_hierarchy[self.rootpkg].add(self.n)
 
         if self.stmt.keyword in ('module', 'submodule'):
             self.generate_classes()
@@ -988,7 +988,7 @@ class ClassGenerator(object):
                         or normalize(ch.arg) in java_lang
                         or normalize(ch.arg) in java_util
                         or normalize(ch.arg) in com_tailf_jnc
-                        or normalize(ch.arg) in class_hierarchy[rootpkg]
+                        or normalize(ch.arg) in class_hierarchy[self.rootpkg]
                         or normalize(ch.arg) in class_hierarchy[self.package]):
                     # Need to do explicit import
                     import_ = '.'.join([self.package, self.n2,
@@ -1031,8 +1031,8 @@ class ClassGenerator(object):
                 self.java_class.imports.add('com.tailf.jnc.*')
                 self.java_class.imports.add('java.math.*')
                 self.java_class.imports.add('java.util.*')
-                if rootpkg != self.package:
-                    self.java_class.imports.add(rootpkg + '.*')
+                if self.rootpkg != self.package:
+                    self.java_class.imports.add(self.rootpkg + '.*')
                 if package_generated and not all_fully_qualified:
                     import_ = '.'.join([self.package, self.n2, '*'])
                     self.java_class.imports.add(import_)
