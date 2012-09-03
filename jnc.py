@@ -987,7 +987,7 @@ class ClassGenerator(object):
 
         if self.ctx.opts.debug or self.ctx.opts.verbose:
             if package_generated:
-                print self.package
+                print '.'.join([self.package, self.n2])
             if self.ctx.opts.verbose:
                 print 'Generating Java class "' + self.filename + '"...'
 
