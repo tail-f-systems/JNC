@@ -2168,17 +2168,17 @@ class LeafMethodGenerator(MethodGenerator):
         
         # Leaves with a default value returns it instead of null 
         if self.default:
-            method.add_line(method.return_type + ' ' + self.n2 + ' = (' +
-                            method.return_type + ')getValue("' +
-                            self.stmt.arg + '");')
+            method.add_line(''.join([method.return_type, ' ', self.n2, ' = (',
+                                     method.return_type, ')getValue("',
+                                     self.stmt.arg, '");']))
             method.add_line('if (' + self.n2 + ' == null) {')
             method.add_line('    ' + self.n2 + ' = new ' + method.return_type +
                             '("' + self.default_value + '");')
             method.add_line('}')
             method.add_line('return ' + self.n2 + ';')
         else:
-            method.add_line('return (' + method.return_type + ')getValue("' +
-                        self.stmt.arg + '");')
+            method.add_line(''.join(['return (', method.return_type,
+                                     ')getValue("', self.stmt.arg, '");']))
         return [self.fix_imports(method, child=True)]
 
     def setters(self):
