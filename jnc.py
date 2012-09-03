@@ -950,11 +950,14 @@ class ClassGenerator(object):
         """
         stmt = self.stmt
         fields = []
+        rootpkg = self.ctx.rootpkg.replace(os.sep, '.')
 
         self.java_class = JavaClass(filename=self.filename,
                 package=self.package,
-                description='This class represents a "' + self.path +
-                    stmt.arg + '" element\n * from the namespace ' + self.ns,
+                description=''.join(['This class represents a "',
+                                     self.path, '/', stmt.arg,
+                                     '" element\n * from the namespace ',
+                                     self.ns]),
                 source=self.src,
                 superclass='YangElement')
 
@@ -978,7 +981,9 @@ class ClassGenerator(object):
                     fields.append(field)
                 if (not self.ctx.opts.import_on_demand
                         or normalize(ch.arg) in java_lang
-                        or normalize(ch.arg) in generated_in_root):
+                        or normalize(ch.arg) in com_tailf_jnc
+                        or normalize(ch.arg) in class_hierarchy[rootpkg]
+                        or normalize(ch.arg) in class_hierarchy[self.package]):
                     # Need to do explicit import
                     import_ = '.'.join([self.package, self.n2,
                                         normalize(ch.arg)])
