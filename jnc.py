@@ -852,6 +852,7 @@ class ClassGenerator(object):
 
     def generate(self):
         """Generates class(es) for self.stmt"""
+        rootpkg = self.ctx.rootpkg.replace(os.sep, '.')
         if self.package not in class_hierarchy:
             s = set([])
             s.add('<< No generated classes >>')
@@ -863,7 +864,8 @@ class ClassGenerator(object):
             for stmt in search(self.stmt.parent, ('container', 'list')):
                 s.add(normalize(stmt.arg))
         elif self.stmt.keyword in ('module', 'submodule', 'typedef'):
-            class_hierarchy[self.package].add(self.n)
+            # class_hierarchy[self.package].add(self.n)
+            class_hierarchy[rootpkg].add(self.n)
 
         if self.stmt.keyword in ('module', 'submodule'):
             self.generate_classes()
