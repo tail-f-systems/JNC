@@ -1071,21 +1071,26 @@ class ClassGenerator(object):
         if sub.keyword in ('list', 'container', 'typedef'):
             if sub.keyword != 'typedef':
                 field = ''
-            child_generator = ClassGenerator(stmt=sub,
-                package=self.package + '.' + camelize(sub.parent.arg),
-                path=self.path + os.sep + camelize(sub.parent.arg) + os.sep, ns=None,
-                prefix_name=None, parent=self)
+                pkg = self.package + '.' + camelize(sub.parent.arg)
+            child_generator = ClassGenerator(stmt=sub, package=pkg,
+                path=self.path + os.sep + camelize(sub.parent.arg) + os.sep,
+                ns=None, prefix_name=None, parent=self)
             child_generator.generate()
-            if sub.keyword == 'list':
-                child_gen = MethodGenerator(sub, self.ctx)
-                for access_method in child_gen.parent_access_methods():
-                    add(sub.arg, access_method)
-            elif sub.keyword == 'container':
+            child_gen = MethodGenerator(sub, self.ctx)
+            if sub.keyword == 'container':
                 field = sub.arg
-                child_gen = MethodGenerator(sub, self.ctx)
                 self.java_class.add_field(child_gen.child_field())
-                for access_method in child_gen.parent_access_methods():
-                    add(sub.arg, access_method)
+            for access_method in child_gen.parent_access_methods():
+                name = normalize(sub.arg)
+                if name == normalize(sub.parent.arg):
+                    f = lambda s: s.replace(name, '.'.join([pkg, name]))
+                    access_method.return_value = f(access_method.return_value)
+                    fix_parameter_types = lambda param_type, param_name: (
+                        f(param_type), param_name)
+                    access_method.parameters = map(fix_parameter_types,
+                                                   access_method.parameters)
+                    access_method.body = map(f, access_method.body)
+                add(sub.arg, access_method)
         elif sub.keyword in ('leaf', 'leaf-list'):
             child_gen = MethodGenerator(sub, self.ctx)
             add(sub.arg, child_gen.access_methods_comment())
