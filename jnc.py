@@ -1390,13 +1390,15 @@ class JavaClass(object):
         if self.superclass:
             self.imports.add(get_import(self.superclass))
         if self.imports:
-            prev = ''
+            prevpkg = ''
             for import_ in self.imports.as_sorted_list():
-                basepkg = import_[:import_.find('.')]
-                if basepkg != prev:
-                    header.append('')
-                header.append('import ' + import_ + ';')
-                prev = basepkg
+                pkg, _, cls = import_.rpartition('.')
+                if pkg != 'com.tailf.jnc' or cls in com_tailf_jnc:
+                    basepkg = import_[:import_.find('.')]
+                    if basepkg != prevpkg:
+                        header.append('')
+                    header.append('import ' + import_ + ';')
+                    prevpkg = basepkg
 
         # Class doc-comment and declaration, with modifiers
         header.append('')
