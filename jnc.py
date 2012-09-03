@@ -1075,7 +1075,7 @@ class ClassGenerator(object):
                 field = ''
                 pkg = self.package + '.' + camelize(sub.parent.arg)
             child_generator = ClassGenerator(stmt=sub, package=pkg,
-                path=self.path + os.sep + camelize(sub.parent.arg) + os.sep,
+                path=self.path + os.sep + camelize(sub.parent.arg),
                 ns=None, prefix_name=None, parent=self)
             child_generator.generate()
             child_gen = MethodGenerator(sub, self.ctx)
