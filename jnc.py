@@ -229,7 +229,7 @@ class JNCPlugin(plugin.PyangPlugin):
                             schema_nodes[i] = ' ' * 8 + schema_nodes[i]
                     schema_nodes.append('</schema>')
 
-                    name = capitalize_first(search_one(module, 'prefix').arg)
+                    name = normalize(search_one(module, 'prefix').arg)
                     write_file(d, name + '.schema', '\n'.join(schema_nodes), ctx)
                     if ctx.opts.debug or ctx.opts.verbose:
                         print 'Schema generation COMPLETE.'
