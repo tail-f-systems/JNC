@@ -976,6 +976,7 @@ class ClassGenerator(object):
                     fields.append(field)
                 if (not self.ctx.opts.import_on_demand
                         or normalize(ch.arg) in java_lang
+                        or normalize(ch.arg) in java_util
                         or normalize(ch.arg) in com_tailf_jnc
                         or normalize(ch.arg) in class_hierarchy[rootpkg]
                         or normalize(ch.arg) in class_hierarchy[self.package]):
