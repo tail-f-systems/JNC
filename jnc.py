@@ -1021,7 +1021,6 @@ class ClassGenerator(object):
                 self.java_class.imports.add('com.tailf.jnc.*')
                 self.java_class.imports.add('java.math.*')
                 self.java_class.imports.add('java.util.*')
-                rootpkg = self.ctx.rootpkg.replace(os.sep, '.')
                 if rootpkg != self.package:
                     self.java_class.imports.add(rootpkg + '.*')
                 if package_generated:
