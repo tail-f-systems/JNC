@@ -970,14 +970,16 @@ class ClassGenerator(object):
         for ch in search(stmt, ('list', 'container', 'typedef',
                                 'leaf', 'leaf-list')):
             field = self.generate_child(ch)
-            package_generated |= field is not None
-            if field:
-                fields.append(field)
+            if field is not None:
+                package_generated = True
+                if field != '':
+                    fields.append(field)
                 if (not self.ctx.opts.import_on_demand
-                        or normalize(field) in java_lang
-                        or normalize(field) in generated_in_root):
+                        or normalize(ch.arg) in java_lang
+                        or normalize(ch.arg) in generated_in_root):
                     # Need to do explicit import
-                    import_ = '.'.join([self.package, self.n2, normalize(field)])
+                    import_ = '.'.join([self.package, self.n2,
+                                        normalize(ch.arg)])
                     self.java_class.imports.add(import_)
 
         if self.ctx.opts.debug or self.ctx.opts.verbose:
