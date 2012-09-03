@@ -980,11 +980,11 @@ class ClassGenerator(object):
                     import_ = '.'.join([self.package, self.n2, normalize(field)])
                     self.java_class.imports.add(import_)
 
-        if package_generated and (self.ctx.opts.debug or self.ctx.opts.verbose):
-            print "Classes generated to " + self.package
-
-        if self.ctx.opts.verbose:
-            print 'Generating Java class "' + self.filename + '"...'
+        if self.ctx.opts.debug or self.ctx.opts.verbose:
+            if package_generated:
+                print self.package
+            if self.ctx.opts.verbose:
+                print 'Generating Java class "' + self.filename + '"...'
 
         gen = MethodGenerator(stmt, self.ctx)
 
