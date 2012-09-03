@@ -1488,8 +1488,6 @@ class JavaValue(object):
             for import_ in imports:
                 self.imports.add(import_)
 
-        self.crucial_imports = set([])
-
         self.exact = exact
         self.default_modifiers = True
 
@@ -1784,7 +1782,7 @@ class MethodGenerator(object):
         res = set([])
         imports = method.imports
         if self.ctx.opts.import_on_demand:
-            imports = set([])  # method.crucial_imports
+            imports = set([])
             pkg = self.pkg
             if child:
                 pkg = pkg.rpartition('.')[0]
