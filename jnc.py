@@ -968,13 +968,22 @@ class ClassGenerator(object):
             return  # XXX: Do not generate a class for the augment statement
 
         package_generated = False
+        all_fully_qualified = True
+        fully_qualified = False
         for ch in search(stmt, ('list', 'container', 'typedef',
                                 'leaf', 'leaf-list')):
             field = self.generate_child(ch)
             if field is not None:
                 package_generated = True
+                if normalize(ch.arg) == self.n and not fully_qualified:
+                    fully_qualified = True
+                    s = ('\n * <p>\n * Children with the same name as this ' +
+                        'class are fully qualified.')
+                    self.java_class.description += s
+                else:
+                    all_fully_qualified = False
                 if field != '':
-                    fields.append(field)
+                    fields.append(field)  # Container child
                 if (not self.ctx.opts.import_on_demand
                         or normalize(ch.arg) in java_lang
                         or normalize(ch.arg) in java_util
@@ -1024,7 +1033,7 @@ class ClassGenerator(object):
                 self.java_class.imports.add('java.util.*')
                 if rootpkg != self.package:
                     self.java_class.imports.add(rootpkg + '.*')
-                if package_generated:
+                if package_generated and not all_fully_qualified:
                     import_ = '.'.join([self.package, self.n2, '*'])
                     self.java_class.imports.add(import_)
         elif stmt.keyword == 'typedef':
