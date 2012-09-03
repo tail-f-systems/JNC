@@ -952,7 +952,8 @@ class ClassGenerator(object):
                 description=''.join(['This class represents a "',
                                      self.path, '/', stmt.arg,
                                      '" element\n * from the namespace ',
-                                     self.ns]),
+                                     self.ns, '\n * <p>\n * See line',
+                                     str(stmt.pos.line), 'in', stmt.pos.ref]),
                 source=self.src,
                 superclass='YangElement')
 
