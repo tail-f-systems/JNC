@@ -1084,14 +1084,18 @@ class ClassGenerator(object):
                 self.java_class.add_field(child_gen.child_field())
             for access_method in child_gen.parent_access_methods():
                 name = normalize(sub.arg)
-                if name == normalize(sub.parent.arg):
-                    f = lambda s: s.replace(name, '.'.join([pkg, name]))
-                    access_method.return_value = f(access_method.return_value)
-                    fix_parameter_types = lambda param_type, param_name: (
-                        f(param_type), param_name)
-                    access_method.parameters = map(fix_parameter_types,
-                                                   access_method.parameters)
+                def f(s):
+                    f_name = '.'.join([pkg, name])
+                    res = s.replace(name, f_name)
+                    res = res.replace('add' + f_name, 'add' + name)
+                    return res
+                if (name == normalize(sub.parent.arg)
+                        and isinstance(access_method, JavaMethod)):
+                    access_method.return_type = f(access_method.return_type)
+                    access_method.parameters = map(f, access_method.parameters)
                     access_method.body = map(f, access_method.body)
+                elif name == normalize(sub.parent.arg):
+                    access_method.modifiers = map(f, access_method.modifiers)
                 add(sub.arg, access_method)
         elif sub.keyword in ('leaf', 'leaf-list'):
             child_gen = MethodGenerator(sub, self.ctx)
