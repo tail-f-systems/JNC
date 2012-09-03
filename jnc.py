@@ -1417,7 +1417,9 @@ class JavaClass(object):
             prevpkg = ''
             for import_ in self.imports.as_sorted_list():
                 pkg, _, cls = import_.rpartition('.')
-                if pkg != 'com.tailf.jnc' or cls == '*' or cls in com_tailf_jnc:
+                if (cls != self.filename.split('.')[0]
+                        and (pkg != 'com.tailf.jnc' or cls in com_tailf_jnc
+                            or cls == '*')):
                     basepkg = import_[:import_.find('.')]
                     if basepkg != prevpkg:
                         header.append('')
