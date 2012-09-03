@@ -1138,9 +1138,9 @@ class PackageInfoGenerator(object):
         directory_listing = os.listdir(self.d)
         java_files = filter(is_java_file, directory_listing)
         dirs = filter(is_not_java_file, directory_listing)
-        class_hierarchy = self.generate_javadoc(self.stmt.substmts, java_files)
+        class_hierarchy_list = self.generate_javadoc(self.stmt.substmts, java_files)
         write_file(self.d, 'package-info.java',
-                   self.gen_package_info(class_hierarchy), self.ctx)
+                   self.gen_package_info(class_hierarchy_list), self.ctx)
         for directory in dirs:
             for sub in self.stmt.substmts:
                 if normalize(sub.arg) == normalize(directory):
@@ -1218,11 +1218,12 @@ class PackageInfoGenerator(object):
         body += '</' + tag + '>'
         return ' ' * 4 + body.replace('\n', '\n' + ' ' * 4)
 
-    def gen_package_info(self, class_hierarchy):
+    def gen_package_info(self, class_hierarchy_list):
         """Writes a package-info.java file to the package directory with a high
         level description of the package functionality and requirements.
 
-        class_hierarchy -- A tree represented as a list as in parse_hierarchy
+        class_hierarchy_list -- A tree represented as a list as in
+                                parse_hierarchy
 
         """
         module = self.stmt.arg if not self.stmt.top else self.stmt.top.arg
