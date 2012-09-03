@@ -520,7 +520,7 @@ def camelize(string):
     res = ''.join(camelized_str)
     if res in java_reserved_words | java_literals:
         camelized_str.append('_')
-    if re.match('\d', res):
+    if re.match(r'\d', res):
         camelized_str.appendleft('_')
     res = ''.join(camelized_str)
     camelized_stmt_args[string] = res  # Add to cache
