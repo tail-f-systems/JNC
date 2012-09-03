@@ -408,10 +408,6 @@ normalized_stmt_args = {}
 """Cache containing normalized versions of statement identifiers"""
 
 
-generated_in_root = set([])
-"""Set of names of classes generated in the top package level"""
-
-
 class_hierarchy = {}
 """Dict that map package names to sets of names of classes to be generated"""
 
@@ -940,7 +936,6 @@ class ClassGenerator(object):
         reg.add_line('parser.readFile("' + schema + '.schema", h);')
         self.java_class.add_schema_registrator(reg)
 
-        generated_in_root.add(self.n)
         self.write_to_file()
 
     def generate_class(self):
@@ -1047,7 +1042,6 @@ class ClassGenerator(object):
                     typedef_generator.generate()
                     self.yang_types.add(type_stmt.i_typedef.arg)
             self.yang_types.add(stmt.arg)
-            generated_in_root.add(self.n)
 
         self.write_to_file()
 
@@ -1568,8 +1562,6 @@ class JavaValue(object):
         if sep:
             if class_name not in java_built_in:
                 self.imports.add(import_)
-                if class_name in generated_in_root:
-                    self.crucial_imports.add(import_)
                 return class_name
         elif not any(x in java_built_in for x in (import_, import_[:-2])):
             self.imports.add(import_)
@@ -2070,9 +2062,8 @@ class MethodGenerator(object):
                         param_type = 'String'
                     method.add_parameter(param_type, camelize(key_stmt.arg))
                 new_child = [self.n, ' ', self.n2, ' = new ', self.n, '(']
-                if self.n in generated_in_root:
-                    method.add_dependency(self.n)
-                new_child.append(', '.join([s.arg for s in self.gen.key_stmts]))
+                keys = [camelize(s.arg) for s in self.gen.key_stmts]
+                new_child.append(', '.join(keys))
                 new_child.append(');')
                 method.add_line(''.join(new_child))
             else:  # Create new, for subtree filter usage
