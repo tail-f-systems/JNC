@@ -944,18 +944,6 @@ class ClassGenerator(object):
 
         """
         stmt = self.stmt
-        fields = []
-        rootpkg = self.ctx.rootpkg.replace(os.sep, '.')
-
-        self.java_class = JavaClass(filename=self.filename,
-                package=self.package,
-                description=''.join(['This class represents a "',
-                                     self.path, '/', stmt.arg,
-                                     '" element\n * from the namespace ',
-                                     self.ns, '\n * <p>\n * See line',
-                                     str(stmt.pos.line), 'in', stmt.pos.ref]),
-                source=self.src,
-                superclass='YangElement')
 
         # If augment, add target module to augmented_modules dict
         if stmt.keyword == 'augment':
@@ -967,9 +955,23 @@ class ClassGenerator(object):
                 augmented_modules[target.top.arg] = target.top
             return  # XXX: Do not generate a class for the augment statement
 
+        fields = []
         package_generated = False
         all_fully_qualified = True
         fully_qualified = False
+
+        self.java_class = JavaClass(filename=self.filename,
+                package=self.package,
+                description=''.join(['This class represents an element from ',
+                                     '\n * the namespace ', self.ns,
+                                     '\n * generated to "', 
+                                     self.path, os.sep, stmt.arg,
+                                     '"\n * <p>\n * See line ',
+                                     str(stmt.pos.line), ' in\n * ',
+                                     stmt.pos.ref]),
+                source=self.src,
+                superclass='YangElement')
+
         for ch in search(stmt, ('list', 'container', 'typedef',
                                 'leaf', 'leaf-list')):
             field = self.generate_child(ch)
