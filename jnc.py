@@ -617,14 +617,18 @@ def get_types(yang_type, ctx):
                 print_warning(key=pkg  + '.' + normalize(yang_type), ctx=ctx)
         else:
             basetype = get_base_type(typedef)
-            package = get_package(typedef, ctx)
-            typedef_arg = normalize(yang_type.arg)
-            return package + '.' + typedef_arg, get_types(basetype, ctx)[1]
+            jnc, primitive = get_types(basetype, ctx)
+            if typedef.parent.keyword in ('module', 'submodule'):
+                package = get_package(typedef, ctx)
+                typedef_arg = normalize(yang_type.arg)
+                jnc = package + '.' + typedef_arg
     return jnc, primitive
 
 
 def get_base_type(stmt):
     """Returns the built in type that stmt is derived from"""
+    if stmt.keyword == 'type' and stmt.arg == 'union':
+        return stmt
     type_stmt = search_one(stmt, 'type')
     try:
         typedef = type_stmt.i_typedef
