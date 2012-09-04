@@ -1798,7 +1798,12 @@ class MethodGenerator(object):
         self.stmt = stmt
         self.n = normalize(stmt.arg)
         self.n2 = camelize(stmt.arg)
-        self.children = map(lambda s: normalize(s.arg), stmt.substmts)
+        norm_stmt = lambda s: normalize(s.arg)
+        self.children = map(norm_stmt, stmt.substmts)
+        try:
+            self.children.extend(map(norm_stmt, stmt.i_children))
+        except AttributeError:
+            pass
         self.pkg = get_package(stmt, ctx)
         self.basepkg = self.pkg.partition('.')[0]
         self.rootpkg = ctx.rootpkg.split(os.sep)
@@ -2011,6 +2016,10 @@ class MethodGenerator(object):
         is_child = lambda stmt: stmt.keyword in ('leaf', 'container',
                                                  'leaf-list', 'list')
         children = filter(is_child, self.stmt.substmts)
+        try:
+            children.extend(filter(is_child, self.stmt.i_children))
+        except AttributeError:
+            pass
         method.add_line('return new String[] {')
         for child in children:
             method.add_line('"'.join([' ' * 4, child.arg, ',']))
