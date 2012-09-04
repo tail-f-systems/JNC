@@ -247,8 +247,8 @@ public class Element implements Serializable {
      * 
      * @param subPath A sub-path to be appended to the current path
      */
-    public String getPath(String subPath) {
-        return getPath() + "/" + subPath;
+    public String getElementPath(String subPath) {
+        return getElementPath() + "/" + subPath;
     }
 
     /**
@@ -1207,8 +1207,8 @@ public class Element implements Serializable {
             System.err.println(" root= " + root);
             System.err.println(" compare: " + x.compare(root));
 
-            throw new JNCException(JNCException.ELEMENT_MISSING, x.getPath()
-                    + ", " + root.getPath());
+            throw new JNCException(JNCException.ELEMENT_MISSING,
+                    x.getElementPath() + ", " + root.getElementPath());
         }
         // same now, go down
         Element parent = root;
@@ -1532,8 +1532,7 @@ public class Element implements Serializable {
      * 
      * @return The path of element
      */
-    public String getPath() {
-        // trace("getPath()");
+    public String getElementPath() {
         Element top = this;
         String s = null;
         while (top != null) {
@@ -1669,7 +1668,7 @@ public class Element implements Serializable {
             res.append("], children=[" + s_children);
         }
 
-        res.append("], path=" + getPath() + "}");
+        res.append("], path=" + getElementPath() + "}");
         return res.toString();
     }
 

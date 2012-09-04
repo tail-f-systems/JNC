@@ -153,7 +153,7 @@ public abstract class YangElement extends Element {
                     if (!RevisionInfo.newerRevisionSupportEnabled) {
                         throw new YangException(
                                 YangException.ELEMENT_MISSING,
-                                parent.getPath(name) + ": Unexpected element");
+                                parent.getElementPath(name) + ": Unexpected element");
                     }
                     parser.unknownLevel = 1;
                     return null;
@@ -169,18 +169,18 @@ public abstract class YangElement extends Element {
         } catch (final ClassNotFoundException e) {
             e.printStackTrace();
             throw new YangException(YangException.ELEMENT_MISSING,
-                    parent.getPath(name) + ": Unexpected element");
+                    parent.getElementPath(name) + ": Unexpected element");
         } catch (final InstantiationException e) {
             e.printStackTrace();
             throw new YangException(YangException.ELEMENT_MISSING,
-                    parent.getPath(name) + ": Unexpected element");
+                    parent.getElementPath(name) + ": Unexpected element");
         } catch (final IllegalAccessException e) {
             e.printStackTrace();
             throw new YangException(YangException.ELEMENT_MISSING,
-                    parent.getPath(name) + ": Unexpected element");
+                    parent.getElementPath(name) + ": Unexpected element");
         } catch (final InvocationTargetException e) {
             throw new YangException(YangException.ELEMENT_MISSING,
-                    parent.getPath(name) + ": Unexpected element");
+                    parent.getElementPath(name) + ": Unexpected element");
         }
     }
 
@@ -202,7 +202,7 @@ public abstract class YangElement extends Element {
             if (!RevisionInfo.newerRevisionSupportEnabled) {
                 // e.printStackTrace();
                 throw new YangException(YangException.ELEMENT_MISSING,
-                        getPath(name) + ": Unexpected element");
+                        getElementPath(name) + ": Unexpected element");
             }
             final NodeSet nodes = get(name);
             if (nodes.isEmpty()) {
@@ -217,7 +217,7 @@ public abstract class YangElement extends Element {
             // case with added enumerations,
             if (!RevisionInfo.newerRevisionSupportEnabled) {
                 throw new YangException(YangException.BAD_VALUE,
-                        getPath(name) + ": " + cm.getCause().toString());
+                        getElementPath(name) + ": " + cm.getCause().toString());
             }
 
             final NodeSet nodes = get(name);
@@ -233,7 +233,7 @@ public abstract class YangElement extends Element {
 
         catch (final Exception invErr) {
             // type error
-            throw new YangException(YangException.BAD_VALUE, getPath(name)
+            throw new YangException(YangException.BAD_VALUE, getElementPath(name)
                     + ": " + invErr.getCause().toString());
         }
     }
@@ -378,7 +378,7 @@ public abstract class YangElement extends Element {
 
         if (nodes.isEmpty()) {
             throw new YangException(YangException.ELEMENT_MISSING,
-                    getPath(path));
+                    getElementPath(path));
         } else {
             nodes.first().markReplace();
         }
@@ -388,7 +388,7 @@ public abstract class YangElement extends Element {
         final NodeSet nodes = get(path);
         if (nodes.isEmpty()) {
             throw new YangException(YangException.ELEMENT_MISSING,
-                    getPath(path));
+                    getElementPath(path));
         } else {
             nodes.first().markMerge();
         }
@@ -399,7 +399,7 @@ public abstract class YangElement extends Element {
 
         if (nodes.isEmpty()) {
             throw new YangException(YangException.ELEMENT_MISSING,
-                    getPath(path));
+                    getElementPath(path));
         } else {
             nodes.first().markCreate();
         }
@@ -410,7 +410,7 @@ public abstract class YangElement extends Element {
 
         if (nodes.isEmpty()) {
             throw new YangException(YangException.ELEMENT_MISSING,
-                    getPath(path));
+                    getElementPath(path));
         } else {
             nodes.first().markDelete();
         }
@@ -423,7 +423,7 @@ public abstract class YangElement extends Element {
         final NodeSet nodes = get(path);
         if (nodes.isEmpty()) {
             throw new YangException(YangException.ELEMENT_MISSING,
-                    getPath(path));
+                    getElementPath(path));
         } else {
             return (YangElement) nodes.first();
         }
