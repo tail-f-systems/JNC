@@ -848,25 +848,25 @@ class ClassGenerator(object):
                 if getattr(self, attr) is None:
                     setattr(self, attr, getattr(parent, attr))
 
+        self.rootpkg = self.ctx.rootpkg.replace(os.sep, '.')
+
     def generate(self):
         """Generates class(es) for self.stmt"""
         if self.package not in class_hierarchy:
             s = set([])
             s.add('<< No generated classes >>')
             class_hierarchy[self.package] = s
-        if ('<< No generated classes >>' in class_hierarchy[self.package]
-                and self.stmt.keyword in ('container', 'list')):
-            s = class_hierarchy[self.package]
-            s.discard('<< No generated classes >>')
-            for stmt in search(self.stmt.parent, ('container', 'list')):
-                s.add(normalize(stmt.arg))
-        elif self.stmt.keyword in ('module', 'submodule', 'typedef'):
-            # class_hierarchy[self.package].add(self.n)
-            class_hierarchy[self.rootpkg].add(self.n)
 
         if self.stmt.keyword in ('module', 'submodule'):
+            class_hierarchy[self.rootpkg].add(self.n)
             self.generate_classes()
         else:
+            if ('<< No generated classes >>' in class_hierarchy[self.package]
+                    and self.stmt.keyword in ('container', 'list')):
+                s = class_hierarchy[self.package]
+                s.discard('<< No generated classes >>')
+                for stmt in search(self.stmt.parent, ('container', 'list')):
+                    s.add(normalize(stmt.arg))
             self.generate_class()
 
     def generate_classes(self):
@@ -883,10 +883,61 @@ class ClassGenerator(object):
             prefix = search_one(parent_module, 'prefix')
             ns_arg = '<unknown/prefix: ' + prefix.arg + '>'
 
-        for stmt in search(self.stmt, ('container', 'list',
-                                       'augment', 'typedef')):
-            child_generator = ClassGenerator(stmt, ns=ns_arg,
-                prefix_name=self.n, top_level=True, parent=self)
+        # Gather all typedef statements to generate classes for
+        typedef_stmts = set([])
+        for stmt in search(self.stmt, 'typedef'):
+            typedef_stmts.add(stmt)
+            try:
+                while True:
+                    type_stmt = search_one(stmt, 'type')
+                    if type_stmt.i_typedef is None:
+                        break
+                    typedef_stmts.add(type_stmt.i_typedef)
+                    stmt = type_stmt.i_typedef
+            except AttributeError:
+                pass
+
+        # Generate the typedef classes
+        for stmt in typedef_stmts:
+            name = normalize(stmt.arg)
+            description = ''.join(['This class represents an element from ',
+                                   '\n * the namespace ', self.ns,
+                                   '\n * generated to "',
+                                   self.path, os.sep, stmt.arg,
+                                   '"\n * <p>\n * See line ',
+                                   str(stmt.pos.line), ' in\n * ',
+                                   stmt.pos.ref])
+            class_hierarchy[self.rootpkg].add(name)
+            java_class = JavaClass(filename=name + '.java',
+                                        package=self.package,
+                                        description=description,
+                                        source=self.src,
+                                        superclass='YangElement')
+            if self.ctx.opts.verbose:
+                print 'Generating Java class "' + name + '.java' + '"...'
+    
+            gen = MethodGenerator(stmt, self.ctx)
+    
+            for constructor in gen.constructors():
+                java_class.add_constructor(constructor)
+    
+            for i, method in enumerate(gen.setters()):
+                java_class.append_access_method(str(i), method)
+    
+            java_class.append_access_method('check', gen.checker())
+            
+            type_stmt = search_one(stmt, 'type')
+            super_type = get_types(type_stmt, self.ctx)[0]
+            java_class.superclass = super_type.rpartition('.')[2]
+            java_class.imports.add(super_type)
+            
+            write_file(self.path, java_class.filename,
+                       java_class.as_list(), self.ctx)
+
+        # Generate classes for children and keep track of augmented modules
+        for stmt in search(self.stmt, ('container', 'list', 'augment')):
+            child_generator = ClassGenerator(stmt, package=self.package,
+                ns=ns_arg, prefix_name=self.n, parent=self)
             child_generator.generate()
 
         if self.ctx.opts.verbose:
@@ -974,8 +1025,7 @@ class ClassGenerator(object):
                 source=self.src,
                 superclass='YangElement')
 
-        for ch in search(stmt, ('list', 'container', 'typedef',
-                                'leaf', 'leaf-list')):
+        for ch in search(stmt, ('list', 'container', 'leaf', 'leaf-list')):
             field = self.generate_child(ch)
             if field is not None:
                 package_generated = True
@@ -1013,69 +1063,39 @@ class ClassGenerator(object):
         for cloner in gen.cloners():
             self.java_class.add_cloner(cloner)
 
-        try:
-            for i, method in enumerate(gen.setters()):
-                self.java_class.append_access_method(str(i), method)
-        except TypeError:
-            pass  # setters not implemented
-
-        checker = gen.checker()
-        if checker is not None:
-            self.java_class.append_access_method('check', checker)
-
         support_method = gen.support_method(fields)
         if support_method is not None:
             self.java_class.add_support_method(support_method)
 
-        if stmt.keyword != 'typedef':  # TODO: Only add key name getter when relevant
-            self.java_class.add_name_getter(gen.key_names())
-            self.java_class.add_name_getter(gen.children_names())
-            
-            if self.ctx.opts.import_on_demand:
-                self.java_class.imports.add('com.tailf.jnc.*')
-                self.java_class.imports.add('java.math.*')
-                self.java_class.imports.add('java.util.*')
-                if self.rootpkg != self.package:
-                    self.java_class.imports.add(self.rootpkg + '.*')
-                if package_generated and not all_fully_qualified:
-                    import_ = '.'.join([self.package, self.n2, '*'])
-                    self.java_class.imports.add(import_)
-        elif stmt.keyword == 'typedef':
-            type_stmt = search_one(stmt, 'type')
-            super_type = get_types(type_stmt, self.ctx)[0]
-            self.java_class.superclass = super_type.rpartition('.')[2]
-            self.java_class.imports.add(super_type)
-
-            # If supertype is derived, make sure a class for it is generated
-            if type_stmt.i_typedef:
-                if not self.yang_types.defined(type_stmt.i_typedef.arg):
-                    typedef_generator = ClassGenerator(type_stmt.i_typedef,
-                        package=self.ctx.rootpkg,
-                        path=self.path.replace('.', os.sep) + os.sep, ns=None,
-                        prefix_name=None, parent=self)
-                    typedef_generator.generate()
-                    self.yang_types.add(type_stmt.i_typedef.arg)
-            self.yang_types.add(stmt.arg)
+        self.java_class.add_name_getter(gen.key_names())
+        self.java_class.add_name_getter(gen.children_names())
+        
+        if self.ctx.opts.import_on_demand:
+            self.java_class.imports.add('com.tailf.jnc.*')
+            self.java_class.imports.add('java.math.*')
+            self.java_class.imports.add('java.util.*')
+            if self.rootpkg != self.package:
+                self.java_class.imports.add(self.rootpkg + '.*')
+            if package_generated and not all_fully_qualified:
+                import_ = '.'.join([self.package, self.n2, '*'])
+                self.java_class.imports.add(import_)
 
         self.write_to_file()
 
     def generate_child(self, sub):
         """Appends access methods to class for children in the YANG module.
-        Returns a list which contains the name of sub if it is a container,
-        otherwise an empty list is returned. Uses mutual recursion with
-        generate_class.
+        Returns the name of sub if it is a container, an empty string if sub is
+        a list, None otherwise. Uses mutual recursion with generate_class.
 
         For this function to work, self.java_class must be defined.
 
-        sub -- A data model subtree statement. Its parent most not be None.
+        sub -- A data model subtree statement, child of self.stmt.
 
         """
         field = None
         add = self.java_class.append_access_method  # XXX: add is a function
-        if sub.keyword in ('list', 'container', 'typedef'):
-            if sub.keyword != 'typedef':
-                field = ''
-                pkg = self.package + '.' + camelize(sub.parent.arg)
+        if sub.keyword in ('list', 'container'):
+            pkg = self.package + '.' + camelize(sub.parent.arg)
             child_generator = ClassGenerator(stmt=sub, package=pkg,
                 path=self.path + os.sep + camelize(sub.parent.arg),
                 ns=None, prefix_name=None, parent=self)
@@ -1084,6 +1104,8 @@ class ClassGenerator(object):
             if sub.keyword == 'container':
                 field = sub.arg
                 self.java_class.add_field(child_gen.child_field())
+            else:
+                field = ''
             for access_method in child_gen.parent_access_methods():
                 name = normalize(sub.arg)
                 def f(s):
@@ -2210,9 +2232,7 @@ class LeafMethodGenerator(MethodGenerator):
     def setters(self):
         name = 'set' + self.n + 'Value'
         num_methods = 2 + (not self.is_string)
-        value_type = normalize(self.stmt_type.arg)
-        if not self.is_typedef:
-            value_type = self.type_str[0]  # JNC type
+        value_type = self.type_str[0]  # JNC type
         res = [JavaMethod(name=name) for _ in range(num_methods)]
 
         for i, method in enumerate(res):
