@@ -80,7 +80,7 @@ class JNCPlugin(plugin.PyangPlugin):
     def add_output_format(self, fmts):
         """Adds 'jnc' as a valid output format and sets the format to jnc if
         the --jnc-output option is set, but --format is not.
-        
+
         """
         self.multiple_modules = False
         fmts['jnc'] = self
@@ -499,7 +499,7 @@ def capitalize_first(string):
 def camelize(string):
     """Removes hyphens and dots and replaces following character (if any) with
     its upper-case counterpart. Does not remove a trailing hyphen or dot.
-    
+
     If the resulting string is reserved in Java, an underline is appended
 
     Returns an empty string if string argument is None.
@@ -532,7 +532,7 @@ def normalize(string):
     """returns capitalize_first(camelize(string)), except if camelize(string)
     begins with and/or ends with a single underline: then they are/it is
     removed and a 'J' is prepended. Mimics normalize in YangElement of JNC.
-    
+
     """
     try:  # Fetch from cache
         return normalized_stmt_args[string]
@@ -835,11 +835,11 @@ class ClassGenerator(object):
         self.ns = ns
         self.prefix_name = prefix_name
         self.yang_types = yang_types
-        
+
         self.n = normalize(stmt.arg)
         self.n2 = camelize(stmt.arg)
         self.filename = self.n + '.java'
-        
+
         if yang_types is None:
             self.yang_types = YangType()
         if parent is not None:
@@ -915,22 +915,22 @@ class ClassGenerator(object):
                                         superclass='YangElement')
             if self.ctx.opts.verbose:
                 print 'Generating Java class "' + name + '.java' + '"...'
-    
+
             gen = MethodGenerator(stmt, self.ctx)
-    
+
             for constructor in gen.constructors():
                 java_class.add_constructor(constructor)
-    
+
             for i, method in enumerate(gen.setters()):
                 java_class.append_access_method(str(i), method)
-    
+
             java_class.append_access_method('check', gen.checker())
-            
+
             type_stmt = search_one(stmt, 'type')
             super_type = get_types(type_stmt, self.ctx)[0]
             java_class.superclass = super_type.rpartition('.')[2]
             java_class.imports.add(super_type)
-            
+
             write_file(self.path, java_class.filename,
                        java_class.as_list(), self.ctx)
 
@@ -1069,7 +1069,7 @@ class ClassGenerator(object):
 
         self.java_class.add_name_getter(gen.key_names())
         self.java_class.add_name_getter(gen.children_names())
-        
+
         if self.ctx.opts.import_on_demand:
             self.java_class.imports.add('com.tailf.jnc.*')
             self.java_class.imports.add('java.math.*')
@@ -2075,7 +2075,7 @@ class MethodGenerator(object):
                 javadoc1.append(', using an existing object.')
                 javadoc2.append(' '.join(['@param', self.n2, 'The object to add.']))
                 method.add_parameter(self.n, self.n2)
-                
+
                 if self.is_list:
                     # Check that object does not already exist
                     iter_ = self.n2 + 'Iterator'
@@ -2088,13 +2088,13 @@ class MethodGenerator(object):
                                     self.n2 + '), ' + self.n2 + ');')
                     method.add_dependency('com.tailf.jnc.YangException')
                     method.add_line('}')
-                    
+
 #                    # Check max-elements restriction
 #                    if self.gen.max_elements != 'unbounded':
 #                        method.add_line('YangException.throwException(children.size() >= ' +
 #                                     self.gen.max_elements + ', ' + self.n2 + ');')
 #                        method.add_dependency('com.tailf.jnc.YangException')
-                
+
             elif self.is_list and i in {1, 2} and len(res) == 4:
                 # Add child with String or JNC type keys
                 javadoc1.append(', with specified keys.')
@@ -2559,7 +2559,7 @@ class ListMethodGenerator(MethodGenerator):
             self.keys = key.arg.split(' ')
         findkey = lambda k: search_one(self.stmt, 'leaf', arg=k)
         self.key_stmts = map(findkey, self.keys)
-        
+
         notstring = lambda k: get_types(k, ctx)[1] != 'String'
         self.is_string = not filter(notstring, self.key_stmts)
 #        max_ = search_one(stmt, 'max-elements')
@@ -2829,3 +2829,4 @@ class OrderedSet(collections.MutableSet):
 
         """
         self.clear()
+
