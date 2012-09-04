@@ -2213,15 +2213,25 @@ class LeafMethodGenerator(MethodGenerator):
             method.add_javadoc('Gets the value for child ' + self.stmt.keyword +
                                ' "' + self.stmt.arg + '".')
             method.add_javadoc('@return The value of the ' + self.stmt.keyword + '.')
-        
-        # Leaves with a default value returns it instead of null 
+
+        # Leaves with a default value returns it instead of null
         if self.default:
             method.add_line(''.join([method.return_type, ' ', self.n2, ' = (',
                                      method.return_type, ')getValue("',
                                      self.stmt.arg, '");']))
             method.add_line('if (' + self.n2 + ' == null) {')
-            method.add_line('    ' + self.n2 + ' = new ' + method.return_type +
-                            '("' + self.default_value + '");')
+            newValue = ['    ', self.n2, ' = new ', method.return_type, '("',
+                        self.default_value]
+            if self.type_str[0] == 'com.tailf.jnc.YangUnion':
+                newValue.append('", new String[] {')
+                for type_stmt in search(self.base_type, 'type'):
+                    # TODO: make generated code prettier by adding newlines
+                    member_type, _ = get_types(type_stmt, self.ctx)
+                    newValue.append('"' + member_type + '", ')
+                newValue.append('});')
+            else:
+                newValue.append('");')
+            method.add_line(''.join(newValue))
             method.add_line('}')
             method.add_line('return ' + self.n2 + ';')
         else:
@@ -2279,6 +2289,7 @@ class LeafMethodGenerator(MethodGenerator):
                 if self.type_str[0] == 'com.tailf.jnc.YangUnion':
                     line.append(', new String[] {')
                     for type_stmt in search(self.base_type, 'type'):
+                        # TODO: make generated code prettier by adding newlines
                         member_type, _ = get_types(type_stmt, self.ctx)
                         line.append('"' + member_type + '", ')
                     line.append('}')
@@ -2660,8 +2671,8 @@ class ListMethodGenerator(MethodGenerator):
                 param_type = 'String'
                 if i == 0:
                     param_type, _ = get_types(key, self.ctx)
-                method.add_parameter(param_type, key_arg)
-                path.extend(['[', key_arg, '=\'" + ', key_arg, ' + "\']'])
+                method.add_parameter(param_type, key_arg + 'Value')
+                path.extend(['[', key_arg, '=\'" + ',key_arg, 'Value + "\']'])
             path.append('";')
 
             method.add_javadoc(''.join(javadoc1))
