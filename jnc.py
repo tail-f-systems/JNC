@@ -2101,14 +2101,15 @@ class MethodGenerator(object):
                 if i == 2:
                     javadoc2.append('The keys are specified as strings.')
                 for key_stmt in self.gen.key_stmts:
-                    javadoc2.append(''.join(['@param ', camelize(key_stmt.arg),
-                        'Value Key argument of child.']))
+                    key_arg = camelize(key_stmt.arg) + 'Value'
+                    javadoc2.append(''.join(['@param ', key_arg,
+                                             ' Key argument of child.']))
                     param_type, _ = get_types(key_stmt, self.ctx)
                     if i == 2:
                         param_type = 'String'
-                    method.add_parameter(param_type, camelize(key_stmt.arg))
+                    method.add_parameter(param_type, key_arg)
                 new_child = [self.n, ' ', self.n2, ' = new ', self.n, '(']
-                keys = [camelize(s.arg) for s in self.gen.key_stmts]
+                keys = [camelize(s.arg) + 'Value' for s in self.gen.key_stmts]
                 new_child.append(', '.join(keys))
                 new_child.append(');')
                 method.add_line(''.join(new_child))
