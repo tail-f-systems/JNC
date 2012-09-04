@@ -197,7 +197,8 @@ class JNCPlugin(plugin.PyangPlugin):
                 src = ('module "' + module.arg + '", revision: "' +
                     util.get_latest_revision(module) + '".')
                 generator = ClassGenerator(module, path=directory,
-                                           package=ctx.rootpkg, src=src, ctx=ctx)
+                                           package=ctx.rootpkg,
+                                           src=src, ctx=ctx)
                 generator.generate()
                 for aug_module in augmented_modules.values():
                     src = ('module "' + aug_module.arg + '", revision: "' +
@@ -805,8 +806,8 @@ class YangType(object):
 class ClassGenerator(object):
     """Used to generate java classes from a yang module"""
 
-    def __init__(self, stmt, path=None, package=None, src=None, ctx=None, ns='',
-            prefix_name='', top_level=False, yang_types=None, parent=None):
+    def __init__(self, stmt, path=None, package=None, src=None, ctx=None,
+                 ns='', prefix_name='', yang_types=None, parent=None):
         """Constructor.
 
         stmt        -- A statement (sub)tree, parsed from a YANG model
@@ -815,10 +816,8 @@ class ClassGenerator(object):
         src         -- Filename of parsed yang module, or the module name and
                        revision if filename is unknown
         ctx         -- Context used to fetch option parameters
-        path        -- The XPath of stmt in the original module
         ns          -- The XML namespace of the module
         prefix_name -- The module prefix
-        top_level   -- Whether or not this is a top-level statement
         yang_types  -- An instance of the YangType class
         parent      -- ClassGenerator to copy arguments that were not supplied
                        from (if applicable)
@@ -831,13 +830,11 @@ class ClassGenerator(object):
         self.ctx = ctx
         self.ns = ns
         self.prefix_name = prefix_name
-        self.top_level = top_level
         self.yang_types = yang_types
         
         self.n = normalize(stmt.arg)
         self.n2 = camelize(stmt.arg)
         self.filename = self.n + '.java'
-        self.rootpkg = ctx.rootpkg.replace(os.sep, '.')
         
         if yang_types is None:
             self.yang_types = YangType()
@@ -873,6 +870,7 @@ class ClassGenerator(object):
         statement, allowing for netconf communication using the jnc library.
 
         """
+        # Namespace and prefix
         if self.stmt.keyword == 'module':
             ns_arg = search_one(self.stmt, 'namespace').arg
             prefix = search_one(self.stmt, 'prefix')
@@ -964,7 +962,7 @@ class ClassGenerator(object):
                 package=self.package,
                 description=''.join(['This class represents an element from ',
                                      '\n * the namespace ', self.ns,
-                                     '\n * generated to "', 
+                                     '\n * generated to "',
                                      self.path, os.sep, stmt.arg,
                                      '"\n * <p>\n * See line ',
                                      str(stmt.pos.line), ' in\n * ',
@@ -984,7 +982,7 @@ class ClassGenerator(object):
                     self.java_class.description += s
                 else:
                     all_fully_qualified = False
-                if field != '':
+                if field:
                     fields.append(field)  # Container child
                 if (not self.ctx.opts.import_on_demand
                         or normalize(ch.arg) in java_lang
@@ -2160,6 +2158,7 @@ class LeafMethodGenerator(MethodGenerator):
         super(LeafMethodGenerator, self).__init__(stmt, ctx)
         assert self.is_leaf or self.is_leaflist
         self.stmt_type = search_one(stmt, 'type')
+        self.base_type = get_base_type(self.stmt_type)
         self.default = search_one(stmt, 'default')
         self.default_value = None if not self.default else self.default.arg
         self.type_str = get_types(self.stmt_type, ctx)
@@ -2255,7 +2254,7 @@ class LeafMethodGenerator(MethodGenerator):
                     method.add_javadoc('using a String value.')
                 if self.type_str[0] == 'com.tailf.jnc.YangUnion':
                     line.append(', new String[] {')
-                    for type_stmt in search(self.stmt_type, 'type'):
+                    for type_stmt in search(self.base_type, 'type'):
                         member_type, _ = get_types(type_stmt, self.ctx)
                         line.append('"' + member_type + '", ')
                     line.append('}')
