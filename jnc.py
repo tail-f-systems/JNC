@@ -212,12 +212,19 @@ class JNCPlugin(plugin.PyangPlugin):
 
                     # Generate external schema
                     schema_nodes = ['<schema>']
-                    stmts = []
-                    stmts.extend(module.substmts)
+                    stmts = module.substmts[:]
+                    try:
+                        stmts.extend(module.i_children)
+                    except AttributeError:
+                        pass
                     module_root = SchemaNode(module, '/')
                     schema_nodes.extend(module_root.as_list())
                     for aug_module in augmented_modules.values():
                         stmts.extend(aug_module.substmts)
+                        try:
+                            stmts.extend(aug_module.i_children)
+                        except AttributeError:
+                            pass
                         aug_module_root = SchemaNode(aug_module, '/')
                         schema_nodes.extend(aug_module_root.as_list())
                     schema_generator = SchemaGenerator(stmts, '/', ctx)
@@ -753,7 +760,12 @@ class SchemaNode(object):
         res.append('<max_occurs>' + max_occurs + '</max_occurs>')  # TODO: correct?
 
         children = ''
-        for ch in stmt.substmts:
+        stmts = stmt.substmts[:]
+        try:
+            stmts.extend(stmt.i_children)
+        except AttributeError:
+            pass
+        for ch in stmts:
             if ch.keyword in ('container', 'list', 'leaf', 'leaf-list'):
                 children += ch.arg + ' '
         res.append('<children>' + children[:-1] + '</children>')
@@ -778,13 +790,19 @@ class SchemaGenerator(object):
         isconfigdata = (lambda stmt: stmt.keyword in
             ('module', 'submodule', 'container', 'list', 'leaf', 'leaf-list'))
         for stmt in filter(isconfigdata, self.stmts):
-            node = SchemaNode(stmt, self.tagpath + stmt.arg + '/')
-            substmt_generator = SchemaGenerator(stmt.substmts,
-                self.tagpath + stmt.arg + '/', self.ctx)
             if self.ctx.opts.verbose:
                 print 'Generating schema node "' + self.tagpath + '"...'
+            node = SchemaNode(stmt, self.tagpath + stmt.arg + '/')
             res.extend(node.as_list())
+            substmt_generator = SchemaGenerator(stmt.substmts,
+                self.tagpath + stmt.arg + '/', self.ctx)
             res.extend(substmt_generator.schema_nodes())
+            try:
+                substmt_generator = SchemaGenerator(stmt.i_children,
+                    self.tagpath + stmt.arg + '/', self.ctx)
+                res.extend(substmt_generator.schema_nodes())
+            except AttributeError:
+                pass
         return res
 
 
@@ -1183,11 +1201,16 @@ class PackageInfoGenerator(object):
         directory_listing = os.listdir(self.d)
         java_files = filter(is_java_file, directory_listing)
         dirs = filter(is_not_java_file, directory_listing)
-        class_hierarchy_list = self.generate_javadoc(self.stmt.substmts, java_files)
+        stmts = self.stmt.substmts[:]
+        try:
+            stmts.extend(self.stmt.i_children)
+        except AttributeError:
+            pass
+        class_hierarchy_list = self.generate_javadoc(stmts, java_files)
         write_file(self.d, 'package-info.java',
                    self.gen_package_info(class_hierarchy_list), self.ctx)
         for directory in dirs:
-            for sub in self.stmt.substmts:
+            for sub in stmts:
                 if normalize(sub.arg) == normalize(directory):
                     old_d = self.d
                     self.d += os.sep + directory
@@ -1217,7 +1240,13 @@ class PackageInfoGenerator(object):
             if filename in java_files:
                 java_files.remove(filename)
                 hierarchy.append(filename)
-                children = PackageInfoGenerator.generate_javadoc(stmt.substmts, java_files)
+                
+                substmts = stmt.substmts[:]
+                try:
+                    substmts.extend(stmt.i_children)
+                except AttributeError:
+                    pass
+                children = PackageInfoGenerator.generate_javadoc(substmts, java_files)
                 if children:
                     hierarchy.append(children)
         return hierarchy
