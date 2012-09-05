@@ -1777,6 +1777,11 @@ class MethodGenerator(object):
         norm_stmt = lambda s: normalize(s.arg)
         self.children = map(norm_stmt, search(stmt, ('list', 'container',
                                                      'leaf', 'leaf-list')))
+        choices = search(stmt, 'choice')
+        for choice in choices:
+            self.children.extend(map(norm_stmt,
+                                     search(choice, ('list', 'container',
+                                                     'leaf', 'leaf-list'))))
         self.pkg = get_package(stmt, ctx)
         self.basepkg = self.pkg.partition('.')[0]
         self.rootpkg = ctx.rootpkg.split(os.sep)
