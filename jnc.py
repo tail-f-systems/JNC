@@ -212,19 +212,14 @@ class JNCPlugin(plugin.PyangPlugin):
 
                     # Generate external schema
                     schema_nodes = ['<schema>']
-                    stmts = module.substmts[:]
-                    try:
-                        stmts.extend(module.i_children)
-                    except AttributeError:
-                        pass
+                    stmts = search(module, ('module', 'submodule', 'container',
+                                            'list', 'leaf', 'leaf-list'))
                     module_root = SchemaNode(module, '/')
                     schema_nodes.extend(module_root.as_list())
                     for aug_module in augmented_modules.values():
-                        stmts.extend(aug_module.substmts)
-                        try:
-                            stmts.extend(aug_module.i_children)
-                        except AttributeError:
-                            pass
+                        stmts.update(search(aug_module.substmts,
+                                            ('module', 'submodule', 'container',
+                                            'list', 'leaf', 'leaf-list')))
                         aug_module_root = SchemaNode(aug_module, '/')
                         schema_nodes.extend(aug_module_root.as_list())
                     schema_generator = SchemaGenerator(stmts, '/', ctx)
@@ -760,14 +755,8 @@ class SchemaNode(object):
         res.append('<max_occurs>' + max_occurs + '</max_occurs>')  # TODO: correct?
 
         children = ''
-        stmts = stmt.substmts[:]
-        try:
-            stmts.extend(stmt.i_children)
-        except AttributeError:
-            pass
-        for ch in stmts:
-            if ch.keyword in ('container', 'list', 'leaf', 'leaf-list'):
-                children += ch.arg + ' '
+        for ch in search(stmt, ('container', 'list', 'leaf', 'leaf-list')):
+            children += ch.arg + ' '
         res.append('<children>' + children[:-1] + '</children>')
 
         res.append('<flags>0</flags>')
@@ -787,22 +776,16 @@ class SchemaGenerator(object):
     def schema_nodes(self):
         """Generate XML schema as a list of "node" elements"""
         res = []
-        isconfigdata = (lambda stmt: stmt.keyword in
-            ('module', 'submodule', 'container', 'list', 'leaf', 'leaf-list'))
-        for stmt in filter(isconfigdata, self.stmts):
+        for stmt in self.stmts:
             if self.ctx.opts.verbose:
                 print 'Generating schema node "' + self.tagpath + '"...'
             node = SchemaNode(stmt, self.tagpath + stmt.arg + '/')
             res.extend(node.as_list())
-            substmt_generator = SchemaGenerator(stmt.substmts,
+            substmt_generator = SchemaGenerator(search(stmt,
+                    ('module', 'submodule', 'container', 'list', 'leaf',
+                     'leaf-list')),
                 self.tagpath + stmt.arg + '/', self.ctx)
             res.extend(substmt_generator.schema_nodes())
-            try:
-                substmt_generator = SchemaGenerator(stmt.i_children,
-                    self.tagpath + stmt.arg + '/', self.ctx)
-                res.extend(substmt_generator.schema_nodes())
-            except AttributeError:
-                pass
         return res
 
 
@@ -1201,11 +1184,8 @@ class PackageInfoGenerator(object):
         directory_listing = os.listdir(self.d)
         java_files = filter(is_java_file, directory_listing)
         dirs = filter(is_not_java_file, directory_listing)
-        stmts = self.stmt.substmts[:]
-        try:
-            stmts.extend(self.stmt.i_children)
-        except AttributeError:
-            pass
+        stmts = search(self.stmt, ('module', 'submodule', 'container', 'list',
+                                   'leaf', 'leaf-list'))
         class_hierarchy_list = self.generate_javadoc(stmts, java_files)
         write_file(self.d, 'package-info.java',
                    self.gen_package_info(class_hierarchy_list), self.ctx)
@@ -1241,11 +1221,7 @@ class PackageInfoGenerator(object):
                 java_files.remove(filename)
                 hierarchy.append(filename)
                 
-                substmts = stmt.substmts[:]
-                try:
-                    substmts.extend(stmt.i_children)
-                except AttributeError:
-                    pass
+                substmts = search(stmt, ('list', 'container'))
                 children = PackageInfoGenerator.generate_javadoc(substmts, java_files)
                 if children:
                     hierarchy.append(children)
@@ -1799,11 +1775,8 @@ class MethodGenerator(object):
         self.n = normalize(stmt.arg)
         self.n2 = camelize(stmt.arg)
         norm_stmt = lambda s: normalize(s.arg)
-        self.children = map(norm_stmt, stmt.substmts)
-        try:
-            self.children.extend(map(norm_stmt, stmt.i_children))
-        except AttributeError:
-            pass
+        self.children = map(norm_stmt, search(stmt, ('list', 'container',
+                                                     'leaf', 'leaf-list')))
         self.pkg = get_package(stmt, ctx)
         self.basepkg = self.pkg.partition('.')[0]
         self.rootpkg = ctx.rootpkg.split(os.sep)
@@ -2013,13 +1986,7 @@ class MethodGenerator(object):
         method = JavaMethod(modifiers=['public'], name='childrenNames')
         method.set_return_type('String[]')
         method.add_javadoc('@return An array with the identifiers of any children, in order.')
-        is_child = lambda stmt: stmt.keyword in ('leaf', 'container',
-                                                 'leaf-list', 'list')
-        children = filter(is_child, self.stmt.substmts)
-        try:
-            children.extend(filter(is_child, self.stmt.i_children))
-        except AttributeError:
-            pass
+        children = search(self.stmt, ('leaf', 'container', 'leaf-list', 'list'))
         method.add_line('return new String[] {')
         for child in children:
             method.add_line('"'.join([' ' * 4, child.arg, ',']))
@@ -2879,4 +2846,3 @@ class OrderedSet(collections.MutableSet):
 
         """
         self.clear()
-
