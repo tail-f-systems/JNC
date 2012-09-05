@@ -1028,9 +1028,10 @@ class ClassGenerator(object):
 
         for ch in search(stmt, ('list', 'container', 'leaf', 'leaf-list')):
             field = self.generate_child(ch)
+            ch_arg = normalize(ch.arg)
             if field is not None:
                 package_generated = True
-                if normalize(ch.arg) == self.n and not fully_qualified:
+                if ch_arg == self.n and not fully_qualified:
                     fully_qualified = True
                     s = ('\n * <p>\n * Children with the same name as this ' +
                         'class are fully qualified.')
@@ -1040,14 +1041,13 @@ class ClassGenerator(object):
                 if field:
                     fields.append(field)  # Container child
                 if (not self.ctx.opts.import_on_demand
-                        or normalize(ch.arg) in java_lang
-                        or normalize(ch.arg) in java_util
-                        or normalize(ch.arg) in com_tailf_jnc
-                        or normalize(ch.arg) in class_hierarchy[self.rootpkg]
-                        or normalize(ch.arg) in class_hierarchy[self.package]):
+                        or ch_arg in java_lang
+                        or ch_arg in java_util
+                        or ch_arg in com_tailf_jnc
+                        or ch_arg in class_hierarchy[self.rootpkg]
+                        or ch_arg in class_hierarchy[self.package]):
                     # Need to do explicit import
-                    import_ = '.'.join([self.package, self.n2,
-                                        normalize(ch.arg)])
+                    import_ = '.'.join([self.package, self.n2, ch_arg])
                     self.java_class.imports.add(import_)
 
         if self.ctx.opts.debug or self.ctx.opts.verbose:
