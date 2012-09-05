@@ -683,6 +683,10 @@ def search(stmt, keywords):
                     res.add(ch)
         except AttributeError:
             continue
+    if 'choice' not in keywords:
+        choices = search(stmt, 'choice')
+        for choice in choices:
+            res.update(search(choice, keywords))
     return res
 
 
@@ -694,6 +698,12 @@ def search_one(stmt, keyword, arg=None):
             res = stmt.search_one(keyword, arg=arg, children=stmt.i_children)
         except AttributeError:
             pass
+    if res is None:
+        choices = search(stmt, 'choice')
+        for choice in choices:
+            res = search_one(choice, keyword)
+            if res is not None:
+                break
     return res
 
 
@@ -1777,11 +1787,6 @@ class MethodGenerator(object):
         norm_stmt = lambda s: normalize(s.arg)
         self.children = map(norm_stmt, search(stmt, ('list', 'container',
                                                      'leaf', 'leaf-list')))
-        choices = search(stmt, 'choice')
-        for choice in choices:
-            self.children.extend(map(norm_stmt,
-                                     search(choice, ('list', 'container',
-                                                     'leaf', 'leaf-list'))))
         self.pkg = get_package(stmt, ctx)
         self.basepkg = self.pkg.partition('.')[0]
         self.rootpkg = ctx.rootpkg.split(os.sep)
