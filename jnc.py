@@ -1843,7 +1843,11 @@ class MethodGenerator(object):
             pkg_classes = class_hierarchy.get(pkg, [])
             for import_ in method.imports:
                 if import_.rpartition('.')[2] in pkg_classes:
-                    imports.add(import_)
+                    if child and not import_.rpartition('.')[1]:
+                        imports.add('.'.join([self.pkg, import_]))
+                    else:
+                        imports.add(import_)
+                        
 
         for dependency in imports:
             if dependency.startswith(('java.math', 'java.util',
