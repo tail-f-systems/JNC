@@ -119,18 +119,18 @@ class JNCPlugin(plugin.PyangPlugin):
                 help='Generate javadoc to JAVADOC_DIRECTORY.'),
             optparse.make_option(
                 '--jnc-no-classes',
-                dest='gen_classes',
-                action='store_false',
+                dest='no_classes',
+                action='store_true',
                 help='Do not generate classes.'),
             optparse.make_option(
                 '--jnc-no-schema',
-                dest='gen_schema',
-                action='store_false',
+                dest='no_schema',
+                action='store_true',
                 help='Do not generate schema.'),
             optparse.make_option(
                 '--jnc-no-pkginfo',
-                dest='gen_pkginfo',
-                action='store_false',
+                dest='no_pkginfo',
+                action='store_true',
                 help='Do not generate package-info files.'),
             optparse.make_option(
                 '--jnc-ignore-errors',
@@ -203,7 +203,7 @@ class JNCPlugin(plugin.PyangPlugin):
         d = directory.replace('.', os.sep)
         for module in modules:
             if module.keyword == 'module':
-                if ctx.opts.gen_classes:
+                if not ctx.opts.no_classes:
                     # Generate Java classes
                     src = ('module "' + module.arg + '", revision: "' +
                         util.get_latest_revision(module) + '".')
@@ -220,7 +220,7 @@ class JNCPlugin(plugin.PyangPlugin):
                     if ctx.opts.debug or ctx.opts.verbose:
                         print 'Java classes generation COMPLETE.'
 
-                if ctx.opts.gen_schema:
+                if not ctx.opts.no_schema:
                     # Generate external schema
                     schema_nodes = ['<schema>']
                     stmts = search(module, ('module', 'submodule', 'container',
@@ -256,7 +256,7 @@ class JNCPlugin(plugin.PyangPlugin):
 
         # Generate javadoc
         for module in modules:
-            if ctx.opts.gen_pkginfo and module.keyword == 'module':
+            if not ctx.opts.no_pkginfo and module.keyword == 'module':
                 package_info_generator = PackageInfoGenerator(d, module, ctx)
                 package_info_generator.generate_package_info()
         javadir = ctx.opts.javadoc_directory
