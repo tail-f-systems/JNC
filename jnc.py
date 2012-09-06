@@ -1042,7 +1042,7 @@ class ClassGenerator(object):
                 augmented_modules[target.top.arg] = target.top
             return  # XXX: Do not generate a class for the augment statement
 
-        fields = []
+        fields = OrderedSet()
         package_generated = False
         all_fully_qualified = True
         fully_qualified = False
@@ -1072,7 +1072,7 @@ class ClassGenerator(object):
                 else:
                     all_fully_qualified = False
                 if field:
-                    fields.append(field)  # Container child
+                    fields.add(field)  # Container child
                 if (not self.ctx.opts.import_on_demand
                         or ch_arg in java_lang
                         or ch_arg in java_util
@@ -2043,15 +2043,14 @@ class MethodGenerator(object):
         add_child.add_javadoc('@param child The child to add')
         add_child.add_line('super.addChild(child);')
         if fields is None:
-            fields = []
-        for i in range(len(fields) - 1, -1, -1):
-            cond = ''
-            if i < len(fields) - 1:
-                cond = 'else '
+            fields = OrderedSet()
+        cond = ''
+        for field in fields:  # could do reversed(fields) to preserve order
             add_child.add_line(''.join([cond, 'if (child instanceof ',
-                    normalize(fields[i]), ') ', camelize(fields[i]), ' = (',
-                    normalize(fields[i]), ')child;']))
-            add_child.add_dependency(normalize(fields[i]))
+                    normalize(field), ') ', camelize(field), ' = (',
+                    normalize(field), ')child;']))
+            add_child.add_dependency(normalize(field))
+            cond = 'else '
         return self.fix_imports(add_child)
 
     def setters(self):
