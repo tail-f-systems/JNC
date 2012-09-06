@@ -2319,7 +2319,9 @@ class LeafMethodGenerator(MethodGenerator):
                 method.add_line('    childrenNames());')
             elif self.type_str[0] == 'com.tailf.jnc.YangEmpty':
                 method.add_javadoc('by instantiating it (value n/a).')
-                param_types = []  # Parameterless
+                param_types = []  # Add parameter here to get correct javadoc
+                method.add_parameter('String', param_names[0])
+                method.add_javadoc(' '.join(['@param', param_names[0], 'ignored.']))
                 l = [name, '(new ', method.add_dependency(value_type), '());']
                 method.add_line(''.join(l))
             else:
@@ -2350,7 +2352,8 @@ class LeafMethodGenerator(MethodGenerator):
                 method.add_line(''.join(line))
             for param_type, param_name in zip(param_types, param_names):
                 method.add_parameter(param_type, param_name)
-            method.add_javadoc(' '.join(['@param', param_names[0], 'The value to set.']))
+                method.add_javadoc(' '.join(['@param', param_name,
+                                             'used during instantiation.']))
             if(len(param_types) > 1):
                 method.add_javadoc('@param fractionDigits Number of decimals in value')
             self.fix_imports(method, child=True)
