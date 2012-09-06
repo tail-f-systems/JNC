@@ -56,6 +56,8 @@ import errno
 import sys
 import collections
 import re
+import Queue
+import threading
 
 from datetime import date
 from pyang import plugin, util, error
@@ -103,6 +105,11 @@ class JNCPlugin(plugin.PyangPlugin):
                 dest='jnc_help',
                 action='store_true',
                 help='Print help on usage of the JNC plugin and exit'),
+            optparse.make_option(
+                '--jnc-serial',
+                dest='serial',
+                action='store_true',
+                help='Turn off usage of multiple threads.'),
             optparse.make_option(
                 '--jnc-verbose',
                 dest='verbose',
@@ -918,11 +925,29 @@ class ClassGenerator(object):
             parent_module = search_one(self.stmt, 'belongs-to')
             prefix = search_one(parent_module, 'prefix')
             ns_arg = '<unknown/prefix: ' + prefix.arg + '>'
+        
+        # Set upp threading queue
+        queue = Queue.Queue()
+        
+        # Add root to class_hierarchy dict
+        if self.rootpkg not in class_hierarchy:
+            class_hierarchy[self.rootpkg] = set([])
+        class_hierarchy[self.rootpkg].add(self.n)
+        
+        # Add all classes that will be generated to class_hierarchy dict
+        def record(stmt, package):
+            for ch in search(stmt, ('container', 'list')):
+                if package not in class_hierarchy:
+                    class_hierarchy[package] = set([])
+                class_hierarchy[package].add(normalize(ch.arg))
+                record(ch, '.'.join([package, camelize(ch.arg)]))
+        record(self.stmt, self.rootpkg)
 
-        # Gather all typedef statements to generate classes for
+        # Gather typedefs to generate and add to class_hierarchy dict
         typedef_stmts = set([])
         for stmt in search(self.stmt, 'typedef'):
             typedef_stmts.add(stmt)
+            class_hierarchy[self.rootpkg].add(normalize(stmt.arg))
             try:
                 while True:
                     type_stmt = search_one(stmt, 'type')
@@ -930,15 +955,11 @@ class ClassGenerator(object):
                         break
                     typedef_stmts.add(type_stmt.i_typedef)
                     stmt = type_stmt.i_typedef
+                    class_hierarchy[self.rootpkg].add(normalize(stmt.arg))
             except AttributeError:
                 pass
-        
-        # Add root to class_hierarchy dict
-        if self.rootpkg not in class_hierarchy:
-            class_hierarchy[self.rootpkg] = set([])
-        class_hierarchy[self.rootpkg].add(self.n)
 
-        # Generate the typedef classes and add to class_hierarchy dict
+        # Generate the typedef classes
         for stmt in typedef_stmts:
             name = normalize(stmt.arg)
             description = ''.join(['This class represents an element from ',
@@ -948,7 +969,6 @@ class ClassGenerator(object):
                                    '"\n * <p>\n * See line ',
                                    str(stmt.pos.line), ' in\n * ',
                                    stmt.pos.ref])
-            class_hierarchy[self.rootpkg].add(name)
             java_class = JavaClass(filename=name + '.java',
                                         package=self.package,
                                         description=description,
@@ -974,15 +994,6 @@ class ClassGenerator(object):
 
             write_file(self.path, java_class.filename,
                        java_class.as_list(), self.ctx)
-        
-        # Add all classes that will be generated to class_hierarchy dict
-        def record(stmt, package):
-            for ch in search(stmt, ('container', 'list')):
-                if package not in class_hierarchy:
-                    class_hierarchy[package] = set([])
-                class_hierarchy[package].add(normalize(ch.arg))
-                record(ch, '.'.join([package, camelize(ch.arg)]))
-        record(self.stmt, self.rootpkg)
 
         # Generate classes for children and keep track of augmented modules
         for stmt in search(self.stmt, ('container', 'list', 'augment')):
