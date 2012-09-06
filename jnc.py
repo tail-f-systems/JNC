@@ -2162,7 +2162,7 @@ class MethodGenerator(object):
 
     def getters(self):
         """Returns a list of JavaMethods representing getters to include
-        in generated class of self.stmt.parent
+        in generated class of parent
 
         """
         assert self.gen is not self, 'Avoid infinite recursion'
@@ -2170,7 +2170,7 @@ class MethodGenerator(object):
 
     def deleters(self):
         """Returns a list of JavaMethods representing deleters to include
-        in generated class of self.stmt.parent
+        in generated class of parent
 
         """
         assert self.gen is not self, 'Avoid infinite recursion'
