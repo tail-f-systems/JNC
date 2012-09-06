@@ -692,23 +692,25 @@ def search(stmt, keywords):
     """
     if isinstance(keywords, basestring):
         keywords = [keywords]
+    bypass = all(x not in keywords for x in ('choice', 'case'))
     res = set([])
-    for keyword in keywords:
-        # Avoid copying the substmt and i_children lists
-        for ch in stmt.substmts:
+    for ch in stmt.substmts:
+        if bypass and ch.keyword in ('choice', 'case'):
+            res.update(search(ch, keywords))
+            continue
+        for keyword in keywords:
             if ch.keyword == keyword:
                 res.add(ch)
-        try:
-            for ch in stmt.i_children:
+    try:
+        for ch in stmt.i_children:
+            if bypass and ch.keyword in ('choice', 'case'):
+                res.update(search(ch, keywords))
+                continue
+            for keyword in keywords:
                 if ch.keyword == keyword:
                     res.add(ch)
-        except AttributeError:
-            continue
-    if all(x not in keywords for x in ('choice', 'case')):
-        f = lambda stmt: (set([stmt]) if stmt.keyword not in ('choice', 'case')
-                                      else search(stmt, keywords))
-        for stmts in map(f, res):
-            res.update(stmts)
+    except AttributeError:
+        pass
     return res
 
 
