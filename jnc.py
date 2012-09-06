@@ -630,7 +630,7 @@ def get_types(yang_type, ctx):
         else:
             basetype = get_base_type(typedef)
             jnc, primitive = get_types(basetype, ctx)
-            if typedef.parent.keyword in ('module', 'submodule'):
+            if get_parent(typedef).keyword in ('module', 'submodule'):
                 package = get_package(typedef, ctx)
                 typedef_arg = normalize(yang_type.arg)
                 jnc = package + '.' + typedef_arg
@@ -722,7 +722,7 @@ def is_config(stmt):
     config = None
     while config is None and stmt is not None:
         config = search_one(stmt, 'config')
-        stmt = stmt.parent
+        stmt = get_parent(stmt)
     return config is None or config.arg == 'true'
 
 
@@ -758,11 +758,12 @@ class SchemaNode(object):
         unique = search_one(stmt, 'unique')
         isUnique = unique is not None and unique.arg == 'true'
         key = None
-        if stmt.parent is not None:
-            key = search_one(stmt.parent, 'key')
+        parent = get_parent(stmt)
+        if parent:
+            key = search_one(parent, 'key')
         isKey = key is not None and key.arg == stmt.arg
-        childOfContainerOrList = (stmt.parent is not None
-            and stmt.parent.keyword in ('container', 'list'))
+        childOfContainerOrList = (parent and parent.keyword in ('container',
+                                                                'list'))
         if (isKey or stmt.keyword in ('module', 'submodule') or
             (childOfContainerOrList and stmt.keyword in ('container',))):
             min_occurs = '1'
@@ -886,7 +887,8 @@ class ClassGenerator(object):
                     and self.stmt.keyword in ('container', 'list')):
                 s = class_hierarchy[self.package]
                 s.discard('<< No generated classes >>')
-                for stmt in search(self.stmt.parent, ('container', 'list')):
+                for stmt in search(get_parent(self.stmt), ('container',
+                                                           'list')):
                     s.add(normalize(stmt.arg))
             self.generate_class()
 
@@ -1116,9 +1118,9 @@ class ClassGenerator(object):
         field = None
         add = self.java_class.append_access_method  # XXX: add is a function
         if sub.keyword in ('list', 'container'):
-            pkg = self.package + '.' + camelize(sub.parent.arg)
+            pkg = self.package + '.' + self.n2
             child_generator = ClassGenerator(stmt=sub, package=pkg,
-                path=self.path + os.sep + camelize(sub.parent.arg),
+                path=self.path + os.sep + self.n2,
                 ns=None, prefix_name=None, parent=self)
             child_generator.generate()
             child_gen = MethodGenerator(sub, self.ctx)
@@ -1134,19 +1136,18 @@ class ClassGenerator(object):
                     res = s.replace(name, f_name)
                     res = res.replace('add' + f_name, 'add' + name)
                     return res
-                if (name == normalize(sub.parent.arg)
-                        and isinstance(access_method, JavaMethod)):
+                if (name == self.n and isinstance(access_method, JavaMethod)):
                     access_method.return_type = f(access_method.return_type)
                     access_method.parameters = map(f, access_method.parameters)
                     access_method.body = map(f, access_method.body)
-                elif name == normalize(sub.parent.arg):
+                elif name == self.n:
                     access_method.modifiers = map(f, access_method.modifiers)
                 add(sub.arg, access_method)
         elif sub.keyword in ('leaf', 'leaf-list'):
             child_gen = MethodGenerator(sub, self.ctx)
             add(sub.arg, child_gen.access_methods_comment())
             if sub.keyword == 'leaf':
-                key = search_one(sub.parent, 'key')
+                key = search_one(self.stmt, 'key')
                 optional = key is None or sub.arg not in key.arg.split(' ')
                 # TODO: ensure that the leaf is truly optional
                 add(sub.arg, child_gen.getters())
@@ -1816,7 +1817,7 @@ class MethodGenerator(object):
         self.is_typedef = stmt.keyword == 'typedef'
         self.is_leaf = stmt.keyword == 'leaf'
         self.is_leaflist = stmt.keyword == 'leaf-list'
-        self.is_top_level = self.stmt.parent == self.stmt.top
+        self.is_top_level = get_parent(self.stmt) == self.stmt.top
         assert (self.is_container or self.is_list or self.is_typedef
             or self.is_leaf or self.is_leaflist)
         self.gen = self
@@ -2221,7 +2222,7 @@ class LeafMethodGenerator(MethodGenerator):
         self.is_string = self.type_str[1] == 'String'
         self.is_typedef = (hasattr(self.stmt_type, 'i_typedef')
                            and self.stmt_type.i_typedef is not None)
-        key = search_one(stmt.parent, 'key')
+        key = search_one(get_parent(stmt), 'key')
         self.is_optional = key is None or stmt.arg not in key.arg.split(' ')
 
     def getters(self):
