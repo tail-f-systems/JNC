@@ -18,11 +18,12 @@ Write examples and tests:
 - extension
 - feature
 - identity
-- different revisiona of a single module
+- different revisions of a single module
 - capabilities (test/demo of library rather than plugin)
 - deep package structures
 - name collisions (particularly typedefs) and normalization
 - inet-types and similar "standard-modules"
+Write classes for inet and yang standard module types
 Write User Manual!
 How are the generated classes affected by non-config statements?
 Make sure default values are used where appropriate for all types
