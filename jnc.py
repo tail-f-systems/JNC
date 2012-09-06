@@ -470,7 +470,7 @@ def write_file(d, file_name, file_content, ctx):
 
 def get_parent(stmt):
     """Returns stmt.parent, or stmt.parent.parent if stmt.parent is choice"""
-    if stmt.parent.keyword != 'choice':
+    if stmt.parent is None or stmt.parent.keyword != 'choice':
         return stmt.parent
     else:
         return stmt.parent.parent
