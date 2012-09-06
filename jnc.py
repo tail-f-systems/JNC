@@ -113,10 +113,20 @@ class JNCPlugin(plugin.PyangPlugin):
                 dest='javadoc_directory',
                 help='Generate javadoc to JAVADOC_DIRECTORY.'),
             optparse.make_option(
+                '--jnc-no-classes',
+                dest='no_classes',
+                action='store_true',
+                help='Do not generate classes.'),
+            optparse.make_option(
                 '--jnc-no-schema',
                 dest='no_schema',
                 action='store_true',
                 help='Do not generate schema.'),
+            optparse.make_option(
+                '--jnc-no-pkginfo',
+                dest='no_pkginfo',
+                action='store_true',
+                help='Do not generate package-info files.'),
             optparse.make_option(
                 '--jnc-verbose',
                 dest='verbose',
@@ -193,23 +203,24 @@ class JNCPlugin(plugin.PyangPlugin):
         d = directory.replace('.', os.sep)
         for module in modules:
             if module.keyword == 'module':
-                # Generate Java classes
-                src = ('module "' + module.arg + '", revision: "' +
-                    util.get_latest_revision(module) + '".')
-                generator = ClassGenerator(module, path=directory,
-                                           package=ctx.rootpkg,
-                                           src=src, ctx=ctx)
-                generator.generate()
-                for aug_module in augmented_modules.values():
-                    src = ('module "' + aug_module.arg + '", revision: "' +
-                        util.get_latest_revision(aug_module) + '".')
-                    generator = ClassGenerator(aug_module, path=directory,
-                                               package=ctx.rootpkg, src=src, ctx=ctx)
+                if not ctx.opts.no_classes:
+                    # Generate Java classes
+                    src = ('module "' + module.arg + '", revision: "' +
+                        util.get_latest_revision(module) + '".')
+                    generator = ClassGenerator(module, path=directory,
+                                               package=ctx.rootpkg,
+                                               src=src, ctx=ctx)
                     generator.generate()
-                if ctx.opts.debug or ctx.opts.verbose:
-                    print 'Java classes generation COMPLETE.'
-                if not ctx.opts.no_schema:
+                    for aug_module in augmented_modules.values():
+                        src = ('module "' + aug_module.arg + '", revision: "' +
+                            util.get_latest_revision(aug_module) + '".')
+                        generator = ClassGenerator(aug_module, path=directory,
+                                                   package=ctx.rootpkg, src=src, ctx=ctx)
+                        generator.generate()
+                    if ctx.opts.debug or ctx.opts.verbose:
+                        print 'Java classes generation COMPLETE.'
 
+                if not ctx.opts.no_schema:
                     # Generate external schema
                     schema_nodes = ['<schema>']
                     stmts = search(module, ('module', 'submodule', 'container',
@@ -245,7 +256,7 @@ class JNCPlugin(plugin.PyangPlugin):
 
         # Generate javadoc
         for module in modules:
-            if module.keyword == 'module':
+            if not ctx.opts.no_pkginfo and module.keyword == 'module':
                 package_info_generator = PackageInfoGenerator(d, module, ctx)
                 package_info_generator.generate_package_info()
         javadir = ctx.opts.javadoc_directory
