@@ -104,6 +104,11 @@ class JNCPlugin(plugin.PyangPlugin):
                 action='store_true',
                 help='Print help on usage of the JNC plugin and exit'),
             optparse.make_option(
+                '--jnc-verbose',
+                dest='verbose',
+                action='store_true',
+                help='Verbose mode: Print detailed debug messages.'),
+            optparse.make_option(
                 '--jnc-debug',
                 dest='debug',
                 action='store_true',
@@ -114,24 +119,19 @@ class JNCPlugin(plugin.PyangPlugin):
                 help='Generate javadoc to JAVADOC_DIRECTORY.'),
             optparse.make_option(
                 '--jnc-no-classes',
-                dest='no_classes',
-                action='store_true',
+                dest='gen_classes',
+                action='store_false',
                 help='Do not generate classes.'),
             optparse.make_option(
                 '--jnc-no-schema',
-                dest='no_schema',
-                action='store_true',
+                dest='gen_schema',
+                action='store_false',
                 help='Do not generate schema.'),
             optparse.make_option(
                 '--jnc-no-pkginfo',
-                dest='no_pkginfo',
-                action='store_true',
+                dest='gen_pkginfo',
+                action='store_false',
                 help='Do not generate package-info files.'),
-            optparse.make_option(
-                '--jnc-verbose',
-                dest='verbose',
-                action='store_true',
-                help='Verbose mode: Print detailed debug messages.'),
             optparse.make_option(
                 '--jnc-ignore-errors',
                 dest='ignore',
@@ -203,7 +203,7 @@ class JNCPlugin(plugin.PyangPlugin):
         d = directory.replace('.', os.sep)
         for module in modules:
             if module.keyword == 'module':
-                if not ctx.opts.no_classes:
+                if ctx.opts.gen_classes:
                     # Generate Java classes
                     src = ('module "' + module.arg + '", revision: "' +
                         util.get_latest_revision(module) + '".')
@@ -220,7 +220,7 @@ class JNCPlugin(plugin.PyangPlugin):
                     if ctx.opts.debug or ctx.opts.verbose:
                         print 'Java classes generation COMPLETE.'
 
-                if not ctx.opts.no_schema:
+                if ctx.opts.gen_schema:
                     # Generate external schema
                     schema_nodes = ['<schema>']
                     stmts = search(module, ('module', 'submodule', 'container',
@@ -256,7 +256,7 @@ class JNCPlugin(plugin.PyangPlugin):
 
         # Generate javadoc
         for module in modules:
-            if not ctx.opts.no_pkginfo and module.keyword == 'module':
+            if ctx.opts.gen_pkginfo and module.keyword == 'module':
                 package_info_generator = PackageInfoGenerator(d, module, ctx)
                 package_info_generator.generate_package_info()
         javadir = ctx.opts.javadoc_directory
