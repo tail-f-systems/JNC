@@ -228,7 +228,7 @@ class JNCPlugin(plugin.PyangPlugin):
                     module_root = SchemaNode(module, '/')
                     schema_nodes.extend(module_root.as_list())
                     for aug_module in augmented_modules.values():
-                        stmts.update(search(aug_module.substmts,
+                        stmts.extend(search(aug_module.substmts,
                                             ('module', 'submodule', 'container',
                                             'list', 'leaf', 'leaf-list')))
                         aug_module_root = SchemaNode(aug_module, '/')
@@ -687,31 +687,36 @@ def search(stmt, keywords):
     stmt     -- Statement to search for children in
     keywords -- A string, or a tuple, list or set of strings, to search for
 
-    Returns a set (without duplicates) of children with matching keywords
+    Returns a set (without duplicates) of children with matching keywords.
+    If choice or case is not in keywords, substatements of choice and case
+    are searched as well.
 
     """
     if isinstance(keywords, basestring):
-        keywords = [keywords]
-    bypass = all(x not in keywords for x in ('choice', 'case'))
-    res = set([])
-    for ch in stmt.substmts:
-        if bypass and ch.keyword in ('choice', 'case'):
-            res.update(search(ch, keywords))
-            continue
-        for keyword in keywords:
-            if ch.keyword == keyword:
-                res.add(ch)
-    try:
-        for ch in stmt.i_children:
-            if bypass and ch.keyword in ('choice', 'case'):
-                res.update(search(ch, keywords))
+        keywords = keywords.split()
+    bypassed = ('choice', 'case')
+    bypass = all(x not in keywords for x in bypassed)
+    res = {}
+    def _search(stmt, acc):
+        for ch in stmt.substmts:
+            if bypass and ch.keyword in bypassed:
+                _search(ch, acc)
                 continue
             for keyword in keywords:
                 if ch.keyword == keyword:
-                    res.add(ch)
-    except AttributeError:
-        pass
-    return res
+                    acc[' '.join([ch.keyword + ch.arg])] = ch
+        try:
+            for ch in stmt.i_children:
+                if bypass and ch.keyword in bypassed:
+                    _search(ch, acc)
+                    continue
+                for keyword in keywords:
+                    if ch.keyword == keyword:
+                        acc[' '.join([ch.keyword + ch.arg])] = ch
+        except AttributeError:
+            pass
+    _search(stmt, res)
+    return res.values()
 
 
 def search_one(stmt, keyword, arg=None):
@@ -724,8 +729,8 @@ def search_one(stmt, keyword, arg=None):
             pass
     if res is None:
         try:
-            return search(stmt, keyword).pop()
-        except KeyError:
+            return search(stmt, keyword)[0]
+        except IndexError:
             return None
     return res
 
@@ -2535,8 +2540,7 @@ class TypedefMethodGenerator(MethodGenerator):
                 checker.add_line('throwException( !e );')
             if self.pattern:
                 if len(self.pattern) == 1:
-                    p = self.pattern.pop()  # Set has no peek method
-                    self.pattern.add(p)  # So we need to remove and add
+                    p = self.pattern[0]
                     checker.add_line('pattern("' + p.arg + '");')
                 else:
                     checker.add_line('java.lang.String[] regexs = {')
