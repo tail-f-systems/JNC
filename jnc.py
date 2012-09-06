@@ -1806,9 +1806,8 @@ class MethodGenerator(object):
         self.stmt = stmt
         self.n = normalize(stmt.arg)
         self.n2 = camelize(stmt.arg)
-        norm_stmt = lambda s: normalize(s.arg)
-        self.children = map(norm_stmt, search(stmt, ('list', 'container',
-                                                     'leaf', 'leaf-list')))
+        self.children = map(lambda s: normalize(s.arg),
+            search(stmt, ('list', 'container', 'leaf', 'leaf-list')))
         self.pkg = get_package(stmt, ctx)
         self.basepkg = self.pkg.partition('.')[0]
         self.rootpkg = ctx.rootpkg.split(os.sep)
