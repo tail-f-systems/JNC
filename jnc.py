@@ -704,32 +704,29 @@ def search(stmt, keywords):
     bypassed = ('choice', 'case')
     bypass = all(x not in keywords for x in bypassed)
     dict_ = collections.OrderedDict()
-    def _search(stmt, acc):
-        try:
-            for ch in stmt.i_children:
-                if bypass and ch.keyword in bypassed:
-                    _search(ch, acc)
-                    continue
-                key = ' '.join([ch.keyword + ch.arg])
-                if key in acc:
-                    continue
-                for keyword in keywords:
-                    if ch.keyword == keyword:
-                        acc[key] = ch
-                        break
-        except AttributeError:
-            pass
-        for ch in stmt.substmts:
+
+    def iterate(children, acc):
+        for ch in children:
             if bypass and ch.keyword in bypassed:
                 _search(ch, acc)
                 continue
-            key = ' '.join([ch.keyword + ch.arg])
+            try:
+                key = ' '.join([ch.keyword, ch.arg])
+            except TypeError:
+                key = ' '.join([':'.join(ch.keyword), ch.arg])
             if key in acc:
                 continue
             for keyword in keywords:
                 if ch.keyword == keyword:
                     acc[key] = ch
                     break
+
+    def _search(stmt, acc):
+        try:
+            iterate(stmt.i_children, acc)
+        except AttributeError:
+            iterate(stmt.substmts, acc)
+
     _search(stmt, dict_)
     return dict_.values()
 
