@@ -141,7 +141,7 @@ class JNCPlugin(plugin.PyangPlugin):
                 '--jnc-import-on-demand',
                 dest='import_on_demand',
                 action='store_true',
-                help='Use import on demand instead of explicit .'),
+                help='Use non explicit imports where possible.'),
             ]
         g = optparser.add_option_group('JNC output specific options')
         g.add_options(optlist)
