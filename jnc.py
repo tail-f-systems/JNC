@@ -186,7 +186,7 @@ class JNCPlugin(plugin.PyangPlugin):
 
         """
         if ctx.opts.debug or ctx.opts.verbose:
-            print 'JNC plugin class generation starting'
+            print 'JNC plugin starting'
         if not ctx.opts.ignore:
             for (epos, etag, _) in ctx.errors:
                 if (error.is_error(error.err_level(etag)) and
