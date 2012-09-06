@@ -704,10 +704,11 @@ def search(stmt, keywords):
                     res.add(ch)
         except AttributeError:
             continue
-    if 'choice' not in keywords:
-        choices = search(stmt, 'choice')
-        for choice in choices:
-            res.update(search(choice, keywords))
+    if all(x not in keywords for x in ('choice', 'case')):
+        f = lambda stmt: (set([stmt]) if stmt.keyword not in ('choice', 'case')
+                                      else search(stmt, keywords))
+        for stmts in map(f, res):
+            res.update(stmts)
     return res
 
 
@@ -720,11 +721,10 @@ def search_one(stmt, keyword, arg=None):
         except AttributeError:
             pass
     if res is None:
-        choices = search(stmt, 'choice')
-        for choice in choices:
-            res = search_one(choice, keyword)
-            if res is not None:
-                break
+        try:
+            return search(stmt, keyword).pop()
+        except KeyError:
+            return None
     return res
 
 
