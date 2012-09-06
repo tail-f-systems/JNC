@@ -892,22 +892,9 @@ class ClassGenerator(object):
 
     def generate(self):
         """Generates class(es) for self.stmt"""
-        if self.package not in class_hierarchy:
-            s = set([])
-            s.add('<< No generated classes >>')
-            class_hierarchy[self.package] = s
-
         if self.stmt.keyword in ('module', 'submodule'):
-            class_hierarchy[self.rootpkg].add(self.n)
             self.generate_classes()
         else:
-            if ('<< No generated classes >>' in class_hierarchy[self.package]
-                    and self.stmt.keyword in ('container', 'list')):
-                s = class_hierarchy[self.package]
-                s.discard('<< No generated classes >>')
-                for stmt in search(get_parent(self.stmt), ('container',
-                                                           'list')):
-                    s.add(normalize(stmt.arg))
             self.generate_class()
 
     def generate_classes(self):
@@ -937,8 +924,13 @@ class ClassGenerator(object):
                     stmt = type_stmt.i_typedef
             except AttributeError:
                 pass
+        
+        # Add root to class_hierarchy dict
+        if self.rootpkg not in class_hierarchy:
+            class_hierarchy[self.rootpkg] = set([])
+        class_hierarchy[self.rootpkg].add(self.n)
 
-        # Generate the typedef classes
+        # Generate the typedef classes and add to class_hierarchy dict
         for stmt in typedef_stmts:
             name = normalize(stmt.arg)
             description = ''.join(['This class represents an element from ',
@@ -974,6 +966,15 @@ class ClassGenerator(object):
 
             write_file(self.path, java_class.filename,
                        java_class.as_list(), self.ctx)
+        
+        # Add all classes that will be generated to class_hierarchy dict
+        def record(stmt, package):
+            for ch in search(stmt, ('container', 'list')):
+                if package not in class_hierarchy:
+                    class_hierarchy[package] = set([])
+                class_hierarchy[package].add(normalize(ch.arg))
+                record(ch, '.'.join([package, camelize(ch.arg)]))
+        record(self.stmt, self.rootpkg)
 
         # Generate classes for children and keep track of augmented modules
         for stmt in search(self.stmt, ('container', 'list', 'augment')):
@@ -981,6 +982,7 @@ class ClassGenerator(object):
                 ns=ns_arg, prefix_name=self.n, parent=self)
             child_generator.generate()
 
+        # Generate root class
         if self.ctx.opts.verbose:
             print 'Generating Java class "' + self.filename + '"...'
         self.java_class = JavaClass(filename=self.filename,
@@ -990,6 +992,7 @@ class ClassGenerator(object):
                     '.PREFIX).'),
                 source=self.src)
 
+        # Set fields in root class
         root_fields = [JavaValue(), JavaValue()]
         root_fields[0].set_name('NAMESPACE')
         root_fields[1].set_name('PREFIX')
@@ -1000,6 +1003,7 @@ class ClassGenerator(object):
                 root_field.add_modifier(modifier)
             self.java_class.add_field(root_field)
 
+        # Add method 'enable' to root class
         enabler = JavaMethod(return_type='void', name='enable')
         enabler.exceptions = ['JNCException']  # XXX: Don't use add method
         enabler.add_dependency('com.tailf.jnc.JNCException')
@@ -1012,6 +1016,7 @@ class ClassGenerator(object):
         enabler.add_line(self.n + '.registerSchema();')  # XXX: Don't import name
         self.java_class.add_enabler(enabler)
 
+        # Add method 'registerSchema' to root class
         reg = JavaMethod(return_type='void', name='registerSchema')
         reg.exceptions = ['JNCException']  # XXX: Don't use add method
         reg.add_dependency('com.tailf.jnc.JNCException')
