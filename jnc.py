@@ -2529,12 +2529,18 @@ class TypedefMethodGenerator(MethodGenerator):
             constructor.add_javadoc(''.join(javadoc2))
             constructor.add_javadoc(''.join(javadoc))
 
-            # Now add second argument if the supertype has one
-            if self.jnc_type in ('com.tailf.jnc.YangUnion',):
-                constructor.add_parameter('String[]', 'memberTypes')
-                constructor.body = ['        super(value, memberTypes);']
-                javadoc = ['@param memberValues the types of the union.']
-                constructor.add_javadoc(''.join(javadoc))
+            # Now add second argument to super call if the supertype has one
+            if self.jnc_type == 'com.tailf.jnc.YangUnion':
+                constructor.body = []
+                constructor.add_line('super(value,')
+                constructor.add_line('    new String[] {')
+                for member in search(self.type, 'type'):
+                    line = ''.join(['        "',
+                                    get_types(member, self.ctx)[0],
+                                    '",'])
+                    constructor.add_line(line)
+                constructor.add_line('    }')
+                constructor.add_line(');')
             
             # Add call to check method if type has constraints
             if self.needs_check:
