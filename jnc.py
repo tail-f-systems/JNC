@@ -2306,8 +2306,8 @@ class LeafMethodGenerator(MethodGenerator):
                 newValue.append('", new String[] {\n')
                 for type_stmt in search(self.base_type, 'type'):
                     member_type, _ = get_types(type_stmt, self.ctx)
-                    newValue.append(' ' * 12 + '"' + member_type + '",\n')
-                newValue.append('        });')
+                    newValue.append(' ' * 16 + '"' + member_type + '",\n')
+                newValue.append(' ' * 12 + '});')
             elif self.type_str[0] == 'com.tailf.jnc.YangDecimal64':
                 newValue.append('", new String[] {')
                 for type_stmt in search(self.base_type, 'type'):
