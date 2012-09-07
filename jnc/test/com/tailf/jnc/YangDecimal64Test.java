@@ -17,7 +17,7 @@ public class YangDecimal64Test {
     @Before
     public void setUp() throws YangException {
         d1 = new YangDecimal64(0, 1);
-        d2 = new YangDecimal64("3.14");
+        d2 = new YangDecimal64("3.14", 2);
         d3 = new YangDecimal64(new BigDecimal("3.14"), 1);
     }
 
@@ -46,11 +46,11 @@ public class YangDecimal64Test {
 
     @Test
     public void testYangDecimal64StringInt() throws YangException {
-        tmp1 = new YangDecimal64("0");
+        tmp1 = new YangDecimal64("0", 1);
         assertTrue(tmp1.value.intValue() == 0);
         assertTrue(tmp1.getFractionDigits() == 1);
 
-        tmp1 = new YangDecimal64("0.01000");
+        tmp1 = new YangDecimal64("0.01000", 5);
         assertTrue(Math.abs(tmp1.value.doubleValue() - 0.01) < Utils.EPSILON);
         assertTrue(tmp1.getFractionDigits() == 5);
     }
@@ -107,7 +107,7 @@ public class YangDecimal64Test {
         
         // Invalid fraction digits
         try {
-            new YangDecimal64("0.9999999999999999999"); // 19
+            new YangDecimal64("0.9999999999999999999", 19); // 19
             fail("Should not accept that high precision");
         } catch (YangException e) {}
 
@@ -116,7 +116,7 @@ public class YangDecimal64Test {
         d18.exact(1);
         
         // Outside precision
-        YangDecimal64 d17 = new YangDecimal64("0.99999999999999999");
+        YangDecimal64 d17 = new YangDecimal64("0.99999999999999999", 17);
         try {
             d17.exact(1);
             fail("Outside precision");
