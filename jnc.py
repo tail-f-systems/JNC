@@ -2303,6 +2303,12 @@ class LeafMethodGenerator(MethodGenerator):
             newValue = ['    ', self.n2, ' = new ', method.return_type, '("',
                         self.default_value]
             if self.type_str[0] == 'com.tailf.jnc.YangUnion':
+                newValue.append('", new String[] {\n')
+                for type_stmt in search(self.base_type, 'type'):
+                    member_type, _ = get_types(type_stmt, self.ctx)
+                    newValue.append(' ' * 12 + '"' + member_type + '",\n')
+                newValue.append('        });')
+            elif self.type_str[0] == 'com.tailf.jnc.YangDecimal64':
                 newValue.append('", new String[] {')
                 for type_stmt in search(self.base_type, 'type'):
                     # TODO: make generated code prettier by adding newlines
@@ -2370,11 +2376,24 @@ class LeafMethodGenerator(MethodGenerator):
                     method.add_javadoc('using a String value.')
                 if self.type_str[0] == 'com.tailf.jnc.YangUnion':
                     line.append(', new String[] {')
+                    method.add_line(''.join(line))
                     for type_stmt in search(self.base_type, 'type'):
-                        # TODO: make generated code prettier by adding newlines
                         member_type, _ = get_types(type_stmt, self.ctx)
-                        line.append('"' + member_type + '", ')
-                    line.append('}')
+                        method.add_line('     "' + member_type + '",')
+                    line = ['}']
+                elif self.type_str[0] == 'com.tailf.jnc.YangDecimal64':
+                    tmpline = ['final int decimalPos = ']
+                    tmpline.append(param_names[0])
+                    tmpline.append(".lastIndexOf('.');")
+                    method.add_line(''.join(tmpline))
+                    method.add_line('int fractionDigits = 1;')
+                    method.add_line('if (decimalPos > 0) {')
+                    tmpline = ['    fractionDigits = ']
+                    tmpline.append(param_names[0])
+                    tmpline.append('.length() - decimalPos - 1;')
+                    method.add_line(''.join(tmpline))
+                    method.add_line('}')
+                    line.append(', fractionDigits')
                 line.append('));')
                 method.add_line(''.join(line))
             for param_type, param_name in zip(param_types, param_names):
