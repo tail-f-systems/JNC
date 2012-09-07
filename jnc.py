@@ -727,13 +727,18 @@ def search(stmt, keywords):
                     acc[key] = ch
                     break
 
-    def _search(stmt, acc):
+    def _search(stmt, keywords, acc):
+        if 'typedef' in keywords:
+            old_keywords = keywords[:]
+            keywords = ['typedef']
+            iterate(stmt.substmts, acc)
+            keywords = old_keywords
         try:
             iterate(stmt.i_children, acc)
         except AttributeError:
             iterate(stmt.substmts, acc)
 
-    _search(stmt, dict_)
+    _search(stmt, keywords, dict_)
     return dict_.values()
 
 
