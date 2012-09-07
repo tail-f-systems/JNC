@@ -4,6 +4,7 @@ Verify correctness of this list
 Update the README
 Add line-number and path to comments in add-methods, etc.
 Take away code that's commented out
+Write changelog for diff between ConfM and JNC
 Write structure template for User Manual, in LaTeX
 Write examples and tests:
 - Juniper
@@ -25,6 +26,7 @@ Write examples and tests:
 - inet-types and similar "standard-modules"
 Write classes for inet and yang standard module types
 Write User Manual!
+Make sure to add section about how to go from using ConfM to using JNC
 How are the generated classes affected by non-config statements?
 Make sure default values are used where appropriate for all types
 Other substatement implications... (check-list!)
