@@ -39,13 +39,9 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
      *             a java.math.BigDecimal.
      * @see java.math.BigDecimal
      */
-    public YangDecimal64(String s) throws YangException {
+    public YangDecimal64(String s, int fractionDigits) throws YangException {
         super(s);
-        final int decimalPos = s.lastIndexOf('.');
-        fractionDigits = 1;
-        if (decimalPos > 0) {
-            fractionDigits = s.length() - decimalPos - 1;
-        }
+        this.fractionDigits = fractionDigits;
         setMinMax();
         check();
     }
@@ -202,7 +198,7 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
      */
     @Override
     protected YangDecimal64 cloneShallow() throws YangException {
-        return new YangDecimal64(toString());
+        return new YangDecimal64(toString(), fractionDigits);
     }
 
 }
