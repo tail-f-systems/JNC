@@ -714,7 +714,7 @@ def search(stmt, keywords):
     def iterate(children, acc):
         for ch in children:
             if bypass and ch.keyword in bypassed:
-                _search(ch, acc)
+                _search(ch, keywords, acc)
                 continue
             try:
                 key = ' '.join([ch.keyword, ch.arg])
