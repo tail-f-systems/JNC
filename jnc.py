@@ -222,7 +222,8 @@ class JNCPlugin(plugin.PyangPlugin):
                         src = ('module "' + aug_module.arg + '", revision: "' +
                             util.get_latest_revision(aug_module) + '".')
                         generator = ClassGenerator(aug_module, path=directory,
-                                                   package=ctx.rootpkg, src=src, ctx=ctx)
+                                                   package=ctx.rootpkg,
+                                                   src=src, ctx=ctx)
                         generator.generate()
                     if ctx.opts.debug or ctx.opts.verbose:
                         print 'Java classes generation COMPLETE.'
