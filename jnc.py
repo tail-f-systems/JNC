@@ -2499,7 +2499,7 @@ class TypedefMethodGenerator(MethodGenerator):
         self.is_string = False
         self.needs_check = True  # Set to False to avoid redundant checks
         if self.base_type is not None:
-            self.is_string = self.base_type.arg == 'string'
+            self.is_string = self.base_primitive == 'String'
             for s in ('length', 'path', 'range', 'require_instance'):
                 setattr(self, s, search_one(self.base_type, s))
             for s in ('bit', 'enum', 'pattern'):
@@ -2524,8 +2524,19 @@ class TypedefMethodGenerator(MethodGenerator):
                 javadoc2.extend([' object from a ', self.base_primitive, '.'])
                 tmp_primitive = constructor.add_dependency(self.base_primitive)
                 constructor.add_parameter(tmp_primitive, 'value')
+
+            # Add javadoc
             constructor.add_javadoc(''.join(javadoc2))
             constructor.add_javadoc(''.join(javadoc))
+
+            # Now add second argument if the supertype has one
+            if self.jnc_type in ('com.tailf.jnc.YangUnion',):
+                constructor.add_parameter('String[]', 'memberTypes')
+                constructor.body = ['        super(value, memberTypes);']
+                javadoc = ['@param memberValues the types of the union.']
+                constructor.add_javadoc(''.join(javadoc))
+            
+            # Add call to check method if type has constraints
             if self.needs_check:
                 constructor.add_line('check();')
                 constructor.add_exception('YangException')
