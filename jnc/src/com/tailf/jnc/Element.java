@@ -1615,7 +1615,7 @@ public class Element implements Serializable {
         final boolean sameName = name.equals(b.name);
         final boolean sameNamespace = namespace.equals(b.namespace);
         if (sameName && sameNamespace) {
-            return equals(b) ? 1 : 0;
+            return equals(b) ? 0 : 1;
         }
         return -1;
     }
