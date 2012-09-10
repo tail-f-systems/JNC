@@ -2393,6 +2393,12 @@ class LeafMethodGenerator(MethodGenerator):
                         member_type, _ = get_types(type_stmt, self.ctx)
                         method.add_line('     "' + member_type + '",')
                     line = ['}']
+                elif self.type_str[0] == 'com.tailf.jnc.YangEnumeration':
+                    line.append(', new String[] {')
+                    method.add_line(''.join(line))
+                    for enum in search(self.base_type, 'enum'):
+                        method.add_line('     "' + enum.arg + '",')
+                    line = ['}']
                 elif self.type_str[0] == 'com.tailf.jnc.YangDecimal64':
                     tmpline = ['final int decimalPos = ']
                     tmpline.append(param_names[0])
