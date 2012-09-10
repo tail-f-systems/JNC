@@ -23,27 +23,52 @@ public class YangEnumeration extends YangBaseString {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates an YangEnumeration object from a java.lang.String.
-     * 
-     * @param value The Java String.
-     * @throws YangException If an invariant was broken during assignment.
+     * An array of the allowed names, ordered as in the YANG module.
      */
-    public YangEnumeration(String value) throws YangException {
-        super(value);
-        if (value.isEmpty()) {
-            YangException.throwException(true, "empty string");
-        }
-        pattern("[^ ]|[^ ].*[^ ]");
-    }
+    private String[] enums;
+    
+    /**
+     * Get the allowed type names for this enumeration.
+     *
+     * @return A string array with the enum names
+     */
+    protected String[] enums() {
+        return enums;
+    };
 
     /**
-     * Checks if value is equal to this object's value, interpreted as an enum.
+     * Creates an YangEnumeration object given an enum (as a String) and an
+     * array of the allowed enum names.
      * 
-     * @param value An enum value candidate, as a String.
-     * @return true if value of this object is equal to value; false otherwise.
+     * @param value The enum name
+     * @param enums The allowed type names of the enumeration.
+     * @throws YangException If an invariant was broken during assignment.
      */
-    protected boolean enumeration(String value) {
-        return this.value.equals(value);
+    public YangEnumeration(String value, String[] enums) throws YangException {
+        super(value);
+        if (value.isEmpty()) {
+            YangException.throwException(true, "empty string in enum value");
+        }
+        pattern("[^ ]|[^ ].*[^ ]");  // Leading and trailing spaces not allowed
+        this.enums = enums;
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangBaseType#check()
+     */
+    @Override
+    public void check() throws YangException {
+        if (enums == null) {
+            return;  // Premature check
+        }
+        super.check();
+        boolean found = false;
+        for (String enumName : enums) {
+            found |= value.equals(enumName);
+        }
+        YangException.throwException(!found, "\"" + value + "\" not valid" +
+        		"enum name");
     }
 
     /**
