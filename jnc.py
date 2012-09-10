@@ -2315,20 +2315,25 @@ class LeafMethodGenerator(MethodGenerator):
             newValue = ['    ', self.n2, ' = new ', method.return_type, '("',
                         self.default_value]
             if self.type_str[0] == 'com.tailf.jnc.YangUnion':
-                newValue.append('", new String[] {\n')
+                newValue.append('", new String[] {  // default\n')
                 for type_stmt in search(self.base_type, 'type'):
                     member_type, _ = get_types(type_stmt, self.ctx)
                     newValue.append(' ' * 16 + '"' + member_type + '",\n')
                 newValue.append(' ' * 12 + '});')
+            elif self.type_str[0] == 'com.tailf.jnc.YangEnumeration':
+                newValue.append('", new String[] {  // default\n')
+                for enum in search(self.base_type, 'enum'):
+                    newValue.append(' ' * 16 + '"' + enum.arg + '",\n')
+                newValue.append(' ' * 12 + '});')
             elif self.type_str[0] == 'com.tailf.jnc.YangDecimal64':
-                newValue.append('", new String[] {')
+                newValue.append('", new String[] {  // default')
                 for type_stmt in search(self.base_type, 'type'):
                     # TODO: make generated code prettier by adding newlines
                     member_type, _ = get_types(type_stmt, self.ctx)
                     newValue.append('"' + member_type + '", ')
                 newValue.append('});')
             else:
-                newValue.append('");')
+                newValue.append('");  // default')
             method.add_line(''.join(newValue))
             method.add_line('}')
             method.add_line('return ' + self.n2 + ';')
