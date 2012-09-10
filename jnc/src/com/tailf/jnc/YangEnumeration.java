@@ -82,5 +82,28 @@ public class YangEnumeration extends YangBaseString {
     public boolean canEqual(Object obj) {
         return obj instanceof YangEnumeration;
     }
+    
+    /**
+     * Compares this enumeration with another object for equality.
+     * 
+     * @param obj The object to compare with.
+     * @return true if obj is an enumeration with same value and enum names;
+     *         false otherwise.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return (canEqual(obj)
+                && java.util.Arrays.equals(enums, ((YangEnumeration)obj).enums)
+                && super.equals(obj));
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangBaseString#cloneShallow()
+     */
+    @Override
+    protected YangEnumeration cloneShallow() throws YangException {
+        return new YangEnumeration(value.toString(), enums);
+    }
 
 }
