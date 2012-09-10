@@ -2570,6 +2570,16 @@ class TypedefMethodGenerator(MethodGenerator):
                     constructor.add_line(line)
                 constructor.add_line('    }')
                 constructor.add_line(');')
+            elif self.jnc_type == 'com.tailf.jnc.YangEnumeration':
+                constructor.body = []
+                constructor.add_line('super(value,')
+                constructor.add_line('    new String[] {')
+                for member in search(self.type, 'enum'):
+                    constructor.add_line(''.join(['        "',
+                                                  member.arg,
+                                                  '",']))
+                constructor.add_line('    }')
+                constructor.add_line(');')
             
             # Add call to check method if type has constraints
             if self.needs_check:
