@@ -1149,6 +1149,16 @@ class ClassGenerator(object):
             self.java_class.imports.add('java.util.*')
             if self.rootpkg != self.package:
                 self.java_class.imports.add(self.rootpkg + '.*')
+                top = self.stmt.top
+                if top is None:
+                    top = self.stmt
+                elif top.keyword == 'submodule':
+                    top = search_one(top, 'belongs-to')
+                top_classname = normalize(search_one(top, 'prefix').arg)
+                if (top_classname in java_built_in
+                        or top_classname in java_util):
+                    top_import = self.rootpkg + '.' + top_classname
+                    self.java_class.imports.add(top_import)
             if package_generated and not all_fully_qualified:
                 import_ = '.'.join([self.package, self.n2, '*'])
                 self.java_class.imports.add(import_)
