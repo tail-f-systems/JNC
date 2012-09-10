@@ -150,6 +150,21 @@ public class YangUnion extends YangBaseType<YangType<?>> {
     public boolean canEqual(Object obj) {
         return obj instanceof YangUnion;
     }
+    
+    /**
+     * Compares this union with another object for equality.
+     * 
+     * @param obj The object to compare with.
+     * @return true if obj is a a union with equal value and member types;
+     *         false otherwise.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return (canEqual(obj)
+                && java.util.Arrays.equals(memberTypes,
+                        ((YangUnion)obj).memberTypes)
+                && super.equals(obj));
+    }
 
     /*
      * (non-Javadoc)
