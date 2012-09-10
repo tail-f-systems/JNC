@@ -2754,6 +2754,13 @@ class ListMethodGenerator(MethodGenerator):
                         for type_stmt in search(search_one(key, 'type'), 'type'):
                             member_type, _ = get_types(type_stmt, self.ctx)
                             setValue.append('"' + member_type + '", ')
+                            # TODO: break line and indent for readabililty
+                        setValue.append('}')
+                    elif jnc == 'YangEnumeration':
+                        setValue.append(', new String [] {')
+                        for enum in search(search_one(key, 'type'), 'enum'):
+                            setValue.append('"' + enum.arg + '", ')
+                            # TODO: break line and indent for readabililty
                         setValue.append('}')
                     setValue.append('));')
                     if i == 1:
