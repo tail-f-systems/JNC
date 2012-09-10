@@ -666,6 +666,8 @@ def get_base_type(stmt):
     if stmt.keyword == 'type' and stmt.arg == 'union':
         return stmt
     type_stmt = search_one(stmt, 'type')
+    if type_stmt is None:
+        return stmt
     try:
         typedef = type_stmt.i_typedef
     except AttributeError:
