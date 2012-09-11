@@ -2745,9 +2745,10 @@ class ListMethodGenerator(MethodGenerator):
             constructor.add_exception('JNCException')  # TODO: Add only if needed
             for key in self.key_stmts:
                 key_arg = camelize(key.arg)
-                javadoc = ['@param ', key_arg, 'Value Key argument of child.']
-                jnc, primitive = get_types(key, self.ctx)
+                key_type = search_one(key, 'type')
+                jnc, primitive = get_types(key_type, self.ctx)
                 jnc = constructor.add_dependency(jnc)
+                javadoc = ['@param ', key_arg, 'Value Key argument of child.']
                 setValue = [key_arg, '.setValue(']
                 if i == 0:
                     # Default constructor
@@ -2758,17 +2759,20 @@ class ListMethodGenerator(MethodGenerator):
                     setValue.extend(['new ', jnc, '(', key_arg, 'Value'])
                     if jnc == 'YangUnion':
                         setValue.append(', new String [] {')
-                        for type_stmt in search(search_one(key, 'type'), 'type'):
+                        for type_stmt in search(key_type, 'type'):
                             member_type, _ = get_types(type_stmt, self.ctx)
                             setValue.append('"' + member_type + '", ')
                             # TODO: break line and indent for readabililty
                         setValue.append('}')
                     elif jnc == 'YangEnumeration':
                         setValue.append(', new String [] {')
-                        for enum in search(search_one(key, 'type'), 'enum'):
+                        for enum in search(key_type, 'enum'):
                             setValue.append('"' + enum.arg + '", ')
                             # TODO: break line and indent for readabililty
                         setValue.append('}')
+                    elif jnc == 'YangDecimal64':
+                        frac_digits = search_one(key_type, 'fraction-digits')
+                        setValue.extend([', ', frac_digits.arg])
                     setValue.append('));')
                     if i == 1:
                         param_type = 'String'
