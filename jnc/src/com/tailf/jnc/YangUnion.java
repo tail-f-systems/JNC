@@ -168,6 +168,16 @@ public class YangUnion extends YangBaseType<YangType<?>> {
 
     /*
      * (non-Javadoc)
+     * @see com.tailf.jnc.YangBaseType#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int hash = super.hashCode();
+        return (memberTypes == null) ? hash : (hash + memberTypes.hashCode());
+    }
+
+    /*
+     * (non-Javadoc)
      * @see com.tailf.jnc.YangBaseType#cloneShallow()
      */
     @Override
