@@ -2326,12 +2326,8 @@ class LeafMethodGenerator(MethodGenerator):
                     newValue.append(' ' * 16 + '"' + enum.arg + '",\n')
                 newValue.append(' ' * 12 + '});')
             elif self.type_str[0] == 'com.tailf.jnc.YangDecimal64':
-                newValue.append('", new String[] {  // default')
-                for type_stmt in search(self.base_type, 'type'):
-                    # TODO: make generated code prettier by adding newlines
-                    member_type, _ = get_types(type_stmt, self.ctx)
-                    newValue.append('"' + member_type + '", ')
-                newValue.append('});')
+                fraction_digits = search_one(self.base_type, 'fraction-digits')
+                newValue.extend(['", ', fraction_digits.arg, ');  // default'])
             else:
                 newValue.append('");  // default')
             method.add_line(''.join(newValue))
