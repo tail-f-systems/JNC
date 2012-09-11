@@ -67,21 +67,24 @@ public class YangDecimal64Test {
     }
 
     @Test
-    public void testSetValueStringInt() throws YangException {
+    public void testSetValueString() throws YangException {
         assertTrue(Math.abs(d1.value.doubleValue()) < Utils.EPSILON);
         assertTrue(d1.getFractionDigits() == 1);
-        d1.setValue("-0.1", 7);
+        d1.setValue("-0.1");
         assertTrue(Math.abs(d1.value.doubleValue()+0.1) < Utils.EPSILON);
-        assertTrue(d1.getFractionDigits() == 7);
     }
 
     @Test
-    public void testSetValueNumberInt() throws YangException {
+    public void testSetValueNumber() throws YangException {
         assertTrue(Math.abs(d1.value.doubleValue()) < Utils.EPSILON);
         assertTrue(d1.getFractionDigits() == 1);
-        d1.setValue(-0.1, 7);
+        d1.setValue(-0.1);
         assertTrue(Math.abs(d1.value.doubleValue()+0.1) < Utils.EPSILON);
-        assertTrue(d1.getFractionDigits() == 7);
+
+        d1.setValue(0);
+        assertTrue(Math.abs(d1.value.doubleValue()) < Utils.EPSILON);
+        d1.setValue(new BigDecimal("-0.1"));
+        assertTrue(Math.abs(d1.value.doubleValue()+0.1) < Utils.EPSILON);
     }
 
     @Test
@@ -226,20 +229,6 @@ public class YangDecimal64Test {
         assertTrue("was: "+d2.hashCode(), d2.hashCode() == expected);
         expected = new BigDecimal("3.14").hashCode() << 1;   // 19472
         assertTrue("was: "+d3.hashCode(), d3.hashCode() == expected);
-    }
-
-    @Test
-    public void testSetValueString() throws YangException {
-        assertTrue(Math.abs(d1.value.doubleValue()) < Utils.EPSILON);
-        d1.setValue("-0.1");
-        assertTrue(Math.abs(d1.value.doubleValue()+0.1) < Utils.EPSILON);
-    }
-
-    @Test
-    public void testSetValueBigDecimal() throws YangException {
-        assertTrue(Math.abs(d1.value.doubleValue()) < Utils.EPSILON);
-        d1.setValue(new BigDecimal("-0.1"));
-        assertTrue(Math.abs(d1.value.doubleValue()+0.1) < Utils.EPSILON);
     }
 
 }

@@ -33,6 +33,7 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
      * Creates a YangDecimal64 object from a String.
      * 
      * @param s The string.
+     * @param fractionDigits [1, 18], Number of decimals allowed in value.
      * @throws YangException If value is too small or too large with regard to
      *             the number of decimals.
      * @throws NumberFormatException If value is not a valid representation of
@@ -64,31 +65,28 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
      * Sets the value of this object using a String.
      * 
      * @param value The string.
-     * @param fractionDigits [1, 18], Number of decimals allowed in value.
      * @throws YangException If value is too small or too large with regard to
-     *             the fractionDigits argument.
+     *             the fractionDigits of this YangDecimal.
      * @throws NumberFormatException If value is not a valid representation of
      *             a java.math.BigDecimal.
      * @see java.math.BigDecimal
      */
-    public void setValue(String value, int fractionDigits)
+    @Override
+    public void setValue(String value)
             throws YangException {
-        setValue(new BigDecimal(value), fractionDigits);
+        setValue(new BigDecimal(value));
     }
 
     /**
-     * Sets the value of this object using a BigDecimal.
+     * Sets the value of this object using a Number.
      * 
-     * @param n The BigDecimal.
-     * @param fractionDigits Number of decimals allowed.
+     * @param n The Number.
      * @throws YangException If value is too small or too large with regard to
-     *             the fractionDigits argument.
+     *             the fractionDigits of this YangDecimal.
      */
-    public void setValue(Number n, int fractionDigits) throws YangException {
+    public void setValue(Number n) throws YangException {
         final BigDecimal value = Utils.bigDecimalValueOf(n);
         super.setValue(value);
-        this.fractionDigits = fractionDigits;
-        setMinMax();
         check();
     }
 
