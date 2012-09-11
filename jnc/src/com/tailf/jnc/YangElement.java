@@ -363,9 +363,15 @@ public abstract class YangElement extends Element {
 
     protected void setLeafListValue(String ns, String path, Object value,
             String[] childrenNames) throws JNCException {
-        final Leaf leaf = new Leaf(ns, path);
-        leaf.setValue(value);
-        insertChild(leaf, childrenNames);
+        final Element listEntry = get(path).last();
+        
+        if (listEntry instanceof Leaf && listEntry.value == null) {
+            listEntry.setValue(value);
+        } else {
+            final Leaf leaf = new Leaf(ns, path);
+            leaf.setValue(value);
+            insertChild(leaf, childrenNames);
+        }
     }
 
     protected boolean isLeafDefault(String path) throws JNCException {
