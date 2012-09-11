@@ -85,6 +85,13 @@ public class NodeSet extends ArrayList<Element> {
     }
 
     /**
+     * @return last element from this node set, or null if none.
+     */
+    public Element last() {
+        return isEmpty() ? null : getElement(size()-1);
+    }
+
+    /**
      * Checks if an element is a member of the NodeSet. Elements are compared
      * with the {@link Element#equals(Object) Element.equals} method.
      * 
