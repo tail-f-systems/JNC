@@ -11,6 +11,7 @@
 
 package com.tailf.jnc;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
@@ -36,17 +37,14 @@ public class YangUInt64 extends YangBaseInt<BigInteger> {
     }
 
     /**
-     * Creates a YangUInt64 object from a Number. This may involve rounding or
-     * truncation.
+     * Creates a YangUInt64 object from a Number.
      * 
      * @param n The initial value of the new YangUInt64 object.
-     * @throws YangException If value is negative or if it is larger than
-     *             18446744073709551615.
+     * @throws YangException If value is negative, larger than
+     *             18446744073709551615 or rounding is necessary.
      */
     public YangUInt64(Number n) throws YangException {
-        super(Utils.bigDecimalValueOf(n).toBigInteger());
-        setMinMax(0, new BigInteger("18446744073709551615"));
-        check();
+        this(n.toString());
     }
 
     /**
