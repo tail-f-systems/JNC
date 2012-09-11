@@ -1001,6 +1001,11 @@ class ClassGenerator(object):
             super_type = get_types(type_stmt, self.ctx)[0]
             java_class.superclass = super_type.rpartition('.')[2]
             java_class.imports.add(super_type)
+            if super_type == 'com.tailf.jnc.YangDecimal64':
+                java_class.imports.add('java.math.BigDecimal')
+            elif super_type in ('com.tailf.jnc.YangBits',
+                                'com.tailf.jnc.YangUInt64'):
+                java_class.imports.add('java.math.BigInteger')
 
             write_file(self.path, java_class.filename,
                        java_class.as_list(), self.ctx)
