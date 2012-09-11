@@ -2371,22 +2371,19 @@ class LeafMethodGenerator(MethodGenerator):
                 l = [name, '(new ', method.add_dependency(value_type), '());']
                 method.add_line(''.join(l))
             else:
-                line = [name, '(new ', method.add_dependency(value_type), '(',
-                        param_names[0]]
+                line = [name, '(new ', method.add_dependency(value_type),
+                        '(', param_names[0]]
                 if not self.is_string and i == 1:
                     param_types = [self.type_str[1]]
                     method.add_javadoc('using Java primitive values.')
-                    if self.type_str[0] == 'com.tailf.jnc.YangDecimal64':
-                        param_types.append('int')
-                        param_names.append('fractionDigits')
-                        line.extend([', ', param_names[-1]])
                     # FIXME: Add support for bits, leafref, instance-identifier, etc.
                     # TODO: Write functions that returns appropriate types and names
                     # FIXME: Some types may be incorrectly classified as
-                    # ... string, resulting in no primitive (enumeration, bits, etc)
+                    # ... string, resulting in no primitive (bits, etc)
                 else:
                     param_types = ['String']
                     method.add_javadoc('using a String value.')
+
                 if self.type_str[0] == 'com.tailf.jnc.YangUnion':
                     line.append(', new String[] {')
                     method.add_line(''.join(line))
@@ -2401,26 +2398,16 @@ class LeafMethodGenerator(MethodGenerator):
                         method.add_line('     "' + enum.arg + '",')
                     line = ['}']
                 elif self.type_str[0] == 'com.tailf.jnc.YangDecimal64':
-                    tmpline = ['final int decimalPos = ']
-                    tmpline.append(param_names[0])
-                    tmpline.append(".lastIndexOf('.');")
-                    method.add_line(''.join(tmpline))
-                    method.add_line('int fractionDigits = 1;')
-                    method.add_line('if (decimalPos > 0) {')
-                    tmpline = ['    fractionDigits = ']
-                    tmpline.append(param_names[0])
-                    tmpline.append('.length() - decimalPos - 1;')
-                    method.add_line(''.join(tmpline))
-                    method.add_line('}')
-                    line.append(', fractionDigits')
+                    frac_digits = search_one(self.base_type, 'fraction-digits')
+                    line.extend([', ', frac_digits.arg])
+
                 line.append('));')
                 method.add_line(''.join(line))
+
             for param_type, param_name in zip(param_types, param_names):
                 method.add_parameter(param_type, param_name)
                 method.add_javadoc(' '.join(['@param', param_name,
                                              'used during instantiation.']))
-            if(len(param_types) > 1):
-                method.add_javadoc('@param fractionDigits Number of decimals in value')
             self.fix_imports(method, child=True)
         return res
 
