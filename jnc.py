@@ -2584,7 +2584,7 @@ class TypedefMethodGenerator(MethodGenerator):
             elif self.jnc_type == 'com.tailf.jnc.YangDecimal64':
                 constructor.body = []
                 frac_digits = search_one(self.type, 'fraction-digits')
-                line = ['super(value, ', frac_digits, ');']
+                line = ['super(value, ', frac_digits.arg, ');']
                 constructor.add_line(''.join(line))
             
             # Add call to check method if type has constraints
