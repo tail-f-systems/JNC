@@ -1006,6 +1006,9 @@ class ClassGenerator(object):
             elif super_type in ('com.tailf.jnc.YangBits',
                                 'com.tailf.jnc.YangUInt64'):
                 java_class.imports.add('java.math.BigInteger')
+            elif super_type in ('com.tailf.jnc.YangLeafref',
+                                'com.tailf.jnc.YangIdentityref'):
+                java_class.imports.add('com.tailf.jnc.Element')
 
             write_file(self.path, java_class.filename,
                        java_class.as_list(), self.ctx)
