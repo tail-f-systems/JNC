@@ -96,6 +96,16 @@ public class YangEnumeration extends YangBaseString {
                 && java.util.Arrays.equals(enums, ((YangEnumeration)obj).enums)
                 && super.equals(obj));
     }
+
+    /*
+     * (non-Javadoc)
+     * @see com.tailf.jnc.YangBaseType#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int hash = super.hashCode();
+        return (enums == null) ? hash : (hash + enums.hashCode());
+    }
     
     /*
      * (non-Javadoc)
