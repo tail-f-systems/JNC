@@ -620,12 +620,11 @@ def get_types(yang_type, ctx):
     jnc = 'com.tailf.jnc.Yang' + primitive
     if yang_type.arg in ('string', 'boolean'):
         pass
-    elif yang_type.arg in ('enumeration', 'binary', 'union', 'empty'):
+    elif yang_type.arg in ('enumeration', 'binary', 'union', 'empty',
+                           'instance-identifier', 'identityref'):
         primitive = 'String'
-    elif yang_type.arg in ('bits',):
+    elif yang_type.arg in ('bits',):  # uint64 handled below
         primitive = 'BigInteger'
-    elif yang_type.arg in ('instance-identifier', 'identityref'):
-        primitive = 'Element'
     elif yang_type.arg == 'decimal64':
         primitive = 'BigDecimal'
     elif yang_type.arg in ('int8', 'int16', 'int32', 'int64', 'uint8',
@@ -633,7 +632,7 @@ def get_types(yang_type, ctx):
         integer_type = ['long', 'int', 'short', 'byte']
         if yang_type.arg[:1] == 'u':  # Unsigned
             integer_type.pop()
-            integer_type.insert(0, 'long')
+            integer_type.insert(0, 'BigInteger')
             jnc = 'com.tailf.jnc.YangUI' + yang_type.arg[2:]
         if yang_type.arg[-2:] == '64':
             primitive = integer_type[0]
