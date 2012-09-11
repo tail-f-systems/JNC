@@ -560,16 +560,13 @@ public class Element implements Serializable {
         int pos = 0;
         int i = 0;
 
-        while (true) {
-            if (pos == children.size()) {
-                break;
-            } else if (children.getElement(pos).name
-                    .compareTo(childrenNames[i]) == 0) {
-                ++pos;
-            } else if (child.name.compareTo(childrenNames[i]) == 0) {
+        while (pos < children.size()) {
+            if (children.getElement(pos).name.equals(childrenNames[i])) {
+                pos++;
+            } else if (child.name.equals(childrenNames[i])) {
                 break;
             } else {
-                ++i;
+                i++;
             }
         }
 
