@@ -65,11 +65,15 @@ public class YangUInt64 extends YangBaseInt<BigInteger> {
     /*
      * (non-Javadoc)
      * 
-     * @see com.tailf.jnc.yang.YangInt#parse(java.lang.String)
+     * @see com.tailf.jnc.YangBaseInt#decode(java.lang.String)
      */
     @Override
     protected BigInteger decode(String s) throws NumberFormatException {
-        return new BigInteger(s);
+        try {
+            return new BigDecimal(s).toBigIntegerExact();
+        } catch (final ArithmeticException e) {
+            throw new NumberFormatException(e.toString());
+        }
     }
 
     /*
