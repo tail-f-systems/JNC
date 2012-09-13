@@ -44,7 +44,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
             throws YangException {
         super(value);
         YangException.throwException(smap.length != imap.length, value);
-        Utils.bigDecimalValueOf(mask).toBigIntegerExact();
+        this.mask = Utils.bigDecimalValueOf(mask).toBigIntegerExact();
         this.smap = smap;
         this.imap = imap;
         setValue(value);
