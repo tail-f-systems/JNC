@@ -18,7 +18,7 @@ import java.math.BigInteger;
  * 
  * @author emil@tail-f.com
  */
-public abstract class YangBits extends YangBaseInt<BigInteger> {
+public class YangBits extends YangBaseInt<BigInteger> {
 
     private static final long serialVersionUID = 1L;
 
@@ -88,7 +88,7 @@ public abstract class YangBits extends YangBaseInt<BigInteger> {
      * @throws YangException if value space does not match mask.
      */
     public void check(BigInteger mask) throws YangException {
-        final boolean fail = mask.or(value).compareTo(mask) == 0;
+        final boolean fail = mask.or(value).compareTo(mask) != 0;
         YangException.throwException(fail, this);
         check();
     }
@@ -101,6 +101,11 @@ public abstract class YangBits extends YangBaseInt<BigInteger> {
     @Override
     public boolean canEqual(Object obj) {
         return (obj instanceof YangBits);
+    }
+
+    @Override
+    protected YangBits cloneShallow() throws YangException {
+        return new YangBits(value.toString(), value.toString());
     }
 
     /*
