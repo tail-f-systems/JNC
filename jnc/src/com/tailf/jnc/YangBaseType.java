@@ -142,11 +142,9 @@ abstract class YangBaseType<T> implements YangType<T> {
             obj = other.getValue();
         }
         if (value instanceof Number && obj instanceof Number) {
-            final BigDecimal valueNumber = Utils
-                    .bigDecimalValueOf((Number) value);
-            final BigDecimal objNumber = Utils
-                    .bigDecimalValueOf((Number) obj);
-            return valueNumber.compareTo(objNumber) == 0;
+            final BigDecimal valNum = Utils.bigDecimalValueOf((Number) value);
+            final BigDecimal objNum = Utils.bigDecimalValueOf((Number) obj);
+            return valNum.compareTo(objNum) == 0;
         }
         return value.equals(obj);
     }
