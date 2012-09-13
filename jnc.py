@@ -2658,10 +2658,6 @@ class TypedefMethodGenerator(MethodGenerator):
                 checker.add_line('super.check();')
             if self.enum:
                 checker.add_line('super.check();')
-#                checker.add_line('boolean e = false;')
-#                for e in self.enum:
-#                    checker.add_line('e |= enumeration("' + e.arg + '");')
-#                checker.add_line('throwException( !e );')
             if self.pattern:
                 if len(self.pattern) == 1:
                     p = self.pattern[0]
