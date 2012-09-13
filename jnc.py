@@ -2768,11 +2768,17 @@ class ListMethodGenerator(MethodGenerator):
                 jnc, primitive = get_types(key_type, self.ctx)
                 jnc = constructor.add_dependency(jnc)
                 javadoc = ['@param ', key_arg, 'Value Key argument of child.']
+                constructor.add_javadoc(''.join(javadoc))
+                newLeaf = ['Leaf ', key_arg, ' = new Leaf']
+                constructor.add_dependency('Leaf')
+                newLeaf.extend(self._root_namespace(key.arg))
+                constructor.add_line(''.join(newLeaf))
                 setValue = [key_arg, '.setValue(']
                 if i == 0:
                     # Default constructor
                     param_type = jnc
                     setValue.extend([key_arg, 'Value);'])
+                    constructor.add_line(''.join(setValue))
                 else:
                     # String or primitive constructor
                     setValue.extend(['new ', jnc, '(', key_arg, 'Value'])
@@ -2782,30 +2788,55 @@ class ListMethodGenerator(MethodGenerator):
                             member_type, _ = get_types(type_stmt, self.ctx)
                             setValue.append('"' + member_type + '", ')
                             # TODO: break line and indent for readabililty
-                        setValue.append('}')
+                        setValue.append('}));')
+                        constructor.add_line(''.join(setValue))
                     elif jnc == 'YangEnumeration':
                         setValue.append(', new String [] {')
                         for enum in search(key_type, 'enum'):
                             setValue.append('"' + enum.arg + '", ')
                             # TODO: break line and indent for readabililty
-                        setValue.append('}')
+                        setValue.append('}));')
+                        constructor.add_line(''.join(setValue))
+                    elif jnc == 'YangBits':
+                        setValue.append(',')
+                        constructor.add_line(''.join(setValue))
+                        mask = 0
+                        smap = ['    new String[] {']
+                        imap = ['    new int[] {']
+                        position = 0
+                        for bit in search(key_type, 'bit'):
+                            smap.extend(['"', bit.arg, '", '])
+                            pos_stmt = search_one(bit, 'position')
+                            if pos_stmt:
+                                position = int(pos_stmt.arg)
+                            imap.extend([str(position), ', '])
+                            mask |= position
+                            position += 1
+                        smap.append('},')
+                        imap.append('}')
+                        constructor.add_line(''.join(['    new BigInteger("',
+                                                      str(mask), '"),']))
+                        constructor.add_dependency('BigInteger')
+                        constructor.add_line(''.join(smap))
+                        constructor.add_line(''.join(imap))
+                        constructor.add_line('));')
                     elif jnc == 'YangDecimal64':
                         frac_digits = search_one(key_type, 'fraction-digits')
                         setValue.extend([', ', frac_digits.arg])
-                    setValue.append('));')
+                        setValue.append('));')
+                        constructor.add_line(''.join(setValue))
+                    else:
+                        setValue.append('));')
+                        constructor.add_line(''.join(setValue))
+
                     if i == 1:
                         param_type = 'String'
                     else:
                         param_type = primitive
-                newLeaf = ['Leaf ', key_arg, ' = new Leaf']
-                constructor.add_dependency('Leaf')
-                newLeaf.extend(self._root_namespace(key.arg))
-                constructor.add_dependency(self.root)
-                insertChild = ['insertChild(', key_arg, ', childrenNames());']
-                constructor.add_javadoc(''.join(javadoc))
+
                 constructor.add_parameter(param_type, key_arg + 'Value')
-                constructor.add_line(''.join(newLeaf))
-                constructor.add_line(''.join(setValue))
+
+                insertChild = ['insertChild(', key_arg, ', childrenNames());']
                 constructor.add_line(''.join(insertChild))
             constructors.append(self.fix_imports(constructor))
 
