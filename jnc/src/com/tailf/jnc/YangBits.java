@@ -101,7 +101,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
                 }
             }
         }
-        return res.toString();
+        return Utils.wsCollapse(res.toString());
     }
 
     /*
