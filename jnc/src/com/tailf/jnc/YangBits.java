@@ -156,7 +156,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
     @Override
     protected BigInteger decode(String s) throws NumberFormatException {
         if (smap == null || imap == null) {
-            return null;
+            return BigInteger.ONE.negate(); // Bogus value
         } else {
             StringTokenizer st = new StringTokenizer(s);
             BigInteger res = BigInteger.ZERO;
