@@ -2347,7 +2347,7 @@ class LeafMethodGenerator(MethodGenerator):
                     if pos_stmt:
                         position = int(pos_stmt.arg)
                     imap.extend([str(position), ', '])
-                    mask |= position
+                    mask += 1 << position
                     position += 1
                 smap.append('},')
                 imap.append('}')
@@ -2441,7 +2441,7 @@ class LeafMethodGenerator(MethodGenerator):
                         if pos_stmt:
                             position = int(pos_stmt.arg)
                         imap.extend([str(position), ', '])
-                        mask |= position
+                        mask += 1 << position
                         position += 1
                     smap.append('},')
                     imap.append('}')
@@ -2647,7 +2647,7 @@ class TypedefMethodGenerator(MethodGenerator):
                     if pos_stmt:
                         position = int(pos_stmt.arg)
                     imap.extend([str(position), ', '])
-                    mask |= position
+                    mask += 1 << position
                     position += 1
                 smap.append('},')
                 imap.append('}')
@@ -2854,7 +2854,7 @@ class ListMethodGenerator(MethodGenerator):
                             if pos_stmt:
                                 position = int(pos_stmt.arg)
                             imap.extend([str(position), ', '])
-                            mask |= position
+                            mask += 1 << position
                             position += 1
                         smap.append('},')
                         imap.append('}')
