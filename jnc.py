@@ -2590,6 +2590,28 @@ class TypedefMethodGenerator(MethodGenerator):
                 frac_digits = search_one(self.type, 'fraction-digits')
                 line = ['super(value, ', frac_digits.arg, ');']
                 constructor.add_line(''.join(line))
+            elif self.jnc_type == 'com.tailf.jnc.YangBits':
+                constructor.body = []
+                constructor.add_line('super(value,')
+                mask = 0
+                smap = ['    new String[] {']
+                imap = ['    new int[] {']
+                position = 0
+                for bit in search(self.type, 'bit'):
+                    smap.extend(['"', bit.arg, '", '])
+                    pos_stmt = search_one(bit, 'position')
+                    if pos_stmt:
+                        position = int(pos_stmt.arg)
+                    imap.extend([str(position), ', '])
+                    mask |= position
+                    position += 1
+                smap.append('},')
+                imap.append('}')
+                constructor.add_line(''.join(['    new BigInteger("',
+                                              str(mask), '"),']))
+                constructor.add_line(''.join(smap))
+                constructor.add_line(''.join(imap))
+                constructor.add_line(');')
             
             # Add call to check method if type has constraints
             if self.needs_check:
