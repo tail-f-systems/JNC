@@ -23,11 +23,11 @@ import java.util.StringTokenizer;
 public class YangBits extends YangBaseInt<BigInteger> {
 
     private static final long serialVersionUID = 1L;
-    
+
     private String[] smap;
-    
+
     private int[] imap;
-    
+
     private BigInteger mask;
 
     /**
@@ -41,7 +41,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
      * @throws NumberFormatException If value is not valid as a number.
      */
     public YangBits(String value, Number mask, String[] smap, int[] imap)
-        throws YangException {
+            throws YangException {
         super(value);
         YangException.throwException(smap.length != imap.length, value);
         Utils.bigDecimalValueOf(mask).toBigIntegerExact();
@@ -60,7 +60,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
      * @throws YangException If value does not match mask.
      */
     public YangBits(Number value, Number mask, String[] smap, int[] imap)
-        throws YangException {
+            throws YangException {
         super(Utils.bigDecimalValueOf(value).toBigIntegerExact());
         YangException.throwException(smap.length != imap.length, value);
         this.mask = Utils.bigDecimalValueOf(mask).toBigIntegerExact();
@@ -86,12 +86,13 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangBaseType#toString()
      */
     @Override
     public String toString() {
         StringBuffer res = new StringBuffer();
-        for (int i = 0; i<imap.length; i++) {
+        for (int i = 0; i < imap.length; i++) {
             BigInteger flag = BigInteger.ONE.shiftLeft(imap[i]);
             if (!value.and(flag).equals(BigInteger.ZERO)) {
                 res.append(smap[i]);
@@ -105,15 +106,17 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangBaseInt#canEqual(java.lang.Object)
      */
     @Override
     public boolean canEqual(Object obj) {
         return (obj instanceof YangBits);
     }
-    
+
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangBaseType#hashCode()
      */
     @Override
@@ -124,6 +127,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangBaseType#equals(java.lang.Object)
      */
     @Override
@@ -132,14 +136,12 @@ public class YangBits extends YangBaseInt<BigInteger> {
             return false;
         }
         YangBits other = (YangBits) obj;
-        if (!other.mask.equals(mask)
-                || other.smap.length != smap.length
+        if (!other.mask.equals(mask) || other.smap.length != smap.length
                 || other.imap.length != imap.length) {
             return false;
         }
-        for (int i=0; i<smap.length; i++) {
-            if (!smap[i].equals(other.smap[i])
-                    || imap[i] != other.imap[i]) {
+        for (int i = 0; i < smap.length; i++) {
+            if (!smap[i].equals(other.smap[i]) || imap[i] != other.imap[i]) {
                 return false;
             }
         }
@@ -148,6 +150,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangBaseInt#decode(java.lang.String)
      */
     @Override
@@ -160,7 +163,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
             while (st.hasMoreTokens()) {
                 boolean found = false;
                 String tok = st.nextToken();
-                for (int i = 0; i<smap.length; i++) {
+                for (int i = 0; i < smap.length; i++) {
                     if (tok.compareTo(smap[i]) == 0) {
                         found = true;
                         res = res.or(BigInteger.ONE.shiftLeft(imap[i]));
@@ -176,6 +179,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.tailf.jnc.YangBaseType#cloneShallow()
      */
     @Override
