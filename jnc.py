@@ -2406,6 +2406,28 @@ class LeafMethodGenerator(MethodGenerator):
                     for enum in search(self.base_type, 'enum'):
                         method.add_line('     "' + enum.arg + '",')
                     line = ['}']
+                elif self.type_str[0] == 'com.tailf.jnc.YangBits':
+                    line.append(',')
+                    method.add_line(''.join(line))
+                    mask = 0
+                    smap = ['    new String[] {']
+                    imap = ['    new int[] {']
+                    position = 0
+                    for bit in search(self.base_type, 'bit'):
+                        smap.extend(['"', bit.arg, '", '])
+                        pos_stmt = search_one(bit, 'position')
+                        if pos_stmt:
+                            position = int(pos_stmt.arg)
+                        imap.extend([str(position), ', '])
+                        mask |= position
+                        position += 1
+                    smap.append('},')
+                    imap.append('}')
+                    method.add_line(''.join(['    new BigInteger("',
+                                                  str(mask), '"),']))
+                    method.add_line(''.join(smap))
+                    method.add_line(''.join(imap))
+                    line = []
                 elif self.type_str[0] == 'com.tailf.jnc.YangDecimal64':
                     frac_digits = search_one(self.base_type, 'fraction-digits')
                     line.extend([', ', frac_digits.arg])
