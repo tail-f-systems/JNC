@@ -76,10 +76,10 @@ public class YangBits extends YangBaseInt<BigInteger> {
      */
     @Override
     public void check() throws YangException {
-        super.check();
         if (mask == null) {
             return;
         }
+        super.check();
         final boolean fail = mask.or(value).compareTo(mask) != 0;
         YangException.throwException(fail, this);
     }
