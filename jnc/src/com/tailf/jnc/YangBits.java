@@ -166,7 +166,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
                 for (int i = 0; i < smap.length; i++) {
                     if (tok.compareTo(smap[i]) == 0) {
                         found = true;
-                        res = res.or(BigInteger.ONE.shiftLeft(imap[i]));
+                        res = res.add(BigInteger.ONE.shiftLeft(imap[i]));
                     }
                 }
                 if (!found) {
