@@ -2655,7 +2655,7 @@ class TypedefMethodGenerator(MethodGenerator):
             checker.add_exception('YangException')
             # TODO 'length', 'path', 'range', 'require_instance'
             if self.bit:
-                pass  # TODO
+                checker.add_line('super.check();')
             if self.enum:
                 checker.add_line('super.check();')
 #                checker.add_line('boolean e = false;')
