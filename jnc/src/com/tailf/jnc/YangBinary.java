@@ -25,8 +25,9 @@ public class YangBinary extends YangBaseType<String> {
      * collapsed before it is encoded.
      * 
      * @param value the String
+     * @throws YangException if setValue(value) does
      */
-    public YangBinary(String value) {
+    public YangBinary(String value) throws YangException {
         setValue(value);
     }
 
@@ -46,11 +47,16 @@ public class YangBinary extends YangBaseType<String> {
      * collapsed before it is encoded.
      * 
      * @param value The string
+     * @throws YangException If the input is not valid Base64 encoded data.
      */
     @Override
-    public void setValue(String value) {
+    public void setValue(String value) throws YangException {
         value = Utils.wsCollapse(value);
-        this.value = Base64Coder.encodeString(value);
+        try {
+            this.value = Base64Coder.encodeString(value);
+        } catch (IllegalArgumentException e) {
+            YangException.throwException(true, e);
+        }
     }
 
     /**
