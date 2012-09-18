@@ -298,8 +298,8 @@ public class YangBinary extends YangBaseType<String> {
         public static byte[] decode(char[] in) {
             int iLen = in.length;
             if (iLen % 4 != 0) {
-                throw new IllegalArgumentException(
-                        "Length of Base64 encoded input string is not a multiple of 4.");
+                throw new IllegalArgumentException("Length of Base64 encoded" +
+                        " input string is not a multiple of 4.");
             }
             while (iLen > 0 && in[iLen - 1] == '=') {
                 iLen--;
