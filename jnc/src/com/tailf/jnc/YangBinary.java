@@ -94,7 +94,7 @@ public class YangBinary extends YangBaseType<String> {
      */
     @Override
     protected String fromString(String s) throws YangException {
-        return s;
+        return Base64Coder.encodeString(s);
     }
 
     /**
