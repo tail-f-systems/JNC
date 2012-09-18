@@ -1,0 +1,21 @@
+<c xmlns="http://acme.com/ns/leafref/1.0">
+  <referenced>0.0</referenced>
+  <l1>
+    <key1>abc</key1>
+    <key2>7.0</key2>
+  </l1>
+  <l1>
+    <key1>abc</key1>
+    <key2>0.01</key2>
+    <thirty-seven>0.0</thirty-seven>
+  </l1>
+  <l1>
+    <key1>7</key1>
+    <key2>0.01</key2>
+    <thirty-seven>0.0</thirty-seven>
+  </l1>
+  <l2>
+    <leaf1>abc</leaf1>
+    <leaf2>0.01</leaf2>
+  </l2>
+</c>

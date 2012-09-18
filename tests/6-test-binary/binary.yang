@@ -1,0 +1,31 @@
+module binary {
+  namespace "http://acme.com/ns/binary/1.0";
+  prefix binary;
+  typedef binary-2 {
+    type binary {
+      length 0..4;
+    }
+  }
+  container c {
+    leaf binary-leaf {
+      type binary;
+      default "1234";
+    }
+    leaf-list llist {
+      type binary-2;
+    }
+    list l {
+      key "key1 key2";
+      leaf key1 {
+        type binary-2;
+      }
+      leaf key2 {
+        type binary;
+      }
+      leaf abcd {
+        type binary-2;
+        default "ABCD";
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+<c xmlns="http://acme.com/ns/binary/1.0">
+  <binary-leaf>
+    ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789+/=
+  </binary-leaf>
+  <llist>9+z/</llist>
+  <llist></llist>
+  <llist>h0Y+</llist>
+  <llist>aaAA</llist>
+  <llist>////</llist>
+  <llist>+Ab=</llist>
+  <l>
+    <key1>XyZ=</key1>
+    <key2></key2>
+  </l>
+  <l>
+    <key1>ZzYy</key1>
+    <key2>AA==</key2>
+    <abcd>abcd</abcd>
+  </l>
+  <l>
+    <key1>+/==</key1>
+    <key2>Ht8J+tK/nE2=</key2>
+    <abcd>abcd</abcd>
+  </l>
+</c>

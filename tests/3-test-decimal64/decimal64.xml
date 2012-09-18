@@ -1,0 +1,17 @@
+<c xmlns="http://acme.com/ns/decimal64/1.0">
+  <decimal64-leaf>0.0</decimal64-leaf>
+  <l>
+    <key1>abc</key1>
+    <key2>7.0</key2>
+  </l>
+  <l>
+    <key1>abc</key1>
+    <key2>0.01</key2>
+    <thirty-seven>30.07</thirty-seven>
+  </l>
+  <l>
+    <key1>7</key1>
+    <key2>0.01</key2>
+    <thirty-seven>37.0</thirty-seven>
+  </l>
+</c>

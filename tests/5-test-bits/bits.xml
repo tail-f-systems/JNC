@@ -1,0 +1,24 @@
+<c xmlns="http://acme.com/ns/bits/1.0">
+  <bits-leaf>b1 b4</bits-leaf>
+  <l>
+    <key1>a c d</key1>
+    <key2>vital warning error wait ready</key2>
+  </l>
+  <l>
+    <key1></key1>
+    <key2></key2>
+    <ac></ac>
+  </l>
+  <l>
+    <key1>a d</key1>
+    <key2>vital ready</key2>
+    <ac>c d</ac>
+    <l-settings>set-enable activate forward timeout</l-settings>
+    <l-settings>set-enable activate forward</l-settings>
+    <l-settings>set-enable activate timeout</l-settings>
+    <l-settings>set-enable activate</l-settings>
+    <l-settings>forward timeout</l-settings>
+    <l-settings>forward</l-settings>
+    <l-settings></l-settings>
+  </l>
+</c>

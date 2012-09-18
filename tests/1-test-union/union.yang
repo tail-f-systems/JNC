@@ -1,0 +1,35 @@
+module union {
+  namespace "http://acme.com/ns/union/1.0";
+  prefix union;
+  typedef union1 {
+    type union {
+      type int32;
+      type boolean;
+      type string;
+    }
+  }
+  container c {
+    container c2;
+    container c3;
+    leaf union-leaf {
+      type union1;
+    }
+    list l {
+      key "key1 key2";
+      leaf key1 {
+        type string;
+      }
+      leaf key2 {
+        type union {
+          type int32;
+          type string;
+        }
+      }
+      leaf thirty-seven {
+        type union1;
+        default 37;
+      }
+      container c2;
+    }
+  }
+}

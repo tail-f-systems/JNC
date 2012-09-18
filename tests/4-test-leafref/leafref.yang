@@ -1,0 +1,45 @@
+module leafref {
+  namespace "http://acme.com/ns/leafref/1.0";
+  prefix leafref;
+  typedef leafref-2 {
+    type leafref {
+      path /c/referenced;
+    }
+  }
+  container c {
+    leaf referenced {
+      type uint64;
+      default 123;
+    }
+    leaf-list llist {
+      type uint32;
+    }
+    list l1 {
+      key "key1 key2";
+      leaf key1 {
+        type string;
+      }
+      leaf key2 {
+        type string;
+      }
+      leaf thirty-seven {
+        type leafref-2;
+      }
+      leaf-list llist {
+        type uint32;
+      }
+    }
+    container l2 {
+      leaf leaf1 {
+        type leafref {
+          path ../../l1/key1;
+        }
+      }
+      leaf leaf2 {
+        type leafref {
+          path ../../l1/key2;
+        }
+      }
+    }
+  }
+}

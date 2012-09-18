@@ -1,0 +1,15 @@
+<c xmlns="http://acme.com/ns/union/1.0">
+  <union-leaf>true</union-leaf>
+  <l>
+    <key1>abc</key1>
+    <key2>7</key2>
+  </l>
+  <l>
+    <key1>abc</key1>
+    <key2>abc</key2>
+  </l>
+  <l>
+    <key1>7</key1>
+    <key2>abc</key2>
+  </l>
+</c>
