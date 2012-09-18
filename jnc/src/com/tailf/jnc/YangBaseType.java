@@ -188,7 +188,7 @@ abstract class YangBaseType<T> implements YangType<T> {
             }
         }
         try {
-            copy.setValue(value.toString());
+            copy.setValue(toString());
         } catch (final YangException e) {
             return null;
         }
