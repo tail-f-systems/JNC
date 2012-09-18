@@ -1,7 +1,7 @@
 <project name="simple" basedir="." default="main">
   <property environment="env" />
   <property name="src.dir"     value="src" />
-  <property name="gen.dir"     value="src/simple" />
+  <property name="gen.dir"     value="src/gen/simple" />
   <property name="main-class"  value="simple.Client" />
   <property name="build.dir"   value="build" />
   <property name="classes.dir" value="${build.dir}/classes" />
