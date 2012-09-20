@@ -127,8 +127,6 @@ public class XMLParser {
             parser.setContentHandler(handler);
             parser.parse(filename);
             return handler.top;
-            // } catch (INMException e) {
-            // throw e;
         } catch (final Exception e) {
             throw new JNCException(JNCException.PARSER_ERROR, "parse file: "
                     + filename + " error: " + e);
@@ -146,8 +144,6 @@ public class XMLParser {
             parser.setContentHandler(handler);
             parser.parse(is);
             return handler.top;
-            // } catch (INMException e) {
-            // throw e;
         } catch (final Exception e) {
             throw new JNCException(JNCException.PARSER_ERROR, "parse error: "
                     + e);
