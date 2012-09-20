@@ -11,6 +11,9 @@
 
 package com.tailf.jnc;
 
+/**
+ * Used to instantiate YangElement in sync-methods and in tests
+ */
 class DummyElement extends YangElement {
 
     private static final long serialVersionUID = 1L;
