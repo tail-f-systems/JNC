@@ -136,10 +136,9 @@ public abstract class YangElement extends Element {
                 try {
                     final String methodName = "add" + normalize(name);
                     final Class<?> parentClass = parent.getClass();
-                    final Method addContainer = parentClass.getMethod(
+                    final Method addChild = parentClass.getMethod(
                             methodName, new Class[] {});
-                    return (Element) addContainer.invoke(parent,
-                            new Object[] {});
+                    return (Element) addChild.invoke(parent, new Object[] {});
                 } catch (final NoSuchMethodException e) {
                     if (((YangElement) parent).isChild(name)) {
                         // known existing leaf will be handled by endElement
