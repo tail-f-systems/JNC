@@ -2,12 +2,14 @@ TODO (in order of priority)
 ===========================
 Verify correctness of this list
 Update the README
-Add line-number and path to comments in add-methods, etc.
-Take away code that's commented out
 Write changelog for diff between ConfM and JNC
 Write structure template for User Manual, in LaTeX
+Convert the JNC plugin to become python 3.0 compatible
+Make sure that the examples and tests are easily run without eclipse
+Add line-number and path to comments in add-methods, etc.
+Take away code that's commented out
+Fix the juniper example by handling the junos extensions correctly
 Write examples and tests:
-- Juniper
 - Cisco?
 - Generating classes from yang models with choice statements
 - (all) built in types
@@ -24,6 +26,7 @@ Write examples and tests:
 - deep package structures
 - name collisions (particularly typedefs) and normalization
 - inet-types and similar "standard-modules"
+Write tests for YangElement.getDiff, compare it with old version
 Write classes for inet and yang standard module types
 Write User Manual!
 Make sure to add section about how to go from using ConfM to using JNC
@@ -36,6 +39,7 @@ Remove withDefaults from ConfDSession, replace with standard withDefaults
 Consider changing how different types of sessions work
 Fix existing javadoc in the JNC library
 Add complete javadoc to the JNC library and clean up code
+Make the JNC plugin multithreaded
 Check restrictions on leaf values in the JNC plugin
 Add description, reference, status, etc. to class level javadoc
 Consider removing duplicate key checks from generated classes
