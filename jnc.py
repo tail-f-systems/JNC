@@ -191,7 +191,7 @@ class JNCPlugin(plugin.PyangPlugin):
 
         """
         if ctx.opts.debug or ctx.opts.verbose:
-            print 'JNC plugin starting'
+            print('JNC plugin starting')
         if not ctx.opts.ignore:
             for (epos, etag, _) in ctx.errors:
                 if (error.is_error(error.err_level(etag)) and
@@ -224,7 +224,7 @@ class JNCPlugin(plugin.PyangPlugin):
                                                    src=src, ctx=ctx)
                         generator.generate()
                     if ctx.opts.debug or ctx.opts.verbose:
-                        print 'Java classes generation COMPLETE.'
+                        print('Java classes generation COMPLETE.')
 
                 if not ctx.opts.no_schema:
                     # Generate external schema
@@ -252,7 +252,7 @@ class JNCPlugin(plugin.PyangPlugin):
                     name = normalize(search_one(module, 'prefix').arg)
                     write_file(d, name + '.schema', '\n'.join(schema_nodes), ctx)
                     if ctx.opts.debug or ctx.opts.verbose:
-                        print 'Schema generation COMPLETE.'
+                        print('Schema generation COMPLETE.')
 
                 augmented_modules.clear()
 
@@ -268,14 +268,14 @@ class JNCPlugin(plugin.PyangPlugin):
         javadir = ctx.opts.javadoc_directory
         if javadir:
             if ctx.opts.debug or ctx.opts.verbose:
-                print 'Generating javadoc...'
+                print('Generating javadoc...')
             if ctx.opts.verbose:
                 os.system('javadoc -d ' + javadir + ' -subpackages ' + d)
             else:
                 os.system(('javadoc -d ' + javadir + ' -subpackages ' + d +
                     ' >/dev/null'))
             if ctx.opts.debug or ctx.opts.verbose:
-                print 'Javadoc generation COMPLETE.'
+                print('Javadoc generation COMPLETE.')
         if len(modules) != 1:
             print_warning(msg=('Generating code for several modules has not' +
                 ' been tested thoroughly.'), ctx=ctx)
@@ -286,7 +286,7 @@ class JNCPlugin(plugin.PyangPlugin):
 
     def print_help(self):
         """Prints a description of what JNC is and how to use it"""
-        print '''
+        print('''
 The JNC (Java NETCONF Client) plug-in can be used to generate a Java class
 hierarchy from a single YANG data model. Together with the JNC library, these
 generated Java classes may be used as the foundation for a NETCONF client
@@ -331,7 +331,7 @@ One way to use the JNC plug-in of pyang is
 $ pyang -f jnc --jnc-output package.dir <file.yang>
 
 Type '$ pyang --help' for more details on how to use pyang.
-'''
+''')
 
 
 com_tailf_jnc = {'Attribute', 'Capabilities', 'ConfDSession',
@@ -442,7 +442,7 @@ def print_warning(msg='', key='', ctx=None):
     if ((not key or key not in outputted_warnings) and
         (not ctx or ctx.opts.debug or ctx.opts.verbose)):
         if msg:
-            print >> sys.stderr, 'WARNING: ' + msg
+            sys.stderr.write('WARNING: ' + msg)
             if key:
                 outputted_warnings.append(key)
         else:
@@ -841,7 +841,7 @@ class SchemaGenerator(object):
         res = []
         for stmt in self.stmts:
             if self.ctx.opts.verbose:
-                print 'Generating schema node "' + self.tagpath + '"...'
+                print('Generating schema node "' + self.tagpath + '"...')
             node = SchemaNode(stmt, self.tagpath + stmt.arg + '/')
             res.extend(node.as_list())
             substmt_generator = SchemaGenerator(search(stmt,
@@ -981,7 +981,7 @@ class ClassGenerator(object):
                                         source=self.src,
                                         superclass='YangElement')
             if self.ctx.opts.verbose:
-                print 'Generating Java class "' + name + '.java' + '"...'
+                print('Generating Java class "' + name + '.java' + '"...')
 
             gen = MethodGenerator(stmt, self.ctx)
 
@@ -1017,7 +1017,7 @@ class ClassGenerator(object):
 
         # Generate root class
         if self.ctx.opts.verbose:
-            print 'Generating Java class "' + self.filename + '"...'
+            print('Generating Java class "' + self.filename + '"...')
         self.java_class = JavaClass(filename=self.filename,
                 package=self.package, description=('The root class for namespace ' +
                     ns_arg + ' (accessible from \n * ' + self.n +
@@ -1130,9 +1130,9 @@ class ClassGenerator(object):
 
         if self.ctx.opts.debug or self.ctx.opts.verbose:
             if package_generated:
-                print '.'.join([self.package, self.n2])
+                print('.'.join([self.package, self.n2]))
             if self.ctx.opts.verbose:
-                print 'Generating Java class "' + self.filename + '"...'
+                print('Generating Java class "' + self.filename + '"...')
 
         gen = MethodGenerator(stmt, self.ctx)
 
