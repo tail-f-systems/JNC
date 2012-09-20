@@ -564,7 +564,7 @@ public abstract class YangElement extends Element {
     public static void getDiff(YangElement a, YangElement b, NodeSet uniqueA,
             NodeSet uniqueB, NodeSet changedA, NodeSet changedB) {
         if (a.compare(b) >= 0) {
-            // Containers are equal, go through the children.
+            // parents are equal, go through the children.
             final NodeSet bList = new NodeSet();
             if (a.children == null || b.children == null) {
                 if (b.children != null) {
