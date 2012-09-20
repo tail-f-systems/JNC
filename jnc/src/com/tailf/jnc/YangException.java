@@ -12,9 +12,8 @@
 package com.tailf.jnc;
 
 /**
- * This is the class of exceptions that are thrown from the ConfM classes.
- * 
- * 
+ * This is the class of exceptions that are thrown from the classes generated
+ * by the JNC pyang plugin, and by the yang type classes.
  */
 public class YangException extends JNCException {
 
@@ -45,7 +44,7 @@ public class YangException extends JNCException {
     /**
      * Asserts that fail is false, throws BAD_VALUE with o otherwise.
      * 
-     * @param fail Determines if a Bad Value ConfM exception is thrown
+     * @param fail Determines if a Bad Value YangException is thrown
      * @param o Object which toString-method will be appended to exception
      * @throws YangException if and only if fail is true
      */
