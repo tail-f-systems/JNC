@@ -740,7 +740,7 @@ def search(stmt, keywords):
             iterate(stmt.substmts, acc)
 
     _search(stmt, keywords, dict_)
-    return dict_.values()
+    return list(dict_.values())
 
 
 def search_one(stmt, keyword, arg=None):
@@ -1204,10 +1204,10 @@ class ClassGenerator(object):
                     return res
                 if (name == self.n and isinstance(access_method, JavaMethod)):
                     access_method.return_type = f(access_method.return_type)
-                    access_method.parameters = map(f, access_method.parameters)
-                    access_method.body = map(f, access_method.body)
+                    access_method.parameters = [f(x) for x in access_method.parameters]
+                    access_method.body = [f(x) for x in access_method.body]
                 elif name == self.n:
-                    access_method.modifiers = map(f, access_method.modifiers)
+                    access_method.modifiers = [f(x) for x in access_method.modifiers]
                 add(sub.arg, access_method)
         elif sub.keyword in ('leaf', 'leaf-list'):
             child_gen = MethodGenerator(sub, self.ctx)
@@ -1269,7 +1269,7 @@ class PackageInfoGenerator(object):
         is_java_file = lambda s: s.endswith('.java')
         is_not_java_file = lambda s: not is_java_file(s)
         directory_listing = os.listdir(self.d)
-        java_files = filter(is_java_file, directory_listing)
+        java_files = [is_java_file(d) for d in directory_listing]
         dirs = filter(is_not_java_file, directory_listing)
         stmts = search(self.stmt, ('module', 'submodule', 'container', 'list',
                                    'leaf', 'leaf-list'))
@@ -1529,8 +1529,7 @@ class JavaClass(object):
                 if hasattr(method, 'imports'):
                     self.imports |= method.imports
                 if hasattr(method, 'exceptions'):
-                    self.imports |= map(lambda s: 'com.tailf.jnc.' + s,
-                                        method.exceptions)
+                    self.imports |= ['com.tailf.jnc.' + s for s in method.exceptions]
         if self.superclass:
             self.imports.add(get_import(self.superclass))
         if self.imports:
@@ -1861,8 +1860,7 @@ class MethodGenerator(object):
         self.stmt = stmt
         self.n = normalize(stmt.arg)
         self.n2 = camelize(stmt.arg)
-        self.children = map(lambda s: normalize(s.arg),
-            search(stmt, ('list', 'container', 'leaf', 'leaf-list')))
+        self.children = [normalize(s.arg) for s in search(stmt, ('list', 'container', 'leaf', 'leaf-list'))]
         self.pkg = get_package(stmt, ctx)
         self.basepkg = self.pkg.partition('.')[0]
         self.rootpkg = ctx.rootpkg.split(os.sep)
@@ -1942,7 +1940,7 @@ class MethodGenerator(object):
                 res.add(dependency)
                 continue
             elif dependency.endswith('>'):
-                for token in filter(None, re.findall(r'\w+', dependency)):
+                for token in [_f for _f in re.findall(r'\w+', dependency) if _f]:
                     res.add(self.canonical_import(token, child))
             elif dependency.endswith(']'):
                 assert dependency[:-2] and dependency[-2:] == '[]'
@@ -2775,10 +2773,10 @@ class ListMethodGenerator(MethodGenerator):
             key = search_one(self.stmt, 'key')
             self.keys = key.arg.split(' ')
         findkey = lambda k: search_one(self.stmt, 'leaf', arg=k)
-        self.key_stmts = map(findkey, self.keys)
+        self.key_stmts = [findkey(k) for k in self.keys]
 
         notstring = lambda k: get_types(k, ctx)[1] != 'String'
-        self.is_string = not filter(notstring, self.key_stmts)
+        self.is_string = not [notstring(k) for k in  self.key_stmts]
 #        max_ = search_one(stmt, 'max-elements')
 #        self.max_elements = 'unbounded' if not max_ else max_.arg
 
@@ -2985,7 +2983,7 @@ class OrderedSet(collections.MutableSet):
                     used, the set is initialized as empty.
 
         """
-        self.ITEM, self.PREV, self.NEXT = range(3)
+        self.ITEM, self.PREV, self.NEXT = list(range(3))
         self.end = end = []
         end += [None, end, end]         # sentinel node for doubly linked list
         self.map = {}                   # value --> [value, prev, next]
