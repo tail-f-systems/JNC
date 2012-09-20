@@ -56,8 +56,6 @@ import errno
 import sys
 import collections
 import re
-import Queue
-import threading
 
 from datetime import date
 from pyang import plugin, util, error
@@ -936,9 +934,6 @@ class ClassGenerator(object):
             parent_module = search_one(self.stmt, 'belongs-to')
             prefix = search_one(parent_module, 'prefix')
             ns_arg = '<unknown/prefix: ' + prefix.arg + '>'
-        
-        # Set upp threading queue
-        queue = Queue.Queue()
         
         # Add root to class_hierarchy dict
         if self.rootpkg not in class_hierarchy:
