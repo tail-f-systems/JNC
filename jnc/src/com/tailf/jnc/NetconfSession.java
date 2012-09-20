@@ -2518,8 +2518,9 @@ public class NetconfSession {
      * 
      * @param out The transport interface to send the action to
      * @param data Element tree representing the action
+     * @throws JNCException if unable to encode data
      */
-    void encode_action(Transport out, Element data) {
+    void encode_action(Transport out, Element data) throws JNCException {
         final String prefix = Element.defaultPrefixes.nsToPrefix(Capabilities.NS_ACTIONS);
         final String act = mk_prefix_colon(prefix);
         final String xmlnsAttr = mk_xmlns_attr(prefix, Capabilities.NS_ACTIONS);
