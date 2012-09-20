@@ -15,11 +15,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
- * This is a help class to provide features for managing a device with NETCONF.
- * The device have a list of users {@link DeviceUser} which contain information
+ * This class provides features for managing a device with NETCONF.
+ * A device has a list of users {@link DeviceUser} which contain information
  * about how to connect to the device.
  * <p>
- * Associated to a device we have a list of named sessions, each session is a
+ * Associated to a device is a list of named sessions, each session is a
  * {@link NetconfSession} session inside an SSH channel. We can have several
  * sessions to one device. It can for example make sense to have one session
  * open to the configuration db(s) and another session open for NETCONF
@@ -56,7 +56,9 @@ public class Device implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    // named session specific connection data
+    /**
+     * named session specific connection data
+     */
     static private class SessionConnData {
         String sessionName;
         SSHSession sshSession;
@@ -69,7 +71,9 @@ public class Device implements Serializable {
         }
     }
 
-    // named session specific config data
+    /**
+     * named session specific config data
+     */
     static private class SessionTree {
         String sessionName;
         Element configTree;
@@ -81,15 +85,12 @@ public class Device implements Serializable {
     }
 
     /**
-     * The device should have a name. If nothing else choose the IP address as
-     * name.
-     * 
+     * The name of the device, or its IP address.
      */
     public String name;
 
     /**
-     * The SSH Connection for this device.
-     * 
+     * An SSH Connection to this device.
      */
     protected transient SSHConnection con = null;
 
@@ -103,24 +104,32 @@ public class Device implements Serializable {
      * A list of configuration changes. The backlog is saved when a
      * configuration change is made and the device is down, so that it can be
      * re-sent later when the device comes up again.
-     * 
      */
     protected ArrayList<Element> backlog;
 
     /**
      * A list of users.
-     * 
      */
     protected ArrayList<DeviceUser> users;
 
-    String mgmt_ip; // ip address as string
-    int mgmt_port;
-    int defaultReadTimeout = 0;
+    /**
+     * ip address as string
+     */
+    protected String mgmt_ip;
+    
+    /**
+     * port number
+     */
+    protected int mgmt_port;
+    
+    /**
+     * Time to wait for read, in milliseconds.
+     */
+    protected int defaultReadTimeout = 0;
 
     /**
      * Constructor for the Device with on initial user. We need at least one
      * DeviceUser in order to be able to connect.
-     * 
      */
     public Device(String name, DeviceUser user, String mgmt_ip, int mgmt_port) {
 
@@ -138,9 +147,7 @@ public class Device implements Serializable {
      * Constructor for the Device with on initial user. We need at least one
      * DeviceUser in order to be able to connect. Thus if this constructor is
      * used to create the Device we must use addUser() priot to connecting.
-     * 
      */
-
     public Device(String name, String mgmt_ip, int mgmt_port) {
 
         this.name = name;
@@ -155,9 +162,7 @@ public class Device implements Serializable {
     /**
      * If Device is stored on disk as a serialized object, we need to init the
      * transient variables after we read a Device from disk.
-     * 
      */
-
     public void initTransients() {
         backlog = new ArrayList<Element>();
         connSessions = new ArrayList<SessionConnData>();
@@ -166,7 +171,6 @@ public class Device implements Serializable {
 
     /**
      * Adds a user to the Device list of users.
-     * 
      */
     public void addUser(DeviceUser user) {
         users.add(user);
@@ -183,7 +187,6 @@ public class Device implements Serializable {
      * Clears the accumulation config tree for a named NETCONF session
      * 
      * @param sessionName symbolic Name of the session
-     * 
      */
     public void clearConfig(String sessionName) {
         final SessionTree t = getTreeData(sessionName);
@@ -201,7 +204,6 @@ public class Device implements Serializable {
      * ssh socket to the server may be dead.
      * 
      * @param sessionName symbolic Name of the session
-     * 
      */
     public Element getConfig(String sessionName) {
         final SessionTree t = getTreeData(sessionName);
@@ -214,7 +216,6 @@ public class Device implements Serializable {
      * @param sessionName symbolic Name of the session
      * @param readTimeout timeout in milliseconds
      */
-
     public void setReadTimeout(String sessionName, int readTimeout) {
         final SessionConnData p = getConnData(sessionName);
         p.sshSession.setReadTimeout(readTimeout);
@@ -226,7 +227,6 @@ public class Device implements Serializable {
      * @param sessionName symbolic Name of the session
      * @return timeout in milliseconds
      */
-
     public long getReadTimeout(String sessionName) {
         final SessionConnData p = getConnData(sessionName);
         return p.sshSession.getReadTimeout();
@@ -237,7 +237,6 @@ public class Device implements Serializable {
      * 
      * @param sessionName symbolic Name of the session
      */
-
     public boolean hasConfig(String sessionName) {
         final SessionTree t = getTreeData(sessionName);
         if (t.configTree != null) {
@@ -259,9 +258,7 @@ public class Device implements Serializable {
 
     /**
      * Checks if a backlog is saved for this device.
-     * 
      */
-
     public boolean hasBacklog() {
         return (backlog.size() > 0);
     }
@@ -270,7 +267,6 @@ public class Device implements Serializable {
      * Whenever new NetconfSession objects are created through newSession() set
      * this timeout value (milliseconds) as the readTimeout value
      */
-
     public void setDefaultReadTimeout(int defaultReadTimeout) {
         this.defaultReadTimeout = defaultReadTimeout;
     }
@@ -282,9 +278,7 @@ public class Device implements Serializable {
      * data we have.
      * 
      * @param sessionName symbolic Name of the session
-     * 
      */
-
     public void closeSession(String sessionName) {
         final SessionConnData data = removeConnData(sessionName);
         if (data.session != null) {
@@ -301,7 +295,6 @@ public class Device implements Serializable {
      * end all NETCONF sessions and close the SSH socket associated to this
      * device It also clears all accumulated config trees.
      */
-
     public void close() {
         for (int i = 0; i < connSessions.size(); i++) {
             final SessionConnData d = connSessions.get(i);
@@ -323,8 +316,7 @@ public class Device implements Serializable {
     }
 
     /**
-     * Checks if this device have any sessions.
-     * 
+     * Checks if this device has any sessions with specified name.
      */
     public boolean hasSession(String name) {
         return (getSession(name) != null);
@@ -340,10 +332,8 @@ public class Device implements Serializable {
      * Session s = ((SSHSession) d.getSession(&quot;cfg&quot;).getTransport()).getSession();
      * </pre>
      * 
-     * This is required if we wish to monitor the ganymed Session object for
-     * EOF
+     * This is required to monitor the ganymed Session object for EOF
      */
-
     public NetconfSession getSession(String sessionName) {
         final SessionConnData data = getConnData(sessionName);
         return (data == null) ? null : data.session;
@@ -354,7 +344,6 @@ public class Device implements Serializable {
      * {@link SSHSession} object if we for example wish to check if an ssh
      * session is ready to read.
      */
-
     public SSHSession getSSHSession(String sessionName) {
         final SessionConnData data = getConnData(sessionName);
         return (data == null) ? null : data.sshSession;
@@ -376,7 +365,6 @@ public class Device implements Serializable {
      * 
      * @param localUser The name of a local (for the EMS) user
      */
-
     public void connect(String localUser, int connectTimeout)
             throws IOException, JNCException {
         DeviceUser u = null;
@@ -416,7 +404,6 @@ public class Device implements Serializable {
      * one SSH channel towards the agent
      * 
      * @param sessionName symbolic Name of the session
-     * 
      */
     public void newSession(String sessionName) throws JNCException,
             IOException, YangException {
@@ -432,19 +419,18 @@ public class Device implements Serializable {
      * @param sessionName symbolic Name of the session
      */
     public void newSession(IOSubscriber sub, String sessionName)
-            throws JNCException, IOException, YangException {
+            throws JNCException, IOException {
         final SessionConnData data = getConnData(sessionName);
         // always create the configTree
         newSessionConfigTree(sessionName);
 
-        // Check that we don't already have a session with
-        // that name
+        // Check that we don't already have a session with that name
         if (data != null) {
-            throw new YangException(YangException.BAD_SESSION_NAME,
-                    sessionName);
+            int errCode = YangException.BAD_SESSION_NAME;
+            throw new YangException(errCode, sessionName);
         }
 
-        final YangXMLParser parser = new com.tailf.jnc.YangXMLParser();
+        final YangXMLParser parser = new YangXMLParser();
         final SSHSession sshSession = new SSHSession(con, defaultReadTimeout);
         if (sub != null) {
             sshSession.addSubscriber(sub);
@@ -488,7 +474,6 @@ public class Device implements Serializable {
      * succeeed in creating a new sesssion.
      * 
      * @param sessionName symbolic Name of the session
-     * 
      */
     public void runBacklog(String sessionName) throws IOException,
             JNCException {
@@ -508,7 +493,6 @@ public class Device implements Serializable {
 
     /**
      * Returns a string with information about this device.
-     * 
      */
     @Override
     public String toString() {
