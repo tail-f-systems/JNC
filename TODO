@@ -24,11 +24,9 @@ Write tests:
 - extension (junos)
 - feature
 - identity
-Add built in type for Inet-adresses to the JNC library
-Remove withDefaults from ConfDSession, replace with standard withDefaults
 Fix existing javadoc in the JNC library
 Add complete javadoc to the JNC library and clean up code
-Add restrictions on leaf values to method javadocs in the JNC plugin
+Add restrictions on leaf values to javadocs of methods in the JNC plugin
 Remove duplicate key checks from generated classes
 
 ============================= << Post release
@@ -53,6 +51,8 @@ Write examples and tests: (generic, junos, confd)   (lux?)
 - deep package structures
 - name collisions (particularly typedefs) and normalization
 - inet-types and similar "standard-modules"
+Add withDefaults compatibility to NetconfSession
+Add built in type for Inet-adresses to the JNC library
 Write tests for YangElement.getDiff, compare it with old version
 with-defaults capabilities
 Make sure default values are used where appropriate for all types
