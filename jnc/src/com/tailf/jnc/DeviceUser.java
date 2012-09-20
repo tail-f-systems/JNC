@@ -23,8 +23,6 @@ import java.io.Serializable;
  * {@link Device} class we can install several users and then at connection
  * time pick the DeviceUser associated to the user currently logged in to the
  * element manager.
- * 
- * 
  */
 public class DeviceUser implements Serializable {
 
