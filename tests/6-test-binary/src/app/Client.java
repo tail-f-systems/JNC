@@ -93,67 +93,64 @@ public class Client {
         Binary.enable();
         client.init();
         NodeSet configs = client.getConfig();
-        
+
         // Get (first) config with name "c"
         C cConfig = getCConfig(configs);
-        
+
         // Clone a backup configuration for rollback purposes
         YangElement backup = cConfig.clone();
 
         String configAsXML = cConfig.toXMLString();
         System.out.println("Initial config:\n" + configAsXML);
-        System.out.println("HashCode of the config XML string: " +
-                configAsXML.hashCode());
-        
+        System.out.println("HashCode of the config XML string: "
+                + configAsXML.hashCode());
+
         ElementChildrenIterator lIterator = cConfig.lIterator();
-        while (lIterator.hasNext()) {
+        for (int i=0; lIterator.hasNext(); i++) {
             L h = (L) lIterator.next();
-            
+
             // Internal representations of key1 and key2
             YangBinary key1Value = h.getKey1Value();
             YangBinary key2Value = h.getKey2Value();
+
+            key1Value.setValue("key" + i/2);
+            key2Value.setValue("key" + (i + 1)/2);
         }
 
         // Edit the remote configuration and get the new one
         NodeSet configs2 = client.editConfig(cConfig);
-        
+
         // Get the new (changed) config with name "c"
         cConfig = getCConfig(configs2);
         String configAsXML2 = cConfig.toXMLString();
-//        System.out.println("New config:\n" + configAsXML2);
-        System.out.println("HashCode of the new configuration: " +
-                configAsXML2.hashCode());
-        
+        // System.out.println("New config:\n" + configAsXML2);
+        System.out.println("HashCode of the new configuration: "
+                + configAsXML2.hashCode());
+
         // Get diff between "backup" and "cConfig"
-        NodeSet toKeep1 = new NodeSet();
-        NodeSet toDelete1 = new NodeSet();
-        NodeSet toKeep2 = new NodeSet();
-        NodeSet toDelete2 = new NodeSet();
-        YangElement.getDiff(backup, cConfig,
-                toKeep1, toDelete1, toKeep2, toDelete2);
-        System.out.print("C changed or unique to backup: ");
-        for (NodeSet toKeep : new NodeSet[] {toKeep1, toKeep2}) {
-            for (Element elem : toKeep) {
-                if (elem instanceof L) {
-                    L l = (L) elem;
-                    System.out.print("(" + l.getKey1Value() + ", " +
-                            l.getKey2Value() + "), ");
-                }
-            }
+        NodeSet changedBackup = new NodeSet();
+        NodeSet uniqueBackup = new NodeSet();
+        NodeSet changedCConfig = new NodeSet();
+        NodeSet uniqueCConfig = new NodeSet();
+        YangElement.getDiff(backup, cConfig, uniqueBackup, uniqueCConfig,
+                changedBackup, changedCConfig);
+        System.out.print("Unique to backup: ");
+        for (Element elem : uniqueBackup) {
+            System.out.println(elem + ", ");
         }
-        System.out.println();
-        System.out.print("C changed or unique to cConfig: ");
-        for (NodeSet toDelete : new NodeSet[] {toDelete1, toDelete2}) {
-            for (Element elem : toDelete) {
-                if (elem instanceof L) {
-                    L l = (L) elem;
-                    System.out.print("(" + l.getKey1Value() + ", " +
-                            l.getKey2Value() + "), ");
-                }
-            }
+        System.out.print("Changed in backup: ");
+        for (Element elem : changedBackup) {
+            System.out.println(elem + ", ");
         }
-        System.out.println();
-        
+        System.out.print("Unique to cConfig: ");
+        for (Element elem : uniqueCConfig) {
+            System.out.println(elem + ", ");
+        }
+        System.out.print("Changed in cConfig: ");
+        for (Element elem : changedCConfig) {
+            System.out.println(elem + ", ");
+        }
+
         // Clear remote l config
         cConfig.markDelete();
         NodeSet configs3 = client.editConfig(cConfig);
