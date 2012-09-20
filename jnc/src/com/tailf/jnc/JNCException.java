@@ -123,9 +123,9 @@ public class JNCException extends Exception {
     /**
      * Revision error. When we tried to encode a configuration tree in order to
      * send it to a device - A revision error was encountered. This only
-     * applies to ConfM code. A revision error occurs when we try to encode
-     * something the receiving node doesn't understand, such as an
-     * enumeration/bit value the node cannot understand
+     * applies to Client code. A revision error occurs when we try to encode
+     * something the receiving node doesn't understand, such as an unknown
+     * enumeration or bit value.
      */
     public static final int REVISION_ERROR = -12;
 
