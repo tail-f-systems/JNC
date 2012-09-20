@@ -12,11 +12,10 @@
 package com.tailf.jnc;
 
 /**
- * The Leaf is the leaf of a sub-tree.
+ * This class represents leaves in data model aware Element trees.
  * <p>
- * It is an extension of the Element class to make the configuration sub-tree
- * data model aware. Classes generated from the ConfM compiler are either
- * Containers, Leafs, or derived data types.
+ * YangElement classes generated from the JNC pyang plugin may instantiate this
+ * class for leaf values.
  * 
  * @see YangElement
  */
