@@ -18,7 +18,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * into a simple {@link Element Element} tree.
  * <p>
  * This parser is data model aware and will try to construct
- * classes that are generated with the ConfM compiler.
+ * classes that are generated from the JNC pyang plugin.
  * <p>
  */
 
