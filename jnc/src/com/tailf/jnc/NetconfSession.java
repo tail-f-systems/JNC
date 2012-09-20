@@ -1381,6 +1381,20 @@ public class NetconfSession {
         throw new JNCException(JNCException.NOTIFICATION_ERROR, t);
     }
 
+    /**
+     * Action capability. An action that does not return any result value,
+     * replies with the standard 'ok' element. If a result value is returned,
+     * it is encapsulated within a returned 'data' element.
+     * 
+     * @param data element tree with action-data
+     */
+    public Element action(Element data) throws JNCException, IOException {
+        trace("action: " + data.toXMLString());
+        encode_action(out, data);
+        out.flush();
+        return recv_rpc_reply_ok(null);
+    }
+
     /* Receive from session */
 
     /**
@@ -1395,20 +1409,38 @@ public class NetconfSession {
         recv_rpc_reply_ok(Integer.toString(mid));
     }
 
-    void recv_rpc_reply_ok(String mid) throws JNCException, IOException {
+    /**
+     * Receive from session
+     *
+     * @return the reply element
+     * @throws JNCException
+     * @throws IOException
+     */
+    protected Element recv_rpc_reply_ok(String mid) throws JNCException, IOException {
         final StringBuffer reply = in.readOne();
         trace("reply= " + reply);
         if (reply.length() == 0) {
             throw new JNCException(JNCException.PARSER_ERROR, "empty input");
         }
         final Element t = parser.parse(reply.toString());
-        final Element rep = t.getFirst("self::rpc-reply");
-        if (rep != null) {
-            check_mid(rep, mid);
+        final Element ok;
+
+        if (mid != null) {
+            final Element rep = t.getFirst("self::rpc-reply");
+            if (rep != null) {
+                check_mid(rep, mid);
+            }
+            ok = rep.getFirst("self::rpc-reply/ok");
+        } else {
+            ok = t.getFirst("self::rpc-reply/ok");
         }
-        final Element ok = rep.getFirst("self::rpc-reply/ok");
+
         if (ok != null) {
-            return;
+            return ok;
+        }
+        final Element data = t.getFirst("self::rpc-reply/data");
+        if (data != null) {
+            return data;
         }
 
         /* rpc-error */
@@ -2458,6 +2490,43 @@ public class NetconfSession {
         out.println("</" + ncn + "create-subscription>");
         encode_rpc_end(out);
         return mid;
+    }
+
+    /**
+     * Encodes an Element tree (data) and sends it to out.
+     * <p>
+     * Example:
+     * 
+     * <pre>
+     * <rpc message-id="101"
+     * xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+     *  <action xmlns="http://tail-f.com/ns/netconf/actions/1.0">
+     *   <data>
+     *    <interfaces xmlns="http://example.com/interfaces/1.0">
+     *     <interface>
+     *       <name>eth0</name>
+     *       <reset/>
+     *     </interface>
+     *    </interfaces>
+     *   </data>
+     *  </action>
+     * </rpc>
+     * </pre>
+     * 
+     * @param out The transport interface to send the action to
+     * @param data Element tree representing the action
+     */
+    void encode_action(Transport out, Element data) {
+        final String prefix = Element.defaultPrefixes.nsToPrefix(Capabilities.NS_ACTIONS);
+        final String act = mk_prefix_colon(prefix);
+        final String xmlnsAttr = mk_xmlns_attr(prefix, Capabilities.NS_ACTIONS);
+        encode_rpc_begin(out);
+        out.println("<" + act + "action " + xmlnsAttr + ">");
+        out.print("<" + act + "data>");
+        data.encode(out);
+        out.println("</" + act + "data>");
+        out.println("</" + act + "action>");
+        encode_rpc_end(out);
     }
 
     /* help functions */
