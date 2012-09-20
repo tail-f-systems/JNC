@@ -1254,8 +1254,8 @@ public class Element implements Serializable {
     }
 
     /**
-     * clones the attributes to the target copy. Note: help method to
-     * Containers clone and clone above.
+     * Clones the attributes to the target copy. Used in clone methods of this
+     * class and YangElement.
      * 
      * @param copy The target copy to clone the attributes to
      */
@@ -1277,8 +1277,8 @@ public class Element implements Serializable {
     }
 
     /**
-     * clones the value to the target copy. Note: help method to Containers
-     * clone and clone above.
+     * clones the value to the target copy. Used in clone methods of this
+     * class and YangElement.
      * 
      * @param copy The target copy to clone the value field to
      */
@@ -1872,18 +1872,16 @@ public class Element implements Serializable {
     }
 
     /**
-     * Write the configuration tree to a file. The configuration tree is
+     * Write this configuration tree to a file. The configuration tree is
      * written as XML text.
      * 
      * @param filename File name.
      * @see #readFile(String)
      */
     public void writeFile(String filename) throws IOException {
-        FileOutputStream fos;
-        DataOutputStream dos;
         final File file = new File(filename);
-        fos = new FileOutputStream(file);
-        dos = new DataOutputStream(fos);
+        final FileOutputStream fos = new FileOutputStream(file);
+        final DataOutputStream dos = new DataOutputStream(fos);
         dos.writeBytes(toXMLString());
         fos.close();
     }
@@ -1895,7 +1893,6 @@ public class Element implements Serializable {
      * @see #writeFile(String)
      */
     public static Element readFile(String filename) throws JNCException {
-
         final XMLParser p = new XMLParser();
         return p.readFile(filename);
     }
