@@ -22,12 +22,12 @@ public class Client {
     private DeviceUser duser;
 
     public Client() {
-        this.init();
+        init();
     }
 
     private void init() {
         String emsUserName = "bobby";
-        String ip = "192.168.2.5";
+        String ip = "localhost";
         duser = new DeviceUser(emsUserName, "admin", "admin");
         dev = new Device("mydev", duser, ip, 2022);
 
