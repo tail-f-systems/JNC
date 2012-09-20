@@ -968,13 +968,14 @@ public abstract class YangElement extends Element {
     }
 
     /**
-     * Read file with XML text and parse it into a configuration tree.
+     * Read file with XML text and parse it into a data model aware
+     * configuration tree.
      * 
      * @param filename File name.
      * @see #writeFile(String)
      */
-    public static Element readFile(String filename) throws JNCException {
-        final YangXMLParser p = new com.tailf.jnc.YangXMLParser();
+    public static YangElement readFile(String filename) throws JNCException {
+        final YangXMLParser p = new YangXMLParser();
         return p.readFile(filename);
     }
 
