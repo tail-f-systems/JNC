@@ -22,8 +22,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
- * A simple SAX parser, for parsing ConfD schema files with the following
- * syntax:
+ * A simple SAX parser, for parsing schema files with the following syntax:
  * <pre>
  * <schema>
  *   <node>
