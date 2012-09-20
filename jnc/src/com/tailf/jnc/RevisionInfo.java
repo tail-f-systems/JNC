@@ -32,15 +32,12 @@ public class RevisionInfo {
     public static boolean olderRevisionSupportEnabled = false;
     public static boolean newerRevisionSupportEnabled = false;
 
-    /*
-     * enables revision support for newer data. This means that if the device
+    /**
+     * Enables revision support for newer data. This means that if the device
      * sends us data where we don't understand the data because the device has
      * a newer revision of the YANG model than we have, we accept that data
-     * anyway. Obviously, that data cannot be represented as proper ConfM
-     * objects, instead we well have all the unknown data represented as INM
-     * Element objects.
+     * anyway, represented as Element objects (not YangElement).
      */
-
     public static void enableOlderRevisionSupport() {
         olderRevisionSupportEnabled = true;
     }
@@ -49,16 +46,13 @@ public class RevisionInfo {
         olderRevisionSupportEnabled = false;
     }
 
-    /*
-     * enables revision support for older schema at the device. This requires
-     * that the .fxs file we used to generate the ConfM classes has been
-     * produced by a "confdc --merge-revisions ... " command. If this feature
-     * is enabled, we can safely talk NETCONF to devices that have an older
+    /**
+     * Enables revision support for older schema at the device. Enabling this
+     * feature means that we can safely talk NETCONF to devices with an older
      * revision of the YANG data model than we have. This means that we during
      * the encode() process checks each element and makes sure that the device
      * understands it. If not, the element is skipped.
      */
-
     public static void enableNewerRevisionSupport() {
         newerRevisionSupportEnabled = true;
     }
