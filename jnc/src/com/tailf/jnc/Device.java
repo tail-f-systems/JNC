@@ -20,7 +20,7 @@ import java.util.ArrayList;
  * about how to connect to the device.
  * <p>
  * Associated to a device we have a list of named sessions, each session is a
- * {@link ConfDSession} session inside an SSH channel. We can have several
+ * {@link NetconfSession} session inside an SSH channel. We can have several
  * sessions to one device. It can for example make sense to have one session
  * open to the configuration db(s) and another session open for NETCONF
  * notifications Typical usage pattern is:
@@ -60,9 +60,9 @@ public class Device implements Serializable {
     static private class SessionConnData {
         String sessionName;
         SSHSession sshSession;
-        ConfDSession session;
+        NetconfSession session;
 
-        SessionConnData(String n, SSHSession t, ConfDSession s) {
+        SessionConnData(String n, SSHSession t, NetconfSession s) {
             sessionName = n;
             session = s;
             sshSession = t;
@@ -267,7 +267,7 @@ public class Device implements Serializable {
     }
 
     /**
-     * Whenever new ConfDSession objects are created through newSession() set
+     * Whenever new NetconfSession objects are created through newSession() set
      * this timeout value (milliseconds) as the readTimeout value
      */
 
@@ -331,8 +331,8 @@ public class Device implements Serializable {
     }
 
     /**
-     * Returns a named ConfDSession for this NETCONF enabled device. The
-     * ConfDSession implements (through it's subclass NetconfSession) the
+     * Returns a named NetconfSession for this NETCONF enabled device. The
+     * NetconfSession implements (through it's subclass NetconfSession) the
      * getTransport() method. Thus we can get to the underlying ganymed Session
      * object as:
      * 
@@ -344,7 +344,7 @@ public class Device implements Serializable {
      * EOF
      */
 
-    public ConfDSession getSession(String sessionName) {
+    public NetconfSession getSession(String sessionName) {
         final SessionConnData data = getConnData(sessionName);
         return (data == null) ? null : data.session;
     }
@@ -449,7 +449,7 @@ public class Device implements Serializable {
         if (sub != null) {
             sshSession.addSubscriber(sub);
         }
-        final ConfDSession session = new ConfDSession(sshSession, parser);
+        final NetconfSession session = new NetconfSession(sshSession, parser);
         final SessionConnData d = new SessionConnData(sessionName,
                 sshSession, session);
         connSessions.add(d);
