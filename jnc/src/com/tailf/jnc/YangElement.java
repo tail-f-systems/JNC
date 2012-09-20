@@ -19,27 +19,24 @@ import java.util.ArrayList;
  * The YangElement is a configuration sub-tree like the
  * {@link com.tailf.jnc.Element Element}. It is an extension of the Element
  * class to make the configuration sub-tree data model aware. Classes generated
- * from the JNC compiler are either Containers, Leafs, or derived data types.
- * <p>
+ * from the JNC pyang plugin are either YangElements or derived data types.
  * Thus the YangElement which is an abstract class is never used directly.
  * <p>
  * Fundamental methods for comparing, syncing, and inspecting sets of
  * configuration data, is provided by this class. The following two methods
- * highlights the fundmental purpose of this library:
+ * highlights the fundamental purpose of this library:
  * <ul>
- * <li>{@link #checkSync checkSync} - checks if two configurations are are
- * equal, or if a sync is needed. This is a common typical operation a manager
- * would like to do when one configuration is stored on the device and the
- * other is stored in a database.
+ * <li>{@link #checkSync checkSync} - checks if two configurations are equal,
+ * or if a sync is needed. This is a typical operation a manager would like to
+ * do when one configuration is stored on the device and the other is stored in
+ * a database.
  * <li>{@link #sync sync} - will calculate the difference between two
  * configuration sub trees and build up a resulting subtree which is basically
  * a tree with NETCONF operations needed to turn the source tree into the
  * target tree. The purpose of this is to find a minimal set of operations to
  * sync two configurations so that they become equal.
  * </ul>
- * 
  */
-// @SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class YangElement extends Element {
 
     private static final long serialVersionUID = 1L;
