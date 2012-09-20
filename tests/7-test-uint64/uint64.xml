@@ -1,0 +1,19 @@
+<c xmlns="http://acme.com/ns/uint64/1.0">
+  <c2></c2>
+  <uint64-leaf>18446744073709550123</uint64-leaf>
+  <l>
+    <key1>abc</key1>
+    <key2>7</key2>
+  </l>
+  <l>
+    <key1>abc</key1>
+    <key2>10</key2>
+    <thirty-seven>3007</thirty-seven>
+  </l>
+  <l>
+    <key1>7</key1>
+    <key2>10</key2>
+    <thirty-seven>370</thirty-seven>
+    <c2></c2>
+  </l>
+</c>

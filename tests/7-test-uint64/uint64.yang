@@ -1,0 +1,37 @@
+module uint64 {
+  namespace "http://acme.com/ns/uint64/1.0";
+  prefix uint64;
+  typedef uint64-2 {
+    type uint64 {
+      range 0..18446744073709551000; // default is 18446744073709551615
+    }
+  }
+  container c {
+    container c2 {
+      presence "test purposes";
+    }
+    leaf uint64-leaf {
+      type uint64-2;
+    }
+    list l {
+      key "key1 key2";
+      leaf key1 {
+        type string;
+      }
+      leaf key2 {
+        type uint64 {
+          range 1..10;
+        }
+      }
+      leaf thirty-seven {
+        type uint64 {
+          range 37..max;
+        }
+        default 37;
+      }
+      container c2 {
+        presence "test purposes";
+      }
+    }
+  }
+}
