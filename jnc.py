@@ -458,7 +458,7 @@ def write_file(d, file_name, file_content, ctx):
     d = d.replace('.', os.sep)
     wd = os.getcwd()
     try:
-        os.makedirs(d, 0777)
+        os.makedirs(d, 0o777)
     except OSError as exc:
         if exc.errno == errno.EEXIST:
             pass  # The directory already exists
@@ -475,14 +475,14 @@ def write_file(d, file_name, file_content, ctx):
             raise
     finally:
         if ctx.opts.verbose:
-            print 'Writing file to: ' + os.getcwd() + os.sep + file_name
+            print('Writing file to: ' + os.getcwd() + os.sep + file_name)
         os.chdir(wd)
     with open(d + os.sep + file_name, 'w+') as f:
-        if isinstance(file_content, basestring):
+        if isinstance(file_content, str):
             f.write(file_content)
         else:
             for line in file_content:
-                print >> f, line
+                f.write(line)
 
 
 def get_parent(stmt):
@@ -513,7 +513,7 @@ def get_package(stmt, ctx):
 def pairwise(iterable):
     """Returns an iterator that includes the next item also"""
     iterator = iter(iterable)
-    item = iterator.next()  # throws StopIteration if empty.
+    item = next(iterator)  # throws StopIteration if empty.
     for next_item in iterator:
         yield (item, next_item)
         item = next_item
@@ -544,7 +544,7 @@ def camelize(string):
         for character, next_character in iterator:
             if next_character and character in '-.':
                 camelized_str.append(capitalize_first(next_character))
-                iterator.next()
+                next(iterator)
             else:
                 camelized_str.append(character)
     res = ''.join(camelized_str)
@@ -588,10 +588,10 @@ def flatten(l):
     """
     res = []
     while hasattr(l, 'values'):
-        l = l.values()
+        l = list(l.values())
     for item in l:
         try:
-            assert not isinstance(item, basestring)
+            assert not isinstance(item, str)
             iter(item)
         except (AssertionError, TypeError):
             res.append(item)
@@ -706,7 +706,7 @@ def search(stmt, keywords):
     are searched as well.
 
     """
-    if isinstance(keywords, basestring):
+    if isinstance(keywords, str):
         keywords = keywords.split()
     bypassed = ('choice', 'case')
     bypass = all(x not in keywords for x in bypassed)
