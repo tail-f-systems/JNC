@@ -63,7 +63,7 @@ public class Client {
     public NodeSet getConfig() throws IOException, JNCException {
         return getConfig(dev);
     }
-    
+
     /**
      * Gets the first configuration element in configs with name "c".
      * 
@@ -80,7 +80,7 @@ public class Client {
                 }
             }
         }
-        return (C)cConfig;
+        return (C) cConfig;
     }
 
     /**
@@ -160,7 +160,7 @@ public class Client {
         } else {
             System.out.println("Clear the remote c config: FAIL");
         }
-        
+
         // Change back to original config
         client.editConfig(backup);
         NodeSet configs4 = client.getConfig();
@@ -171,8 +171,8 @@ public class Client {
         } else {
             System.out.println("Different rollback config: FAIL");
         }
-        System.out.println("Rollback config XML string hashCode: " +
-                configAsXML4.hashCode());
+        System.out.println("Rollback config XML string hashCode: "
+                + configAsXML4.hashCode());
 
         // Cleanup
         client.dev.close();
