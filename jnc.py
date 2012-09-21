@@ -391,12 +391,15 @@ java_built_in = java_reserved_words | java_literals | java_lang
 
 
 yangelement_stmts = {'container', 'list', 'notification'}
+"""Keywords of statements that YangElement classes are generated from"""
 
 
 leaf_stmts = {'leaf', 'leaf-list'}
+"""Leaf and leaf-list statement keywords"""
 
 
 node_stmts = {'module', 'submodule'} | yangelement_stmts | leaf_stmts
+"""Keywords of statements that make up a configuration tree"""
 
 
 package_info = '''/**
