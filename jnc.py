@@ -821,7 +821,7 @@ class SchemaNode(object):
         res.append('<max_occurs>' + max_occurs + '</max_occurs>')
 
         children = ''
-        for ch in search(stmt, ('container', 'notification' 'list', 'leaf',
+        for ch in search(stmt, ('container', 'notification', 'list', 'leaf',
                                 'leaf-list')):
             children += ch.arg + ' '
         res.append('<children>' + children[:-1] + '</children>')
