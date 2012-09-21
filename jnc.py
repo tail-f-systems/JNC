@@ -230,13 +230,15 @@ class JNCPlugin(plugin.PyangPlugin):
                     # Generate external schema
                     schema_nodes = ['<schema>']
                     stmts = search(module, ('module', 'submodule', 'container',
-                                            'list', 'leaf', 'leaf-list'))
+                                            'list', 'leaf', 'leaf-list',
+                                            'notification'))
                     module_root = SchemaNode(module, '/')
                     schema_nodes.extend(module_root.as_list())
                     for aug_module in augmented_modules.values():
                         stmts.extend(search(aug_module.substmts,
                                             ('module', 'submodule', 'container',
-                                            'list', 'leaf', 'leaf-list')))
+                                            'list', 'leaf', 'leaf-list',
+                                            'notification')))
                         aug_module_root = SchemaNode(aug_module, '/')
                         schema_nodes.extend(aug_module_root.as_list())
                     schema_generator = SchemaGenerator(stmts, '/', ctx)
@@ -804,21 +806,23 @@ class SchemaNode(object):
         if parent:
             key = search_one(parent, 'key')
         isKey = key is not None and key.arg == stmt.arg
-        childOfContainerOrList = (parent and parent.keyword in ('container',
-                                                                'list'))
+        childOfContainerOrList = (parent
+                and parent.keyword in ('container', 'list', 'notification'))
         if (isKey or stmt.keyword in ('module', 'submodule') or
             (childOfContainerOrList and stmt.keyword in ('container',))):
             min_occurs = '1'
             max_occurs = '1'
         if isMandatory:
             min_occurs = '1'
-        if isUnique or childOfContainerOrList or stmt.keyword in ('container',):
+        if (isUnique or childOfContainerOrList
+                or stmt.keyword in ('container', 'notification')):
             max_occurs = '1'
-        res.append('<min_occurs>' + min_occurs + '</min_occurs>')  # TODO: correct?
-        res.append('<max_occurs>' + max_occurs + '</max_occurs>')  # TODO: correct?
+        res.append('<min_occurs>' + min_occurs + '</min_occurs>')
+        res.append('<max_occurs>' + max_occurs + '</max_occurs>')
 
         children = ''
-        for ch in search(stmt, ('container', 'list', 'leaf', 'leaf-list')):
+        for ch in search(stmt, ('container', 'notification' 'list', 'leaf',
+                                'leaf-list')):
             children += ch.arg + ' '
         res.append('<children>' + children[:-1] + '</children>')
 
@@ -846,7 +850,7 @@ class SchemaGenerator(object):
             res.extend(node.as_list())
             substmt_generator = SchemaGenerator(search(stmt,
                     ('module', 'submodule', 'container', 'list', 'leaf',
-                     'leaf-list')),
+                     'leaf-list', 'notification')),
                 self.tagpath + stmt.arg + '/', self.ctx)
             res.extend(substmt_generator.schema_nodes())
         return res
@@ -942,7 +946,7 @@ class ClassGenerator(object):
         
         # Add all classes that will be generated to class_hierarchy dict
         def record(stmt, package):
-            for ch in search(stmt, ('container', 'list')):
+            for ch in search(stmt, ('container', 'list', 'notification')):
                 if package not in class_hierarchy:
                     class_hierarchy[package] = set([])
                 class_hierarchy[package].add(normalize(ch.arg))
@@ -1010,7 +1014,8 @@ class ClassGenerator(object):
                        java_class.as_list(), self.ctx)
 
         # Generate classes for children and keep track of augmented modules
-        for stmt in search(self.stmt, ('container', 'list', 'augment')):
+        for stmt in search(self.stmt, ('container', 'list', 'augment',
+                                       'notification')):
             child_generator = ClassGenerator(stmt, package=self.package,
                 ns=ns_arg, prefix_name=self.n, parent=self)
             child_generator.generate()
@@ -1104,7 +1109,8 @@ class ClassGenerator(object):
                 source=self.src,
                 superclass='YangElement')
 
-        for ch in search(stmt, ('list', 'container', 'leaf', 'leaf-list')):
+        for ch in search(stmt, ('list', 'container', 'leaf', 'leaf-list',
+                                'notification')):
             field = self.generate_child(ch)
             ch_arg = normalize(ch.arg)
             if field is not None:
@@ -1272,7 +1278,7 @@ class PackageInfoGenerator(object):
         java_files = [is_java_file(d) for d in directory_listing]
         dirs = filter(is_not_java_file, directory_listing)
         stmts = search(self.stmt, ('module', 'submodule', 'container', 'list',
-                                   'leaf', 'leaf-list'))
+                                   'leaf', 'leaf-list', 'notification'))
         class_hierarchy_list = self.generate_javadoc(stmts, java_files)
         write_file(self.d, 'package-info.java',
                    self.gen_package_info(class_hierarchy_list), self.ctx)
@@ -1308,7 +1314,7 @@ class PackageInfoGenerator(object):
                 java_files.remove(filename)
                 hierarchy.append(filename)
                 
-                substmts = search(stmt, ('list', 'container'))
+                substmts = search(stmt, ('list', 'container', 'notification'))
                 children = PackageInfoGenerator.generate_javadoc(substmts, java_files)
                 if children:
                     hierarchy.append(children)
@@ -1860,7 +1866,9 @@ class MethodGenerator(object):
         self.stmt = stmt
         self.n = normalize(stmt.arg)
         self.n2 = camelize(stmt.arg)
-        self.children = [normalize(s.arg) for s in search(stmt, ('list', 'container', 'leaf', 'leaf-list'))]
+        self.children = [normalize(s.arg) for s in
+                         search(stmt, ('list', 'container', 'leaf',
+                                       'leaf-list', 'notification'))]
         self.pkg = get_package(stmt, ctx)
         self.basepkg = self.pkg.partition('.')[0]
         self.rootpkg = ctx.rootpkg.split(os.sep)
@@ -1875,7 +1883,7 @@ class MethodGenerator(object):
         if prefix is not None:
             self.root = normalize(prefix.arg)
 
-        self.is_container = stmt.keyword == 'container'
+        self.is_container = stmt.keyword in ('container', 'notification')
         self.is_list = stmt.keyword == 'list'
         self.is_typedef = stmt.keyword == 'typedef'
         self.is_leaf = stmt.keyword == 'leaf'
@@ -2075,7 +2083,8 @@ class MethodGenerator(object):
         method = JavaMethod(modifiers=['public'], name='childrenNames')
         method.set_return_type('String[]')
         method.add_javadoc('@return An array with the identifiers of any children, in order.')
-        children = search(self.stmt, ('leaf', 'container', 'leaf-list', 'list'))
+        children = search(self.stmt, ('leaf', 'container', 'notification',
+                                      'leaf-list', 'list'))
         method.add_line('return new String[] {')
         for child in children:
             method.add_line('"'.join([' ' * 4, child.arg, ',']))
@@ -2715,7 +2724,7 @@ class ContainerMethodGenerator(MethodGenerator):
     def __init__(self, stmt, ctx=None):
         super(ContainerMethodGenerator, self).__init__(stmt, ctx)
         assert self.gen is self
-        assert self.is_container, 'Only valid for container stmts'
+        assert self.is_container, 'Only valid for containers and notifications'
 
     def constructors(self):
         return [self.empty_constructor()]
