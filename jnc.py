@@ -301,16 +301,16 @@ Root class  -- This class has the name of the prefix of the YANG module, and
                that enables the JNC library to use the other generated classes
                when interacting with a NETCONF server.
 
-YangElement -- Each YangElement corresponds to a container or a list in the
-               YANG model. They represent tree nodes of a configuration and
-               provides methods to modify the configuration in accordance with
-               the YANG model that they were generated from.
+YangElement -- Each YangElement corresponds to a container, list or
+               notification in the YANG model. They represent tree nodes of a
+               configuration and provides methods to modify the configuration
+               in accordance with the YANG model that they were generated from.
 
-               The top-level containers or lists in the YANG model will have
-               their corresponding YangElement classes generated in the output
+               The top-level nodes in the YANG model will have their
+               corresponding YangElement classes generated in the output
                directory together with the root class. Their respective
-               subcontainers and sublists are generated in subpackages with
-               names corresponding to the name of the parent container or list.
+               subnodes are generated in subpackages with names corresponding
+               to the name of the parent.
 
 YangTypes   -- For each derived type in the YANG model, a class is generated to
                the root of the output directory. The derived type may either
@@ -1179,24 +1179,25 @@ class ClassGenerator(object):
 
     def generate_child(self, sub):
         """Appends access methods to class for children in the YANG module.
-        Returns the name of sub if it is a container, an empty string if sub is
-        a list, None otherwise. Uses mutual recursion with generate_class.
+        Returns the name of sub if it is a container or notification, an empty
+        string if sub is a list, None otherwise.
 
-        For this function to work, self.java_class must be defined.
+        Uses mutual recursion with generate_class. For this function to work,
+        self.java_class must be defined.
 
         sub -- A data model subtree statement, child of self.stmt.
 
         """
         field = None
         add = self.java_class.append_access_method  # XXX: add is a function
-        if sub.keyword in ('list', 'container'):
+        if sub.keyword in ('list', 'container', 'notification'):
             pkg = self.package + '.' + self.n2
             child_generator = ClassGenerator(stmt=sub, package=pkg,
                 path=self.path + os.sep + self.n2,
                 ns=None, prefix_name=None, parent=self)
             child_generator.generate()
             child_gen = MethodGenerator(sub, self.ctx)
-            if sub.keyword == 'container':
+            if sub.keyword in ('container', 'notification'):
                 field = sub.arg
                 self.java_class.add_field(child_gen.child_field())
             else:
@@ -2052,9 +2053,9 @@ class MethodGenerator(object):
 
         The keys are returned by the generated method as a String array
         with the identifiers of the keys in the statement of this generator,
-        which should be a list or a container, or otherwise None is returned.
-        If the statement does not have any keys, the generated method returns
-        null.
+        which should be a list, container or notification, otherwise None is
+        returned. If the statement does not have any keys, the generated method
+        returns null.
 
         """
         if not (self.is_list or self.is_container):
