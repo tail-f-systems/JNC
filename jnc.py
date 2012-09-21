@@ -229,16 +229,11 @@ class JNCPlugin(plugin.PyangPlugin):
                 if not ctx.opts.no_schema:
                     # Generate external schema
                     schema_nodes = ['<schema>']
-                    stmts = search(module, ('module', 'submodule', 'container',
-                                            'list', 'leaf', 'leaf-list',
-                                            'notification'))
+                    stmts = search(module, node_stmts)
                     module_root = SchemaNode(module, '/')
                     schema_nodes.extend(module_root.as_list())
                     for aug_module in augmented_modules.values():
-                        stmts.extend(search(aug_module.substmts,
-                                            ('module', 'submodule', 'container',
-                                            'list', 'leaf', 'leaf-list',
-                                            'notification')))
+                        stmts.extend(search(aug_module.substmts, node_stmts))
                         aug_module_root = SchemaNode(aug_module, '/')
                         schema_nodes.extend(aug_module_root.as_list())
                     schema_generator = SchemaGenerator(stmts, '/', ctx)
@@ -393,6 +388,15 @@ java_util = {'Collection', 'Enumeration', 'Iterator', 'List', 'ListIterator',
 
 java_built_in = java_reserved_words | java_literals | java_lang
 """Identifiers that shouldn't be imported in Java"""
+
+
+yangelement_stmts = {'container', 'list', 'notification'}
+
+
+leaf_stmts = {'leaf', 'leaf-list'}
+
+
+node_stmts = {'module', 'submodule'} | yangelement_stmts | leaf_stmts
 
 
 package_info = '''/**
@@ -607,7 +611,7 @@ def get_types(yang_type, ctx):
     typedef, leaf or leaf-list statement.
 
     """
-    if yang_type.keyword in ('leaf', 'leaf-list'):
+    if yang_type.keyword in leaf_stmts:
         yang_type = search_one(yang_type, 'type')
     assert yang_type.keyword in ('type', 'typedef'), 'argument is type, typedef or leaf'
     if yang_type.arg == 'leafref':
@@ -807,9 +811,10 @@ class SchemaNode(object):
             key = search_one(parent, 'key')
         isKey = key is not None and key.arg == stmt.arg
         childOfContainerOrList = (parent
-                and parent.keyword in ('container', 'list', 'notification'))
-        if (isKey or stmt.keyword in ('module', 'submodule') or
-            (childOfContainerOrList and stmt.keyword in ('container',))):
+                and parent.keyword in yangelement_stmts)
+        if (isKey or stmt.keyword in ('module', 'submodule')
+                or (childOfContainerOrList
+                    and stmt.keyword in ('container', 'notification'))):
             min_occurs = '1'
             max_occurs = '1'
         if isMandatory:
@@ -821,8 +826,7 @@ class SchemaNode(object):
         res.append('<max_occurs>' + max_occurs + '</max_occurs>')
 
         children = ''
-        for ch in search(stmt, ('container', 'notification', 'list', 'leaf',
-                                'leaf-list')):
+        for ch in search(stmt, yangelement_stmts | leaf_stmts):
             children += ch.arg + ' '
         res.append('<children>' + children[:-1] + '</children>')
 
@@ -848,9 +852,7 @@ class SchemaGenerator(object):
                 print('Generating schema node "' + self.tagpath + '"...')
             node = SchemaNode(stmt, self.tagpath + stmt.arg + '/')
             res.extend(node.as_list())
-            substmt_generator = SchemaGenerator(search(stmt,
-                    ('module', 'submodule', 'container', 'list', 'leaf',
-                     'leaf-list', 'notification')),
+            substmt_generator = SchemaGenerator(search(stmt, node_stmts),
                 self.tagpath + stmt.arg + '/', self.ctx)
             res.extend(substmt_generator.schema_nodes())
         return res
@@ -946,7 +948,7 @@ class ClassGenerator(object):
         
         # Add all classes that will be generated to class_hierarchy dict
         def record(stmt, package):
-            for ch in search(stmt, ('container', 'list', 'notification')):
+            for ch in search(stmt, yangelement_stmts):
                 if package not in class_hierarchy:
                     class_hierarchy[package] = set([])
                 class_hierarchy[package].add(normalize(ch.arg))
@@ -1014,8 +1016,7 @@ class ClassGenerator(object):
                        java_class.as_list(), self.ctx)
 
         # Generate classes for children and keep track of augmented modules
-        for stmt in search(self.stmt, ('container', 'list', 'augment',
-                                       'notification')):
+        for stmt in search(self.stmt, yangelement_stmts | {'augment'}):
             child_generator = ClassGenerator(stmt, package=self.package,
                 ns=ns_arg, prefix_name=self.n, parent=self)
             child_generator.generate()
@@ -1109,8 +1110,7 @@ class ClassGenerator(object):
                 source=self.src,
                 superclass='YangElement')
 
-        for ch in search(stmt, ('list', 'container', 'leaf', 'leaf-list',
-                                'notification')):
+        for ch in search(stmt, yangelement_stmts | leaf_stmts):
             field = self.generate_child(ch)
             ch_arg = normalize(ch.arg)
             if field is not None:
@@ -1190,7 +1190,7 @@ class ClassGenerator(object):
         """
         field = None
         add = self.java_class.append_access_method  # XXX: add is a function
-        if sub.keyword in ('list', 'container', 'notification'):
+        if sub.keyword in yangelement_stmts:
             pkg = self.package + '.' + self.n2
             child_generator = ClassGenerator(stmt=sub, package=pkg,
                 path=self.path + os.sep + self.n2,
@@ -1216,7 +1216,7 @@ class ClassGenerator(object):
                 elif name == self.n:
                     access_method.modifiers = [f(x) for x in access_method.modifiers]
                 add(sub.arg, access_method)
-        elif sub.keyword in ('leaf', 'leaf-list'):
+        elif sub.keyword in leaf_stmts:
             child_gen = MethodGenerator(sub, self.ctx)
             add(sub.arg, child_gen.access_methods_comment())
             if sub.keyword == 'leaf':
@@ -1278,8 +1278,7 @@ class PackageInfoGenerator(object):
         directory_listing = os.listdir(self.d)
         java_files = [is_java_file(d) for d in directory_listing]
         dirs = filter(is_not_java_file, directory_listing)
-        stmts = search(self.stmt, ('module', 'submodule', 'container', 'list',
-                                   'leaf', 'leaf-list', 'notification'))
+        stmts = search(self.stmt, node_stmts)
         class_hierarchy_list = self.generate_javadoc(stmts, java_files)
         write_file(self.d, 'package-info.java',
                    self.gen_package_info(class_hierarchy_list), self.ctx)
@@ -1315,7 +1314,7 @@ class PackageInfoGenerator(object):
                 java_files.remove(filename)
                 hierarchy.append(filename)
                 
-                substmts = search(stmt, ('list', 'container', 'notification'))
+                substmts = search(stmt, yangelement_stmts)
                 children = PackageInfoGenerator.generate_javadoc(substmts, java_files)
                 if children:
                     hierarchy.append(children)
@@ -1868,8 +1867,7 @@ class MethodGenerator(object):
         self.n = normalize(stmt.arg)
         self.n2 = camelize(stmt.arg)
         self.children = [normalize(s.arg) for s in
-                         search(stmt, ('list', 'container', 'leaf',
-                                       'leaf-list', 'notification'))]
+                         search(stmt, yangelement_stmts | leaf_stmts)]
         self.pkg = get_package(stmt, ctx)
         self.basepkg = self.pkg.partition('.')[0]
         self.rootpkg = ctx.rootpkg.split(os.sep)
@@ -2084,8 +2082,7 @@ class MethodGenerator(object):
         method = JavaMethod(modifiers=['public'], name='childrenNames')
         method.set_return_type('String[]')
         method.add_javadoc('@return An array with the identifiers of any children, in order.')
-        children = search(self.stmt, ('leaf', 'container', 'notification',
-                                      'leaf-list', 'list'))
+        children = search(self.stmt, yangelement_stmts | leaf_stmts)
         method.add_line('return new String[] {')
         for child in children:
             method.add_line('"'.join([' ' * 4, child.arg, ',']))
