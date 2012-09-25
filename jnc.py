@@ -492,6 +492,7 @@ def write_file(d, file_name, file_content, ctx):
         else:
             for line in file_content:
                 f.write(line)
+                f.write('\n')
 
 
 def get_parent(stmt):
