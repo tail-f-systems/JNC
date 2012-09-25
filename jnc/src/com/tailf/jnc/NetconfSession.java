@@ -1246,14 +1246,14 @@ public class NetconfSession {
      * specified in a subscription. The <code>:notification</code> capability
      * must be supported by the server.
      * <p>
-     * Subscribe on speciied stream name.
+     * Subscribe on specified stream name.
      * 
-     * 
-     * @param stream The name of the stream or 'null'
+     * @param stream The name of the stream or <code>null</code> if all streams
+     *         of events are of interest.
      * @see #createSubscription(String,String,String,String)
      */
-    public void createSubscription(String stream) throws IOException,
-            JNCException {
+    public void createSubscription(String stream)
+            throws IOException, JNCException {
         createSubscription(stream, (String) null, null, null);
     }
 
@@ -1286,12 +1286,15 @@ public class NetconfSession {
      * are valid. The time is specified in dateTime format.
      * <p>
      * 
-     * @param streamName The name of the stream or 'null'
-     * @param eventFilter a subtree filter - list of events, or 'null'
+     * @param streamName The name of the stream or <code>null</code>
+     * @param eventFilter a subtree filter - list of events, or
+     *            <code>null</code>
      * @param startTime a dateTime string specifying the replay start, or
-     *            'null'
+     *            <code>null</code> if the subscription is not a replay
+     *            subscription
      * @param stopTime a dateTime string specifying the stop of replay, or
-     *            'null'
+     *            <code>null</code> if the subscription is not a replay
+     *            subscription or infinite subscription is desired
      * @see #receiveNotification()
      */
     public void createSubscription(String streamName, NodeSet eventFilter,
@@ -1314,12 +1317,12 @@ public class NetconfSession {
      * Same as {@link #createSubscription(String,NodeSet,String,String)} except
      * a filter in xpath format can be given instead of a subtree filter.
      * 
-     * @param streamName The name of the stream or 'null'
-     * @param eventFilter a filter xpath expression, or 'null'
+     * @param streamName The name of the stream or <code>null</code>
+     * @param eventFilter a filter xpath expression, or <code>null</code>
      * @param startTime a dateTime string specifying the replay start, or
-     *            'null'
+     *            <code>null</code>
      * @param stopTime a dateTime string specifying the stop of replay, or
-     *            'null'
+     *            <code>null</code>
      * @see #receiveNotification()
      */
     public void createSubscription(String streamName, String eventFilter,
