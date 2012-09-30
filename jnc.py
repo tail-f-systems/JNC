@@ -2920,7 +2920,8 @@ class ListMethodGenerator(MethodGenerator):
         method_type -- either 'get' or 'delete'
 
         """
-        res = [self._parent_template(method_type) for _ in range(2)]
+        num_methods = 2 if self.is_config else 1
+        res = [self._parent_template(method_type) for _ in range(num_methods)]
 
         for i, method in enumerate(res):
             javadoc1 = [method_type.capitalize(), 's ', self.stmt.keyword,
