@@ -2174,7 +2174,9 @@ class MethodGenerator(object):
             return self.gen.adders()
         elif not (self.is_container or self.is_list):
             return None
-        number_of_adders = 2 * (1 + self.is_list)
+        number_of_adders = 2
+        if self.is_list and self.gen.is_config:
+            number_of_adders = 4
         res = [self._parent_template('add') for _ in range(number_of_adders)]
 
         for i, method in enumerate(res):
