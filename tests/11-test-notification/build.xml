@@ -1,7 +1,7 @@
-<project name="notification" basedir="." default="main">
+<project name="notif" basedir="." default="main">
   <property environment="env" />
   <property name="src.dir"     value="src" />
-  <property name="gen.dir"     value="src/notification" />
+  <property name="gen.dir"     value="src/notif" />
   <property name="main-class"  value="simple.Client" />
   <property name="build.dir"   value="build" />
   <property name="classes.dir" value="${build.dir}/classes" />
@@ -13,13 +13,13 @@
   <target name="clean">
     <delete dir="${build.dir}" />
     <delete dir="${gen.dir}" />
-    <delete file="notification.schema" />
+    <delete file="notif.schema" />
   </target>
 
   <target name="generate">
     <mkdir dir="${gen.dir}" />
     <exec executable="${pyang}" failonerror="true">
-      <arg line="-f jnc --jnc-output ${gen.dir} --jnc-import-on-demand notification.yang" />
+      <arg line="-f jnc --jnc-output ${gen.dir} --jnc-import-on-demand notif.yang" />
     </exec>
   </target>
 

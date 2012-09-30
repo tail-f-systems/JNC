@@ -1,0 +1,60 @@
+module notif {
+  namespace "http://tail-f.com/ns/test/notif";
+  prefix notif;
+
+  container interfaces {
+    list interface {
+      key ifIndex;
+      leaf ifIndex {
+        type uint32;
+      }
+      leaf desc {
+        type string;
+      }
+    }
+  }
+
+  notification linkUp {
+    leaf ifIndex {
+      type leafref {
+        path "/interfaces/interface/ifIndex";
+      }
+      mandatory true;
+    }
+    leaf extraId {
+      type string;
+    }
+    list linkProperty {
+      max-elements 64;
+      leaf newlyAdded {
+        type empty;
+      }
+      leaf flags {
+        type uint32;
+        default 0;
+      }
+      list extensions {
+        max-elements 64;
+        leaf name {
+          type uint32;
+          mandatory true;
+        }
+        leaf value {
+          type uint32;
+          mandatory true;
+        }
+      }
+    }
+  }
+
+/*  M3_BEGIN sec1  */
+  notification linkDown {
+    leaf ifIndex {
+      type leafref {
+        path "/interfaces/interface/ifIndex";
+      }
+      mandatory true;
+    }
+  }
+/*  M3_END sec1  */
+}

@@ -22,11 +22,11 @@ CONFD_HOST ?= localhost
 CONFD_FLAGS = --addloadpath $(CONFD_DIR)/etc/confd
 START_FLAGS ?=
 
-all: notification.fxs ssh-keydir $(CDB_DIR)/notification.xml
+all: notif.fxs ssh-keydir $(CDB_DIR)/notif.xml
 	@echo "Build complete"
 
-notification.xsd: notification.fxs
-	$(CONFDC) --emit-xsd notification.xsd notification.fxs
+notif.xsd: notif.fxs
+	$(CONFDC) --emit-xsd notif.xsd notif.fxs
 
 $(CDB_DIR)/aaa_init.xml: ../confd/aaa_init.xml $(CDB_DIR)
 	@cp $< $@
