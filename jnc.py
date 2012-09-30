@@ -771,6 +771,11 @@ def search_one(stmt, keyword, arg=None):
 
 def is_config(stmt):
     """Returns True if stmt is a configuration data statement"""
+    # stmt is not config if part of a notification tree
+
+    # TODO check if notification, possibly by recursively searching for a
+    #      notification super statement
+
     config = None
     while config is None and stmt is not None:
         config = search_one(stmt, 'config')
