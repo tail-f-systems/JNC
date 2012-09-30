@@ -2042,7 +2042,7 @@ class MethodGenerator(object):
             cloner.return_type = self.n
             cloner.set_name('clone' + c[i])
             copy = ''.join(['new ', self.n, '(', keys, ')'])
-            if self.is_list:
+            if self.is_list and self.gen.is_config:
                 cloner.add_line(self.n + ' copy;')
                 cloner.add_line('try {')
                 cloner.add_line('    copy = ' + copy + ';')
