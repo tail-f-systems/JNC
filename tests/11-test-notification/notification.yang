@@ -1,0 +1,32 @@
+module notification {
+  namespace "http://acme.com/ns/notification/1.0";
+  prefix notification;
+  notification c {
+    container c2 {
+      presence "test purposes";
+    }
+    leaf leaf {
+      type string;
+    }
+    list l {
+      key "key1 key2";
+      leaf key1 {
+        type string;
+      }
+      leaf key2 {
+        type int32 {
+          range -100..100;
+        }
+      }
+      leaf thirty-seven {
+        type uint32 {
+          range 37..max;
+        }
+        default 37;
+      }
+      container c2 {
+        presence "test purposes";
+      }
+    }
+  }
+}
