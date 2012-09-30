@@ -2782,12 +2782,16 @@ class ListMethodGenerator(MethodGenerator):
         super(ListMethodGenerator, self).__init__(stmt, ctx)
         assert self.gen is self
         assert self.is_list, 'Only valid for list stmts'
-        self.is_config = is_config(stmt)
 
+        self.is_config = is_config(stmt)
         self.keys = []
         if self.is_config:
             key = search_one(self.stmt, 'key')
-            self.keys = key.arg.split(' ')
+            try:
+                self.keys = key.arg.split(' ')
+            except AttributeError:
+                self.is_config = False  # is_config produced wrong value
+
         findkey = lambda k: search_one(self.stmt, 'leaf', arg=k)
         self.key_stmts = [findkey(k) for k in self.keys]
 
