@@ -2186,26 +2186,6 @@ class MethodGenerator(object):
                 javadoc1.append(', using an existing object.')
                 javadoc2.append(' '.join(['@param', self.n2, 'The object to add.']))
                 method.add_parameter(self.n, self.n2)
-
-                if self.is_list:
-                    # Check that object does not already exist
-                    iter_ = self.n2 + 'Iterator'
-                    method.add_line(iter_.join(['ElementChildrenIterator ',
-                                               ' = ', '();']))
-                    method.add_line('while (' + iter_ + '.hasNext()) {')
-                    method.add_line(''.join(['    ', self.n, ' child = (',
-                                             self.n, ')', iter_, '.next();']))
-                    method.add_line('    YangException.throwException(child.keyCompare(' +
-                                    self.n2 + '), ' + self.n2 + ');')
-                    method.add_dependency('com.tailf.jnc.YangException')
-                    method.add_line('}')
-
-#                    # Check max-elements restriction
-#                    if self.gen.max_elements != 'unbounded':
-#                        method.add_line('YangException.throwException(children.size() >= ' +
-#                                     self.gen.max_elements + ', ' + self.n2 + ');')
-#                        method.add_dependency('com.tailf.jnc.YangException')
-
             elif self.is_list and i in {1, 2} and len(res) == 4:
                 # Add child with String or JNC type keys
                 javadoc1.append(', with specified keys.')
