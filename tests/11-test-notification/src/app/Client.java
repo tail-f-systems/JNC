@@ -64,6 +64,14 @@ public class Client {
         return getConfig(dev);
     }
     
+    public void subscribe() throws IOException, JNCException {
+        dev.getSession("cfg").createSubscription();
+    }
+    
+    public Element waitForNotification() throws IOException, JNCException {
+        return dev.getSession("cfg").receiveNotification();
+    }
+    
     /**
      * Gets the first configuration element in configs with name "c".
      * 
@@ -93,100 +101,33 @@ public class Client {
         Notif.enable();
         client.init();
         NodeSet configs = client.getConfig();
+        if (configs.isEmpty()) {
+            System.out.println("Received empty configuration");
+            return;
+        }
 
         // Buffered reader used to pause execution
         java.io.InputStreamReader isr =
                 new java.io.InputStreamReader(System.in);
         java.io.BufferedReader br = new java.io.BufferedReader(isr);
         
-        // Get (first) config with name "c"
+        // Confirm that there are no interfaces configs
         Interfaces interfacesConfig = getInterfacesConfig(configs);
-        
-        // Clone a backup configuration for rollback purposes
-        YangElement backup = interfacesConfig.clone();
-
-        String configAsXML = interfacesConfig.toXMLString();
-        System.out.println("Initial config:\n" + configAsXML);
-        System.out.println("HashCode of the config XML string: " +
-                configAsXML.hashCode());
-        
-        ElementChildrenIterator lIterator = interfacesConfig.interface_Iterator();
-        while (lIterator.hasNext()) {
-            JInterface h = (JInterface) lIterator.next();
-            
-            // Internal representations of ifIndex key
-            YangUInt32 ifIndexValue = (YangUInt32)h.getIfIndexValue();
-            
-            // Increment the ifIndex value by one
-            ifIndexValue.setValue(ifIndexValue.getValue() + 1L);
-        }
-
-        // Edit the remote configuration and get the new one
-        NodeSet configs2 = client.editConfig(interfacesConfig);
-        
-        // Pause (Read line)
-        br.readLine();
-        
-        // Get the new (changed) config with name "c"
-        interfacesConfig = getInterfacesConfig(configs2);
-        String configAsXML2 = interfacesConfig.toXMLString();
-//        System.out.println("New config:\n" + configAsXML2);
-        System.out.println("HashCode of the new configuration: " +
-                configAsXML2.hashCode());
-        
-        // Get diff between "backup" and "interfacesConfig"
-        NodeSet toKeep1 = new NodeSet();
-        NodeSet toDelete1 = new NodeSet();
-        NodeSet toKeep2 = new NodeSet();
-        NodeSet toDelete2 = new NodeSet();
-        YangElement.getDiff(backup, interfacesConfig,
-                toKeep1, toDelete1, toKeep2, toDelete2);
-        System.out.print("C changed or unique to backup: ");
-        for (NodeSet toKeep : new NodeSet[] {toKeep1, toKeep2}) {
-            for (Element elem : toKeep) {
-                if (elem instanceof JInterface) {
-                    JInterface l = (JInterface) elem;
-                    System.out.print("(" + l.getIfIndexValue() + "), ");
-                }
-            }
-        }
-        System.out.println();
-        System.out.print("C changed or unique to interfacesConfig: ");
-        for (NodeSet toDelete : new NodeSet[] {toDelete1, toDelete2}) {
-            for (Element elem : toDelete) {
-                if (elem instanceof JInterface) {
-                    JInterface l = (JInterface) elem;
-                    System.out.print("(" + l.getIfIndexValue() + "), ");
-                }
-            }
-        }
-        System.out.println();
-        
-        // Clear remote interfaces config
-        interfacesConfig.markDelete();
-        NodeSet configs3 = client.editConfig(interfacesConfig);
-        interfacesConfig = getInterfacesConfig(configs3);
         if (interfacesConfig == null) {
-            System.out.println("Cleared the remote c config: OK");
+            System.out.println("Remote configuration contains no interfaces");
         } else {
-            System.out.println("Clear the remote c config: FAIL");
+            System.err.println("Remote configuration contains interfaces");
         }
-
-        // Pause (Read line)
-        br.readLine();
         
-        // Change back to original config
-        client.editConfig(backup);
-        NodeSet configs4 = client.getConfig();
-        interfacesConfig = getInterfacesConfig(configs4);
-        String configAsXML4 = interfacesConfig.toXMLString();
-        if (configAsXML4.equals(configAsXML)) {
-            System.out.println("Rollback config same as first one: OK");
-        } else {
-            System.out.println("Different rollback config: FAIL");
-        }
-        System.out.println("Rollback config XML string hashCode: " +
-                configAsXML4.hashCode());
+        client.subscribe();
+        System.out.println(client.waitForNotification().toXMLString());
+        
+//        interfacesConfig = new Interfaces();
+//        JInterface interface0 = new JInterface();
+//        JInterface interface1 = new JInterface();
+//        interfacesConfig.addJInterface(interface0);
+//        interfacesConfig.addJInterface(interface1);
+//        System.out.println(interfacesConfig.toXMLString());
 
         // Cleanup
         client.dev.close();
