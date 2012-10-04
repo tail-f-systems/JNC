@@ -63,9 +63,13 @@ public class Client {
     public NodeSet getConfig() throws IOException, JNCException {
         return getConfig(dev);
     }
+
+    public NodeSet getStreams() throws IOException, JNCException {
+        return dev.getSession("cfg").getStreams();
+    }
     
     public void subscribe() throws IOException, JNCException {
-        dev.getSession("cfg").createSubscription();
+        dev.getSession("cfg").createSubscription("interface");
     }
     
     public Element waitForNotification() throws IOException, JNCException {
@@ -100,6 +104,10 @@ public class Client {
         Client client = new Client();
         Notif.enable();
         client.init();
+        
+        NodeSet reply = client.getStreams();
+        System.out.println("got streams:" + reply.toXMLString());
+        
         NodeSet configs = client.getConfig();
         if (configs.isEmpty()) {
             System.out.println("Received empty configuration");
@@ -119,18 +127,25 @@ public class Client {
             System.err.println("Remote configuration contains interfaces");
         }
         
+        // Subscribe to "interface" notifications
         client.subscribe();
-        System.out.println(client.waitForNotification().toXMLString());
         
-//        interfacesConfig = new Interfaces();
-//        JInterface interface0 = new JInterface();
-//        JInterface interface1 = new JInterface();
-//        interfacesConfig.addJInterface(interface0);
-//        interfacesConfig.addJInterface(interface1);
-//        System.out.println(interfacesConfig.toXMLString());
+        // Wait for a notification and print it as XML (blocking)
+        System.out.println("Waiting for \"interface\" notification...");
+        System.out.println(client.waitForNotification().toXMLString());
+
+        // Loop for 10000 iterations, print every 1000 received notification
+        System.out.println("Waiting for more \"interface\" notifications...");
+        System.out.println("Only every 100 notification is printed.");
+        for (int i=0; i<10000; i++) {
+            Element notification = client.waitForNotification();
+            if (i % 1000 == 0) {
+                System.out.println(notification.toXMLString());
+            }
+        }
 
         // Cleanup
-        client.dev.close();
+        //client.dev.close();
     }
 
 }
