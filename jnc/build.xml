@@ -4,7 +4,7 @@
   <property name="classes.dir" value="bin" />
   <property name="ganymed.dir" value="/usr/share/java/" />
   <property name="jar.dir" value="lib" />
-  
+
   <target name="clean">
     <delete file="${jar.dir}/JNC.jar" />
     <delete includeemptydirs="true">
@@ -19,12 +19,12 @@
       <classpath location="${ganymed.dir}/ganymed-ssh2-250.jar" />
     </javac>
   </target>
-  
+
   <target name="jar" depends="compile">
     <jar destfile="${jar.dir}/JNC.jar" basedir="${classes.dir}" />
   </target>
-  
+
   <target name="all" depends="clean, jar" />
-  
+
   <target name="main" depends="clean, compile" />
 </project>
