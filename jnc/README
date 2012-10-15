@@ -1,0 +1,20 @@
+The Java NETCONF Client (JNC) library can be compiled using the provided ant-
+script in a shell, or by using eclipse. There are of course other options as
+well but those are not covered here.
+
+To compile using eclipse, start a new Java project. In the wizard, uncheck the
+"Use default location" checkbox and enter this directory as Location. Now just
+give the project a name, click Finish and the project should be configured for
+you. You will notice that there are compilation errors because the ganymed SSH
+Jar-file is missing. Add it to the project build path.
+
+To compile using the provided ant-script in a shell, first make sure you have
+ganymed installed on your system and that build.xml points to the location of
+the ganymed Jar-file (the default is /usr/share/java/). Then type
+
+$ ant all
+
+and the Java classes should be compiled, resulting in both a bin folder
+containing the class files and a lib folder with JNC.jar. Include this Jar-file
+when compiling your client code to use the library. If you omit the "all"
+argument, the classes will still be compiled but no jar-file will be generated.
