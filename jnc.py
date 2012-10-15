@@ -2778,7 +2778,7 @@ class ListMethodGenerator(MethodGenerator):
         self.key_stmts = [findkey(k) for k in self.keys]
 
         notstring = lambda k: get_types(k, ctx)[1] != 'String'
-        self.is_string = not [notstring(k) for k in  self.key_stmts]
+        self.is_string = not all(notstring(k) for k in  self.key_stmts)
 #        max_ = search_one(stmt, 'max-elements')
 #        self.max_elements = 'unbounded' if not max_ else max_.arg
 
