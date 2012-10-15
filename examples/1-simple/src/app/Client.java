@@ -152,14 +152,6 @@ public class Client {
             System.err.println("Cannot add host " + hostName + ": Fail");
         }
         
-        // Try to add one with same name (key collision!)
-        try {
-            hostsConfig.addHost(hostName);
-            System.err.println("Host " + hostName + " added twice: Fail");
-        } catch (YangException e) {
-            System.out.println("Cannot add host " + hostName + " twice: OK");
-        }
-        
         // Fill the host list with MAX_ELEMENTS entries
         final int MAX_ELEMENTS = 64;
         int spaceLeft = MAX_ELEMENTS - hostsConfig.getChildren().size();
@@ -174,16 +166,6 @@ public class Client {
                     " entries: OK");
         } else {
             System.err.println("Fill list to limit: FAIL (is limit 0?)");
-        }
-
-        // Try to add more than max-elements number of hosts
-        try {
-            hostsConfig.addHost("anotherhost");
-            System.err.println("More than " + MAX_ELEMENTS +
-                    " hosts added: Fail");
-        } catch (YangException e) {
-            System.out.println("Cannot add more than " + MAX_ELEMENTS +
-                    " hosts: OK");
         }
         
         // Delete the added host list entries
@@ -267,7 +249,7 @@ public class Client {
         } else {
             System.out.println("Different rollback config: FAIL");
         }
-        System.out.println("Rollback config XML string hashCode:" +
+        System.out.println("Rollback config XML string hashCode: " +
                 configAsXML4.hashCode());
 
         // Cleanup
