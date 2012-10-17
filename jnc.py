@@ -2697,16 +2697,6 @@ class TypedefMethodGenerator(MethodGenerator):
                 checker.add_line('super.check();')
             elif self.enum:
                 checker.add_line('super.check();')
-#            elif self.pattern:
-#                if len(self.pattern) == 1:
-#                    p = self.pattern[0]
-#                    checker.add_line('pattern("' + p.arg + '");')
-#                else:
-#                    checker.add_line('java.lang.String[] regexs = {')
-#                    for p in self.pattern:
-#                        checker.add_line('    "' + p.arg + '",')
-#                    checker.add_line('};')
-#                    checker.add_line('pattern(regexs);')
             return [self.fix_imports(checker)]
         return []
 
@@ -2783,8 +2773,6 @@ class ListMethodGenerator(MethodGenerator):
 
         notstring = lambda k: get_types(k, ctx)[1] != 'String'
         self.is_string = not all(notstring(k) for k in  self.key_stmts)
-#        max_ = search_one(stmt, 'max-elements')
-#        self.max_elements = 'unbounded' if not max_ else max_.arg
 
     def value_constructors(self):
         """Returns a list of constructors for configuration data lists"""
