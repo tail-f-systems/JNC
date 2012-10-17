@@ -188,24 +188,30 @@ class JNCPlugin(plugin.PyangPlugin):
                     print_warning(msg=(etag.lower() + ', aborting.'), key=etag)
                     self.fatal("%s contains errors" % epos.top.arg)
         directory = ctx.opts.directory
-        d = directory.replace('.', os.sep)
+        d = os.sep.join(directory.split('.') + [camelize(modules[0].arg)])
         for module in modules:
-            if module.keyword == 'module':
+            if module.keyword in module_stmts:
                 if not ctx.opts.no_classes:
                     # Generate Java classes
-                    src = ('module "' + module.arg + '", revision: "' +
-                        util.get_latest_revision(module) + '".')
-                    generator = ClassGenerator(module, path=directory,
-                                               package=ctx.rootpkg,
-                                               src=src, ctx=ctx)
-                    generator.generate()
-                    for aug_module in augmented_modules.values():
-                        src = ('module "' + aug_module.arg + '", revision: "' +
-                            util.get_latest_revision(aug_module) + '".')
-                        generator = ClassGenerator(aug_module, path=directory,
-                                                   package=ctx.rootpkg,
-                                                   src=src, ctx=ctx)
+                    def generate_from(module):
+                        src = ('module "' + module.arg + '", revision: "' +
+                            util.get_latest_revision(module) + '".')
+                        subpkg = camelize(module.arg)
+                        generator = ClassGenerator(module,
+                            path='.'.join([directory, subpkg]),
+                            package='.'.join([ctx.rootpkg, subpkg]),
+                            src=src, ctx=ctx)
                         generator.generate()
+                    generate_from(module)
+                    for other_module in ctx.modules.values():
+                        import_stmts = search(module, 'import')
+                        for aug_module in augmented_modules.values():
+                            import_stmts.extend(search(aug_module, 'import'))
+                        imported_modules = map(lambda s: s.arg, import_stmts)
+                        if other_module.arg in imported_modules:
+                            generate_from(other_module)
+                    for aug_module in augmented_modules.values():
+                        generate_from(aug_module)
                     if ctx.opts.debug or ctx.opts.verbose:
                         print('Java classes generation COMPLETE.')
 
@@ -216,7 +222,7 @@ class JNCPlugin(plugin.PyangPlugin):
                     module_root = SchemaNode(module, '/')
                     schema_nodes.extend(module_root.as_list())
                     for aug_module in augmented_modules.values():
-                        stmts.extend(search(aug_module.substmts, node_stmts))
+                        stmts.extend(search(aug_module, node_stmts))
                         aug_module_root = SchemaNode(aug_module, '/')
                         schema_nodes.extend(aug_module_root.as_list())
                     schema_generator = SchemaGenerator(stmts, '/', ctx)
@@ -500,8 +506,7 @@ def get_package(stmt, ctx):
     while parent is not None:
         stmt = parent
         parent = get_parent(stmt)
-        if parent is not None:
-            sub_packages.appendleft(camelize(stmt.arg))
+        sub_packages.appendleft(camelize(stmt.arg))
     full_package = ctx.rootpkg.split(os.sep)
     full_package.extend(sub_packages)
     return '.'.join(full_package)
@@ -726,9 +731,9 @@ def search(stmt, keywords):
                     break
 
     def _search(stmt, keywords, acc):
-        if 'typedef' in keywords:
+        if any(x in keywords for x in ('typedef', 'import', 'augment')):
             old_keywords = keywords[:]
-            keywords = ['typedef']
+            keywords = ['typedef', 'import', 'augment']
             iterate(stmt.substmts, acc)
             keywords = old_keywords
         try:
@@ -917,7 +922,11 @@ class ClassGenerator(object):
                 if getattr(self, attr) is None:
                     setattr(self, attr, getattr(parent, attr))
 
-        self.rootpkg = self.ctx.rootpkg.replace(os.sep, '.')
+            self.rootpkg = '.'.join([self.ctx.rootpkg.replace(os.sep, '.'),
+                                 camelize(stmt.top.arg)])
+        else:
+            self.rootpkg = '.'.join([self.ctx.rootpkg.replace(os.sep, '.'),
+                                 self.n2])
 
     def generate(self):
         """Generates class(es) for self.stmt"""
@@ -1069,7 +1078,8 @@ class ClassGenerator(object):
         reg.add_dependency('com.tailf.jnc.Tagpath')
         reg.add_dependency('com.tailf.jnc.SchemaNode')
         reg.add_dependency('com.tailf.jnc.SchemaTree')
-        schema = os.sep.join([self.ctx.opts.directory.replace('.', os.sep), self.n])
+        schema = os.sep.join([self.ctx.opts.directory.replace('.', os.sep),
+                              self.n2, self.n])
         reg.add_line('parser.readFile("' + schema + '.schema", h);')
         self.java_class.add_schema_registrator(reg)
 
@@ -1872,6 +1882,10 @@ class MethodGenerator(object):
         self.rootpkg = ctx.rootpkg.split(os.sep)
         if self.rootpkg[:1] == ['src']:
             self.rootpkg = self.rootpkg[1:]  # src not part of package
+        if stmt.top.arg:
+            self.rootpkg.append(camelize(stmt.top.arg))
+        else:
+            self.rootpkg.append(self.n2)
 
         self.ctx = ctx
         self.root = None
