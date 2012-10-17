@@ -1,3 +1,9 @@
+DISCLAIMER: This project has not been publically announced as open source,
+no guarantees are made regarding the completeness or correctness of the
+documentation, examples, tests, etc. Please contact the main contributors for
+an update on the current status of the project.
+
+
 JNC
 ===
 
@@ -192,3 +198,9 @@ basic functionality has been tested and the documentation is complete.
 JNC pyang plugin.
 
 2012-08-29 The GitHub repository is renamed to JNC and its readme is updated.
+
+2012-09-20 Support for notifications added, and there is only one thing
+remaining until it is possible to generate fully compliant junos.yang classes!
+
+2012-10-17 JNC is finally made open source! There are some changes remaining
+before this will be publicly announced however.
