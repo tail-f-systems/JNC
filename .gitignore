@@ -1,5 +1,3 @@
-*.pyc
-<<<<<<< HEAD
 *.metadata
 *.class
 *.classpath
@@ -22,7 +20,3 @@ bin
 pyang
 jnc/lib
 *JPyang.java
-=======
-*~
-*bak
->>>>>>> d10266816e266788df4a97b6c23f381dae529f27
