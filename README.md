@@ -110,3 +110,6 @@ plugin.
 
 2012-08-29
 The GitHub repository is renamed to JNC and this readme is updated.
+
+2012-10-17
+The GitHub repository is transferred to tail-f-systems.
