@@ -882,11 +882,9 @@ public abstract class YangElement extends Element {
             if (x instanceof Leaf) {
                 continue;
             }
-            final YangElement c = (YangElement) x; // XXX Assuming YangElement
-                                                   // if not
-            // Leaf
+            // Assuming YangElement if not Leaf
+            final YangElement c = (YangElement) x;
             if (keys == null) {
-                // plain container
                 if (e.equals(x)) {
                     s.remove(i);
                     return c;
