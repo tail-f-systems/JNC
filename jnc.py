@@ -652,7 +652,7 @@ def get_types(yang_type, ctx):
             jnc, primitive = get_types(basetype, ctx)
             if get_parent(typedef).keyword in ('module', 'submodule'):
                 package = get_package(typedef, ctx)
-                typedef_arg = normalize(yang_type.arg)
+                typedef_arg = normalize(typedef.arg)
                 jnc = package + '.' + typedef_arg
     return jnc, primitive
 
