@@ -31,9 +31,7 @@ Or, if you like to keep things simple:
 
 """
 
-import optparse  # TODO: Deprecated in python 2.7, should use argparse instead
-# ... See http://stackoverflow.com/questions/3217673/why-use-argparse-rather-than-optparse
-# ... and http://docs.python.org/dev/library/argparse.html#upgrading-optparse-code
+import optparse
 import os
 import errno
 import sys
@@ -745,13 +743,10 @@ def search_one(stmt, keyword, arg=None):
 
 def is_config(stmt):
     """Returns True if stmt is a configuration data statement"""
-    # stmt is not config if part of a notification tree
-
-    # TODO check if notification, possibly by recursively searching for a
-    #      notification super statement
-
     config = None
     while config is None and stmt is not None:
+        if stmt.keyword == 'notification':
+            return False # stmt is not config if part of a notification tree
         config = search_one(stmt, 'config')
         stmt = get_parent(stmt)
     return config is None or config.arg == 'true'
@@ -1076,7 +1071,7 @@ class ClassGenerator(object):
 
         # If augment, add target module to augmented_modules dict
         if stmt.keyword == 'augment':
-            if not hasattr(stmt, "i_target_node"):  # TODO: EAFP
+            if not hasattr(stmt, "i_target_node"):
                 warn_msg = 'Target missing from augment statement'
                 print_warning(warn_msg, warn_msg, self.ctx)
             else:
@@ -1213,7 +1208,7 @@ class ClassGenerator(object):
             if sub.keyword == 'leaf':
                 key = search_one(self.stmt, 'key')
                 optional = key is None or sub.arg not in key.arg.split(' ')
-                # TODO: ensure that the leaf is truly optional
+                # FIXME: The leaf might be mandatory even if it is not a key
                 add(sub.arg, child_gen.getters())
                 for setter in child_gen.setters():
                     add(sub.arg, setter)
@@ -2313,10 +2308,7 @@ class LeafMethodGenerator(MethodGenerator):
                 if not self.is_string and i == 1:
                     param_types = [self.type_str[1]]
                     method.add_javadoc('using Java primitive values.')
-                    # FIXME: Add support for bits, leafref, instance-identifier, etc.
-                    # TODO: Write functions that returns appropriate types and names
-                    # FIXME: Some types may be incorrectly classified as
-                    # ... string, resulting in no primitive (bits, etc)
+                    # FIXME: Some types are incorrectly classified as string
                 else:
                     param_types = ['String']
                     method.add_javadoc('using a String value.')
@@ -2603,7 +2595,6 @@ class TypedefMethodGenerator(MethodGenerator):
             checker = JavaMethod(name='check')
             checker.add_javadoc('Checks all restrictions (if any).')
             checker.add_exception('YangException')
-            # TODO 'length', 'path', 'range', 'require_instance'
             if self.bit:
                 checker.add_line('super.check();')
             elif self.enum:
@@ -2703,7 +2694,7 @@ class ListMethodGenerator(MethodGenerator):
             constructor = self._constructor_template()
             constructor.add_javadoc(''.join(javadoc1))
             constructor.add_javadoc(javadoc2[i])
-            constructor.add_exception('JNCException')  # TODO: Add only if needed
+            constructor.add_exception('JNCException')
             for key in self.key_stmts:
                 key_arg = camelize(key.arg)
                 key_type = search_one(key, 'type')
@@ -2729,14 +2720,12 @@ class ListMethodGenerator(MethodGenerator):
                         for type_stmt in search(key_type, 'type'):
                             member_type, _ = get_types(type_stmt, self.ctx)
                             setValue.append('"' + member_type + '", ')
-                            # TODO: break line and indent for readabililty
                         setValue.append('}));')
                         constructor.add_line(''.join(setValue))
                     elif jnc == 'YangEnumeration':
                         setValue.append(', new String [] {')
                         for enum in search(key_type, 'enum'):
                             setValue.append('"' + enum.arg + '", ')
-                            # TODO: break line and indent for readabililty
                         setValue.append('}));')
                         constructor.add_line(''.join(setValue))
                     elif jnc == 'YangBits':
