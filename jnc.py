@@ -398,7 +398,11 @@ leaf_stmts = {'leaf', 'leaf-list'}
 """Leaf and leaf-list statement keywords"""
 
 
-node_stmts = {'module', 'submodule'} | yangelement_stmts | leaf_stmts
+module_stmts = {'module', 'submodule'}
+"""Module and submodule statement keywords"""
+
+
+node_stmts = module_stmts | yangelement_stmts | leaf_stmts
 """Keywords of statements that make up a configuration tree"""
 
 
@@ -917,7 +921,10 @@ class ClassGenerator(object):
 
         self.n = normalize(stmt.arg)
         self.n2 = camelize(stmt.arg)
-        self.filename = self.n + '.java'
+        if stmt.keyword in module_stmts:
+            self.filename = normalize(search_one(stmt, 'prefix').arg) + '.java'
+        else:
+            self.filename = self.n + '.java'
 
         if yang_types is None:
             self.yang_types = YangType()
@@ -1061,7 +1068,7 @@ class ClassGenerator(object):
         enabler.add_line('"'.join(['YangElement.setPackage(NAMESPACE, ',
                                    self.java_class.package, ');']))
         enabler.add_dependency('com.tailf.jnc.YangElement')
-        enabler.add_line(self.n + '.registerSchema();')  # XXX: Don't import name
+        enabler.add_line(normalize(prefix.arg) + '.registerSchema();')
         self.java_class.add_enabler(enabler)
 
         # Add method 'registerSchema' to root class
