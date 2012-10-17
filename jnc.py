@@ -102,10 +102,6 @@ class JNCPlugin(plugin.PyangPlugin):
                 action='store_true',
                 help='Print debug messages. Redundant if verbose mode is on.'),
             optparse.make_option(
-                '--jnc-javadoc',
-                dest='javadoc_directory',
-                help='Generate javadoc to JAVADOC_DIRECTORY.'),
-            optparse.make_option(
                 '--jnc-no-classes',
                 dest='no_classes',
                 action='store_true',
@@ -246,25 +242,11 @@ class JNCPlugin(plugin.PyangPlugin):
                 print_warning(msg=('Ignoring schema tree rooted at "' +
                     module.keyword + ' ' + module.arg + '" - not a module'))
 
-        # Generate javadoc
+        # Generate package-info.java for javadoc
         for module in modules:
             if not ctx.opts.no_pkginfo and module.keyword == 'module':
                 package_info_generator = PackageInfoGenerator(d, module, ctx)
                 package_info_generator.generate_package_info()
-        javadir = ctx.opts.javadoc_directory
-        if javadir:
-            if ctx.opts.debug or ctx.opts.verbose:
-                print('Generating javadoc...')
-            if ctx.opts.verbose:
-                os.system('javadoc -d ' + javadir + ' -subpackages ' + d)
-            else:
-                os.system(('javadoc -d ' + javadir + ' -subpackages ' + d +
-                    ' >/dev/null'))
-            if ctx.opts.debug or ctx.opts.verbose:
-                print('Javadoc generation COMPLETE.')
-        if len(modules) != 1:
-            print_warning(msg=('Generating code for several modules has not' +
-                ' been tested thoroughly.'), ctx=ctx)
 
     def fatal(self, exitCode=1):
         """Raise an EmitError"""
@@ -1282,15 +1264,10 @@ class PackageInfoGenerator(object):
         and all of its substatements.
 
         """
-        is_java_file = lambda s: s.endswith('.java')
-        is_not_java_file = lambda s: not is_java_file(s)
-        directory_listing = os.listdir(self.d)
-        java_files = [is_java_file(d) for d in directory_listing]
-        dirs = filter(is_not_java_file, directory_listing)
-        stmts = search(self.stmt, node_stmts)
-        class_hierarchy_list = self.generate_javadoc(stmts, java_files)
         write_file(self.d, 'package-info.java',
-                   self.gen_package_info(class_hierarchy_list), self.ctx)
+                   self.gen_package_info(), self.ctx)
+        dirs = filter(lambda s: not s.endswith('.java'), os.listdir(self.d))
+        stmts = search(self.stmt, node_stmts)
         for directory in dirs:
             for sub in stmts:
                 if normalize(sub.arg) == normalize(directory):
@@ -1307,75 +1284,9 @@ class PackageInfoGenerator(object):
                     self.pkg = old_pkg
                     self.stmt = old_stmt
 
-    @staticmethod
-    def generate_javadoc(stmts, java_files):
-        """Generates a list of class filenames and lists of their subclasses'
-        filenames, positioned immediately after each filename if any.
-
-        stmts      -- list of statements representing a YANG module tree node
-        java_files -- list of Java class filenames that has been generated
-
-        """
-        hierarchy = []
-        for stmt in stmts:
-            filename = normalize(stmt.arg) + '.Java'
-            if filename in java_files:
-                java_files.remove(filename)
-                hierarchy.append(filename)
-                
-                substmts = search(stmt, yangelement_stmts)
-                children = PackageInfoGenerator.generate_javadoc(substmts, java_files)
-                if children:
-                    hierarchy.append(children)
-        return hierarchy
-
-    @staticmethod
-    def parse_hierarchy(hierarchy):
-        """Returns html for a list of javadoc pages corresponding to the .java
-        files in the hierarchy list.
-
-        hierarchy -- a tree of .java files represented as a list, for example:
-            ['Foo.java', ['Bar.java', ['Baz.java'], 'Qu.java']] would represent the
-            hierarchy structure:
-            Foo
-            |   Bar
-            |   |   Baz
-            |   Qu
-
-            That is, Baz is a child of Bar in the data model tree, and Bar and Qu
-            are children of the top level element Foo.
-
-        """
-        res = ''
-        for entry in hierarchy:
-            if not isinstance(entry, list):
-                body = '    <a href="' + entry[:-5] + '.html">' + entry[:-5] + '</a>'
-                res += PackageInfoGenerator.html_list(body, 1, tag='li')
-            else:
-                body = PackageInfoGenerator.parse_hierarchy(entry)
-                res += PackageInfoGenerator.html_list(body, 1)
-            if body[-1:] != '\n':
-                res += '\n'
-        return res
-
-    @staticmethod
-    def html_list(body, indent_level, tag='ul'):
-        """Returns a string representing javadoc with a <ul> html-element if ul,
-        else with a <li> html-element.
-
-        """
-        body = '<' + tag + '>\n' + body
-        if body[-1:] != '\n':
-            body += '\n'
-        body += '</' + tag + '>'
-        return ' ' * 4 + body.replace('\n', '\n' + ' ' * 4)
-
-    def gen_package_info(self, class_hierarchy_list):
+    def gen_package_info(self):
         """Writes a package-info.java file to the package directory with a high
         level description of the package functionality and requirements.
-
-        class_hierarchy_list -- A tree represented as a list as in
-                                parse_hierarchy
 
         """
         module = self.stmt.arg if not self.stmt.top else self.stmt.top.arg
