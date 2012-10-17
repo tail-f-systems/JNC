@@ -1015,7 +1015,7 @@ class ClassGenerator(object):
                        java_class.as_list(), self.ctx)
 
         # Generate classes for children and keep track of augmented modules
-        for stmt in search(self.stmt, yangelement_stmts | {'augment'}):
+        for stmt in search(self.stmt, list(yangelement_stmts | {'augment'})):
             child_generator = ClassGenerator(stmt, package=self.package,
                 ns=ns_arg, prefix_name=self.n, parent=self)
             child_generator.generate()
@@ -2681,18 +2681,18 @@ class TypedefMethodGenerator(MethodGenerator):
             # TODO 'length', 'path', 'range', 'require_instance'
             if self.bit:
                 checker.add_line('super.check();')
-            if self.enum:
+            elif self.enum:
                 checker.add_line('super.check();')
-            if self.pattern:
-                if len(self.pattern) == 1:
-                    p = self.pattern[0]
-                    checker.add_line('pattern("' + p.arg + '");')
-                else:
-                    checker.add_line('java.lang.String[] regexs = {')
-                    for p in self.pattern:
-                        checker.add_line('    "' + p.arg + '",')
-                    checker.add_line('};')
-                    checker.add_line('pattern(regexs);')
+#            elif self.pattern:
+#                if len(self.pattern) == 1:
+#                    p = self.pattern[0]
+#                    checker.add_line('pattern("' + p.arg + '");')
+#                else:
+#                    checker.add_line('java.lang.String[] regexs = {')
+#                    for p in self.pattern:
+#                        checker.add_line('    "' + p.arg + '",')
+#                    checker.add_line('};')
+#                    checker.add_line('pattern(regexs);')
             return [self.fix_imports(checker)]
         return []
 
