@@ -1,16 +1,4 @@
-/*    -*- Java -*-
- *
- *  Copyright 2012 Tail-F Systems AB. All rights reserved.
- *
- *  This software is the confidential and proprietary
- *  information of Tail-F Systems AB.
- *
- *  $Id$
- *
- */
-
 package com.tailf.jnc;
-
 
 /**
  * The IO subscriber is used for tracing, auditing, and logging of messages

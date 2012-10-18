@@ -1,14 +1,3 @@
-/*    -*- Java -*-
- *
- *  Copyright 2012 Tail-F Systems AB. All rights reserved.
- *
- *  This software is the confidential and proprietary
- *  information of Tail-F Systems AB.
- *
- *  $Id$
- *
- */
-
 package com.tailf.jnc;
 
 import java.lang.reflect.Constructor;
