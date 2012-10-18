@@ -1,6 +1,7 @@
 package app;
 
 import gen.ietfInterfaces.Interfaces;
+import gen.ietfInterfaces.JIf;
 import gen.ietfIp.Ip;
 
 import java.io.IOException;
@@ -88,7 +89,7 @@ public class Client {
      */
     public static void main(String[] args) throws IOException, JNCException {
         Client client = new Client();
-        Ip.enable();
+        JIf.enable();
         client.init();
         NodeSet configs = client.getConfig();
         
