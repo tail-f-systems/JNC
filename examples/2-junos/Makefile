@@ -22,11 +22,8 @@ CONFD_HOST ?= localhost
 CONFD_FLAGS = --addloadpath $(CONFD_DIR)/etc/confd
 START_FLAGS ?=
 
-all: junos.fxs ssh-keydir $(CDB_DIR)/junos.xml
+all: junos-system.fxs ssh-keydir $(CDB_DIR)/junos-system.xml
 	@echo "Build complete"
-
-junos.xsd: junos.fxs
-	$(CONFDC) --emit-xsd junos.xsd junos.fxs
 
 $(CDB_DIR)/aaa_init.xml: ../confd/aaa_init.xml $(CDB_DIR)
 	@cp $< $@

@@ -9,8 +9,8 @@ import com.tailf.jnc.JNCException;
 import com.tailf.jnc.NetconfSession;
 import com.tailf.jnc.NodeSet;
 
-import junos.Junos;
-import junos.Configuration;
+import gen.junosSystem.Junos;
+import gen.junosSystem.Configuration;
 
 public class Client {
 
@@ -92,6 +92,15 @@ public class Client {
         
         // Get (first) config with name "hosts"
         Configuration config = getJunosConfiguration(configs);
+        
+        System.out.println(config.toXMLString());
+        
+        client.editConfig(config);
+        
+        configs = client.getConfig();
+        
+        // Get (first) config with name "hosts"
+        config = getJunosConfiguration(configs);
         
         System.out.println(config.toXMLString());
 

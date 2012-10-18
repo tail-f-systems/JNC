@@ -1,8 +1,8 @@
-<project name="junos" basedir="." default="main">
+<project name="junos-system" basedir="." default="main">
   <property environment="env" />
   <property name="src.dir"     value="src" />
-  <property name="gen.dir"     value="src/junos" />
-  <property name="main-class"  value="junos.Client" />
+  <property name="gen.dir"     value="src/gen" />
+  <property name="main-class"  value="junosSystem.Client" />
   <property name="build.dir"   value="build" />
   <property name="classes.dir" value="${build.dir}/classes" />
   <property name="jar.dir"     value="${build.dir}/jar" />
@@ -19,7 +19,7 @@
   <target name="generate">
     <mkdir dir="${gen.dir}" />
     <exec executable="${pyang}" failonerror="true">
-      <arg line="-f jnc --jnc-output ${gen.dir} --jnc-import-on-demand junos.yang" />
+      <arg line="-f jnc --jnc-output ${gen.dir} --jnc-import-on-demand junos-system.yang" />
     </exec>
   </target>
 
