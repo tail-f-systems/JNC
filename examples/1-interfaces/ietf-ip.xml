@@ -1,0 +1,13 @@
+<interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+  <interface>
+    <name>eth0</name>
+    <type>fast</type>
+    <mtu>1500</mtu>
+  </interface>
+  <interface>
+    <name>eth1</name>
+    <type>atm</type>
+    <enabled>true</enabled>
+    <speed>0</speed>
+  </interface>
+</interfaces>
