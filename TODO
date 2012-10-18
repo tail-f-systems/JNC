@@ -58,3 +58,8 @@ with-defaults capabilities
 Make sure default values are used where appropriate for all types
 Make the JNC plugin multithreaded
 Add description, reference, status, etc. to class level javadoc
+
+KNOWN BUGS
+==========
+The slash character ("/") in binary encoding is sometimes replaced by another
+character. 
