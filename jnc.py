@@ -23,7 +23,7 @@ For complete functionality, invoke with:
     --jnc-output <package.name> \
     --jnc-verbose \
     --jnc-ignore-errors \
-    --jnc-javadoc <javadoc directory path> \
+    --jnc-import-on-demand \
     <file.yang>
 
 Or, if you like to keep things simple:
@@ -58,9 +58,12 @@ class JNCPlugin(plugin.PyangPlugin):
 
     """
 
+    def __init__(self):
+        self.done = set([])  # Helps avoiding processing modules more than once
+
     def add_output_format(self, fmts):
         """Adds 'jnc' as a valid output format and sets the format to jnc if
-        the --jnc-output option is set, but --format is not.
+        the -d/--jnc-output option is set, but -f/--format is not.
 
         """
         self.multiple_modules = False
@@ -145,6 +148,8 @@ class JNCPlugin(plugin.PyangPlugin):
                 print_warning(msg=('Option -d (or --java-package) not set, ' +
                     'defaulting to "gen".'))
             ctx.rootpkg = ctx.opts.directory.rpartition('src')[2][1:]
+            self.ctx = ctx
+            self.d = ctx.opts.directory.split('.')
 
     def setup_fmt(self, ctx):
         """Disables implicit errors for the Context"""
@@ -181,70 +186,83 @@ class JNCPlugin(plugin.PyangPlugin):
                 else:
                     print_warning(msg=(etag.lower() + ', aborting.'), key=etag)
                     self.fatal("%s contains errors" % epos.top.arg)
-        directory = ctx.opts.directory
-        d = os.sep.join(directory.split('.') + [camelize(modules[0].arg)])
-        for module in modules:
-            if module.keyword in module_stmts:
-                if not ctx.opts.no_classes:
-                    # Generate Java classes
-                    def generate_from(module):
-                        src = ('module "' + module.arg + '", revision: "' +
-                            util.get_latest_revision(module) + '".')
-                        subpkg = camelize(module.arg)
-                        generator = ClassGenerator(module,
-                            path='.'.join([directory, subpkg]),
-                            package='.'.join([ctx.rootpkg, subpkg]),
-                            src=src, ctx=ctx)
-                        generator.generate()
-                    generate_from(module)
-                    for other_module in ctx.modules.values():
-                        import_stmts = search(module, 'import')
-                        for aug_module in augmented_modules.values():
-                            import_stmts.extend(search(aug_module, 'import'))
-                        imported_modules = map(lambda s: s.arg, import_stmts)
-                        if other_module.arg in imported_modules:
-                            generate_from(other_module)
-                    for aug_module in augmented_modules.values():
-                        generate_from(aug_module)
-                    if ctx.opts.debug or ctx.opts.verbose:
-                        print('Java classes generation COMPLETE.')
 
-                if not ctx.opts.no_schema:
-                    # Generate external schema
-                    schema_nodes = ['<schema>']
-                    stmts = search(module, node_stmts)
-                    module_root = SchemaNode(module, '/')
-                    schema_nodes.extend(module_root.as_list())
-                    for aug_module in augmented_modules.values():
-                        stmts.extend(search(aug_module, node_stmts))
-                        aug_module_root = SchemaNode(aug_module, '/')
-                        schema_nodes.extend(aug_module_root.as_list())
-                    schema_generator = SchemaGenerator(stmts, '/', ctx)
-                    schema_nodes.extend(schema_generator.schema_nodes())
-                    for i in range(1, len(schema_nodes)):
-                        # Indent all but the first and last line
-                        if schema_nodes[i] in ('<node>', '</node>'):
-                            schema_nodes[i] = ' ' * 4 + schema_nodes[i]
-                        else:
-                            schema_nodes[i] = ' ' * 8 + schema_nodes[i]
-                    schema_nodes.append('</schema>')
+        # Generate files from main module
+        module = modules[0]
+        import_stmts = set(search(module, 'import'))
+        self.generate_from(module)
 
-                    name = normalize(search_one(module, 'prefix').arg)
-                    write_file(d, name + '.schema', '\n'.join(schema_nodes), ctx)
-                    if ctx.opts.debug or ctx.opts.verbose:
-                        print('Schema generation COMPLETE.')
+        # Generate files from imported modules
+        for other_module in ctx.modules.values():
+            # Need to check augmented modules for imports multiple times
+            for aug_module in augmented_modules.values():
+                import_stmts.update(search(aug_module, 'import'))
+            imported_modules = map(lambda s: s.arg, import_stmts)
+            if other_module.arg in imported_modules:
+                self.generate_from(other_module)
 
-                augmented_modules.clear()
+        # Generate files from augmented modules
+        for aug_module in augmented_modules.values():
+            self.generate_from(aug_module)
 
-            else:
-                print_warning(msg=('Ignoring schema tree rooted at "' +
-                    module.keyword + ' ' + module.arg + '" - not a module'))
+        # Print debug messages saying that we're done.
+        if ctx.opts.debug or ctx.opts.verbose:
+            if not self.ctx.opts.no_classes:
+                print('Java classes generation COMPLETE.')
+            if not self.ctx.opts.no_schema:
+                print('Schema generation COMPLETE.')
 
-        # Generate package-info.java for javadoc
-        for module in modules:
-            if not ctx.opts.no_pkginfo and module.keyword == 'module':
-                package_info_generator = PackageInfoGenerator(d, module, ctx)
-                package_info_generator.generate_package_info()
+    def generate_from(self, module):
+        """Generates classes, schema file and pkginfo files for module,
+        according to options set in self.ctx. The attributes self.directory
+        and self.d are used to determine where to generate the files.
+
+        module -- Module statement to generate files from
+
+        """
+        if module in self.done:
+            return
+        self.done.add(module)
+        subpkg = camelize(module.arg)
+        d = os.sep.join(self.d + [subpkg])
+        if not self.ctx.opts.no_classes:
+            # Generate Java classes
+            src = ('module "' + module.arg + '", revision: "' +
+                util.get_latest_revision(module) + '".')
+            generator = ClassGenerator(module,
+                path='.'.join([self.ctx.opts.directory, subpkg]),
+                package='.'.join([self.ctx.rootpkg, subpkg]),
+                src=src, ctx=self.ctx)
+            generator.generate()
+
+        if not self.ctx.opts.no_schema:
+            # Generate external schema
+            schema_nodes = ['<schema>']
+            stmts = search(module, node_stmts)
+            module_root = SchemaNode(module, '/')
+            schema_nodes.extend(module_root.as_list())
+            if self.ctx.opts.verbose:
+                print('Generating schema node "/"...')
+            schema_generator = SchemaGenerator(stmts, '/', self.ctx)
+            schema_nodes.extend(schema_generator.schema_nodes())
+            for i in range(1, len(schema_nodes)):
+                # Indent all but the first and last line
+                if schema_nodes[i] in ('<node>', '</node>'):
+                    schema_nodes[i] = ' ' * 4 + schema_nodes[i]
+                else:
+                    schema_nodes[i] = ' ' * 8 + schema_nodes[i]
+            schema_nodes.append('</schema>')
+
+            name = normalize(search_one(module, 'prefix').arg)
+            write_file(d, name + '.schema', '\n'.join(schema_nodes), self.ctx)
+
+        if not self.ctx.opts.no_pkginfo:
+            # Generate package-info.java for javadoc
+            pkginfo_generator = PackageInfoGenerator(d, module, self.ctx)
+            pkginfo_generator.generate_package_info()
+
+        if self.ctx.opts.debug or self.ctx.opts.verbose:
+            print('pkg ' + '.'.join([self.ctx.rootpkg, subpkg]) + ' generated')
 
     def fatal(self, exitCode=1):
         """Raise an EmitError"""
@@ -752,14 +770,6 @@ def is_config(stmt):
     return config is None or config.arg == 'true'
 
 
-def java_docify(s):
-    """Returns the string s, but with each row prepended by ' * '"""
-    res = ''
-    for row in s.splitlines():
-        res += ' * ' + row + '\n'
-    return res[:-1]  # Don't include the last newline character
-
-
 class SchemaNode(object):
 
     def __init__(self, stmt, tagpath):
@@ -826,12 +836,13 @@ class SchemaGenerator(object):
         """Generate XML schema as a list of "node" elements"""
         res = []
         for stmt in self.stmts:
+            subpath = self.tagpath + stmt.arg + '/'
             if self.ctx.opts.verbose:
-                print('Generating schema node "' + self.tagpath + '"...')
-            node = SchemaNode(stmt, self.tagpath + stmt.arg + '/')
+                print('Generating schema node "' + subpath + '"...')
+            node = SchemaNode(stmt, subpath)
             res.extend(node.as_list())
             substmt_generator = SchemaGenerator(search(stmt, node_stmts),
-                self.tagpath + stmt.arg + '/', self.ctx)
+                subpath, self.ctx)
             res.extend(substmt_generator.schema_nodes())
         return res
 
@@ -1056,7 +1067,7 @@ class ClassGenerator(object):
         reg.add_dependency('com.tailf.jnc.SchemaNode')
         reg.add_dependency('com.tailf.jnc.SchemaTree')
         schema = os.sep.join([self.ctx.opts.directory.replace('.', os.sep),
-                              self.n2, self.n])
+                              self.n2, normalize(prefix.arg)])
         reg.add_line('parser.readFile("' + schema + '.schema", h);')
         self.java_class.add_schema_registrator(reg)
 
@@ -1122,9 +1133,9 @@ class ClassGenerator(object):
 
         if self.ctx.opts.debug or self.ctx.opts.verbose:
             if package_generated:
-                print('.'.join([self.package, self.n2]))
+                print('pkg ' + '.'.join([self.package, self.n2]) + ' generated')
             if self.ctx.opts.verbose:
-                print('Generating Java class "' + self.filename + '"...')
+                print('Generating "' + self.filename + '"...')
 
         gen = MethodGenerator(stmt, self.ctx)
 

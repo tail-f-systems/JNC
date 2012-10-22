@@ -2,7 +2,6 @@ package app;
 
 import gen.ietfInterfaces.Interfaces;
 import gen.ietfInterfaces.JIf;
-import gen.ietfIp.Ip;
 
 import java.io.IOException;
 
@@ -12,7 +11,6 @@ import com.tailf.jnc.Element;
 import com.tailf.jnc.JNCException;
 import com.tailf.jnc.NetconfSession;
 import com.tailf.jnc.NodeSet;
-import com.tailf.jnc.YangElement;
 
 public class Client {
 
