@@ -2,6 +2,8 @@ package app;
 
 import java.io.IOException;
 
+import com.tailf.jnc.Device;
+import com.tailf.jnc.DeviceUser;
 import com.tailf.jnc.Element;
 import com.tailf.jnc.JNCException;
 import com.tailf.jnc.NetconfSession;
@@ -12,67 +14,60 @@ import com.tailf.jnc.SSHSession;
 import gen.junosSystem.Junos;
 import gen.junosSystem.Configuration;
 
-/**
- * Client code to get the running configuration from a juniper router, copy it
- * to the candidate configuration and then commit any changes made to it.
- * 
- * NetconfSession is used directly, no "Device" is used.
- */
 public class Client {
 
-    // Hard coded host name, user name and password
-    private String junosHost = "olive1.lab";
-    private String junosUserName = "admin";
-    private String pass = "Admin99";
-    private NetconfSession session = null;
+    private Device dev;
+    private DeviceUser duser;
 
-    /**
-     * Constructor, creates a connected client object.
-     * 
-     * @throws IOException
-     * @throws JNCException
-     */
-    public Client() throws IOException, JNCException {
+    public Client() {
         this.init();
     }
 
-    /**
-     * Connects to host using hard coded values
-     * 
-     * @throws IOException
-     * @throws JNCException
-     */
-    private void init() throws IOException, JNCException {
-        SSHConnection conn = new SSHConnection(junosHost, 22);
-        conn.authenticateWithPassword(junosUserName, pass);
-        SSHSession sshSession = new SSHSession(conn);
-        session = new NetconfSession(sshSession);
+    // Hardcoded fields
+    private String emsUserName = "bobby";
+    private String junosUserName = "admin";
+    private String pass = "Admin99";
+    private String junosHost = "olive1.lab";
+
+    private void init() {
+        duser = new DeviceUser(emsUserName, junosUserName, pass);
+        dev = new Device("mydev", duser, junosHost, 22);
+
+        try {
+            dev.connect(emsUserName);
+            dev.newSession("cfg");
+        } catch (IOException e) {
+            System.err.println(e);
+            System.exit(1);
+        } catch (JNCException e) {
+            System.err.println("Can't authenticate " + e);
+            System.exit(1);
+        }
+    }
+
+    public NodeSet getConfig() throws IOException, JNCException {
+        NetconfSession session = dev.getSession("cfg");
+        NodeSet reply = session.getConfig(NetconfSession.RUNNING);
+        return reply;
     }
     
     /**
-     * Returns the netconf session initiated by the client
-     * 
-     * @return an active netconf session
-     */
-    public NetconfSession getSession() {
-        return session;
-    }
-
-    /**
-     * Gets the first configuration element in configs with name "configuration".
+     * Gets the first configuration element in configs with name "hosts".
      * 
      * @param configs Set of device configuration data.
      * @return First hosts configuration, or null if none present.
      */
     public static Configuration getJunosConfiguration(NodeSet configs) {
-        Element config = null;
-        for (Element elem : configs) {
-            if (elem.name.equals("configuration")) {
-                config = elem;
-                break;
+        Element config = configs.first();
+        if (!config.name.equals("hosts")) {
+            config = null;
+            for (Element elem : configs) {
+                if (elem.name.equals("configuration")) {
+                    config = elem;
+                }
             }
         }
-        return (Configuration) config;
+        return (Configuration)config;
     }
 
     /**
@@ -81,38 +76,41 @@ public class Client {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException, JNCException {
-        Junos.enable();
         Client client = new Client();
-        NetconfSession session = client.getSession();
+        Junos.enable();
 
-        // lock CANDIDATE datastore so that we are not interrupted
-        session.lock(NetconfSession.CANDIDATE);
+        // Start (NETCONF) sessions towards devices
+        SSHConnection c1 = new SSHConnection(client.junosHost, 22);
+        c1.authenticateWithPassword(client.junosUserName, client.pass);
+        SSHSession ssh1 = new SSHSession(c1);
+        NetconfSession dev1 = new NetconfSession(ssh1);
+
+        // take locks on CANDIDATE datastore so that we are not interrupted
+        dev1.lock(NetconfSession.CANDIDATE);
 
         // reset candidates so that CANDIDATE is an exact copy of running
-        session.copyConfig(NetconfSession.RUNNING, NetconfSession.CANDIDATE);
+        dev1.copyConfig(NetconfSession.RUNNING, NetconfSession.CANDIDATE);
 
         // Get system configuration from dev1
-        NodeSet configs = session.getConfig(NetconfSession.RUNNING);
+        NodeSet configs = client.getConfig();
         Element sys1 = getJunosConfiguration(configs);
-        System.out.println("Received:\n" + sys1.toXMLString());
-        System.out.println("\n-----------------\n\n");
 
         // Manipulate element trees locally
         // TODO
 
         // Write back the updated element tree to the device
-        session.editConfig(NetconfSession.CANDIDATE, sys1);
+        dev1.editConfig(NetconfSession.CANDIDATE, sys1);
 
         // candidates are now updated
-        session.confirmedCommit(60);
+        dev1.confirmedCommit(60);
 
-        // now commit them
-        session.commit();
-        session.unlock(NetconfSession.CANDIDATE);
-
+        // now commit them, unlock the candidate config and close connection
+        // Note: in case of error, the device will rollback within 1 min
+        dev1.commit();
+        dev1.unlock(NetconfSession.CANDIDATE);
+        client.dev.close();
+        
         System.out.println("Committed:\n" + sys1.toXMLString());
-
-        // Devices will rollback within 1 min
     }
 
 }
