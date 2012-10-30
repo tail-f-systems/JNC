@@ -37,6 +37,8 @@ public class YangEnumeration extends YangBaseString {
         super(value);
         if (value.isEmpty()) {
             YangException.throwException(true, "empty string in enum value");
+        } else if (enums == null || enums.length == 0) {
+            YangException.throwException(true, "no enum names provided");
         }
         pattern("[^ ]|[^ ].*[^ ]");  // Leading and trailing spaces not allowed
         this.enums = enums;

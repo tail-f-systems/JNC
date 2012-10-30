@@ -73,7 +73,7 @@ public class YangEnumerationTest {
             one = new YangEnumeration("hej", null);
             fail("Expected YangException");
         } catch (YangException e) {
-            assertTrue(e.opaqueData instanceof NullPointerException);
+            assertTrue(e.opaqueData.equals("no enum names provided"));
         }
         try {
             one = new YangEnumeration(null, new String[] {"hej"});
