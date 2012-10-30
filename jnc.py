@@ -144,9 +144,13 @@ class JNCPlugin(plugin.PyangPlugin):
             sys.exit(0)
         if ctx.opts.format == 'jnc':
             if not ctx.opts.directory:
-                ctx.opts.directory = 'gen'
+                ctx.opts.directory = 'src/gen'
                 print_warning(msg=('Option -d (or --java-package) not set, ' +
-                    'defaulting to "gen".'))
+                    'defaulting to "src/gen".'))
+            elif 'src' not in ctx.opts.directory:
+                ctx.opts.directory = 'src/gen'
+                print_warning(msg=('No "src" in output directory path, ' +
+                    'defaulting to "src/gen".'))
             ctx.rootpkg = ctx.opts.directory.rpartition('src')[2][1:]
             self.ctx = ctx
             self.d = ctx.opts.directory.split('.')
