@@ -101,7 +101,7 @@ public class Client {
      */
     public static void main(String[] args) throws IOException, JNCException {
         Client client = new Client();
-//        Junos.enable();
+        Junos.enable();
 //        client.init();
 //        NodeSet configs = client.getConfig();
 //        
@@ -149,6 +149,8 @@ public class Client {
         // now commit them
         dev1.commit();
         dev1.unlock(NetconfSession.CANDIDATE);
+        
+        System.out.println("Committed:\n" + sys1.toXMLString());
 
         // Devices will rollback within 1 min
     }
