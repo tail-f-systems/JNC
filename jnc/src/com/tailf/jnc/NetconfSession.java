@@ -86,7 +86,7 @@ import java.util.ArrayList;
  * 
  *     // take locks on CANDIDATE datastore so that we are not interrupted
  *     dev1.lock(NetconfSession.CANDIDATE);
- *     dev1.lock(NetconfSession.CANDIDATE);
+ *     dev2.lock(NetconfSession.CANDIDATE);
  * 
  *     // reset candidates so that CANDIDATE is an exact copy of running
  *     dev1.copyConfig(NetconfSession.RUNNING, NetconfSession.CANDIDATE);
