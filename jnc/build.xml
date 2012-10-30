@@ -5,6 +5,8 @@
   <property name="ganymed.dir" value="/usr/share/java/" />
   <property name="jar.dir" value="lib" />
 
+  <target name="all" depends="jar" />
+
   <target name="clean">
     <delete file="${jar.dir}/JNC.jar" />
     <delete includeemptydirs="true">
@@ -24,7 +26,5 @@
     <jar destfile="${jar.dir}/JNC.jar" basedir="${classes.dir}" />
   </target>
 
-  <target name="all" depends="clean, jar" />
-
-  <target name="main" depends="clean, compile" />
+  <target name="main" depends="compile" />
 </project>
