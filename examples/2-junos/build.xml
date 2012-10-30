@@ -10,10 +10,17 @@
   <property name="jnc.dir"     value="../../jnc/lib" />
   <property name="ganymed.dir" value="/usr/share/java" />
 
+  <!-- Before we can do anything with this example, we must first  -->
+  <!-- get the xml schema from the juniper router and generate yang,  -->
+  <!-- and then java files from that, thus do this first: -->
+
+  <target name="setup"
+          depends="junos.yang, generate">
+  </target>
+
   <target name="clean">
     <delete dir="${build.dir}" />
     <delete dir="${gen.dir}" />
-    <delete file="Simple.schema" />
   </target>
 
   <target name="generate">
@@ -23,9 +30,17 @@
     </exec>
   </target>
 
-  <target name="compile" depends="generate">
+  <target name="junos.yang">
+    <exec executable="./get-schema.sh"/>
+  </target>
+
+
+  <target name="compile">
     <mkdir dir="${classes.dir}" />
     <javac srcdir="${src.dir}" destdir="${classes.dir}" debug="on"
+           fork="true"
+           memoryInitialSize="2000m"
+           memoryMaximumSize="2000m"
            debuglevel="lines,vars,source" includeantruntime="false">
       <classpath location="${jnc.dir}/JNC.jar" />
     </javac>
@@ -50,7 +65,7 @@
     </java>
   </target>
 
-  <target name="main" depends="clean, generate" />
+  <target name="main" depends="generate" />
 
-  <target name="all" depends="clean, jar" />
+  <target name="all" depends="jar" />
 </project>

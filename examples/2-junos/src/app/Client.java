@@ -21,11 +21,18 @@ public class Client {
         this.init();
     }
 
+    // Hardcoded fields
+    private String emsUserName = "bobby";
+    private String junosUserName = "admin";
+    private String pass = "Admin99";
+    private String junosHost = "olive1.lab";
+
+
     private void init() {
-        String emsUserName = "bobby";
+
         String ip = "localhost";
-        duser = new DeviceUser(emsUserName, "admin", "admin");
-        dev = new Device("mydev", duser, ip, 2022);
+        duser = new DeviceUser(emsUserName, junosUserName, pass);
+        dev = new Device("mydev", duser, junosHost, 22);
 
         try {
             dev.connect(emsUserName);
