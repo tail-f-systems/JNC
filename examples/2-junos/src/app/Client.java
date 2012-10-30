@@ -8,6 +8,8 @@ import com.tailf.jnc.Element;
 import com.tailf.jnc.JNCException;
 import com.tailf.jnc.NetconfSession;
 import com.tailf.jnc.NodeSet;
+import com.tailf.jnc.SSHConnection;
+import com.tailf.jnc.SSHSession;
 
 import gen.junosSystem.Junos;
 import gen.junosSystem.Configuration;
@@ -54,17 +56,23 @@ public class Client {
             JNCException {
         d.getSession("cfg").editConfig(config);
         // Inspect the updated RUNNING configuration
-        return getConfig(d);
+        return getRunningConfig(d);
     }
 
-    private NodeSet getConfig(Device d) throws IOException, JNCException {
+    private NodeSet getRunningConfig(Device d) throws IOException, JNCException {
         NetconfSession session = d.getSession("cfg");
         NodeSet reply = session.getConfig(NetconfSession.RUNNING);
         return reply;
     }
 
+    private NodeSet getCandidateConfig(Device d) throws IOException, JNCException {
+        NetconfSession session = d.getSession("cfg");
+        NodeSet reply = session.getConfig(NetconfSession.CANDIDATE);
+        return reply;
+    }
+
     public NodeSet getConfig() throws IOException, JNCException {
-        return getConfig(dev);
+        return getRunningConfig(dev);
     }
     
     /**
@@ -93,26 +101,56 @@ public class Client {
      */
     public static void main(String[] args) throws IOException, JNCException {
         Client client = new Client();
-        Junos.enable();
-        client.init();
-        NodeSet configs = client.getConfig();
-        
-        // Get (first) config with name "hosts"
-        Configuration config = getJunosConfiguration(configs);
-        
-        System.out.println(config.toXMLString());
-        
-        client.editConfig(config);
-        
-        configs = client.getConfig();
-        
-        // Get (first) config with name "hosts"
-        config = getJunosConfiguration(configs);
-        
-        System.out.println(config.toXMLString());
+//        Junos.enable();
+//        client.init();
+//        NodeSet configs = client.getConfig();
+//        
+//        // Get (first) config with name "hosts"
+//        Configuration config = getJunosConfiguration(configs);
+//        
+//        System.out.println(config.toXMLString());
+//        
+//        client.editConfig(config);
+//        
+//        configs = client.getConfig();
+//        
+//        // Get (first) config with name "hosts"
+//        config = getJunosConfiguration(configs);
+//        
+//        System.out.println(config.toXMLString());
+//
+//        // Cleanup
+//        client.dev.close();
+        // Start (NETCONF) sessions towards devices
+        SSHConnection c1 = new SSHConnection(client.junosHost, 22);
+        c1.authenticateWithPassword(client.junosUserName, client.pass);
+        SSHSession ssh1 = new SSHSession(c1);
+        NetconfSession dev1 = new NetconfSession(ssh1);
 
-        // Cleanup
-        client.dev.close();
+        // take locks on CANDIDATE datastore so that we are not interrupted
+        dev1.lock(NetconfSession.CANDIDATE);
+
+        // reset candidates so that CANDIDATE is an exact copy of running
+        dev1.copyConfig(NetconfSession.RUNNING, NetconfSession.CANDIDATE);
+
+        // Get system configuration from dev1
+        NodeSet configs = client.getConfig();
+        Element sys1 = getJunosConfiguration(configs);//dev1.getConfig("cfg").first();
+
+        // Manipulate element trees locally
+        // TODO
+
+        // Write back the updated element tree to the device
+        dev1.editConfig(NetconfSession.CANDIDATE, sys1);
+
+        // candidates are now updated
+        dev1.confirmedCommit(60);
+
+        // now commit them
+        dev1.commit();
+        dev1.unlock(NetconfSession.CANDIDATE);
+
+        // Devices will rollback within 1 min
     }
 
 }
