@@ -2645,6 +2645,7 @@ class ContainerMethodGenerator(MethodGenerator):
         res = JavaValue(name=self.n2, value='null')
         res.add_javadoc(' '.join(['Field for child', self.stmt.keyword,
                                   '"' + self.stmt.arg + '".']))
+        res.add_modifier('public')
         res.add_modifier(self.n)
         res.add_dependency(self.n)
         return self.fix_imports(res, child=True)
