@@ -114,12 +114,12 @@ public class Client {
         NodeSet configs = client.getConfig();
         Configuration config = getJunosConfiguration(configs);
 
-        // ========== Manipulate element trees locally
+        // ========== Manipulate element tree locally
         
         // Change the as-number leaf value of 
         // /configuration/routing-options/autonomous-system
         // to 13.37
-        AutonomousSystem aSystem = (AutonomousSystem)config.getChild("routing-options").getChild("autonomous-system");
+        AutonomousSystem aSystem = config.routingOptions.autonomousSystem;
         YangString asNumber = aSystem.getAsNumberValue();
         asNumber.setValue("13.37");
         
