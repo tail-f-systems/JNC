@@ -1,7 +1,7 @@
 <project name="ietf-interfaces" basedir="." default="main">
   <property environment="env" />
   <property name="src.dir"     value="src" />
-  <property name="gen.dir"     value="src/" />
+  <property name="gen.dir"     value="src/gen" />
   <property name="main-class"  value="ietf-interfaces.Client" />
   <property name="build.dir"   value="build" />
   <property name="classes.dir" value="${build.dir}/classes" />
@@ -50,7 +50,7 @@
     </java>
   </target>
 
-  <target name="all" depends="clean, jar" />
+  <target name="all" depends="jar" />
   
-  <target name="main" depends="clean, compile" />
+  <target name="main" depends="compile" />
 </project>
