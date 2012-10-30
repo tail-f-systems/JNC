@@ -228,15 +228,18 @@ class JNCPlugin(plugin.PyangPlugin):
             return
         self.done.add(module)
         subpkg = camelize(module.arg)
+        if self.ctx.rootpkg:
+            fullpkg = '.'.join([self.ctx.rootpkg, subpkg])
+        else:
+            fullpkg = subpkg
         d = os.sep.join(self.d + [subpkg])
         if not self.ctx.opts.no_classes:
             # Generate Java classes
             src = ('module "' + module.arg + '", revision: "' +
                 util.get_latest_revision(module) + '".')
             generator = ClassGenerator(module,
-                path='.'.join([self.ctx.opts.directory, subpkg]),
-                package='.'.join([self.ctx.rootpkg, subpkg]),
-                src=src, ctx=self.ctx)
+                path=os.sep.join([self.ctx.opts.directory, subpkg]),
+                package=fullpkg, src=src, ctx=self.ctx)
             generator.generate()
 
         if not self.ctx.opts.no_schema:
@@ -266,7 +269,7 @@ class JNCPlugin(plugin.PyangPlugin):
             pkginfo_generator.generate_package_info()
 
         if self.ctx.opts.debug or self.ctx.opts.verbose:
-            print('pkg ' + '.'.join([self.ctx.rootpkg, subpkg]) + ' generated')
+            print('pkg ' + fullpkg + ' generated')
 
     def fatal(self, exitCode=1):
         """Raise an EmitError"""
@@ -914,11 +917,13 @@ class ClassGenerator(object):
                 if getattr(self, attr) is None:
                     setattr(self, attr, getattr(parent, attr))
 
-            self.rootpkg = '.'.join([self.ctx.rootpkg.replace(os.sep, '.'),
-                                 camelize(stmt.top.arg)])
+            if self.ctx.rootpkg:
+                self.rootpkg = '.'.join([self.ctx.rootpkg.replace(os.sep, '.'),
+                                         camelize(stmt.top.arg)])
+            else:
+                self.rootpkg = camelize(stmt.top.arg)
         else:
-            self.rootpkg = '.'.join([self.ctx.rootpkg.replace(os.sep, '.'),
-                                 self.n2])
+            self.rootpkg = package
 
     def generate(self):
         """Generates class(es) for self.stmt"""
