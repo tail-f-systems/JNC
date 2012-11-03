@@ -27,8 +27,8 @@ public class Client {
     // Hard coded host name, user name and password
     private String emsUserName = "bobby";
     private String junosUserName = "admin";
-    private String pass = "Admin99";
-    private String junosHost = "olive1.lab";
+    private String pass = "admin";
+    private String junosHost = "my-junos";
     
     // The device and device user used by the client
     private Device dev;
