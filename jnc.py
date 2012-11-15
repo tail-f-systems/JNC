@@ -789,7 +789,15 @@ class SchemaNode(object):
         stmt = self.stmt
         res.append('<tagpath>' + self.tagpath + '</tagpath>')
         top_stmt = stmt if stmt.top is None else stmt.top
-        ns = search_one(top_stmt, 'namespace').arg
+        if top_stmt.keyword == 'module':
+            module = top_stmt
+        else:  #submodule
+            modulename = search_one(top_stmt, 'belongs-to').arg
+            for (name, rev) in top_stmt.i_ctx.modules:
+                if name == modulename:
+                    module = top_stmt.i_ctx.modules[(name, rev)]
+                    break
+        ns = search_one(module, 'namespace').arg
         res.append('<namespace>' + ns + '</namespace>')
         res.append('<primitive_type>0</primitive_type>')
 
