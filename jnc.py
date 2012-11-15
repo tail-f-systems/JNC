@@ -1820,6 +1820,11 @@ class MethodGenerator(object):
             prefix = search_one(self.stmt.top, 'prefix')
         if prefix is not None:
             self.root = normalize(prefix.arg)
+        else:
+            try:
+                self.root = normalize(self.stmt.top.i_prefix)
+            except AttributeError:
+                pass
 
         self.is_container = stmt.keyword in ('container', 'notification')
         self.is_list = stmt.keyword == 'list'
