@@ -54,8 +54,7 @@
     </jar>
   </target>
 
-  <target name="Client"
-          depends="compile">
+  <target name="Client">
     <java classname="app.Client"
           failonerror="true"
           fork="true">
