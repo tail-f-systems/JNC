@@ -991,19 +991,25 @@ class ClassGenerator(object):
 
         # Gather typedefs to generate and add to class_hierarchy dict
         typedef_stmts = set([])
-        for stmt in search(self.stmt, 'typedef'):
-            typedef_stmts.add(stmt)
-            class_hierarchy[self.rootpkg].add(normalize(stmt.arg))
-            try:
-                while True:
-                    type_stmt = search_one(stmt, 'type')
-                    if type_stmt.i_typedef is None:
-                        break
-                    typedef_stmts.add(type_stmt.i_typedef)
-                    stmt = type_stmt.i_typedef
-                    class_hierarchy[self.rootpkg].add(normalize(stmt.arg))
-            except AttributeError:
-                pass
+        module_stmts = set([self.stmt])
+        included = map(lambda x: x.arg, search(self.stmt, 'include'))
+        for (module, rev) in self.ctx.modules:
+            if module in included:
+                module_stmts.add(self.ctx.modules[(module, rev)])
+        for module_stmt in module_stmts:
+            for stmt in search(module_stmt, 'typedef'):
+                typedef_stmts.add(stmt)
+                class_hierarchy[self.rootpkg].add(normalize(stmt.arg))
+                try:
+                    while True:
+                        type_stmt = search_one(stmt, 'type')
+                        if type_stmt.i_typedef is None:
+                            break
+                        typedef_stmts.add(type_stmt.i_typedef)
+                        stmt = type_stmt.i_typedef
+                        class_hierarchy[self.rootpkg].add(normalize(stmt.arg))
+                except AttributeError:
+                    pass
 
         # Generate the typedef classes
         for stmt in typedef_stmts:
