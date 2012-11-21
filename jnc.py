@@ -193,10 +193,17 @@ class JNCPlugin(plugin.PyangPlugin):
 
         # Generate files from main module
         module = modules[0]
-        import_stmts = set(search(module, 'import'))
         self.generate_from(module)
 
         # Generate files from imported modules
+        import_stmts = set(search(module, 'import'))
+        module_stmts = set([])
+        included = map(lambda x: x.arg, search(module, 'include'))
+        for (module_stmt, rev) in self.ctx.modules:
+            if module_stmt in included:
+                module_stmts.add(self.ctx.modules[(module_stmt, rev)])
+        for module_stmt in module_stmts:
+            import_stmts.update(search(module_stmt, 'import'))
         for other_module in ctx.modules.values():
             # Need to check augmented modules for imports multiple times
             for aug_module in augmented_modules.values():
