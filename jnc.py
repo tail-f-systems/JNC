@@ -1838,34 +1838,23 @@ class MethodGenerator(object):
                          search(stmt, yangelement_stmts | leaf_stmts)]
 
         self.ctx = ctx
-        self.root = None
-        prefix = None
-        if stmt.top is not None:
-            prefix = search_one(self.stmt.top, 'prefix')
-        if prefix is not None:
-            self.root = normalize(prefix.arg)
-        else:
-            try:
-                self.root = normalize(self.stmt.top.i_prefix)
-            except AttributeError:
-                pass
+        self.module_stmt = get_module(stmt)
+        prefix = search_one(self.module_stmt, 'prefix')
+        self.root = normalize(prefix.arg)
 
         self.pkg = get_package(stmt, ctx)
         self.basepkg = self.pkg.partition('.')[0]
         self.rootpkg = ctx.rootpkg.split(os.sep)
         if self.rootpkg[:1] == ['src']:
             self.rootpkg = self.rootpkg[1:]  # src not part of package
-        if stmt.top.arg:
-            self.rootpkg.append(camelize(stmt.top.arg))
-        else:
-            self.rootpkg.append(self.n2)
+        self.rootpkg.append(camelize(self.module_stmt.arg))
 
         self.is_container = stmt.keyword in ('container', 'notification')
         self.is_list = stmt.keyword == 'list'
         self.is_typedef = stmt.keyword == 'typedef'
         self.is_leaf = stmt.keyword == 'leaf'
         self.is_leaflist = stmt.keyword == 'leaf-list'
-        self.is_top_level = get_parent(self.stmt) == self.stmt.top
+        self.is_top_level = get_parent(self.stmt) == self.module_stmt
         assert (self.is_container or self.is_list or self.is_typedef
             or self.is_leaf or self.is_leaflist)
         self.gen = self
