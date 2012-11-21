@@ -1834,15 +1834,6 @@ class MethodGenerator(object):
         self.n2 = camelize(stmt.arg)
         self.children = [normalize(s.arg) for s in
                          search(stmt, yangelement_stmts | leaf_stmts)]
-        self.pkg = get_package(stmt, ctx)
-        self.basepkg = self.pkg.partition('.')[0]
-        self.rootpkg = ctx.rootpkg.split(os.sep)
-        if self.rootpkg[:1] == ['src']:
-            self.rootpkg = self.rootpkg[1:]  # src not part of package
-        if stmt.top.arg:
-            self.rootpkg.append(camelize(stmt.top.arg))
-        else:
-            self.rootpkg.append(self.n2)
 
         self.ctx = ctx
         self.root = None
@@ -1856,6 +1847,16 @@ class MethodGenerator(object):
                 self.root = normalize(self.stmt.top.i_prefix)
             except AttributeError:
                 pass
+
+        self.pkg = get_package(stmt, ctx)
+        self.basepkg = self.pkg.partition('.')[0]
+        self.rootpkg = ctx.rootpkg.split(os.sep)
+        if self.rootpkg[:1] == ['src']:
+            self.rootpkg = self.rootpkg[1:]  # src not part of package
+        if stmt.top.arg:
+            self.rootpkg.append(camelize(stmt.top.arg))
+        else:
+            self.rootpkg.append(self.n2)
 
         self.is_container = stmt.keyword in ('container', 'notification')
         self.is_list = stmt.keyword == 'list'
