@@ -757,7 +757,10 @@ def search(stmt, keywords):
             try:
                 key = ' '.join([ch.keyword, ch.arg])
             except TypeError:
-                key = ' '.join([':'.join(ch.keyword), ch.arg])
+                if ch.arg is None:  # Extension
+                    key = ' '.join(ch.keyword)
+                else:
+                    key = ' '.join([':'.join(ch.keyword), ch.arg])
             if key in acc:
                 continue
             for keyword in keywords:
