@@ -493,12 +493,35 @@ def write_file(d, file_name, file_content, ctx):
                 f.write('\n')
 
 
+def get_module(stmt):
+    """Returns the module to which stmt belongs to"""
+    if stmt.top is not None:
+        return get_module(stmt.top)
+    elif stmt.keyword == 'module':
+        return stmt
+    else:  # stmt.keyword == 'submodule':
+        belongs_to = search_one(stmt, 'belongs-to')
+        for (module_name, revision) in stmt.i_ctx.modules:
+            if module_name == belongs_to.arg:
+                return stmt.i_ctx.modules[(module_name, revision)]
+
+
 def get_parent(stmt):
-    """Returns closest parent which is not a choice or case statement"""
-    if stmt.parent is None or stmt.parent.keyword not in ('choice', 'case'):
+    """Returns closest parent which is not a choice, case or submodule
+    statement. If the parent is a submodule statement, the corresponding main
+    module is returned instead.
+
+    """
+    if stmt.parent is None:
+        return None
+    elif stmt.parent.keyword == 'submodule':
+        return get_module(stmt)
+    elif stmt.parent.parent is None:
         return stmt.parent
-    else:
+    elif stmt.parent.keyword in ('choice', 'case'):
         return get_parent(stmt.parent)
+    else:
+        return stmt.parent
 
 
 def get_package(stmt, ctx):
