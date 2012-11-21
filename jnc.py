@@ -965,18 +965,14 @@ class ClassGenerator(object):
             self.generate_class()
 
     def generate_classes(self):
-        """Generates a Java class hierarchy from a module or submodule
-        statement, allowing for netconf communication using the jnc library.
+        """Generates a Java class hierarchy from a module statement, allowing
+        for netconf communication using the jnc library.
 
         """
+        assert(self.stmt.keyword == 'module')
         # Namespace and prefix
-        if self.stmt.keyword == 'module':
-            ns_arg = search_one(self.stmt, 'namespace').arg
-            prefix = search_one(self.stmt, 'prefix')
-        elif self.stmt.keyword == 'submodule':
-            parent_module = search_one(self.stmt, 'belongs-to')
-            prefix = search_one(parent_module, 'prefix')
-            ns_arg = '<unknown/prefix: ' + prefix.arg + '>'
+        ns_arg = search_one(self.stmt, 'namespace').arg
+        prefix = search_one(self.stmt, 'prefix')
         
         # Add root to class_hierarchy dict
         if self.rootpkg not in class_hierarchy:
