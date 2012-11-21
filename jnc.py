@@ -811,7 +811,7 @@ class SchemaNode(object):
         res = ['<node>']
         stmt = self.stmt
         res.append('<tagpath>' + self.tagpath + '</tagpath>')
-        top_stmt = stmt if stmt.top is None else stmt.top
+        top_stmt = get_module(stmt)
         if top_stmt.keyword == 'module':
             module = top_stmt
         else:  #submodule
@@ -948,11 +948,12 @@ class ClassGenerator(object):
                 if getattr(self, attr) is None:
                     setattr(self, attr, getattr(parent, attr))
 
+            module = get_module(stmt)
             if self.ctx.rootpkg:
                 self.rootpkg = '.'.join([self.ctx.rootpkg.replace(os.sep, '.'),
-                                         camelize(stmt.top.arg)])
+                                         camelize(module.arg)])
             else:
-                self.rootpkg = camelize(stmt.top.arg)
+                self.rootpkg = camelize(module.arg)
         else:
             self.rootpkg = package
 
@@ -1127,7 +1128,8 @@ class ClassGenerator(object):
                 print_warning(warn_msg, warn_msg, self.ctx)
             else:
                 target = stmt.i_target_node
-                augmented_modules[target.top.arg] = target.top
+                target_module = get_module(target)
+                augmented_modules[target_module.arg] = target_module
             return  # XXX: Do not generate a class for the augment statement
 
         fields = OrderedSet()
@@ -1198,7 +1200,7 @@ class ClassGenerator(object):
             self.java_class.imports.add('java.util.*')
             if self.rootpkg != self.package:
                 self.java_class.imports.add(self.rootpkg + '.*')
-                top = self.stmt.top
+                top = get_module(self.stmt)
                 if top is None:
                     top = self.stmt
                 elif top.keyword == 'submodule':
@@ -1335,7 +1337,7 @@ class PackageInfoGenerator(object):
         level description of the package functionality and requirements.
 
         """
-        module = self.stmt.arg if not self.stmt.top else self.stmt.top.arg
+        module = get_module(self.stmt).arg
         return ''.join([package_info.format(' ' + module, ''), self.pkg, ';'])
 
 
