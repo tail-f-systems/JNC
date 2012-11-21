@@ -759,9 +759,10 @@ def search(stmt, keywords):
                     break
 
     def _search(stmt, keywords, acc):
-        if any(x in keywords for x in ('typedef', 'import', 'augment')):
+        if any(x in keywords for x in ('typedef', 'import',
+                                       'augment', 'include')):
             old_keywords = keywords[:]
-            keywords = ['typedef', 'import', 'augment']
+            keywords = ['typedef', 'import', 'augment', 'include']
             iterate(stmt.substmts, acc)
             keywords = old_keywords
         try:
