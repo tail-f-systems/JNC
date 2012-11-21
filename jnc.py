@@ -1509,6 +1509,7 @@ class JavaClass(object):
                     self.imports |= ['com.tailf.jnc.' + s for s in method.exceptions]
         if self.superclass:
             self.imports.add(get_import(self.superclass))
+        imported_classes = []
         if self.imports:
             prevpkg = ''
             for import_ in self.imports.as_sorted_list():
@@ -1516,6 +1517,10 @@ class JavaClass(object):
                 if (cls != self.filename.split('.')[0]
                         and (pkg != 'com.tailf.jnc' or cls in com_tailf_jnc
                             or cls == '*')):
+                    if cls in imported_classes:
+                        continue
+                    else:
+                        imported_classes.append(cls)
                     basepkg = import_[:import_.find('.')]
                     if basepkg != prevpkg:
                         header.append('')
