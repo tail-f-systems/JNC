@@ -191,26 +191,21 @@ class JNCPlugin(plugin.PyangPlugin):
                     print_warning(msg=(etag.lower() + ', aborting.'), key=etag)
                     self.fatal("%s contains errors" % epos.top.arg)
 
-        # Generate files from main module
-        module = modules[0]
-        self.generate_from(module)
+        # Sweep, adding included and imported modules, until no change
+        module_set = set(modules)
+        num_modules = 0
+        while num_modules != len(module_set):
+            num_modules = len(module_set)
+            for module in list(module_set):
+                imported = map(lambda x: x.arg, search(module, 'import'))
+                included = map(lambda x: x.arg, search(module, 'include'))
+                for (module_stmt, rev) in self.ctx.modules:
+                    if module_stmt in (imported + included):
+                        module_set.add(self.ctx.modules[(module_stmt, rev)])
 
-        # Generate files from imported modules
-        import_stmts = set(search(module, 'import'))
-        module_stmts = set([])
-        included = map(lambda x: x.arg, search(module, 'include'))
-        for (module_stmt, rev) in self.ctx.modules:
-            if module_stmt in included:
-                module_stmts.add(self.ctx.modules[(module_stmt, rev)])
-        for module_stmt in module_stmts:
-            import_stmts.update(search(module_stmt, 'import'))
-        for other_module in ctx.modules.values():
-            # Need to check augmented modules for imports multiple times
-            for aug_module in augmented_modules.values():
-                import_stmts.update(search(aug_module, 'import'))
-            imported_modules = map(lambda s: s.arg, import_stmts)
-            if other_module.arg in imported_modules:
-                self.generate_from(other_module)
+        # Generate files from main modules
+        for module in filter(lambda s: s.keyword == 'module', module_set):
+            self.generate_from(module)
 
         # Generate files from augmented modules
         for aug_module in augmented_modules.values():
