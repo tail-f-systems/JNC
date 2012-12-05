@@ -1,14 +1,6 @@
 package com.tailf.jnc;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
@@ -40,7 +32,6 @@ public class SchemaParserTest {
     
     @Test
     public void testLoadSchemaFromClasspath() throws JNCException {
-
         parser.findAndReadFile("Yang.schema", h);
         Assert.assertEquals(1, h.size());
         Assert.assertEquals("urn:ietf:params:xml:ns:yang:ietf-yang-types", h.values().iterator().next().namespace);
