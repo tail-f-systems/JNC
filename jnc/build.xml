@@ -23,6 +23,7 @@
   </target>
 
   <target name="jar" depends="compile">
+    <mkdir dir="${jar.dir}" />
     <jar destfile="${jar.dir}/JNC.jar" basedir="${classes.dir}" />
   </target>
 
