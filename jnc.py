@@ -1123,7 +1123,7 @@ class ClassGenerator(object):
         schema = os.sep.join([self.ctx.opts.directory.replace('.', os.sep),
                               self.n2, normalize(prefix.arg)])
         if self.ctx.opts.classpath_schema_loading:
-            reg.add_line('parser.findAndReadFile("' + normalize(prefix.arg) + '.schema", h);')
+            reg.add_line('parser.findAndReadFile("' + normalize(prefix.arg) + '.schema", h, ' + normalize(prefix.arg) + '.class);')
         else:
             reg.add_line('parser.readFile("' + schema + '.schema", h);')
         self.java_class.add_schema_registrator(reg)

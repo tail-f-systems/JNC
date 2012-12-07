@@ -27,12 +27,12 @@ public class SchemaParserTest {
 
     @Test (expected=JNCException.class)
     public void testFileNotFound() throws JNCException {
-        parser.findAndReadFile("File Not Found.schema", h);
+        parser.findAndReadFile("File Not Found.schema", h, SchemaParser.class);
     }
     
     @Test
     public void testLoadSchemaFromClasspath() throws JNCException {
-        parser.findAndReadFile("Yang.schema", h);
+        parser.findAndReadFile("Yang.schema", h, SchemaParser.class);
         Assert.assertEquals(1, h.size());
         Assert.assertEquals("urn:ietf:params:xml:ns:yang:ietf-yang-types", h.values().iterator().next().namespace);
     }
