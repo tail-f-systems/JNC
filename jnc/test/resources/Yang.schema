@@ -1,0 +1,12 @@
+<schema>
+    <node>
+        <tagpath>/</tagpath>
+        <namespace>urn:ietf:params:xml:ns:yang:ietf-yang-types</namespace>
+        <primitive_type>0</primitive_type>
+        <min_occurs>1</min_occurs>
+        <max_occurs>1</max_occurs>
+        <children></children>
+        <flags>0</flags>
+        <desc></desc>
+    </node>
+</schema>
