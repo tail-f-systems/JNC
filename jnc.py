@@ -127,6 +127,11 @@ class JNCPlugin(plugin.PyangPlugin):
                 dest='import_on_demand',
                 action='store_true',
                 help='Use non explicit imports where possible.'),
+           optparse.make_option(
+                '--jnc-classpath-schema-loading',
+                dest='classpath_schema_loading',
+                action='store_true',
+                help='Load schema files using classpath rather than location.')
             ]
         g = optparser.add_option_group('JNC output specific options')
         g.add_options(optlist)
@@ -1117,7 +1122,10 @@ class ClassGenerator(object):
         reg.add_dependency('com.tailf.jnc.SchemaTree')
         schema = os.sep.join([self.ctx.opts.directory.replace('.', os.sep),
                               self.n2, normalize(prefix.arg)])
-        reg.add_line('parser.readFile("' + schema + '.schema", h);')
+        if self.ctx.opts.classpath_schema_loading:
+            reg.add_line('parser.findAndReadFile("' + normalize(prefix.arg) + '.schema", h, ' + normalize(prefix.arg) + '.class);')
+        else:
+            reg.add_line('parser.readFile("' + schema + '.schema", h);')
         self.java_class.add_schema_registrator(reg)
 
         self.write_to_file()

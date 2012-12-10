@@ -198,4 +198,23 @@ public class SchemaParser {
                     + inputSource + " error: " + e);
         }
     }
+
+    /**
+     * Scans the classpath for the XML schema file and populates the hashtable with 
+     * SchemaNode objects. Class is passed in so that in the case of multiple {@link ClassLoader}s 
+     * the correct one can be used to locate the schema.
+     * 
+     * @param filename
+     * @param h
+     * @param clazz
+     * @throws JNCException if the file is not found or cannot be parsed.
+     */
+    public void findAndReadFile(final String filename, final HashMap<Tagpath, SchemaNode> h, final Class clazz)
+            throws JNCException {
+        final URL url = clazz.getResource(filename);
+        if (url == null){
+            throw new JNCException(JNCException.PARSER_ERROR, "Cannot find file: " + filename + " on the classpath.");
+        }
+        readFile(url, h);
+    }
 }
