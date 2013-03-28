@@ -208,9 +208,17 @@ class JNCPlugin(plugin.PyangPlugin):
                     if module_stmt in (imported + included):
                         module_set.add(self.ctx.modules[(module_stmt, rev)])
 
+        # Normalize yang identifiers, i.e. use lower case, etc.
+        for module in module_set:
+            convert_identifiers(module)
+
         # Generate files from main modules
         for module in filter(lambda s: s.keyword == 'module', module_set):
             self.generate_from(module)
+
+        # Normalize yang identifiers, i.e. use lower case, etc.
+        for module in augmented_modules.values():
+            convert_identifiers(module)
 
         # Generate files from augmented modules
         for aug_module in augmented_modules.values():
@@ -613,6 +621,32 @@ def normalize(string):
         res = capitalize_first(res)
     normalized_stmt_args[string] = res  # Add to cache
     return res
+
+
+def convert_identifier(string):
+    """Converts string to avoid name clashes between package and class names
+
+    Returns the string to lower if it is all upper case,
+    decapitalized if it begins with a capital letter but contains lower case,
+    unchanged otherwise
+    """
+    if not string:
+        return string
+    elif all([not s.islower() for s in string]):
+        return string.lower()
+    elif string[:1].isupper():
+        return string[:1].lower() + string[1:]
+    return string
+
+
+def convert_identifiers(stmt):
+    """returns stmt with its arg and arg of all substmts converted to a format
+    that prevents package names from clashing with class names
+
+    """
+    stmt.arg = convert_identifier(stmt.arg)
+    for substmt in stmt.substmts:
+        convert_identifiers(substmt)
 
 
 def flatten(l):
