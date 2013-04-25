@@ -313,20 +313,43 @@ public abstract class YangElement extends Element {
         return false;
     }
 
-    private static String camelize(String s) {
-        int pos;
-        while ((pos = s.indexOf('-')) != -1) {
-            s = s.substring(0, pos) + capitalize(s.substring(pos + 1));
+    protected static String camelize(String s) {
+        int len = s == null ? 0 : s.length();
+        if (len == 0) {
+            return "";
         }
+        StringBuilder sb = new StringBuilder(len);
+        sb.append(Character.toLowerCase(s.charAt(0)));
+        for (int i = 1; i < len; i++) {
+            boolean isLast = i == len - 1;
+            char c = s.charAt(i);
+            char next = isLast ? c : s.charAt(i+1);
+            boolean isUpper = Character.isUpperCase(c);
+            boolean nextIsUpper = Character.isUpperCase(next);
+            boolean nextIsLetter = Character.isLetter(next);
+            if (isLast) {
+                sb.append(Character.toLowerCase(c));
+            } else if (c == '-' || c == '.') {
+                sb.append(Character.toUpperCase(next));
+                i++;
+            } else if (isUpper && (nextIsUpper || !nextIsLetter)) {
+                sb.append(Character.toLowerCase(c));
+            } else {
+                sb.append(c);
+            }
+        }
+        s = sb.toString();
+        
         if (isReserved(s)) {
             s += "_";
         } else if (s.matches("[0-9]")) {
             s = "_" + s;
         }
+        
         return s;
     }
 
-    private static String normalize(String s) {
+    protected static String normalize(String s) {
         final String res = camelize(s);
         int start = 0, end = res.length();
 
