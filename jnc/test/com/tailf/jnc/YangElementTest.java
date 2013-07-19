@@ -131,5 +131,39 @@ public class YangElementTest {
         YangElement.getDiff(b1, b2, uniqueA, uniqueB, changedA, changedB);
         assertTrue(nodeSetsAreEmpty());
     }
+    
+    @Test
+    public void shouldProduceValidXmlRegardlessOfLeafNamespace() throws JNCException {
+    	
+    	final Leaf leafWithNamespace = new Leaf("http://testNamespace", "leafWithNamespace");
+    	leafWithNamespace.setValue("leafValue");
+    	a1.addChild(leafWithNamespace);
+    	
+    	final YangXMLParser parser = new YangXMLParser();
+    	 	
+    	String expectedXml = new StringBuilder()
+    		.append("<a xmlns=\"http://test.com/ns/containertest/1.0\" xmlns:conttest=\"http://test.com/ns/containertest/1.0\" presence=\"Always present\" description=\"For testing\" reference=\"YangElementTest\">\n")
+    		.append(" <leaf>leaf</leaf>\n")
+    		.append(" <leafWithNamespace xmlns=\"http://testNamespace\">leafValue</leafWithNamespace>\n")
+    		.append("</a>")
+    		.toString();
+
+    	// Used to verify expectedXML is parseable
+    	final Element expectedElement = parser.parse(expectedXml);
+    	final Element expectedLeafElement = expectedElement.getChild("leafWithNamespace");
+    	assertEquals(expectedLeafElement.namespace, leafWithNamespace.namespace);
+    	
+    	/*
+    	 * Throws SAX exception
+    	 * 
+    	 * [Fatal Error] The prefix "unknown" for element "unknown:leafWithNamespace" is not bound...
+    	 * 
+    	 */
+    	final Element parsedElement = parser.parse(a1.toXMLString());   
+    	assertEquals(expectedXml, parsedElement.toXMLString());  	
+    	
+    }
+    
 
 }
+
