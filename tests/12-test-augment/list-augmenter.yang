@@ -1,4 +1,4 @@
-module leaf-list-augmenter {
+module list-augmenter {
     namespace "http://domain.com/ns/test";
     prefix test;
     

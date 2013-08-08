@@ -19,7 +19,7 @@
   <target name="generate">
     <mkdir dir="${gen.dir}" />
     <exec executable="${pyang}" failonerror="true">
-      <arg line="-f jnc --jnc-output ${gen.dir} leaf-list-augmenter.yang" />
+      <arg line="-f jnc --jnc-output ${gen.dir} list-augmenter.yang" />
     </exec>
   </target>
 
