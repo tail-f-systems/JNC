@@ -1,5 +1,8 @@
 package app;
 
+import gen.ietfInetTypes.IpAddress;
+import gen.ietfSystem.system.ntp.Server;
+
 import java.io.IOException;
 
 import com.tailf.jnc.Device;
@@ -90,6 +93,10 @@ public class Client {
 
         // Get (first) config with name "system"
         gen.ietfSystem.System systemConfig = getSystemConfig(configs);
+        
+        // Add new server
+        Server server = new Server(new IpAddress("4.4.4.4"));
+        systemConfig.getChild("ntp").addChild(server);
 
         String configAsXML = systemConfig.toXMLString();
         System.out.println("Initial config:\n" + configAsXML);
