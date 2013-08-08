@@ -1,0 +1,15 @@
+module ietf-system {
+  namespace "urn:ietf:params:xml:ns:yang:ietf-system";
+  prefix ietf-sys;
+
+  container system {
+    container ntp {
+      list ntp-server {
+        key "address";
+        leaf address {
+          type string;
+        }
+      }
+    }
+  }
+}

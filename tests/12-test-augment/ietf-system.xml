@@ -1,0 +1,10 @@
+<system xmlns="urn:ietf:params:xml:ns:yang:ietf-system">
+  <ntp>
+    <ntp-server>
+      <address>url</address>
+    </ntp-server>
+    <ntp-server>
+      <address>another</address>
+    </ntp-server>
+  </ntp>
+</system>

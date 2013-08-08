@@ -1,0 +1,28 @@
+module leaf-list-augmenter {
+    namespace "http://testNamespace";
+    prefix test;
+    
+    import ietf-system {
+      prefix ietf-sys;
+    }
+    import ietf-inet-types {
+      prefix inet;
+    }
+
+    augment "/ietf-sys:system/ietf-sys:ntp" {
+         /*
+          * Alternate (simpler) NTP model.  This replaces the standard one in
+          * the ietf model and follows the same style as the DNS servers.
+          */
+         leaf-list server {
+            type inet:ip-address;
+            ordered-by user;
+            description
+               "Addresses of the NTP servers to use for system clock
+                synchronization.
+
+                Implementations MAY limit the number of entries in this
+                leaf list.";
+         }
+    }
+}
