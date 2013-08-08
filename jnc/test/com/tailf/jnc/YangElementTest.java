@@ -136,6 +136,7 @@ public class YangElementTest {
     public void shouldProduceValidXmlRegardlessOfLeafNamespace() throws JNCException {
     	
     	final Leaf leafWithNamespace = new Leaf("http://testNamespace", "leafWithNamespace");
+        leafWithNamespace.setDefaultPrefix();
     	leafWithNamespace.setValue("leafValue");
     	a1.addChild(leafWithNamespace);
     	
@@ -143,9 +144,9 @@ public class YangElementTest {
     	 	
     	String expectedXml = new StringBuilder()
     		.append("<a xmlns=\"http://test.com/ns/containertest/1.0\" xmlns:conttest=\"http://test.com/ns/containertest/1.0\" presence=\"Always present\" description=\"For testing\" reference=\"YangElementTest\">\n")
-    		.append(" <leaf>leaf</leaf>\n")
-    		.append(" <leafWithNamespace xmlns=\"http://testNamespace\">leafValue</leafWithNamespace>\n")
-    		.append("</a>")
+            .append("  <leaf>leaf</leaf>\n")
+            .append("  <leafWithNamespace xmlns=\"http://testNamespace\">leafValue</leafWithNamespace>\n")
+            .append("</a>\n")
     		.toString();
 
     	// Used to verify expectedXML is parseable
