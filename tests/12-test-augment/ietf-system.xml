@@ -1,8 +1,8 @@
 <system xmlns="urn:ietf:params:xml:ns:yang:ietf-system">
   <ntp>
-    <server xmlns="http://domain.com/ns/test">1.1.1.1</server>
-    <server xmlns="http://domain.com/ns/test">2.2.2.2</server>
-    <server xmlns="http://domain.com/ns/test">3.3.3.3</server>
+    <server xmlns="http://domain.com/ns/test"><address>1.1.1.1</address></server>
+    <server xmlns="http://domain.com/ns/test"><address>2.2.2.2</address></server>
+    <server xmlns="http://domain.com/ns/test"><address>3.3.3.3</address></server>
     <ntp-server>
       <address>1.1.1.1</address>
     </ntp-server>

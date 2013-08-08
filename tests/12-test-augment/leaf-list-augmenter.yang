@@ -14,15 +14,18 @@ module leaf-list-augmenter {
           * Alternate (simpler) NTP model.  This replaces the standard one in
           * the ietf model and follows the same style as the DNS servers.
           */
-         leaf-list server {
-            type inet:ip-address;
-            ordered-by user;
-            description
-               "Addresses of the NTP servers to use for system clock
-                synchronization.
+         list server {
+            key address;
+            
+            leaf address {
+                type inet:ip-address;
+                description
+                   "Addresses of the NTP servers to use for system clock
+                    synchronization.
 
-                Implementations MAY limit the number of entries in this
-                leaf list.";
+                    Implementations MAY limit the number of entries in this
+                    leaf list.";
+            }
          }
     }
 }
