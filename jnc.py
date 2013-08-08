@@ -1891,6 +1891,7 @@ class MethodGenerator(object):
         self.is_leaf = stmt.keyword == 'leaf'
         self.is_leaflist = stmt.keyword == 'leaf-list'
         self.is_top_level = get_parent(self.stmt) == self.module_stmt
+        self.is_augmented = self.module_stmt != get_module(stmt.parent)
         assert (self.is_container or self.is_list or self.is_typedef
             or self.is_leaf or self.is_leaflist)
         self.gen = self
@@ -1975,8 +1976,7 @@ class MethodGenerator(object):
             call.extend(self._root_namespace(camelize(self.stmt.arg)))
             constructor.add_dependency(self.root)
             constructor.add_line(''.join(call))
-            if self.is_top_level:
-                # Top level statement
+            if self.is_top_level or self.is_augmented:
                 constructor.add_line('setDefaultPrefix();')
                 setPrefix = ['setPrefix(', self.root, '.PREFIX);']
                 constructor.add_line(''.join(setPrefix))
