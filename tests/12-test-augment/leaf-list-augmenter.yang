@@ -1,5 +1,5 @@
 module leaf-list-augmenter {
-    namespace "http://testNamespace";
+    namespace "http://domain.com/ns/test";
     prefix test;
     
     import ietf-system {

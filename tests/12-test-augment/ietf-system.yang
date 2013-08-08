@@ -1,13 +1,17 @@
 module ietf-system {
   namespace "urn:ietf:params:xml:ns:yang:ietf-system";
-  prefix ietf-sys;
+  prefix sys;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
 
   container system {
     container ntp {
       list ntp-server {
         key "address";
         leaf address {
-          type string;
+          type inet:ip-address;
         }
       }
     }

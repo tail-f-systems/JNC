@@ -2,21 +2,13 @@ package app;
 
 import java.io.IOException;
 
-import ietfSystem.System;
-import ietfSystem.system.Ntp;
-import ietfSystem.system.ntp.NtpList;
-
 import com.tailf.jnc.Device;
 import com.tailf.jnc.DeviceUser;
 import com.tailf.jnc.Element;
-import com.tailf.jnc.ElementChildrenIterator;
 import com.tailf.jnc.JNCException;
 import com.tailf.jnc.NetconfSession;
 import com.tailf.jnc.NodeSet;
 import com.tailf.jnc.YangElement;
-import com.tailf.jnc.YangException;
-import com.tailf.jnc.YangString;
-import com.tailf.jnc.YangUInt32;
 
 public class Client {
 
@@ -72,7 +64,7 @@ public class Client {
      * @param configs Set of device configuration data.
      * @return First system configuration, or null if none present.
      */
-    public static System getSystemConfig(NodeSet configs) {
+    public static gen.ietfSystem.System getSystemConfig(NodeSet configs) {
         Element systemConfig = configs.first();
         if (!systemConfig.name.equals("system")) {
             systemConfig = null;
@@ -82,7 +74,7 @@ public class Client {
                 }
             }
         }
-        return (System)systemConfig;
+        return (gen.ietfSystem.System)systemConfig;
     }
 
     /**
@@ -92,15 +84,12 @@ public class Client {
      */
     public static void main(String[] args) throws IOException, JNCException {
         Client client = new Client();
-        Union.enable();
         client.init();
+        gen.ietfSystem.Sys.enable();
         NodeSet configs = client.getConfig();
 
         // Get (first) config with name "system"
-        System systemConfig = getSystemConfig(configs);
-
-        // Clone a backup configuration for rollback purposes
-        YangElement backup = systemConfig.clone();
+        gen.ietfSystem.System systemConfig = getSystemConfig(configs);
 
         String configAsXML = systemConfig.toXMLString();
         System.out.println("Initial config:\n" + configAsXML);

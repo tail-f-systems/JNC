@@ -22,8 +22,11 @@ CONFD_HOST ?= localhost
 CONFD_FLAGS = --addloadpath $(CONFD_DIR)/etc/confd
 START_FLAGS ?=
 
-all: ietf-system.fxs ssh-keydir $(CDB_DIR)/ietf-system.xml
+all: leaf-list-augmenter.fxs ietf-system.fxs ssh-keydir $(CDB_DIR)/ietf-system.xml
 	@echo "Build complete"
+
+leaf-list-augmenter.xsd: leaf-list-augmenter.fxs
+	$(CONFDC) --emit-xsd leaf-list-augmenter.xsd leaf-list-augmenter.fxs
 
 ietf-system.xsd: ietf-system.fxs
 	$(CONFDC) --emit-xsd ietf-system.xsd ietf-system.fxs

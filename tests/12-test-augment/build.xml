@@ -1,7 +1,7 @@
 <project name="ietf-system" basedir="." default="main">
   <property environment="env" />
   <property name="src.dir"     value="src" />
-  <property name="gen.dir"     value="src" />
+  <property name="gen.dir"     value="src/gen" />
   <property name="main-class"  value="simple.Client" />
   <property name="build.dir"   value="build" />
   <property name="classes.dir" value="${build.dir}/classes" />
@@ -19,7 +19,7 @@
   <target name="generate">
     <mkdir dir="${gen.dir}" />
     <exec executable="${pyang}" failonerror="true">
-      <arg line="-f jnc --jnc-output ${gen.dir} --jnc-import-on-demand leaf-list-augmenter.yang" />
+      <arg line="-f jnc --jnc-output ${gen.dir} leaf-list-augmenter.yang" />
     </exec>
   </target>
 
