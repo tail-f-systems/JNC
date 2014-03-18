@@ -1688,19 +1688,24 @@ public class Element implements Serializable {
                 s.append(" " + attr.toXMLString(this));
             }
         }
-        s.append(">" + (flag ? "\n" : ""));
         indent++;
         // add children elements if any
         if (flag) {
+            s.append(">" + (flag ? "\n" : ""));
             for (final Element child : children) {
                 child.toXMLString(indent, s);
             }
         } else { // add value if any
             if (value != null) {
+                s.append(">" + (flag ? "\n" : ""));
                 final String stringValue = value.toString().replaceAll("&",
                         "&amp;");
                 s.append(getIndentationSpacing(flag, indent));
                 s.append(stringValue + (flag ? "\n" : ""));
+            } else {
+             // self-closing tag
+             s.append("/>" + (flag ? "\n" : ""));
+             return;
             }
         }
         indent--;
@@ -1797,17 +1802,20 @@ public class Element implements Serializable {
                 attr.encode(out, this);
             }
         }
-        out.print(">");
         if (hasChildren()) {
             // add children elements if any
-            out.println("");
+            out.println(">");
             for (final Element child : children) {
                 child.encode(out, true, capas);
             }
         } else if (value != null) {
             // otherwise, add value (if any)
-            out.print(value.toString());
-        }
+            out.print(">" + value.toString());
+        } else {
+	    // self-closing tag
+	    out.print("/>" + (newline_at_end ? "\n" : ""));
+	    return;
+	}
         out.print("</" + qName + ">" + (newline_at_end ? "\n" : ""));
     }
 
