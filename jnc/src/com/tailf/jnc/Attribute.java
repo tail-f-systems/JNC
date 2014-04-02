@@ -18,6 +18,8 @@ import java.io.Serializable;
 public class Attribute implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    public static final String EQUALS_QUOTE = "=\"";
+    public static final String QUOTE = "\"";
 
     /**
      * The Attribute name.
@@ -72,7 +74,7 @@ public class Attribute implements Serializable {
      * @param value Set the value of the attribute
      */
     public void setValue(String value) {
-        trace("setValue: " + name + "=\"" + value + "\"");
+        trace("setValue: " + name + EQUALS_QUOTE + value + QUOTE);
         this.value = value;
     }
 
@@ -102,13 +104,13 @@ public class Attribute implements Serializable {
         if (ns != null && ns.length() > 0) {
             final String prefix = contextnode.nsToPrefix(ns);
             if (prefix == null) {
-                return "unknown:" + name + "=\"" + value + "\"";
+                return "unknown:" + name + EQUALS_QUOTE + value + QUOTE;
             }
             if (prefix.length() > 0) {
-                return prefix + ":" + name + "=\"" + value + "\"";
+                return prefix + ":" + name + EQUALS_QUOTE + value + QUOTE;
             }
         }
-        return name + "=\"" + value + "\"";
+        return name + EQUALS_QUOTE + value + QUOTE;
     }
 
     /**
@@ -138,15 +140,15 @@ public class Attribute implements Serializable {
                 if (contextnode != null) {
                     out.print("unknown:");
                 }
-                out.print(name + "=\"" + value + "\"");
+                out.print(name + EQUALS_QUOTE + value + QUOTE);
                 return;
             }
             if (prefix.length() > 0) {
-                out.print(prefix + ":" + name + "=\"" + value + "\"");
+                out.print(prefix + ":" + name + EQUALS_QUOTE + value + QUOTE);
                 return;
             }
         }
-        out.print(name + "=\"" + value + "\"");
+        out.print(name + EQUALS_QUOTE + value + QUOTE);
     }
 
     /* help functions */

@@ -44,6 +44,7 @@ public class Element implements Serializable {
      * The NETCONF namespace. "urn:ietf:params:xml:ns:netconf:base:1.0".
      */
     public static final String NETCONF_NAMESPACE = "urn:ietf:params:xml:ns:netconf:base:1.0";
+    public static final String OPERATION = "operation";
 
     /**
      * The namespace this element name belongs to.
@@ -1288,7 +1289,7 @@ public class Element implements Serializable {
      * <code>removeAttr(Element.NETCONF_NAMESPACE,"operation");</code> see @removeAttr
      */
     public void removeMark() {
-        removeAttr(NETCONF_NAMESPACE, "operation");
+        removeAttr(NETCONF_NAMESPACE, OPERATION);
     }
 
     /**
@@ -1308,7 +1309,7 @@ public class Element implements Serializable {
      * Marks a node with operation delete.
      */
     public void markDelete() {
-        setAttr(NETCONF_NAMESPACE, "operation", "delete");
+        setAttr(NETCONF_NAMESPACE, OPERATION, "delete");
     }
 
     /**
@@ -1332,7 +1333,7 @@ public class Element implements Serializable {
      * Marks a node with operation replace.
      */
     public void markReplace() {
-        setAttr(NETCONF_NAMESPACE, "operation", "replace");
+        setAttr(NETCONF_NAMESPACE, OPERATION, "replace");
     }
 
     /**
@@ -1356,7 +1357,7 @@ public class Element implements Serializable {
      * Marks a node with operation merge.
      */
     public void markMerge() {
-        setAttr(NETCONF_NAMESPACE, "operation", "merge");
+        setAttr(NETCONF_NAMESPACE, OPERATION, "merge");
     }
 
     /**
@@ -1380,7 +1381,7 @@ public class Element implements Serializable {
      * Marks a node with operation create
      */
     public void markCreate() {
-        setAttr(NETCONF_NAMESPACE, "operation", "create");
+        setAttr(NETCONF_NAMESPACE, OPERATION, "create");
     }
 
     /**
