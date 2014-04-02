@@ -1193,7 +1193,7 @@ public class Element implements Serializable {
             System.err.println(" compare: " + x.compare(root));
 
             throw new JNCException(JNCException.ELEMENT_MISSING,
-                    x.getElementPath() + ", " + root.getElementPath());
+                    x.getElementPath() + ", " + (root != null ? root.getElementPath() : null));
         }
         // same now, go down
         Element parent = root;
@@ -1202,7 +1202,7 @@ public class Element implements Serializable {
             x = list.getElement(0);
             list.remove(0);
 
-            Element child = parent.getChild(x);
+            Element child = parent != null ? parent.getChild(x) : null;
             if (child == null) {
                 // need to create it
                 child = x.cloneShallow();
@@ -1449,9 +1449,7 @@ public class Element implements Serializable {
             node = node.parent;
         }
         // merge in the default prefixes as well
-        if (defaultPrefixes != null) {
-            p.merge(defaultPrefixes);
-        }
+        p.merge(defaultPrefixes);
         return p;
     }
 
@@ -1476,10 +1474,7 @@ public class Element implements Serializable {
             node = node.parent;
         }
         // as a last resort use the default prefix map.
-        if (defaultPrefixes != null) {
-            return defaultPrefixes.prefixToNs(prefix);
-        }
-        return null;
+        return defaultPrefixes.prefixToNs(prefix);
     }
 
     /**
@@ -1506,10 +1501,7 @@ public class Element implements Serializable {
             return prefix;
         }
         // as a last resort use the default prefix map
-        if (defaultPrefixes != null) {
-            return defaultPrefixes.nsToPrefix(ns);
-        }
-        return null;
+        return defaultPrefixes.nsToPrefix(ns);
     }
 
     /**
@@ -1688,20 +1680,20 @@ public class Element implements Serializable {
         indent++;
         // add children elements if any
         if (flag) {
-            s.append(">").append((flag ? "\n" : ""));
+            s.append(">").append(("\n"));
             for (final Element child : children) {
                 child.toXMLString(indent, s);
             }
         } else { // add value if any
             if (value != null) {
-                s.append(">").append((flag ? "\n" : ""));
+                s.append(">").append((""));
                 final String stringValue = value.toString().replaceAll("&",
                         "&amp;");
-                s.append(getIndentationSpacing(flag, indent));
-                s.append(stringValue).append((flag ? "\n" : ""));
+                s.append(getIndentationSpacing(false, indent));
+                s.append(stringValue).append((""));
             } else {
              // self-closing tag
-             s.append("/>").append((flag ? "\n" : ""));
+             s.append("/>").append((""));
              return;
             }
         }

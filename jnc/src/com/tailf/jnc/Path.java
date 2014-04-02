@@ -955,13 +955,13 @@ public class Path {
                     + tok1 + "," + tok2 + "," + tok3 + ", ...]");
 
             /* ATOM = */
-            if (tok1.type == ATOM && tok2.type == COMPARE && tok3 != null) {
+            if (tok1.type == ATOM && (tok2 != null ? tok2.type : 0) == COMPARE && tok3 != null) {
                 final Object rexpr = parsePredicate_rvalue(tokens, i + 2, to);
                 return new Expr(tok2.op, new Expr(CHILD_VALUE, tok1.value),
                         rexpr);
             }
             /* ATTR = */
-            else if (tok1.type == ATTR && tok2.type == COMPARE
+            else if (tok1.type == ATTR && (tok2 != null ? tok2.type : 0) == COMPARE
                     && tok3 != null) {
                 final Object rexpr = parsePredicate_rvalue(tokens, i + 2, to);
                 return new Expr(tok2.op, new Expr(ATTR_VALUE, tok1.value),
