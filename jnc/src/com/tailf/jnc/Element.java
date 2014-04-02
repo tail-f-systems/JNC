@@ -1617,13 +1617,12 @@ public class Element implements Serializable {
     public String toString() {
         final StringBuffer s_attrs = new StringBuffer();
         final StringBuffer s_children = new StringBuffer();
-        final StringBuffer res = new StringBuffer();
+        final StringBuffer res = new StringBuffer("Element{name=").append(name);
 
-        res.append("Element{name=" + name);
         if (value != null) {
-            res.append(", value=" + value);
+            res.append(", value=").append(value);
         }
-        res.append(", ns=" + namespace);
+        res.append(", ns=").append(namespace);
 
         // Attributes
         if (prefixes != null) {
@@ -1640,7 +1639,7 @@ public class Element implements Serializable {
         }
         if (s_attrs.length() >= ", ".length()) {
             s_attrs.delete(s_attrs.length() - 3, s_attrs.length());
-            res.append(", attrs=[" + s_attrs);
+            res.append(", attrs=[").append(s_attrs);
         }
 
         // Children
@@ -1652,10 +1651,10 @@ public class Element implements Serializable {
         }
         if (s_children.length() >= ", ".length()) {
             s_children.delete(s_children.length() - 3, s_children.length());
-            res.append("], children=[" + s_children);
+            res.append("], children=[").append(s_children);
         }
 
-        res.append("], path=" + getElementPath() + "}");
+        res.append("], path=").append(getElementPath()).append("}");
         return res.toString();
     }
 
@@ -1675,36 +1674,36 @@ public class Element implements Serializable {
         final boolean flag = hasChildren();
         final String qName = qualifiedName();
         s.append(new String(new char[indent * 2]).replace("\0", " "));
-        s.append("<" + qName);
+        s.append("<").append(qName);
         // add xmlns attributes (prefixes)
         if (prefixes != null) {
             for (final Prefix p : prefixes) {
-                s.append(" " + p.toXMLString());
+                s.append(" ").append(p.toXMLString());
             }
         }
         // add attributes
         if (attrs != null) {
             for (final Attribute attr : attrs) {
-                s.append(" " + attr.toXMLString(this));
+                s.append(" ").append(attr.toXMLString(this));
             }
         }
         indent++;
         // add children elements if any
         if (flag) {
-            s.append(">" + (flag ? "\n" : ""));
+            s.append(">").append((flag ? "\n" : ""));
             for (final Element child : children) {
                 child.toXMLString(indent, s);
             }
         } else { // add value if any
             if (value != null) {
-                s.append(">" + (flag ? "\n" : ""));
+                s.append(">").append((flag ? "\n" : ""));
                 final String stringValue = value.toString().replaceAll("&",
                         "&amp;");
                 s.append(getIndentationSpacing(flag, indent));
-                s.append(stringValue + (flag ? "\n" : ""));
+                s.append(stringValue).append((flag ? "\n" : ""));
             } else {
              // self-closing tag
-             s.append("/>" + (flag ? "\n" : ""));
+             s.append("/>").append((flag ? "\n" : ""));
              return;
             }
         }
