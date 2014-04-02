@@ -861,9 +861,6 @@ public class Path {
                 sz = tokens.size();
             }
         } catch (final Exception e) {
-            if (e instanceof JNCException) {
-                throw (JNCException) e;
-            }
             final int errorCode = JNCException.PATH_ERROR;
             throw new JNCException(errorCode, "parse error: " + e);
         }
