@@ -1878,7 +1878,7 @@ public class Element implements Serializable {
         final FileOutputStream fos = new FileOutputStream(file);
         final DataOutputStream dos = new DataOutputStream(fos);
         dos.writeBytes(toXMLString());
-        fos.close();
+        dos.close();
     }
 
     /**
