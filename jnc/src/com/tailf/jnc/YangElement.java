@@ -73,7 +73,7 @@ public abstract class YangElement extends Element {
             final YangElement c = (YangElement) elem;
             if (c.parent instanceof YangElement) {
                 String pkg = getPackage(c.parent);
-                if (pkg != "") {
+                if (!pkg.equals("")) {
                     pkg += ".";
                 }
                 return pkg + camelize(c.name);
