@@ -5,10 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A configuration element sub-tree. Makes it possible to create and/or
@@ -44,6 +41,7 @@ public class Element implements Serializable {
      * The NETCONF namespace. "urn:ietf:params:xml:ns:netconf:base:1.0".
      */
     public static final String NETCONF_NAMESPACE = "urn:ietf:params:xml:ns:netconf:base:1.0";
+    public static final String OPERATION = "operation";
 
     /**
      * The namespace this element name belongs to.
@@ -61,9 +59,9 @@ public class Element implements Serializable {
     public Object value;
 
     /**
-     * Attributes on the node. ArrayList of Attribute.
+     * Attributes on the node. List of Attribute.
      */
-    ArrayList<Attribute> attrs;
+    List<Attribute> attrs;
 
     /**
      * Prefix map are really xmlns attributes. For example:
@@ -1288,7 +1286,7 @@ public class Element implements Serializable {
      * <code>removeAttr(Element.NETCONF_NAMESPACE,"operation");</code> see @removeAttr
      */
     public void removeMark() {
-        removeAttr(NETCONF_NAMESPACE, "operation");
+        removeAttr(NETCONF_NAMESPACE, OPERATION);
     }
 
     /**
@@ -1308,7 +1306,7 @@ public class Element implements Serializable {
      * Marks a node with operation delete.
      */
     public void markDelete() {
-        setAttr(NETCONF_NAMESPACE, "operation", "delete");
+        setAttr(NETCONF_NAMESPACE, OPERATION, "delete");
     }
 
     /**
@@ -1332,7 +1330,7 @@ public class Element implements Serializable {
      * Marks a node with operation replace.
      */
     public void markReplace() {
-        setAttr(NETCONF_NAMESPACE, "operation", "replace");
+        setAttr(NETCONF_NAMESPACE, OPERATION, "replace");
     }
 
     /**
@@ -1356,7 +1354,7 @@ public class Element implements Serializable {
      * Marks a node with operation merge.
      */
     public void markMerge() {
-        setAttr(NETCONF_NAMESPACE, "operation", "merge");
+        setAttr(NETCONF_NAMESPACE, OPERATION, "merge");
     }
 
     /**
@@ -1380,7 +1378,7 @@ public class Element implements Serializable {
      * Marks a node with operation create
      */
     public void markCreate() {
-        setAttr(NETCONF_NAMESPACE, "operation", "create");
+        setAttr(NETCONF_NAMESPACE, OPERATION, "create");
     }
 
     /**
@@ -1524,11 +1522,11 @@ public class Element implements Serializable {
         String s = null;
         while (top != null) {
             if (top.namespace == null) {
-                s = strConcat(new String(top.name), s);
+                s = strConcat(top.name, s);
             } else { // top.namespace!=null
                 if (top.parent != null && top.parent.namespace != null
                         && top.namespace.equals(top.parent.namespace)) {
-                    s = strConcat(new String(top.name), s);
+                    s = strConcat(top.name, s);
                 } else {
                     s = strConcat(top.qualifiedName(), s);
                 }
@@ -1617,13 +1615,12 @@ public class Element implements Serializable {
     public String toString() {
         final StringBuffer s_attrs = new StringBuffer();
         final StringBuffer s_children = new StringBuffer();
-        final StringBuffer res = new StringBuffer();
+        final StringBuffer res = new StringBuffer("Element{name=").append(name);
 
-        res.append("Element{name=" + name);
         if (value != null) {
-            res.append(", value=" + value);
+            res.append(", value=").append(value);
         }
-        res.append(", ns=" + namespace);
+        res.append(", ns=").append(namespace);
 
         // Attributes
         if (prefixes != null) {
@@ -1640,7 +1637,7 @@ public class Element implements Serializable {
         }
         if (s_attrs.length() >= ", ".length()) {
             s_attrs.delete(s_attrs.length() - 3, s_attrs.length());
-            res.append(", attrs=[" + s_attrs);
+            res.append(", attrs=[").append(s_attrs);
         }
 
         // Children
@@ -1652,10 +1649,10 @@ public class Element implements Serializable {
         }
         if (s_children.length() >= ", ".length()) {
             s_children.delete(s_children.length() - 3, s_children.length());
-            res.append("], children=[" + s_children);
+            res.append("], children=[").append(s_children);
         }
 
-        res.append("], path=" + getElementPath() + "}");
+        res.append("], path=").append(getElementPath()).append("}");
         return res.toString();
     }
 
@@ -1675,36 +1672,36 @@ public class Element implements Serializable {
         final boolean flag = hasChildren();
         final String qName = qualifiedName();
         s.append(new String(new char[indent * 2]).replace("\0", " "));
-        s.append("<" + qName);
+        s.append("<").append(qName);
         // add xmlns attributes (prefixes)
         if (prefixes != null) {
             for (final Prefix p : prefixes) {
-                s.append(" " + p.toXMLString());
+                s.append(" ").append(p.toXMLString());
             }
         }
         // add attributes
         if (attrs != null) {
             for (final Attribute attr : attrs) {
-                s.append(" " + attr.toXMLString(this));
+                s.append(" ").append(attr.toXMLString(this));
             }
         }
         indent++;
         // add children elements if any
         if (flag) {
-            s.append(">" + (flag ? "\n" : ""));
+            s.append(">").append((flag ? "\n" : ""));
             for (final Element child : children) {
                 child.toXMLString(indent, s);
             }
         } else { // add value if any
             if (value != null) {
-                s.append(">" + (flag ? "\n" : ""));
+                s.append(">").append((flag ? "\n" : ""));
                 final String stringValue = value.toString().replaceAll("&",
                         "&amp;");
                 s.append(getIndentationSpacing(flag, indent));
-                s.append(stringValue + (flag ? "\n" : ""));
+                s.append(stringValue).append((flag ? "\n" : ""));
             } else {
              // self-closing tag
-             s.append("/>" + (flag ? "\n" : ""));
+             s.append("/>").append((flag ? "\n" : ""));
              return;
             }
         }

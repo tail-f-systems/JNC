@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -59,13 +61,13 @@ public class SchemaParser {
     }
 
     private class SchemaHandler extends DefaultHandler {
-        protected HashMap<Tagpath, SchemaNode> h;
+        protected Map<Tagpath, SchemaNode> h;
         protected SchemaNode node;
         protected RevisionInfo ri;
-        protected ArrayList<RevisionInfo> riArrayList;
+        protected List<RevisionInfo> riArrayList;
         protected String value = null;
 
-        SchemaHandler(HashMap<Tagpath, SchemaNode> h2) {
+        SchemaHandler(Map<Tagpath, SchemaNode> h2) {
             super();
             h = h2;
         }
@@ -85,7 +87,7 @@ public class SchemaParser {
             } else if (localName.equals("schema") || localName.equals("node")) {
                 value = null;
             } else {
-                value = new String();
+                value = "";
             }
         }
 
@@ -105,7 +107,7 @@ public class SchemaParser {
                     }
                 }
             } else if (localName.equals("namespace")) {
-                node.namespace = new String(value);
+                node.namespace = value;
             } else if (localName.equals("primitive_type")) {
                 node.primitive_type = Integer.parseInt(value);
             } else if (localName.equals("min_occurs")) {
@@ -125,15 +127,15 @@ public class SchemaParser {
             } else if (localName.equals("flags")) {
                 node.flags = Integer.parseInt(value);
             } else if (localName.equals("desc")) {
-                node.desc = new String(value);
+                node.desc = value;
             } else if (localName.equals("type")) {
                 ri.type = Integer.parseInt(value);
             } else if (localName.equals("idata")) {
                 ri.idata = Integer.parseInt(value);
             } else if (localName.equals("data")) {
-                ri.data = new String(value);
+                ri.data = value;
             } else if (localName.equals("introduced")) {
-                ri.introduced = new String(value);
+                ri.introduced = value;
             } else if (localName.equals("info")) {
                 riArrayList.add(ri);
             } else if (localName.equals("rev")) {
@@ -162,7 +164,7 @@ public class SchemaParser {
      * @param h The hashtable to populate.
      * @throws JNCException If there is an IO or SAX parse problem.
      */
-    public void readFile(String filename, HashMap<Tagpath, SchemaNode> h)
+    public void readFile(String filename, Map<Tagpath, SchemaNode> h)
             throws JNCException {
         readFile(new InputSource(filename), h);
     }
@@ -175,7 +177,7 @@ public class SchemaParser {
      * @param h The hashtable to populate.
      * @throws JNCException If there is an IO or SAX parse problem.
      */
-    public void readFile(URL schemaUrl, HashMap<Tagpath, SchemaNode> h)
+    public void readFile(URL schemaUrl, Map<Tagpath, SchemaNode> h)
             throws JNCException {
         try {
             readFile(new InputSource(schemaUrl.openStream()), h);
@@ -187,7 +189,7 @@ public class SchemaParser {
     }
 
     private void readFile(InputSource inputSource,
-            HashMap<Tagpath, SchemaNode> h) throws JNCException {
+            Map<Tagpath, SchemaNode> h) throws JNCException {
         try {
             final SchemaHandler handler = new SchemaHandler(h);
             parser.setContentHandler(handler);
@@ -209,7 +211,7 @@ public class SchemaParser {
      * @param clazz
      * @throws JNCException if the file is not found or cannot be parsed.
      */
-    public void findAndReadFile(final String filename, final HashMap<Tagpath, SchemaNode> h, final Class clazz)
+    public void findAndReadFile(final String filename, final Map<Tagpath, SchemaNode> h, final Class clazz)
             throws JNCException {
         final URL url = clazz.getResource(filename);
         if (url == null){

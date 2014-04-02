@@ -93,7 +93,7 @@ public class XMLParser {
         @Override
         public void characters(char[] ch, int start, int length) {
             if (current.value == null) {
-                current.value = new String();
+                current.value = "";
             }
             current.value = current.value + new String(ch, start, length);
         }

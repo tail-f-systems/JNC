@@ -2,6 +2,7 @@ package com.tailf.jnc;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A NETCONF session class. It makes it possible to connect to a NETCONF agent
@@ -126,6 +127,19 @@ import java.util.ArrayList;
 
 public class NetconfSession {
 
+    public static final String GET_CONFIG_GT = "get-config>";
+    public static final String SOURCE_GT = "source>";
+    public static final String FILTER_GT = "filter>";
+    public static final String FILTER = "filter ";
+    public static final String GET_GT = "get>";
+    public static final String EDIT_CONFIG_GT = "edit-config>";
+    public static final String TARGET_GT = "target>";
+    public static final String CONFIG_GT = "config>";
+    public static final String COPY_CONFIG_GT = "copy-config>";
+    public static final String VALIDATE_GT = "validate>";
+    public static final String STREAM_GT = "stream>";
+    public static final String START_TIME_GT = "startTime>";
+    public static final String STOP_TIME_GT = "stopTime>";
     /**
      * Monotonically increased message identifier for this session.
      */
@@ -1531,7 +1545,7 @@ public class NetconfSession {
         proprietaryClientCaps.add(capability);
     }
 
-    private ArrayList<String> proprietaryClientCaps;
+    private List<String> proprietaryClientCaps;
 
     /**
      * Used by ConfDSession to set the withDefaults Attribute. Will be included
@@ -1640,14 +1654,14 @@ public class NetconfSession {
     int encode_getConfig(Transport out, String source, Element subtreeFilter)
             throws JNCException {
         final int mid = encode_rpc_begin(out, withDefaultsAttr);
-        out.println("<" + nc + "get-config>");
-        out.print("<" + nc + "source>");
+        out.println("<" + nc + GET_CONFIG_GT);
+        out.print("<" + nc + SOURCE_GT);
         out.print(source);
-        out.println("</" + nc + "source>");
-        out.println("<" + nc + "filter " + nc + "type=\"subtree\">");
+        out.println("</" + nc + SOURCE_GT);
+        out.println("<" + nc + FILTER + nc + "type=\"subtree\">");
         subtreeFilter.encode(out, true, capabilities);
-        out.println("</" + nc + "filter>");
-        out.println("</" + nc + "get-config>");
+        out.println("</" + nc + FILTER_GT);
+        out.println("</" + nc + GET_CONFIG_GT);
         encode_rpc_end(out);
         return mid;
     }
@@ -1688,17 +1702,17 @@ public class NetconfSession {
      */
     int encode_getConfig(Transport out, String source, String xpath) {
         final int mid = encode_rpc_begin(out, withDefaultsAttr);
-        out.println("<" + nc + "get-config>");
-        out.print("<" + nc + "source>");
+        out.println("<" + nc + GET_CONFIG_GT);
+        out.print("<" + nc + SOURCE_GT);
         out.print(source);
-        out.println("</" + nc + "source>");
+        out.println("</" + nc + SOURCE_GT);
         if (xpath != null && xpath.length() > 0) {
-            out.print("<" + nc + "filter " + nc + "type=\"xpath\" " + nc
+            out.print("<" + nc + FILTER + nc + "type=\"xpath\" " + nc
                     + "select=\"");
             out.print(xpath);
             out.println("\"/>");
         }
-        out.println("</" + nc + "get-config>");
+        out.println("</" + nc + GET_CONFIG_GT);
         encode_rpc_end(out);
         return mid;
     }
@@ -1717,11 +1731,11 @@ public class NetconfSession {
      */
     int encode_getConfig(Transport out, String source) {
         final int mid = encode_rpc_begin(out, withDefaultsAttr);
-        out.println("<" + nc + "get-config>");
-        out.print("<" + nc + "source>");
+        out.println("<" + nc + GET_CONFIG_GT);
+        out.print("<" + nc + SOURCE_GT);
         out.print(source);
-        out.println("</" + nc + "source>");
-        out.println("</" + nc + "get-config>");
+        out.println("</" + nc + SOURCE_GT);
+        out.println("</" + nc + GET_CONFIG_GT);
         encode_rpc_end(out);
         return mid;
     }
@@ -1811,11 +1825,11 @@ public class NetconfSession {
      */
     int encode_get(Transport out, Element subtreeFilter) throws JNCException {
         final int mid = encode_rpc_begin(out, withDefaultsAttr);
-        out.println("<" + nc + "get>");
-        out.println("<" + nc + "filter " + nc + "type=\"subtree\">");
+        out.println("<" + nc + GET_GT);
+        out.println("<" + nc + FILTER + nc + "type=\"subtree\">");
         subtreeFilter.encode(out, true, capabilities);
-        out.println("</" + nc + "filter>");
-        out.println("</" + nc + "get>");
+        out.println("</" + nc + FILTER_GT);
+        out.println("</" + nc + GET_GT);
         encode_rpc_end(out);
         return mid;
     }
@@ -1834,14 +1848,14 @@ public class NetconfSession {
      */
     int encode_get(Transport out, String xpath) {
         final int mid = encode_rpc_begin(out, withDefaultsAttr);
-        out.println("<" + nc + "get>");
+        out.println("<" + nc + GET_GT);
         if (xpath != null && xpath.length() > 0) {
-            out.print("<" + nc + "filter " + nc + "type=\"xpath\" " + nc
+            out.print("<" + nc + FILTER + nc + "type=\"xpath\" " + nc
                     + "select=\"");
             out.print(xpath);
             out.println("\"/>");
         }
-        out.println("</" + nc + "get>");
+        out.println("</" + nc + GET_GT);
         encode_rpc_end(out);
         return mid;
     }
@@ -1875,17 +1889,17 @@ public class NetconfSession {
             throws JNCException {
 
         final int mid = encode_rpc_begin(out);
-        out.println("<" + nc + "edit-config>");
-        out.print("<" + nc + "target>");
+        out.println("<" + nc + EDIT_CONFIG_GT);
+        out.print("<" + nc + TARGET_GT);
         out.print(target);
-        out.println("</" + nc + "target>");
+        out.println("</" + nc + TARGET_GT);
         encode_defaultOperation(out);
         encode_testOption(out);
         encode_errorOption(out);
-        out.println("<" + nc + "config>");
+        out.println("<" + nc + CONFIG_GT);
         configTrees.encode(out, capabilities);
-        out.println("</" + nc + "config>");
-        out.println("</" + nc + "edit-config>");
+        out.println("</" + nc + CONFIG_GT);
+        out.println("</" + nc + EDIT_CONFIG_GT);
         encode_rpc_end(out);
         return mid;
     }
@@ -1906,15 +1920,15 @@ public class NetconfSession {
     int encode_editConfig(Transport out, String target, String url)
             throws JNCException {
         final int mid = encode_rpc_begin(out);
-        out.println("<" + nc + "edit-config>");
-        out.print("<" + nc + "target>");
+        out.println("<" + nc + EDIT_CONFIG_GT);
+        out.print("<" + nc + TARGET_GT);
         out.print(target);
-        out.println("</" + nc + "target>");
+        out.println("</" + nc + TARGET_GT);
         encode_defaultOperation(out);
         encode_testOption(out);
         encode_errorOption(out);
         out.println(url);
-        out.println("</" + nc + "edit-config>");
+        out.println("</" + nc + EDIT_CONFIG_GT);
         encode_rpc_end(out);
         return mid;
     }
@@ -2047,16 +2061,16 @@ public class NetconfSession {
     int encode_copyConfig(Transport out, NodeSet sourceTrees, String target)
             throws JNCException {
         final int mid = encode_rpc_begin(out);
-        out.println("<" + nc + "copy-config>");
-        out.print("<" + nc + "target>");
+        out.println("<" + nc + COPY_CONFIG_GT);
+        out.print("<" + nc + TARGET_GT);
         out.print(target);
-        out.println("</" + nc + "target>");
-        out.println("<" + nc + "source>");
-        out.println("<" + nc + "config>");
+        out.println("</" + nc + TARGET_GT);
+        out.println("<" + nc + SOURCE_GT);
+        out.println("<" + nc + CONFIG_GT);
         sourceTrees.encode(out, capabilities);
-        out.println("</" + nc + "config>");
-        out.println("</" + nc + "source>");
-        out.println("</" + nc + "copy-config>");
+        out.println("</" + nc + CONFIG_GT);
+        out.println("</" + nc + SOURCE_GT);
+        out.println("</" + nc + COPY_CONFIG_GT);
         encode_rpc_end(out);
         return mid;
     }
@@ -2085,14 +2099,14 @@ public class NetconfSession {
     int encode_copyConfig(Transport out, String source, String target)
             throws JNCException {
         final int mid = encode_rpc_begin(out, withDefaultsAttr);
-        out.println("<" + nc + "copy-config>");
-        out.print("<" + nc + "target>");
+        out.println("<" + nc + COPY_CONFIG_GT);
+        out.print("<" + nc + TARGET_GT);
         out.print(target);
-        out.println("</" + nc + "target>");
-        out.print("<" + nc + "source>");
+        out.println("</" + nc + TARGET_GT);
+        out.print("<" + nc + SOURCE_GT);
         out.print(source);
-        out.println("</" + nc + "source>");
-        out.println("</" + nc + "copy-config>");
+        out.println("</" + nc + SOURCE_GT);
+        out.println("</" + nc + COPY_CONFIG_GT);
         encode_rpc_end(out);
         return mid;
     }
@@ -2114,9 +2128,9 @@ public class NetconfSession {
     int encode_deleteConfig(Transport out, String target) {
         final int mid = encode_rpc_begin(out);
         out.println("<" + nc + "delete-config>");
-        out.print("<" + nc + "target>");
+        out.print("<" + nc + TARGET_GT);
         out.print(target);
-        out.println("</" + nc + "target>");
+        out.println("</" + nc + TARGET_GT);
         out.println("</" + nc + "delete-config>");
         encode_rpc_end(out);
         return mid;
@@ -2137,9 +2151,9 @@ public class NetconfSession {
     int encode_lock(Transport out, String target) {
         final int mid = encode_rpc_begin(out);
         out.println("<" + nc + "lock>");
-        out.print("<" + nc + "target>");
+        out.print("<" + nc + TARGET_GT);
         out.print(target);
-        out.println("</" + nc + "target>");
+        out.println("</" + nc + TARGET_GT);
         out.println("</" + nc + "lock>");
         encode_rpc_end(out);
         return mid;
@@ -2160,9 +2174,9 @@ public class NetconfSession {
     int encode_unlock(Transport out, String target) {
         final int mid = encode_rpc_begin(out);
         out.println("<" + nc + "unlock>");
-        out.print("<" + nc + "target>");
+        out.print("<" + nc + TARGET_GT);
         out.print(target);
-        out.println("</" + nc + "target>");
+        out.println("</" + nc + TARGET_GT);
         out.println("</" + nc + "unlock>");
         encode_rpc_end(out);
         return mid;
@@ -2272,7 +2286,7 @@ public class NetconfSession {
         out.println("<" + nc + "commit>");
         out.println("<" + nc + "confirmed/>");
         out.print("<" + nc + "confirm-timeout>");
-        out.print(new Integer(timeout).toString());
+        out.print(Integer.valueOf(timeout).toString());
         out.println("</" + nc + "confirm-timeout>");
         out.println("</" + nc + "commit>");
         encode_rpc_end(out);
@@ -2360,13 +2374,13 @@ public class NetconfSession {
     int encode_validate(Transport out, Element configTree)
             throws JNCException {
         final int mid = encode_rpc_begin(out);
-        out.println("<" + nc + "validate>");
-        out.println("<" + nc + "source>");
-        out.println("<" + nc + "config>");
+        out.println("<" + nc + VALIDATE_GT);
+        out.println("<" + nc + SOURCE_GT);
+        out.println("<" + nc + CONFIG_GT);
         configTree.encode(out, true, capabilities);
-        out.println("</" + nc + "config>");
-        out.println("</" + nc + "source>");
-        out.println("</" + nc + "validate>");
+        out.println("</" + nc + CONFIG_GT);
+        out.println("</" + nc + SOURCE_GT);
+        out.println("</" + nc + VALIDATE_GT);
         encode_rpc_end(out);
         return mid;
     }
@@ -2385,11 +2399,11 @@ public class NetconfSession {
      */
     int encode_validate(Transport out, String source) {
         final int mid = encode_rpc_begin(out);
-        out.println("<" + nc + "validate>");
-        out.print("<" + nc + "source>");
+        out.println("<" + nc + VALIDATE_GT);
+        out.print("<" + nc + SOURCE_GT);
         out.print(source);
-        out.println("</" + nc + "source>");
-        out.println("</" + nc + "validate>");
+        out.println("</" + nc + SOURCE_GT);
+        out.println("</" + nc + VALIDATE_GT);
         encode_rpc_end(out);
         return mid;
     }
@@ -2417,24 +2431,24 @@ public class NetconfSession {
         final int mid = encode_rpc_begin(out);
         out.println("<" + ncn + "create-subscription " + xmlnsAttr + ">");
         if (stream != null) {
-            out.print("<" + ncn + "stream>");
+            out.print("<" + ncn + STREAM_GT);
             out.print(stream);
-            out.println("</" + ncn + "stream>");
+            out.println("</" + ncn + STREAM_GT);
         }
         if (filter != null) {
-            out.print("<" + ncn + "filter " + ncn + "type='xpath'>");
+            out.print("<" + ncn + FILTER + ncn + "type='xpath'>");
             out.print(filter);
-            out.println("</" + ncn + "filter>");
+            out.println("</" + ncn + FILTER_GT);
         }
         if (startTime != null) {
-            out.print("<" + ncn + "startTime>");
+            out.print("<" + ncn + START_TIME_GT);
             out.print(startTime);
-            out.println("</" + ncn + "startTime>");
+            out.println("</" + ncn + START_TIME_GT);
         }
         if (stopTime != null) {
-            out.print("<" + ncn + "stopTime>");
+            out.print("<" + ncn + STOP_TIME_GT);
             out.print(stopTime);
-            out.println("</" + ncn + "stopTime>");
+            out.println("</" + ncn + STOP_TIME_GT);
         }
         out.println("</" + ncn + "create-subscription>");
         encode_rpc_end(out);
@@ -2463,24 +2477,24 @@ public class NetconfSession {
         final int mid = encode_rpc_begin(out);
         out.println("<" + ncn + "create-subscription>");
         if (stream != null) {
-            out.print("<" + ncn + "stream>");
+            out.print("<" + ncn + STREAM_GT);
             out.print(stream);
-            out.println("</" + ncn + "stream>");
+            out.println("</" + ncn + STREAM_GT);
         }
         if (eventFilter != null) {
-            out.print("<" + ncn + "filter " + ncn + "type='subtree'>");
+            out.print("<" + ncn + FILTER + ncn + "type='subtree'>");
             eventFilter.encode(out, capabilities);
-            out.println("</" + ncn + "filter>");
+            out.println("</" + ncn + FILTER_GT);
         }
         if (startTime != null) {
-            out.print("<" + ncn + "startTime>");
+            out.print("<" + ncn + START_TIME_GT);
             out.print(startTime);
-            out.println("</" + ncn + "startTime>");
+            out.println("</" + ncn + START_TIME_GT);
         }
         if (stopTime != null) {
-            out.print("<" + ncn + "stopTime>");
+            out.print("<" + ncn + STOP_TIME_GT);
             out.print(stopTime);
-            out.println("</" + ncn + "stopTime>");
+            out.println("</" + ncn + STOP_TIME_GT);
         }
         out.println("</" + ncn + "create-subscription>");
         encode_rpc_end(out);

@@ -1,6 +1,7 @@
 package com.tailf.jnc;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A path expression. This is a small subset of the W3C recommendations of
@@ -96,7 +97,7 @@ public class Path {
     /**
      * The list of location steps (LocationStep).
      */
-    ArrayList<LocationStep> locationSteps;
+    List<LocationStep> locationSteps;
 
     /**
      * The original path string.
@@ -123,7 +124,7 @@ public class Path {
         int axis;
         String name;
         String prefix;
-        ArrayList<Expr> predicates; // list of Expr (Predicates)
+        List<Expr> predicates; // list of Expr (Predicates)
 
         LocationStep(int axis) {
             this.axis = axis;
@@ -184,8 +185,7 @@ public class Path {
                     String namespace = null;
                     if (prefix != null) {
                         namespace = node.lookupContextPrefix(prefix);
-                        if (namespace != null
-                                && node.namespace.equals(namespace)) {
+                        if (node.namespace.equals(namespace)) {
                             result.add(node);
                         }
                     } else {
@@ -359,14 +359,14 @@ public class Path {
             case OR:
                 // rvalue not evaluated if lval is 'true'
                 if (f_boolean(lval).booleanValue()) {
-                    return new Boolean(true);
+                    return true;
                 } else {
                     return f_boolean(rval);
                 }
             case AND:
                 // rvalue not evaluated if lval is 'false'
                 if (!f_boolean(lval).booleanValue()) {
-                    return new Boolean(false);
+                    return false;
                 } else {
                     return f_boolean(rval);
                 }
@@ -386,36 +386,36 @@ public class Path {
                 }
                 if (op == EQ) {
                     if (compare(lval, rval) == 0) {
-                        return new Boolean(true);
+                        return true;
                     } else {
-                        return new Boolean(false);
+                        return false;
                     }
                 } else // op==NEQ
                 if (compare(lval, rval) != 0) {
-                    return new Boolean(true);
+                    return true;
                 } else {
-                    return new Boolean(false);
+                    return false;
                 }
             case GT: // '>'
                 if (compare(f_number(lval), f_number(rval)) > 0) {
-                    return new Boolean(true);
+                    return true;
                 }
-                return new Boolean(false);
+                return false;
             case GTE: // '>='
                 if (compare(f_number(lval), f_number(rval)) >= 0) {
-                    return new Boolean(true);
+                    return true;
                 }
-                return new Boolean(false);
+                return false;
             case LT: // '<'
                 if (compare(f_number(lval), f_number(rval)) < 0) {
-                    return new Boolean(true);
+                    return true;
                 }
-                return new Boolean(false);
+                return false;
             case LTE: // '<='
                 if (compare(f_number(lval), f_number(rval)) <= 0) {
-                    return new Boolean(true);
+                    return true;
                 }
-                return new Boolean(false);
+                return false;
 
                 // FUNCTIONS
             case FUN_STRING:
@@ -425,11 +425,11 @@ public class Path {
             case FUN_BOOLEAN:
                 return f_boolean(lval);
             case FUN_POSITION:
-                return new Integer(contextSet.indexOf(node) + 1);
+                return Integer.valueOf(contextSet.indexOf(node) + 1);
             case FUN_LAST:
-                return new Integer(contextSet.size());
+                return Integer.valueOf(contextSet.size());
             case FUN_COUNT:
-                return new Integer(f_nodeSet(lval).size());
+                return Integer.valueOf(f_nodeSet(lval).size());
 
                 // STRING FUNCTIONS:
             case FUN_CONCAT:
@@ -437,11 +437,11 @@ public class Path {
 
                 // BOOLEAN FUNCTIONS:
             case FUN_NOT:
-                return new Boolean(!f_boolean(lval).booleanValue());
+                return !f_boolean(lval).booleanValue();
             case FUN_TRUE:
-                return new Boolean(true);
+                return true;
             case FUN_FALSE:
-                return new Boolean(false);
+                return false;
 
                 // NUMBER FUNCTIONS:
             case FUN_NEG: // '- x' (UNARY)
@@ -524,11 +524,11 @@ public class Path {
             } else if (x instanceof Integer) {
                 return (Integer) x;
             } else if (x instanceof Boolean) {
-                return new Integer((((Boolean) x).booleanValue()) ? 1 : 0);
+                return Integer.valueOf((((Boolean) x).booleanValue()) ? 1 : 0);
             } else if (x instanceof String) {
                 final String s = (String) x;
                 try {
-                    return new Integer(s);
+                    return Integer.valueOf(s);
                 } catch (final NumberFormatException e1) {
                     try {
                         return new Float(s);
@@ -559,7 +559,7 @@ public class Path {
         /** neg. Unary minus "-x" */
         private Number neg(Object x) throws JNCException {
             if (x instanceof Integer) {
-                return new Integer(-((Integer) x).intValue());
+                return Integer.valueOf(-((Integer) x).intValue());
             } else if (x instanceof Float) {
                 return new Float(-((Float) x).floatValue());
             }
@@ -570,7 +570,7 @@ public class Path {
         /** minus "x - y" */
         private Number minus(Number x, Number y) throws JNCException {
             if ((x instanceof Integer) && (y instanceof Integer)) {
-                return new Integer(((Integer) x).intValue()
+                return Integer.valueOf(((Integer) x).intValue()
                         - ((Integer) y).intValue());
             }
             final Float xf = f_float(x);
@@ -581,7 +581,7 @@ public class Path {
         /** plus "x + y" */
         private Number plus(Number x, Number y) throws JNCException {
             if ((x instanceof Integer) && (y instanceof Integer)) {
-                return new Integer(((Integer) x).intValue()
+                return Integer.valueOf(((Integer) x).intValue()
                         + ((Integer) y).intValue());
             }
             final Float xf = f_float(x);
@@ -766,7 +766,7 @@ public class Path {
      * Returns a list of LocationSteps for a path expression.
      * 
      */
-    ArrayList<LocationStep> parse(TokenList tokens) throws JNCException {
+    List<LocationStep> parse(TokenList tokens) throws JNCException {
         final ArrayList<LocationStep> steps = new ArrayList<LocationStep>();
         try {
             Token tok1, tok2, tok3, tok4, tok5;
@@ -861,9 +861,6 @@ public class Path {
                 sz = tokens.size();
             }
         } catch (final Exception e) {
-            if (e instanceof JNCException) {
-                throw (JNCException) e;
-            }
             final int errorCode = JNCException.PATH_ERROR;
             throw new JNCException(errorCode, "parse error: " + e);
         }
@@ -1263,7 +1260,7 @@ public class Path {
                     number = new Float(value);
                 } else {
                     value = new String(buf, i, j - i);
-                    number = new Integer(value);
+                    number = Integer.valueOf(value);
                 }
                 tokens.add(new Token(NUMBER, value, number));
                 i = j;

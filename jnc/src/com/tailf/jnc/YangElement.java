@@ -3,6 +3,7 @@ package com.tailf.jnc;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The YangElement is a configuration sub-tree like the
@@ -39,6 +40,9 @@ public abstract class YangElement extends Element {
             "short", "static", "super", "switch", "synchronized", "this",
             "throw", "throws", "transient", "try", "void", "volatile",
             "while" };
+    public static final String COLON_UNEXPECTED_ELEMENT = ": Unexpected element";
+    public static final String DUMMY = "DUMMY";
+    public static final String DUMMY_LC = "dummy";
 
     /**
      * Structure information. An array of the children names.
@@ -148,7 +152,7 @@ public abstract class YangElement extends Element {
                     if (!RevisionInfo.newerRevisionSupportEnabled) {
                         throw new YangException(
                                 YangException.ELEMENT_MISSING,
-                                parent.getElementPath(name) + ": Unexpected element");
+                                parent.getElementPath(name) + COLON_UNEXPECTED_ELEMENT);
                     }
                     parser.unknownLevel = 1;
                     return null;
@@ -164,18 +168,18 @@ public abstract class YangElement extends Element {
         } catch (final ClassNotFoundException e) {
             e.printStackTrace();
             throw new YangException(YangException.ELEMENT_MISSING,
-                    parent.getElementPath(name) + ": Unexpected element");
+                    parent.getElementPath(name) + COLON_UNEXPECTED_ELEMENT);
         } catch (final InstantiationException e) {
             e.printStackTrace();
             throw new YangException(YangException.ELEMENT_MISSING,
-                    parent.getElementPath(name) + ": Unexpected element");
+                    parent.getElementPath(name) + COLON_UNEXPECTED_ELEMENT);
         } catch (final IllegalAccessException e) {
             e.printStackTrace();
             throw new YangException(YangException.ELEMENT_MISSING,
-                    parent.getElementPath(name) + ": Unexpected element");
+                    parent.getElementPath(name) + COLON_UNEXPECTED_ELEMENT);
         } catch (final InvocationTargetException e) {
             throw new YangException(YangException.ELEMENT_MISSING,
-                    parent.getElementPath(name) + ": Unexpected element");
+                    parent.getElementPath(name) + COLON_UNEXPECTED_ELEMENT);
         }
     }
 
@@ -201,7 +205,7 @@ public abstract class YangElement extends Element {
             if (!RevisionInfo.newerRevisionSupportEnabled) {
                 // e.printStackTrace();
                 throw new YangException(YangException.ELEMENT_MISSING,
-                        getElementPath(name) + ": Unexpected element");
+                        getElementPath(name) + COLON_UNEXPECTED_ELEMENT);
             }
             final NodeSet nodes = get(name);
             if (nodes.isEmpty()) {
@@ -251,7 +255,7 @@ public abstract class YangElement extends Element {
      * Static list of packages.
      * 
      */
-    static ArrayList<Package> packages = new ArrayList<Package>();
+    static List<Package> packages = new ArrayList<Package>();
 
     /**
      * Locate package from Namespace.
@@ -662,8 +666,8 @@ public abstract class YangElement extends Element {
      * @return 'true' if both trees are equal. 'false' otherwise.
      */
     public static boolean checkSync(NodeSet a, NodeSet b) {
-        final DummyElement aDummy = new DummyElement("DUMMY", "dummy");
-        final DummyElement bDummy = new DummyElement("DUMMY", "dummy");
+        final DummyElement aDummy = new DummyElement(DUMMY, DUMMY_LC);
+        final DummyElement bDummy = new DummyElement(DUMMY, DUMMY_LC);
         int i;
         for (i = 0; i < a.size(); i++) {
             aDummy.addChild(a.get(i));
@@ -751,8 +755,8 @@ public abstract class YangElement extends Element {
      */
 
     public static NodeSet syncMerge(NodeSet a, NodeSet b) throws JNCException {
-        final DummyElement aDummy = new DummyElement("DUMMY", "dummy");
-        final DummyElement bDummy = new DummyElement("DUMMY", "dummy");
+        final DummyElement aDummy = new DummyElement(DUMMY, DUMMY_LC);
+        final DummyElement bDummy = new DummyElement(DUMMY, DUMMY_LC);
         int i;
         for (i = 0; i < a.size(); i++) {
             aDummy.addChild(a.get(i));
@@ -796,11 +800,9 @@ public abstract class YangElement extends Element {
         int diffs = 0;
         for (int i = 0; b.children != null && i < b.children.size(); i++) {
             final Element bChild = b.children.get(i);
-            if (a.keyNames() != null && bChild instanceof Leaf) {
+            if (a.keyNames() != null && bChild instanceof Leaf && ((Leaf) bChild).isKey()) {
                 // inside list entries we ignore keys
-                if (((Leaf) bChild).isKey()) {
-                    continue;
-                }
+                continue;
             }
 
             Element aChild = null;
@@ -912,11 +914,9 @@ public abstract class YangElement extends Element {
     private static Element findDeleteChildLeaf(Leaf e, NodeSet s) {
         for (int i = 0; i < s.size(); i++) {
             final Element x = s.get(i);
-            if (x instanceof Leaf) {
-                if (x.compare(e) >= 0) {
-                    s.remove(i);
-                    return x;
-                }
+            if (x instanceof Leaf && x.compare(e) >= 0) {
+              s.remove(i);
+              return x;
             }
         }
         return null;
@@ -931,8 +931,8 @@ public abstract class YangElement extends Element {
      */
 
     public static NodeSet sync(NodeSet a, NodeSet b) throws JNCException {
-        final DummyElement aDummy = new DummyElement("DUMMY", "dummy");
-        final DummyElement bDummy = new DummyElement("DUMMY", "dummy");
+        final DummyElement aDummy = new DummyElement(DUMMY, DUMMY_LC);
+        final DummyElement bDummy = new DummyElement(DUMMY, DUMMY_LC);
         int i;
         for (i = 0; i < a.size(); i++) {
             aDummy.addChild(a.get(i));
