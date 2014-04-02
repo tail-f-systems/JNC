@@ -8,21 +8,21 @@ public class Capabilities {
     /**
      * The NETCONF namespace "urn:ietf:params:xml:ns:netconf:base:1.0"
      */
-    public static String NS_NETCONF = "urn:ietf:params:xml:ns:netconf:base:1.0";
+    public static final String NS_NETCONF = "urn:ietf:params:xml:ns:netconf:base:1.0";
 
     public static final String URN_IETF_PARAMS_XML_NS_NETCONF = "urn:ietf:params:xml:ns:netconf:";
     /**
      * The NETCONF notifications namespace.
      * "urn:ietf:params:xml:ns:netconf:notification:1.0"
      */
-    public static String NS_NOTIFICATION = URN_IETF_PARAMS_XML_NS_NETCONF +
+    public static final String NS_NOTIFICATION = URN_IETF_PARAMS_XML_NS_NETCONF +
     		"notification:1.0";
 
     /**
      * The NETCONF partial lock namespace.
      * "urn:ietf:params:xml:ns:netconf:partial-lock:1.0"
      */
-    public static String NS_PARTIAL_LOCK = URN_IETF_PARAMS_XML_NS_NETCONF +
+    public static final String NS_PARTIAL_LOCK = URN_IETF_PARAMS_XML_NS_NETCONF +
     		"partial-lock:1.0";
 
     public static final String URN_IETF_PARAMS = "urn:ietf:params:";
@@ -30,14 +30,14 @@ public class Capabilities {
      * String constant for the NETCONF base capability.
      * "urn:ietf:params:netconf:base:1.0".
      */
-    public static String NETCONF_BASE_CAPABILITY = URN_IETF_PARAMS +
+    public static final String NETCONF_BASE_CAPABILITY = URN_IETF_PARAMS +
     		"netconf:base:1.0";
 
     /**
      * String constant for the <code>:writable-running</code> capability.
      * "urn:ietf:params:netconf:capability:writable-running:1.0".
      */
-    public static String WRITABLE_RUNNING_CAPABILITY = URN_IETF_PARAMS +
+    public static final String WRITABLE_RUNNING_CAPABILITY = URN_IETF_PARAMS +
     		"netconf:capability:writable-running:1.0";
 
     public static final String URN_IETF_PARAMS_NETCONF = "urn:ietf:params:netconf:";
@@ -45,73 +45,73 @@ public class Capabilities {
      * String constant for the <code>:candidate</code> capability.
      * "urn:ietf:params:netconf:capability:candidate:1.0".
      */
-    public static String CANDIDATE_CAPABILITY = URN_IETF_PARAMS_NETCONF +
+    public static final String CANDIDATE_CAPABILITY = URN_IETF_PARAMS_NETCONF +
     		"capability:candidate:1.0";
 
     /**
      * String constant for the <code>:confirmed-commit</code> capability.
      * "urn:ietf:params:netconf:capability:confirmed-commit:1.0".
      */
-    public static String CONFIRMED_COMMIT_CAPABILITY = URN_IETF_PARAMS +
+    public static final String CONFIRMED_COMMIT_CAPABILITY = URN_IETF_PARAMS +
     		"netconf:capability:confirmed-commit:1.0";
 
     /**
      * String constant for the <code>:rollback-on-error</code> capability.
      * "urn:ietf:params:netconf:capability:rollback-on-error:1.0".
      */
-    public static String ROLLBACK_ON_ERROR_CAPABILITY = URN_IETF_PARAMS +
+    public static final String ROLLBACK_ON_ERROR_CAPABILITY = URN_IETF_PARAMS +
     		"netconf:capability:rollback-on-error:1.0";
 
     /**
      * String constant for the <code>:validate</code> capability.
      * "urn:ietf:params:netconf:capability:validate:1.0".
      */
-    public static String VALIDATE_CAPABILITY = URN_IETF_PARAMS_NETCONF +
+    public static final String VALIDATE_CAPABILITY = URN_IETF_PARAMS_NETCONF +
     		"capability:validate:1.0";
 
     /**
      * String constant for the <code>:startup</code> capability.
      * "urn:ietf:params:netconf:capability:startup:1.0".
      */
-    public static String STARTUP_CAPABILITY = URN_IETF_PARAMS_NETCONF +
+    public static final String STARTUP_CAPABILITY = URN_IETF_PARAMS_NETCONF +
     		"capability:startup:1.0";
 
     /**
      * String constant for the <code>:url</code> capability.
      * "urn:ietf:params:netconf:capability:url:1.0".
      */
-    public static String URL_CAPABILITY = URN_IETF_PARAMS_NETCONF +
+    public static final String URL_CAPABILITY = URN_IETF_PARAMS_NETCONF +
     		"capability:url:1.0";
 
-    public static String URL_CAPABILITY_SCHEME = URN_IETF_PARAMS_NETCONF +
+    public static final String URL_CAPABILITY_SCHEME = URN_IETF_PARAMS_NETCONF +
     		"capability:url:1.0?scheme=";
 
     /**
      * String constant for the <code>:xpath</code> capability.
      * "urn:ietf:params:netconf:capability:xpath:1.0".
      */
-    public static String XPATH_CAPABILITY = URN_IETF_PARAMS_NETCONF +
+    public static final String XPATH_CAPABILITY = URN_IETF_PARAMS_NETCONF +
     		"capability:xpath:1.0";
 
     /**
      * String constant for the <code>:notification</code> capability.
      * "urn:ietf:params:netconf:capability:notification:1.0".
      */
-    public static String NOTIFICATION_CAPABILITY = URN_IETF_PARAMS_NETCONF +
+    public static final String NOTIFICATION_CAPABILITY = URN_IETF_PARAMS_NETCONF +
     		"capability:notification:1.0";
 
     /**
      * String constant for the <code>:interleave</code> capability.
      * "urn:ietf:params:netconf:capability:interleave:1.0".
      */
-    public static String INTERLEAVE_CAPABILITY = URN_IETF_PARAMS_NETCONF +
+    public static final String INTERLEAVE_CAPABILITY = URN_IETF_PARAMS_NETCONF +
     		"capability:interleave:1.0";
 
     /**
      * String constant for the <code>:partial-lock</code> capability.
      * "urn:ietf:params:netconf:capability:partial-lock:1.0"
      */
-    public static String PARTIAL_LOCK_CAPABILITY = URN_IETF_PARAMS_NETCONF +
+    public static final String PARTIAL_LOCK_CAPABILITY = URN_IETF_PARAMS_NETCONF +
     		"capability:partial-lock:1.0";
 
     public static final String HTTP_TAIL_F_COM = "http://tail-f.com/";
