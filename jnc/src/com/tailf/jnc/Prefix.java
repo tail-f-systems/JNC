@@ -57,7 +57,7 @@ public class Prefix extends Attribute implements Serializable {
      */
     @Override
     public String toString() {
-        return new String("Prefix{\"" + name + "\", \"" + value + "\"}");
+        return "Prefix{\"" + name + "\", \"" + value + "\"}";
     }
 
     /**

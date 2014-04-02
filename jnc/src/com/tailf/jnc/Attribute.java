@@ -91,8 +91,7 @@ public class Attribute implements Serializable {
      */
     @Override
     public String toString() {
-        return new String("Attribute{name=" + name + ",ns=" + ns + ",value="
-                + value + "}");
+        return "Attribute{name=" + name + ",ns=" + ns + ",value=" + value + "}";
     }
 
     /**

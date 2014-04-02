@@ -611,7 +611,7 @@ public class Path {
             } else if (x instanceof String) {
                 return (String) x;
             } else if (x instanceof Boolean) {
-                return new String(((Boolean) x) ? "true" : "false");
+                return ((Boolean) x) ? "true" : "false";
             } else if (x == null) {
                 return null;
             }

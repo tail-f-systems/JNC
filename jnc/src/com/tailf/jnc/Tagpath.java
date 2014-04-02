@@ -19,7 +19,7 @@ public class Tagpath {
         final String[] tags = s.split("/");
         p = new String[tags.length];
         for (int i = 0; i < tags.length; i++) {
-            p[i] = new String(tags[i]);
+            p[i] = tags[i];
         }
     }
 

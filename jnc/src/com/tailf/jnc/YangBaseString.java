@@ -62,7 +62,7 @@ public class YangBaseString extends YangBaseType<String> {
 
     @Override
     protected YangBaseString cloneShallow() throws YangException {
-        return new YangBaseString(new String(value));
+        return new YangBaseString(value);
     }
 
     /* ---------- Restrictions ---------- */
