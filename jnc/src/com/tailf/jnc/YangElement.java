@@ -799,11 +799,9 @@ public abstract class YangElement extends Element {
         int diffs = 0;
         for (int i = 0; b.children != null && i < b.children.size(); i++) {
             final Element bChild = b.children.get(i);
-            if (a.keyNames() != null && bChild instanceof Leaf) {
+            if (a.keyNames() != null && bChild instanceof Leaf && ((Leaf) bChild).isKey()) {
                 // inside list entries we ignore keys
-                if (((Leaf) bChild).isKey()) {
-                    continue;
-                }
+                continue;
             }
 
             Element aChild = null;
@@ -915,11 +913,9 @@ public abstract class YangElement extends Element {
     private static Element findDeleteChildLeaf(Leaf e, NodeSet s) {
         for (int i = 0; i < s.size(); i++) {
             final Element x = s.get(i);
-            if (x instanceof Leaf) {
-                if (x.compare(e) >= 0) {
-                    s.remove(i);
-                    return x;
-                }
+            if (x instanceof Leaf && x.compare(e) >= 0) {
+              s.remove(i);
+              return x;
             }
         }
         return null;
