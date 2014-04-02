@@ -121,11 +121,7 @@ public class SSHSession implements Transport {
             return true;
         }
         final int conditionSet = session.waitForCondition(0xffffffff, 1);
-        if ((conditionSet & ChannelCondition.TIMEOUT) == ChannelCondition.TIMEOUT) {
-            // It's a timeout
-            return false;
-        }
-        return true;
+        return (conditionSet & ChannelCondition.TIMEOUT) != ChannelCondition.TIMEOUT;
     }
 
     /**
@@ -136,11 +132,7 @@ public class SSHSession implements Transport {
         int conditionSet = ChannelCondition.TIMEOUT & ChannelCondition.CLOSED
                 & ChannelCondition.EOF;
         conditionSet = session.waitForCondition(conditionSet, 1);
-        if ((conditionSet & ChannelCondition.TIMEOUT) == ChannelCondition.TIMEOUT) {
-            // it's a timeout
-            return false;
-        }
-        return true;
+        return (conditionSet & ChannelCondition.TIMEOUT) != ChannelCondition.TIMEOUT;
     }
 
     /**

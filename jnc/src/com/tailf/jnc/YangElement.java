@@ -824,7 +824,6 @@ public abstract class YangElement extends Element {
                     // both children are identical - remove from b as well
                     toDel.add(bChild);
                 }
-                continue;
             } else if (aChild instanceof Leaf) {
                 if (aChild.equals(bChild)) {
                     // remove identical leaves from b - no need to send them

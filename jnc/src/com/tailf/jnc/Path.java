@@ -385,37 +385,17 @@ public class Path {
                     rval = f_string(rval);
                 }
                 if (op == EQ) {
-                    if (compare(lval, rval) == 0) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return compare(lval, rval) == 0;
                 } else // op==NEQ
-                if (compare(lval, rval) != 0) {
-                    return true;
-                } else {
-                    return false;
-                }
+                    return compare(lval, rval) != 0;
             case GT: // '>'
-                if (compare(f_number(lval), f_number(rval)) > 0) {
-                    return true;
-                }
-                return false;
-            case GTE: // '>='
-                if (compare(f_number(lval), f_number(rval)) >= 0) {
-                    return true;
-                }
-                return false;
-            case LT: // '<'
-                if (compare(f_number(lval), f_number(rval)) < 0) {
-                    return true;
-                }
-                return false;
-            case LTE: // '<='
-                if (compare(f_number(lval), f_number(rval)) <= 0) {
-                    return true;
-                }
-                return false;
+                return compare(f_number(lval), f_number(rval)) > 0;
+                case GTE: // '>='
+                    return compare(f_number(lval), f_number(rval)) >= 0;
+                case LT: // '<'
+                    return compare(f_number(lval), f_number(rval)) < 0;
+                case LTE: // '<='
+                    return compare(f_number(lval), f_number(rval)) <= 0;
 
                 // FUNCTIONS
             case FUN_STRING:
@@ -926,7 +906,6 @@ public class Path {
                 parseError(tokens);
             }
         }
-        return;
     }
 
     /**
