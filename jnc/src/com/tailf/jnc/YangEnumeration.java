@@ -1,5 +1,7 @@
 package com.tailf.jnc;
 
+import java.util.Arrays;
+
 /**
  * Implements the built-in YANG data type "enumeration".
  * <p>
@@ -95,7 +97,7 @@ public class YangEnumeration extends YangBaseString {
     @Override
     public int hashCode() {
         final int hash = super.hashCode();
-        return (enums == null) ? hash : (hash + enums.hashCode());
+        return (enums == null) ? hash : (hash + Arrays.hashCode(enums));
     }
     
     /*
