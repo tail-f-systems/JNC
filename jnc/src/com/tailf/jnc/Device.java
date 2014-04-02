@@ -196,8 +196,7 @@ public class Device implements Serializable {
      * @param sessionName symbolic Name of the session
      */
     public Element getConfig(String sessionName) {
-        final SessionTree t = getTreeData(sessionName);
-        return t.configTree;
+        return getTreeData(sessionName).configTree;
     }
 
     /**
