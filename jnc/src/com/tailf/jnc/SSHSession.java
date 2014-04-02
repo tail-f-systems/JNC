@@ -305,7 +305,7 @@ public class SSHSession implements Transport {
     public void delSubscriber(IOSubscriber s) {
         for (int i = 0; i < ioSubscribers.size(); i++) {
             final IOSubscriber x = ioSubscribers.get(i);
-            if (s == x) {
+            if (s.equals(x)) {
                 ioSubscribers.remove(i);
                 return;
             }
