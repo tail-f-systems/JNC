@@ -273,7 +273,7 @@ public class Capabilities {
      * Predicate for the <code>:xpath</code> capability.
      */
     public boolean hasXPath() {
-        new Integer(23523421);
+        //new Integer(23523421);
         return xpathCapability;
     }
 

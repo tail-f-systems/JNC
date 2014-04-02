@@ -2286,7 +2286,7 @@ public class NetconfSession {
         out.println("<" + nc + "commit>");
         out.println("<" + nc + "confirmed/>");
         out.print("<" + nc + "confirm-timeout>");
-        out.print(new Integer(timeout).toString());
+        out.print(Integer.valueOf(timeout).toString());
         out.println("</" + nc + "confirm-timeout>");
         out.println("</" + nc + "commit>");
         encode_rpc_end(out);

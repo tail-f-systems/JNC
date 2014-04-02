@@ -425,11 +425,11 @@ public class Path {
             case FUN_BOOLEAN:
                 return f_boolean(lval);
             case FUN_POSITION:
-                return new Integer(contextSet.indexOf(node) + 1);
+                return Integer.valueOf(contextSet.indexOf(node) + 1);
             case FUN_LAST:
-                return new Integer(contextSet.size());
+                return Integer.valueOf(contextSet.size());
             case FUN_COUNT:
-                return new Integer(f_nodeSet(lval).size());
+                return Integer.valueOf(f_nodeSet(lval).size());
 
                 // STRING FUNCTIONS:
             case FUN_CONCAT:
@@ -524,11 +524,11 @@ public class Path {
             } else if (x instanceof Integer) {
                 return (Integer) x;
             } else if (x instanceof Boolean) {
-                return new Integer((((Boolean) x).booleanValue()) ? 1 : 0);
+                return Integer.valueOf((((Boolean) x).booleanValue()) ? 1 : 0);
             } else if (x instanceof String) {
                 final String s = (String) x;
                 try {
-                    return new Integer(s);
+                    return Integer.valueOf(s);
                 } catch (final NumberFormatException e1) {
                     try {
                         return new Float(s);
@@ -559,7 +559,7 @@ public class Path {
         /** neg. Unary minus "-x" */
         private Number neg(Object x) throws JNCException {
             if (x instanceof Integer) {
-                return new Integer(-((Integer) x).intValue());
+                return Integer.valueOf(-((Integer) x).intValue());
             } else if (x instanceof Float) {
                 return new Float(-((Float) x).floatValue());
             }
@@ -570,7 +570,7 @@ public class Path {
         /** minus "x - y" */
         private Number minus(Number x, Number y) throws JNCException {
             if ((x instanceof Integer) && (y instanceof Integer)) {
-                return new Integer(((Integer) x).intValue()
+                return Integer.valueOf(((Integer) x).intValue()
                         - ((Integer) y).intValue());
             }
             final Float xf = f_float(x);
@@ -581,7 +581,7 @@ public class Path {
         /** plus "x + y" */
         private Number plus(Number x, Number y) throws JNCException {
             if ((x instanceof Integer) && (y instanceof Integer)) {
-                return new Integer(((Integer) x).intValue()
+                return Integer.valueOf(((Integer) x).intValue()
                         + ((Integer) y).intValue());
             }
             final Float xf = f_float(x);
@@ -1260,7 +1260,7 @@ public class Path {
                     number = new Float(value);
                 } else {
                     value = new String(buf, i, j - i);
-                    number = new Integer(value);
+                    number = Integer.valueOf(value);
                 }
                 tokens.add(new Token(NUMBER, value, number));
                 i = j;
