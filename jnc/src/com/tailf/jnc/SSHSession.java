@@ -186,7 +186,7 @@ public class SSHSession implements Transport {
                     // it's a timeout - there is nothing to
                     // read, not even eof
                     throw new JNCException(JNCException.TIMEOUT_ERROR,
-                            new Long(readTimeout));
+                             Long.valueOf(readTimeout));
                 }
             }
 

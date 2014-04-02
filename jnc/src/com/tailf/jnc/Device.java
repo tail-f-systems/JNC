@@ -486,11 +486,11 @@ public class Device implements Serializable {
      */
     @Override
     public String toString() {
-        String s = "Device: " + name + " " + mgmt_ip + ":" + mgmt_port + "\n";
+        StringBuffer s = new StringBuffer("Device: " + name + " " + mgmt_ip + ":" + mgmt_port + "\n");
         for (final SessionConnData p : connSessions) {
-            s += ("   session: " + p.sessionName);
+            s.append("   session: " + p.sessionName);
         }
-        return s;
+        return s.toString();
     }
 
     private SessionConnData getConnData(String sessionName) {

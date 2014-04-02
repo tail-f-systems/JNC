@@ -103,7 +103,7 @@ public class SchemaParser {
                 } else {
                     node.tagpath = new Tagpath(splittedTagpath.length - 1);
                     for (int i = 1; i < splittedTagpath.length; i++) {
-                        node.tagpath.p[i - 1] = new String(splittedTagpath[i]);
+                        node.tagpath.p[i - 1] = splittedTagpath[i];
                     }
                 }
             } else if (localName.equals("namespace")) {

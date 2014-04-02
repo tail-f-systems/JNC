@@ -75,7 +75,7 @@ public class Element implements Serializable {
      * level. For example the NETCONF prefix mapping "nc" is added here as a
      * default.
      */
-    public static PrefixMap defaultPrefixes = new PrefixMap(new Prefix[] {
+    public static final PrefixMap defaultPrefixes = new PrefixMap(new Prefix[] {
             new Prefix("nc", NETCONF_NAMESPACE),
             new Prefix("pl", Capabilities.NS_PARTIAL_LOCK),
             new Prefix("ncn", Capabilities.NS_NOTIFICATION) });
@@ -1878,7 +1878,7 @@ public class Element implements Serializable {
         final FileOutputStream fos = new FileOutputStream(file);
         final DataOutputStream dos = new DataOutputStream(fos);
         dos.writeBytes(toXMLString());
-        fos.close();
+        dos.close();
     }
 
     /**

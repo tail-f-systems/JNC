@@ -18,8 +18,8 @@ public class RevisionInfo {
     public String data;
     public String introduced; // YYYY-MM-DD
 
-    public static boolean olderRevisionSupportEnabled = true;
-    public static boolean newerRevisionSupportEnabled = true;
+    protected static boolean olderRevisionSupportEnabled = true;
+    protected static boolean newerRevisionSupportEnabled = true;
 
     /**
      * Enables revision support for newer data. This means that if the device

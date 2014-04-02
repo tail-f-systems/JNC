@@ -37,7 +37,7 @@ public class Prefix extends Attribute implements Serializable {
     public Prefix(String name, String nsValue) {
         super(name, nsValue);
         ns = XMLNS_NAMESPACE;
-        if (name == "") {
+        if (name.equals("")) {
             qName = "xmlns";
         } else {
             qName = "xmlns:" + name;
@@ -57,7 +57,7 @@ public class Prefix extends Attribute implements Serializable {
      */
     @Override
     public String toString() {
-        return new String("Prefix{\"" + name + "\", \"" + value + "\"}");
+        return "Prefix{\"" + name + "\", \"" + value + "\"}";
     }
 
     /**
