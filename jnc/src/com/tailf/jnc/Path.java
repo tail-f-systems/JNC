@@ -359,14 +359,14 @@ public class Path {
             case OR:
                 // rvalue not evaluated if lval is 'true'
                 if (f_boolean(lval).booleanValue()) {
-                    return new Boolean(true);
+                    return true;
                 } else {
                     return f_boolean(rval);
                 }
             case AND:
                 // rvalue not evaluated if lval is 'false'
                 if (!f_boolean(lval).booleanValue()) {
-                    return new Boolean(false);
+                    return false;
                 } else {
                     return f_boolean(rval);
                 }
@@ -386,36 +386,36 @@ public class Path {
                 }
                 if (op == EQ) {
                     if (compare(lval, rval) == 0) {
-                        return new Boolean(true);
+                        return true;
                     } else {
-                        return new Boolean(false);
+                        return false;
                     }
                 } else // op==NEQ
                 if (compare(lval, rval) != 0) {
-                    return new Boolean(true);
+                    return true;
                 } else {
-                    return new Boolean(false);
+                    return false;
                 }
             case GT: // '>'
                 if (compare(f_number(lval), f_number(rval)) > 0) {
-                    return new Boolean(true);
+                    return true;
                 }
-                return new Boolean(false);
+                return false;
             case GTE: // '>='
                 if (compare(f_number(lval), f_number(rval)) >= 0) {
-                    return new Boolean(true);
+                    return true;
                 }
-                return new Boolean(false);
+                return false;
             case LT: // '<'
                 if (compare(f_number(lval), f_number(rval)) < 0) {
-                    return new Boolean(true);
+                    return true;
                 }
-                return new Boolean(false);
+                return false;
             case LTE: // '<='
                 if (compare(f_number(lval), f_number(rval)) <= 0) {
-                    return new Boolean(true);
+                    return true;
                 }
-                return new Boolean(false);
+                return false;
 
                 // FUNCTIONS
             case FUN_STRING:
@@ -437,11 +437,11 @@ public class Path {
 
                 // BOOLEAN FUNCTIONS:
             case FUN_NOT:
-                return new Boolean(!f_boolean(lval).booleanValue());
+                return !f_boolean(lval).booleanValue();
             case FUN_TRUE:
-                return new Boolean(true);
+                return true;
             case FUN_FALSE:
-                return new Boolean(false);
+                return false;
 
                 // NUMBER FUNCTIONS:
             case FUN_NEG: // '- x' (UNARY)
