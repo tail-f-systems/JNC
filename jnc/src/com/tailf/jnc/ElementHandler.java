@@ -35,7 +35,7 @@ class ElementHandler extends DefaultHandler {
             Attributes attributes) throws SAXException {
 
         if (unknownLevel > 0) {
-            unkownStartElement(uri, localName, qName, attributes);
+            unkownStartElement(uri, localName, attributes);
             return;
         }
         final Element parent = current;
@@ -54,7 +54,7 @@ class ElementHandler extends DefaultHandler {
 
         if (child == null && unknownLevel == 1) {
             // we're entering XML data that's not in the schema
-            unkownStartElement(uri, localName, qName, attributes);
+            unkownStartElement(uri, localName, attributes);
             return;
         }
 
@@ -73,8 +73,7 @@ class ElementHandler extends DefaultHandler {
         current = child; // step down
     }
 
-    private void unkownStartElement(String uri, String localName,
-            String qName, Attributes attributes) throws SAXException {
+    private void unkownStartElement(String uri, String localName, Attributes attributes) throws SAXException {
         final Element child = new Element(uri, localName);
         child.prefixes = prefixes;
         prefixes = null;
@@ -98,7 +97,7 @@ class ElementHandler extends DefaultHandler {
         }
     }
 
-    private void unknownEndElement(String uri, String localName, String qName) {
+    private void unknownEndElement() {
         // check that we don't have mixed content
         if (current.hasChildren() && current.value != null) {
             // MIXED content not allowed
@@ -112,7 +111,7 @@ class ElementHandler extends DefaultHandler {
     public void endElement(String uri, String localName, String qName)
             throws SAXException {
         if (unknownLevel > 0) {
-            unknownEndElement(uri, localName, qName);
+            unknownEndElement();
             unknownLevel--;
             return;
         }
