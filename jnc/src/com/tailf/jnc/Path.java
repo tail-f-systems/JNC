@@ -1,6 +1,7 @@
 package com.tailf.jnc;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A path expression. This is a small subset of the W3C recommendations of
@@ -96,7 +97,7 @@ public class Path {
     /**
      * The list of location steps (LocationStep).
      */
-    ArrayList<LocationStep> locationSteps;
+    List<LocationStep> locationSteps;
 
     /**
      * The original path string.
@@ -123,7 +124,7 @@ public class Path {
         int axis;
         String name;
         String prefix;
-        ArrayList<Expr> predicates; // list of Expr (Predicates)
+        List<Expr> predicates; // list of Expr (Predicates)
 
         LocationStep(int axis) {
             this.axis = axis;
@@ -766,7 +767,7 @@ public class Path {
      * Returns a list of LocationSteps for a path expression.
      * 
      */
-    ArrayList<LocationStep> parse(TokenList tokens) throws JNCException {
+    List<LocationStep> parse(TokenList tokens) throws JNCException {
         final ArrayList<LocationStep> steps = new ArrayList<LocationStep>();
         try {
             Token tok1, tok2, tok3, tok4, tok5;

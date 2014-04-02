@@ -2,6 +2,7 @@ package com.tailf.jnc;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A NETCONF session class. It makes it possible to connect to a NETCONF agent
@@ -1544,7 +1545,7 @@ public class NetconfSession {
         proprietaryClientCaps.add(capability);
     }
 
-    private ArrayList<String> proprietaryClientCaps;
+    private List<String> proprietaryClientCaps;
 
     /**
      * Used by ConfDSession to set the withDefaults Attribute. Will be included

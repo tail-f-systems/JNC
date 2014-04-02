@@ -3,6 +3,7 @@ package com.tailf.jnc;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The YangElement is a configuration sub-tree like the
@@ -254,7 +255,7 @@ public abstract class YangElement extends Element {
      * Static list of packages.
      * 
      */
-    static ArrayList<Package> packages = new ArrayList<Package>();
+    static List<Package> packages = new ArrayList<Package>();
 
     /**
      * Locate package from Namespace.
