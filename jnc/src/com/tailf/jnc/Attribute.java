@@ -128,7 +128,7 @@ public class Attribute implements Serializable {
     void encode(Transport out, Element contextnode) {
         // NOTE: Namespace is allowed to be "" for attributes
         if (ns != null && ns.length() > 0) {
-            String prefix = null;
+            String prefix;
             if (contextnode != null) {
                 prefix = contextnode.nsToPrefix(ns);
             } else {

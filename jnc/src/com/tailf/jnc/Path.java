@@ -182,7 +182,7 @@ public class Path {
                 final Element node = nodeSet.getElement(i);
                 if (node.name.equals(name)) {
                     /* check namespace also, if prefix is given */
-                    String namespace = null;
+                    String namespace;
                     if (prefix != null) {
                         namespace = node.lookupContextPrefix(prefix);
                         if (node.namespace.equals(namespace)) {
@@ -229,7 +229,7 @@ public class Path {
             case AXIS_ROOT:
                 return null;
             case AXIS_CHILD:
-                String ns = null;
+                String ns;
                 if (prefix == null) {
                     if (parent != null) {
                         ns = parent.namespace;
@@ -1169,8 +1169,8 @@ public class Path {
     TokenList tokenize(String s) throws JNCException {
         final TokenList tokens = new TokenList();
         final byte[] buf = s.getBytes();
-        byte curr, next = 0;
-        int i = 0, j = 0;
+        byte curr, next;
+        int i = 0, j;
 
         while (i < s.length()) {
 

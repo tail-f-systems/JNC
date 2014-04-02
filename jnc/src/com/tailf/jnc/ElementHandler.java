@@ -39,7 +39,7 @@ class ElementHandler extends DefaultHandler {
             return;
         }
         final Element parent = current;
-        Element child = null;
+        Element child;
 
         try {
             child = YangElement.createInstance(this, parent, uri, localName);
