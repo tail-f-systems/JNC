@@ -18,9 +18,7 @@ public class Tagpath {
     public Tagpath(String s) {
         final String[] tags = s.split("/");
         p = new String[tags.length];
-        for (int i = 0; i < tags.length; i++) {
-            p[i] = tags[i];
-        }
+        System.arraycopy(tags, 0, p, 0, tags.length);
     }
 
     @Override
