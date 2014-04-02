@@ -1524,11 +1524,11 @@ public class Element implements Serializable {
         String s = null;
         while (top != null) {
             if (top.namespace == null) {
-                s = strConcat(new String(top.name), s);
+                s = strConcat(top.name, s);
             } else { // top.namespace!=null
                 if (top.parent != null && top.parent.namespace != null
                         && top.namespace.equals(top.parent.namespace)) {
-                    s = strConcat(new String(top.name), s);
+                    s = strConcat(top.name, s);
                 } else {
                     s = strConcat(top.qualifiedName(), s);
                 }

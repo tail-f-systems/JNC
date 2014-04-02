@@ -64,7 +64,7 @@ class ElementHandler extends DefaultHandler {
             leaf = true;
             leafNs = uri;
             leafName = localName;
-            leafValue = new String();
+            leafValue = "";
             return;
         }
         child.prefixes = prefixes;
@@ -144,7 +144,7 @@ class ElementHandler extends DefaultHandler {
 
     private void unknownCharacters(char[] ch, int start, int length) {
         if (current.value == null) {
-            current.value = new String();
+            current.value = "";
         }
         current.value = current.value + new String(ch, start, length);
     }
@@ -160,7 +160,7 @@ class ElementHandler extends DefaultHandler {
             leafValue = leafValue + new String(ch, start, length);
         } else {
             if (current.value == null) {
-                current.value = new String();
+                current.value = "";
             }
             current.value = current.value + new String(ch, start, length);
         }

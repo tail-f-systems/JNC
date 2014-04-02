@@ -85,7 +85,7 @@ public class SchemaParser {
             } else if (localName.equals("schema") || localName.equals("node")) {
                 value = null;
             } else {
-                value = new String();
+                value = "";
             }
         }
 
@@ -105,7 +105,7 @@ public class SchemaParser {
                     }
                 }
             } else if (localName.equals("namespace")) {
-                node.namespace = new String(value);
+                node.namespace = value;
             } else if (localName.equals("primitive_type")) {
                 node.primitive_type = Integer.parseInt(value);
             } else if (localName.equals("min_occurs")) {
@@ -125,15 +125,15 @@ public class SchemaParser {
             } else if (localName.equals("flags")) {
                 node.flags = Integer.parseInt(value);
             } else if (localName.equals("desc")) {
-                node.desc = new String(value);
+                node.desc = value;
             } else if (localName.equals("type")) {
                 ri.type = Integer.parseInt(value);
             } else if (localName.equals("idata")) {
                 ri.idata = Integer.parseInt(value);
             } else if (localName.equals("data")) {
-                ri.data = new String(value);
+                ri.data = value;
             } else if (localName.equals("introduced")) {
-                ri.introduced = new String(value);
+                ri.introduced = value;
             } else if (localName.equals("info")) {
                 riArrayList.add(ri);
             } else if (localName.equals("rev")) {
