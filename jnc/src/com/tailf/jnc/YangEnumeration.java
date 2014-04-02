@@ -104,7 +104,7 @@ public class YangEnumeration extends YangBaseString {
      */
     @Override
     protected YangEnumeration cloneShallow() throws YangException {
-        return new YangEnumeration(value.toString(), enums);
+        return new YangEnumeration(value, enums);
     }
 
 }
