@@ -185,8 +185,7 @@ public class Path {
                     String namespace = null;
                     if (prefix != null) {
                         namespace = node.lookupContextPrefix(prefix);
-                        if (namespace != null
-                                && node.namespace.equals(namespace)) {
+                        if (node.namespace.equals(namespace)) {
                             result.add(node);
                         }
                     } else {
