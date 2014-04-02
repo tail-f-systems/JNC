@@ -119,7 +119,7 @@ public class SchemaParser {
                 } else {
                     node.children = new String[child.length];
                     for (int i = 0; i < child.length; i++) {
-                        node.children[i] = new String(child[i]);
+                        node.children[i] = child[i];
                     }
                 }
             } else if (localName.equals("flags")) {
