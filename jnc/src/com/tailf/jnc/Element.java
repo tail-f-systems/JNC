@@ -1706,7 +1706,7 @@ public class Element implements Serializable {
             }
         }
         indent--;
-        s.append(getIndentationSpacing(flag, indent) + "</" + qName + ">\n");
+        s.append(getIndentationSpacing(flag, indent)).append("</").append(qName).append(">\n");
     }
 
     /**
