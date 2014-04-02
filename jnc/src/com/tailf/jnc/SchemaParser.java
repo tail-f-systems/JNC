@@ -118,9 +118,7 @@ public class SchemaParser {
                     node.children = null;
                 } else {
                     node.children = new String[child.length];
-                    for (int i = 0; i < child.length; i++) {
-                        node.children[i] = child[i];
-                    }
+                    System.arraycopy(child, 0, node.children, 0, child.length);
                 }
             } else if (localName.equals("flags")) {
                 node.flags = Integer.parseInt(value);
