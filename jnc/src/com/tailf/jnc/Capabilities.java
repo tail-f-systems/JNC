@@ -1,7 +1,6 @@
 package com.tailf.jnc;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Capabilities {
 
@@ -309,8 +308,8 @@ public class Capabilities {
         return urlSchemes;
     }
 
-    private final List<Capa> capas;
-    private final List<Capa> data_capas;
+    private final ArrayList<Capa> capas;
+    private final ArrayList<Capa> data_capas;
 
     static private class Capa {
         String uri;

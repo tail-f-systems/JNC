@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.List;
 
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Session;
@@ -38,7 +37,7 @@ public class SSHSession implements Transport {
 
     private BufferedReader in = null;
     private PrintWriter out = null;
-    private final List<IOSubscriber> ioSubscribers;
+    private final ArrayList<IOSubscriber> ioSubscribers;
     protected long readTimeout = 0; // millisecs
 
     private static final String endmarker = "]]>]]>";

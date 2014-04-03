@@ -1,7 +1,6 @@
 package com.tailf.jnc;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -9,7 +8,7 @@ import java.util.Set;
  */
 public class SchemaTree {
 
-    private static Map<String, HashMap<Tagpath, SchemaNode>> namespaces = new HashMap<String, HashMap<Tagpath, SchemaNode>>();
+    private static HashMap<String, HashMap<Tagpath, SchemaNode>> namespaces = new HashMap<String, HashMap<Tagpath, SchemaNode>>();
 
     /**
      * If no hashmap exists for namespace, it is created. Used by generated
@@ -18,7 +17,7 @@ public class SchemaTree {
      * @param namespace The namespace of the module as a String.
      * @return The HashMap associated with namespace.
      */
-    public static Map<Tagpath, SchemaNode> create(String namespace) {
+    public static HashMap<Tagpath, SchemaNode> create(String namespace) {
         if (namespaces.containsKey(namespace)) {
             return namespaces.get(namespace);
         }
@@ -31,7 +30,7 @@ public class SchemaTree {
      * @param namespace A YANG module namespace as a String
      * @return The HashMap associated with namespace, or null.
      */
-    public static Map<Tagpath, SchemaNode> getHashMap(String namespace) {
+    public static HashMap<Tagpath, SchemaNode> getHashMap(String namespace) {
         return namespaces.get(namespace);
     }
 
@@ -52,7 +51,7 @@ public class SchemaTree {
      *         namespace, or null if not found.
      */
     public static SchemaNode lookup(String namespace, Tagpath tp) {
-        final Map<Tagpath, SchemaNode> t = getHashMap(namespace);
+        final HashMap<Tagpath, SchemaNode> t = getHashMap(namespace);
         return t == null ? null : t.get(tp);
     }
 
