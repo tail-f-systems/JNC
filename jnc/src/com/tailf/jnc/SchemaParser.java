@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -61,13 +59,13 @@ public class SchemaParser {
     }
 
     private class SchemaHandler extends DefaultHandler {
-        protected Map<Tagpath, SchemaNode> h;
+        protected HashMap<Tagpath, SchemaNode> h;
         protected SchemaNode node;
         protected RevisionInfo ri;
-        protected List<RevisionInfo> riArrayList;
+        protected ArrayList<RevisionInfo> riArrayList;
         protected String value = null;
 
-        SchemaHandler(Map<Tagpath, SchemaNode> h2) {
+        SchemaHandler(HashMap<Tagpath, SchemaNode> h2) {
             super();
             h = h2;
         }
@@ -164,7 +162,7 @@ public class SchemaParser {
      * @param h The hashtable to populate.
      * @throws JNCException If there is an IO or SAX parse problem.
      */
-    public void readFile(String filename, Map<Tagpath, SchemaNode> h)
+    public void readFile(String filename, HashMap<Tagpath, SchemaNode> h)
             throws JNCException {
         readFile(new InputSource(filename), h);
     }
@@ -177,7 +175,7 @@ public class SchemaParser {
      * @param h The hashtable to populate.
      * @throws JNCException If there is an IO or SAX parse problem.
      */
-    public void readFile(URL schemaUrl, Map<Tagpath, SchemaNode> h)
+    public void readFile(URL schemaUrl, HashMap<Tagpath, SchemaNode> h)
             throws JNCException {
         try {
             readFile(new InputSource(schemaUrl.openStream()), h);
@@ -189,7 +187,7 @@ public class SchemaParser {
     }
 
     private void readFile(InputSource inputSource,
-            Map<Tagpath, SchemaNode> h) throws JNCException {
+            HashMap<Tagpath, SchemaNode> h) throws JNCException {
         try {
             final SchemaHandler handler = new SchemaHandler(h);
             parser.setContentHandler(handler);
@@ -211,7 +209,7 @@ public class SchemaParser {
      * @param clazz
      * @throws JNCException if the file is not found or cannot be parsed.
      */
-    public void findAndReadFile(final String filename, final Map<Tagpath, SchemaNode> h, final Class clazz)
+    public void findAndReadFile(final String filename, final HashMap<Tagpath, SchemaNode> h, final Class clazz)
             throws JNCException {
         final URL url = clazz.getResource(filename);
         if (url == null){

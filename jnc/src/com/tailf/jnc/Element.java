@@ -5,7 +5,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A configuration element sub-tree. Makes it possible to create and/or
@@ -59,9 +62,9 @@ public class Element implements Serializable {
     public Object value;
 
     /**
-     * Attributes on the node. List of Attribute.
+     * Attributes on the node. ArrayList of Attribute.
      */
-    List<Attribute> attrs;
+    ArrayList<Attribute> attrs;
 
     /**
      * Prefix map are really xmlns attributes. For example:

@@ -3,7 +3,6 @@ package com.tailf.jnc;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class provides features for managing a device with NETCONF.
@@ -88,20 +87,20 @@ public class Device implements Serializable {
     /**
      * The NETCONF sessions (channels) for this device.
      */
-    protected transient List<SessionConnData> connSessions;
-    protected transient List<SessionTree> trees;
+    protected transient ArrayList<SessionConnData> connSessions;
+    protected transient ArrayList<SessionTree> trees;
 
     /**
      * A list of configuration changes. The backlog is saved when a
      * configuration change is made and the device is down, so that it can be
      * re-sent later when the device comes up again.
      */
-    protected List<Element> backlog;
+    protected ArrayList<Element> backlog;
 
     /**
      * A list of users.
      */
-    protected List<DeviceUser> users;
+    protected ArrayList<DeviceUser> users;
 
     /**
      * ip address as string
@@ -170,7 +169,7 @@ public class Device implements Serializable {
     /**
      * Return the list of users.
      */
-    public List<DeviceUser> getUsers() {
+    public ArrayList<DeviceUser> getUsers() {
         return users;
     }
 
