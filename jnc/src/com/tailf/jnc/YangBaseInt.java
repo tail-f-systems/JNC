@@ -81,7 +81,7 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
         final BigDecimal bd = Utils.bigDecimalValueOf(n);
         boolean res = true;
         if (MIN_VALUE != null) {
-            res &= bd.compareTo(MIN_VALUE) >= 0;
+            res = bd.compareTo(MIN_VALUE) >= 0;
         }
         if (MAX_VALUE != null) {
             res &= bd.compareTo(MAX_VALUE) <= 0;

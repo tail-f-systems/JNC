@@ -228,10 +228,7 @@ public class Device implements Serializable {
      */
     public boolean hasConfig(String sessionName) {
         final SessionTree t = getTreeData(sessionName);
-        if (t.configTree != null) {
-            return true;
-        }
-        return false;
+        return t.configTree != null;
     }
 
     /**
@@ -370,7 +367,6 @@ public class Device implements Serializable {
         }
         con = new SSHConnection(mgmt_ip, mgmt_port, connectTimeout);
         auth(u);
-        return;
     }
 
     /**
@@ -432,7 +428,6 @@ public class Device implements Serializable {
         if (backlog.size() > 0) {
             runBacklog(sessionName);
         }
-        return;
     }
 
     /**
@@ -487,7 +482,7 @@ public class Device implements Serializable {
     public String toString() {
         StringBuffer s = new StringBuffer("Device: " + name + " " + mgmt_ip + ":" + mgmt_port + "\n");
         for (final SessionConnData p : connSessions) {
-            s.append("   session: " + p.sessionName);
+            s.append("   session: ").append(p.sessionName);
         }
         return s.toString();
     }

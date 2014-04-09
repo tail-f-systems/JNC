@@ -2,6 +2,7 @@ package com.tailf.jnc;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 
 /**
  * Implements the built-in YANG data type "union". Represents a union of
@@ -162,7 +163,7 @@ public class YangUnion extends YangBaseType<YangType<?>> {
     @Override
     public int hashCode() {
         final int hash = super.hashCode();
-        return (memberTypes == null) ? hash : (hash + memberTypes.hashCode());
+        return (memberTypes == null) ? hash : (hash + Arrays.hashCode(memberTypes));
     }
 
     /*

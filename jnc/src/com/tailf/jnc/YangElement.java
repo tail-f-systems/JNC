@@ -167,15 +167,15 @@ public abstract class YangElement extends Element {
         } catch (final ClassNotFoundException e) {
             e.printStackTrace();
             throw new YangException(YangException.ELEMENT_MISSING,
-                    parent.getElementPath(name) + COLON_UNEXPECTED_ELEMENT);
+                    (parent != null ? parent.getElementPath(name) : null) + COLON_UNEXPECTED_ELEMENT);
         } catch (final InstantiationException e) {
             e.printStackTrace();
             throw new YangException(YangException.ELEMENT_MISSING,
-                    parent.getElementPath(name) + COLON_UNEXPECTED_ELEMENT);
+                    (parent != null ? parent.getElementPath(name) : null) + COLON_UNEXPECTED_ELEMENT);
         } catch (final IllegalAccessException e) {
             e.printStackTrace();
             throw new YangException(YangException.ELEMENT_MISSING,
-                    parent.getElementPath(name) + COLON_UNEXPECTED_ELEMENT);
+                    (parent != null ? parent.getElementPath(name) : null) + COLON_UNEXPECTED_ELEMENT);
         } catch (final InvocationTargetException e) {
             throw new YangException(YangException.ELEMENT_MISSING,
                     parent.getElementPath(name) + COLON_UNEXPECTED_ELEMENT);
@@ -823,7 +823,6 @@ public abstract class YangElement extends Element {
                     // both children are identical - remove from b as well
                     toDel.add(bChild);
                 }
-                continue;
             } else if (aChild instanceof Leaf) {
                 if (aChild.equals(bChild)) {
                     // remove identical leaves from b - no need to send them
