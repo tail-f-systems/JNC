@@ -179,7 +179,7 @@ public class YangBinary extends YangBaseType<String> {
                 map1[i++] = c;
             }
             map1[i++] = '+';
-            map1[i++] = '/';
+            map1[i] = '/';
         }
 
         /**

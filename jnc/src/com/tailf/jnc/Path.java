@@ -181,7 +181,7 @@ public class Path {
                 final Element node = nodeSet.getElement(i);
                 if (node.name.equals(name)) {
                     /* check namespace also, if prefix is given */
-                    String namespace = null;
+                    String namespace;
                     if (prefix != null) {
                         namespace = node.lookupContextPrefix(prefix);
                         if (node.namespace.equals(namespace)) {
@@ -228,7 +228,7 @@ public class Path {
             case AXIS_ROOT:
                 return null;
             case AXIS_CHILD:
-                String ns = null;
+                String ns;
                 if (prefix == null) {
                     if (parent != null) {
                         ns = parent.namespace;
@@ -384,37 +384,17 @@ public class Path {
                     rval = f_string(rval);
                 }
                 if (op == EQ) {
-                    if (compare(lval, rval) == 0) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return compare(lval, rval) == 0;
                 } else // op==NEQ
-                if (compare(lval, rval) != 0) {
-                    return true;
-                } else {
-                    return false;
-                }
+                    return compare(lval, rval) != 0;
             case GT: // '>'
-                if (compare(f_number(lval), f_number(rval)) > 0) {
-                    return true;
-                }
-                return false;
-            case GTE: // '>='
-                if (compare(f_number(lval), f_number(rval)) >= 0) {
-                    return true;
-                }
-                return false;
-            case LT: // '<'
-                if (compare(f_number(lval), f_number(rval)) < 0) {
-                    return true;
-                }
-                return false;
-            case LTE: // '<='
-                if (compare(f_number(lval), f_number(rval)) <= 0) {
-                    return true;
-                }
-                return false;
+                return compare(f_number(lval), f_number(rval)) > 0;
+                case GTE: // '>='
+                    return compare(f_number(lval), f_number(rval)) >= 0;
+                case LT: // '<'
+                    return compare(f_number(lval), f_number(rval)) < 0;
+                case LTE: // '<='
+                    return compare(f_number(lval), f_number(rval)) <= 0;
 
                 // FUNCTIONS
             case FUN_STRING:
@@ -925,7 +905,6 @@ public class Path {
                 parseError(tokens);
             }
         }
-        return;
     }
 
     /**
@@ -954,13 +933,13 @@ public class Path {
                     + tok1 + "," + tok2 + "," + tok3 + ", ...]");
 
             /* ATOM = */
-            if (tok1.type == ATOM && tok2.type == COMPARE && tok3 != null) {
+            if (tok1.type == ATOM && (tok2 != null ? tok2.type : 0) == COMPARE && tok3 != null) {
                 final Object rexpr = parsePredicate_rvalue(tokens, i + 2, to);
                 return new Expr(tok2.op, new Expr(CHILD_VALUE, tok1.value),
                         rexpr);
             }
             /* ATTR = */
-            else if (tok1.type == ATTR && tok2.type == COMPARE
+            else if (tok1.type == ATTR && (tok2 != null ? tok2.type : 0) == COMPARE
                     && tok3 != null) {
                 final Object rexpr = parsePredicate_rvalue(tokens, i + 2, to);
                 return new Expr(tok2.op, new Expr(ATTR_VALUE, tok1.value),
@@ -1168,8 +1147,8 @@ public class Path {
     TokenList tokenize(String s) throws JNCException {
         final TokenList tokens = new TokenList();
         final byte[] buf = s.getBytes();
-        byte curr, next = 0;
-        int i = 0, j = 0;
+        byte curr, next;
+        int i = 0, j;
 
         while (i < s.length()) {
 

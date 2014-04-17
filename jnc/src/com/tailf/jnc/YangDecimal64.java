@@ -159,7 +159,7 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
             final YangDecimal64 other = (YangDecimal64) obj;
             try {
                 exact(other.getValue());
-                return (fractionDigits == other.fractionDigits && other
+                return (fractionDigits.equals(other.fractionDigits) && other
                         .canEqual(this));
             } catch (final Exception e) {
             } // Different/null value, or can't equal

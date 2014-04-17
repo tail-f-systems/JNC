@@ -1435,7 +1435,7 @@ public class NetconfSession {
             if (rep != null) {
                 check_mid(rep, mid);
             }
-            ok = rep.getFirst("self::rpc-reply/ok");
+            ok = rep != null ? rep.getFirst("self::rpc-reply/ok") : null;
         } else {
             ok = t.getFirst("self::rpc-reply/ok");
         }
