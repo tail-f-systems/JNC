@@ -2,12 +2,13 @@
 <project name="java-junit-template-project" default="test" basedir=".">
     <property name="main.build.dir" value="build/main"/>
     <property name="main.src.dir" value="src"/>
+    <property name="main.lib.dir" value="lib"/>
     <property name="test.build.dir" value="build/test"/>
     <property name="test.src.dir" value="test"/>
     <property name="jar.build.dir" value="build/jar"/>
 
     <path id="classpath.base">
-        <pathelement location="lib/ganymed-ssh2-250.jar"/>
+        <pathelement location="lib/ganymed-ssh2-262.jar"/>
     </path>
 
     <path id="classpath.test">
@@ -17,7 +18,20 @@
         <path refid="classpath.base"/>
     </path>
 
-    <target name="clean">
+    <target name="get-deps">
+        <mkdir dir="lib"/>
+        <get src="http://repo1.maven.org/maven2/junit/junit/4.11/junit-4.11.jar"
+             dest="${main.lib.dir}/junit-4.11.jar"
+             usetimestamp="true"/>
+        <get src="http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar"
+             dest="${main.lib.dir}/hamcrest-core-1.3.jar"
+             usetimestamp="true"/>
+        <get src="http://repo1.maven.org/maven2/ch/ethz/ganymed/ganymed-ssh2/262/ganymed-ssh2-262.jar"
+             dest="${main.lib.dir}/ganymed-ssh2-262.jar"
+             usetimestamp="true"/>
+    </target>
+
+    <target name="clean" depends="get-deps">
         <delete>
             <fileset dir="${basedir}" includes="**/*.class"/>
         </delete>

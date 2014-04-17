@@ -19,6 +19,7 @@
 bin
 pyang
 *JPyang.java
+jnc/lib
 
 **/.idea
 **/*.iml
