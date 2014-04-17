@@ -1415,7 +1415,7 @@ public class Element implements Serializable {
         String prefix = prefix();
 
         if (prefix == null) {
-            prefix = "unknown";
+            prefix = "";
         }
 
         if (prefix.equals("")) {
