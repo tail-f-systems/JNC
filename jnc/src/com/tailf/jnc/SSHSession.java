@@ -20,14 +20,14 @@ import ch.ethz.ssh2.Session;
  * .ethz.ch/ssh2/</a>)
  * <p>
  * Example:
- * 
+ *
  * <pre>
  * SSHConnection c = new SSHConnection(&quot;127.0.0.1&quot;, 789);
  * c.authenticateWithPassword(&quot;ola&quot;, &quot;secret&quot;);
  * SSHSession ssh = new SSHSession(c);
  * NetconfSession dev1 = new NetconfSession(ssh);
  * </pre>
- * 
+ *
  */
 
 public class SSHSession implements Transport {
@@ -48,7 +48,7 @@ public class SSHSession implements Transport {
      * channel on top of an existing connection. SSHSession objects imlement
      * the Transport interface and they are passed into the constructor of the
      * NetconfSession class.
-     * 
+     *
      * @param con an established and authenticated SSH connection
      */
     public SSHSession(SSHConnection con) throws IOException, JNCException {
@@ -57,7 +57,7 @@ public class SSHSession implements Transport {
 
     /**
      * Constructor with an extra argument for a readTimeout timer.
-     * 
+     *
      * @param con
      * @param readTimeout Time to wait for read. (in milliseconds)
      */
@@ -96,7 +96,7 @@ public class SSHSession implements Transport {
 
     /**
      * Set the read timeout
-     * 
+     *
      * @param readTimeout timout in milliseconds The readTimeout parameter
      *            affects all read operations. If a timeout is reached, an
      *            INMException is thrown. The socket is not closed.
@@ -107,7 +107,7 @@ public class SSHSession implements Transport {
 
     /**
      * Tell whether this transport is ready to be read.
-     * 
+     *
      * @return true if there is something to read, false otherwise. This
      *         function can typically be used to poll a socket and see there is
      *         data to be read. The function will also return true if the
@@ -127,7 +127,7 @@ public class SSHSession implements Transport {
      * given a live SSHSession, check if the server side has closed it's end of
      * the ssh socket
      */
-    public boolean serverSideClosed() {
+    public boolean serverSideClosed() throws IOException {
         int conditionSet = ChannelCondition.TIMEOUT & ChannelCondition.CLOSED
                 & ChannelCondition.EOF;
         conditionSet = session.waitForCondition(conditionSet, 1);
@@ -141,7 +141,7 @@ public class SSHSession implements Transport {
      * parts of unprocessed xml data left on the socket. This function reads
      * and throws away all such unprocessed data. An alternative after timeout
      * is of course to close the socket and reconnect.
-     * 
+     *
      * @return number of discarded characters
      */
     public int readUntilWouldBlock() {
@@ -225,7 +225,7 @@ public class SSHSession implements Transport {
 
     /**
      * Prints an integer (as text) to the output stream.
-     * 
+     *
      * @param iVal Text to send to the stream.
      */
     @Override
@@ -238,7 +238,7 @@ public class SSHSession implements Transport {
 
     /**
      * Prints text to the output stream.
-     * 
+     *
      * @param s Text to send to the stream.
      */
     @Override
@@ -252,7 +252,7 @@ public class SSHSession implements Transport {
     /**
      * Prints an integer (as text) to the output stream. A newline char is
      * appended to end of the output stream.
-     * 
+     *
      * @param iVal Text to send to the stream.
      */
     @Override
@@ -266,7 +266,7 @@ public class SSHSession implements Transport {
     /**
      * Print text to the output stream. A newline char is appended to end of
      * the output stream.
-     * 
+     *
      * @param s Text to send to the stream.
      */
     @Override
@@ -280,7 +280,7 @@ public class SSHSession implements Transport {
     /**
      * Add an IO Subscriber for this transport. This is useful for tracing the
      * messages.
-     * 
+     *
      * @param s An IOSUbscriber that will be called whenever there is something
      *            received or sent on this transport.
      */
@@ -290,7 +290,7 @@ public class SSHSession implements Transport {
 
     /**
      * Removes an IO subscriber.
-     * 
+     *
      * @param s The IO subscriber to remove.
      */
     public void delSubscriber(IOSubscriber s) {
@@ -324,11 +324,11 @@ public class SSHSession implements Transport {
     /**
      * Needed by users that need to monitor a session for EOF . This will
      * return the underlying Ganymed SSH Session object.
-     * 
+     *
      * The ganymed Session object has a method waitForCondition() that can be
      * used to check the connection state of an ssh soscket. Assuming a A
      * Session object s:
-     * 
+     *
      * <pre>
      * int conditionSet =
      *     ChannelCondition.TIMEOUT ;amp
