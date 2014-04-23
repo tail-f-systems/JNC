@@ -314,6 +314,23 @@ public class ConfigurationMergeHandlerTest {
         assertEquals("parent", result.get(0).name);
     }
 
+    @Test
+    public void shouldReturnUpdateNodeSetIfXPathIsNull() throws Exception {
+
+        final NodeSet existingSet = newNodeSet()
+                .withElement(newElement("parent").build())
+                .build();
+
+        final NodeSet updateSet = newNodeSet()
+                .withElement(newElement("newstuff").build())
+                .build();
+
+        final NodeSet result = performMerge("shouldReturnUpdateNodeSetIfXPathIsNull", existingSet, updateSet, null);
+
+        assertEquals(1, result.size());
+        assertEquals("newstuff", result.get(0).name);
+    }
+
 
 
     private NodeSet performMerge(final String testId, final NodeSet before, final NodeSet update, final String xPath) {
