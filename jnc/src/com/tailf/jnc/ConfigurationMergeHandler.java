@@ -221,18 +221,20 @@ public class ConfigurationMergeHandler {
     // Splits a raw XPath string into discrete elements.
     private List<PathComponent> splitPathIntoComponents(final String rawPath) {
         final List<PathComponent> pcs = new ArrayList<PathComponent>();
-        final byte[] buf = rawPath.getBytes();
-        int i = 0;
+        if (rawPath != null) {
+            final byte[] buf = rawPath.getBytes();
+            int i = 0;
 
-        while (i < rawPath.length()) {
-            if (buf[i] == '/') {
-                i++;
-                final int j = scanName(buf, i);
-                final PathComponent pc = new PathComponent(new String(buf, i, j - i));
-                pcs.add(pc);
-                i = scanAndAddKeys(buf, j, pc);
-            } else {
-                break;
+            while (i < rawPath.length()) {
+                if (buf[i] == '/') {
+                    i++;
+                    final int j = scanName(buf, i);
+                    final PathComponent pc = new PathComponent(new String(buf, i, j - i));
+                    pcs.add(pc);
+                    i = scanAndAddKeys(buf, j, pc);
+                } else {
+                    break;
+                }
             }
         }
         return pcs;
