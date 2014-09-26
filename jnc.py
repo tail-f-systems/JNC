@@ -589,7 +589,13 @@ def camelize(string):
         iterator = pairwise(decapitalize_first(string))
         for character, next_character in iterator:
             if next_character is None:
-                camelized_str.append(character.lower())
+                if (len(string) > 1):
+                    camelized_str.append(character)
+                else:
+                    if(string.isupper()):
+                        camelized_str.append(character.upper())
+                    else:
+                        camelized_str.append(character.lower())
             elif character in '-.':
                 camelized_str.append(capitalize_first(next_character))
                 next(iterator)
