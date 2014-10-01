@@ -39,20 +39,17 @@ START_FLAGS ?=
 all: ietf-inet-types.fxs hosts.fxs hosts.xsd ssh-keydir $(CDB_DIR)/hosts.xml
 	@echo "Build complete"
 
-hosts.fxs: hosts.yang
-	$(CONFDC) --java-package com.example.test -c hosts.yang
+hosts.fxs: ../../yang/hosts.yang
+	$(CONFDC) --java-package com.example.test -c ../../yang/hosts.yang
 
 hosts.xsd: hosts.fxs
 	$(CONFDC) -f $(CONFD_DIR)/etc/confd/ietf-inet-types.fxs \
 	--emit-xsd hosts.xsd hosts.fxs
 
-ietf-inet-types.fxs: hosts.yang
-	$(CONFDC) --java-package com.example.test -c hosts.yang
-
-
+ietf-inet-types.fxs:
 	cp $(CONFD_DIR)/etc/confd/ietf-inet-types.fxs ietf-inet-types.fxs
 
-$(CDB_DIR)/aaa_init.xml: aaa_init.xml $(CDB_DIR)
+$(CDB_DIR)/aaa_init.xml: ../../confd/aaa_init.xml $(CDB_DIR)
 	@cp $< $@
 
 $(CDB_DIR)/%.xml: %.xml $(CDB_DIR)

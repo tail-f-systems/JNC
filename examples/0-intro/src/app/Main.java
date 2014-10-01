@@ -13,7 +13,6 @@ import gen.com.example.test.hosts.hosts.*;
 
 public class Main {
 
-
     private static class Test {
 
         public Test() {
@@ -23,8 +22,8 @@ public class Main {
         public Test(Subscriber s) {
             init(s);
         }
-
-
+        
+        
         private Device dev;
         private DeviceUser duser;
 
@@ -63,14 +62,31 @@ public class Main {
              }
         }
 
+        /**
+         * Gets the first configuration element in configs with specified name.
+         * 
+         * @param configs Set of device configuration data.
+         * @param name The identifier of the configuration to select
+         * @return First configuration with matching name, or null if none present.
+         */
+        Element getConfig(NodeSet configs, String name) {
+            Element config = configs.first();
+            if (!config.name.equals(name)) {
+                config = null;
+                for (Element elem : configs) {
+                    if (elem.name.equals(name)) {
+                        config = elem;
+                    }
+                }
+            }
+            return config;
+        }
 
-
-        Hosts getConfig(Device d) throws IOException, JNCException{
+        NodeSet getConfig(Device d) throws IOException, JNCException{
             Simple.enable();
             NodeSet reply = d.getSession("cfg").getConfig(
 NetconfSession.RUNNING);
-            Hosts h = (Hosts) reply.first().clone();
-            return h;
+            return reply;
         }
 
         void getConfig() throws IOException,JNCException{
@@ -86,7 +102,8 @@ NetconfSession.RUNNING);
         }
 
         void listHosts(Device d)  throws IOException,JNCException{
-            Hosts h = getConfig(d);
+            NodeSet configs = getConfig(d);
+            Hosts h = (Hosts) getConfig(configs, "hosts");
             ElementChildrenIterator it = h.hostIterator();
             while (it.hasNext()) {
                 Host hst = (Host)it.next();
@@ -103,7 +120,8 @@ NetconfSession.RUNNING);
 
 
         void updateConfig(Device d) throws IOException,JNCException {
-            Hosts h = getConfig(d);
+        	NodeSet configs = getConfig(d);
+            Hosts h = (Hosts) getConfig(configs, "hosts");
             ElementChildrenIterator it = h.hostIterator();
             while (it.hasNext()) {
                 Host hst = (Host)it.next();
@@ -112,7 +130,7 @@ NetconfSession.RUNNING);
             }
             d.getSession("cfg").editConfig(h);
             // Inspect the updated RUNNING configuration
-            Hosts h2 = getConfig(d);
+            Hosts h2 = (Hosts) getConfig(configs, "hosts");
             System.out.println("Resulting config:\n" + h2.toXMLString());
         }
 
@@ -131,7 +149,8 @@ NetconfSession.RUNNING);
             h.addHost(joe);
             d.getSession("cfg").editConfig(h);
             // Inspect the updated RUNNING configuration
-            Hosts h2 = getConfig(d);
+            NodeSet configs = getConfig(d);
+            Hosts h2 = (Hosts) getConfig(configs, "hosts");
             System.out.println("Resulting config:\n" + h2.toXMLString());
         }
 
@@ -145,7 +164,8 @@ NetconfSession.RUNNING);
         }
 
         void print_cfg(String s, Device d) throws IOException, JNCException {
-             Hosts h = getConfig(d);
+        	NodeSet configs = getConfig(d);
+            Hosts h = (Hosts) getConfig(configs, "hosts");
              System.out.println(s + " \n" + h.toXMLString());
         }
 
