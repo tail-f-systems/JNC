@@ -64,11 +64,11 @@ action_script:
 
 ######################################################################
 clean:	iclean
-	-rm *.log 2>/dev/null
+	-rm *.log *.trace 2>/dev/null
 
 ######################################################################
 start:  stop action_script
-	$(CONFD) --addloadpath $(CONFD_DIR)/etc/confd -c confd.conf $(CONFD_FLAGS)
+	$(CONFD) --addloadpath $(CONFD_DIR)/etc/confd -c ../../confd/confd.conf $(CONFD_FLAGS)
 
 ######################################################################
 stop:
