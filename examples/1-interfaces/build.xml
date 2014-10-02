@@ -7,8 +7,8 @@
   <property name="classes.dir" value="${build.dir}/classes" />
   <property name="jar.dir"     value="${build.dir}/jar" />
   <property name="pyang"       value="pyang" />
-  <property name="jnc.dir"     value="../../jnc/lib" />
-  <property name="ganymed.dir" value="/usr/share/java" />
+  <property name="jnc.dir"     value="../../jnc/build/jar" />
+  <property name="ganymed.dir" value="../../jnc/lib" />
 
   <target name="clean">
     <delete dir="${build.dir}" />
