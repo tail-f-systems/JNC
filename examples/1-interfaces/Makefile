@@ -33,6 +33,7 @@ $(CDB_DIR)/%.xml: %.xml $(CDB_DIR)
 	@touch $(CDB_DIR)/*.xml
 
 clean:	iclean
+	-rm *.log *.trace 2>/dev/null
 
 start:  stop
 	$(CONFD) -c ../confd/confd.conf $(CONFD_FLAGS)

@@ -45,7 +45,7 @@
           failonerror="true"
           fork="true">
       <classpath location="${jnc.dir}/JNC.jar" />
-      <classpath location="${ganymed.dir}/ganymed-ssh2-250.jar" />
+      <classpath location="${ganymed.dir}/ganymed-ssh2-262.jar" />
       <classpath location="build/classes"/>
     </java>
   </target>

@@ -1979,7 +1979,7 @@ class MethodGenerator(object):
         constructor.set_return_type(None)
         if self.is_container or self.is_list:
             call = ['super']
-            call.extend(self._root_namespace(camelize(self.stmt.arg)))
+            call.extend(self._root_namespace(self.stmt.arg))
             constructor.add_dependency(self.root)
             constructor.add_line(''.join(call))
             if self.is_top_level or self.is_augmented:
@@ -1997,7 +1997,7 @@ class MethodGenerator(object):
         res = ['    /* Access methods for']
         if hasattr(self.gen, 'is_optional') and self.gen.is_optional:
             res.append('optional')
-        res.extend([self.stmt.keyword, 'child: "' + camelize(self.stmt.arg) + '". */'])
+            res.extend([self.stmt.keyword, 'child: "' + self.stmt.arg + '". */'])
         return JavaValue(exact=[' '.join(res)])
 
     def empty_constructor(self):
@@ -2076,7 +2076,7 @@ class MethodGenerator(object):
             method.add_line('return new String[] {')
             for key_stmt in self.gen.key_stmts:
                 method.add_line('"'.join([' ' * 4,
-                                          camelize(key_stmt.arg),
+                                          key_stmt.arg,
                                           ',']))
             method.add_line('};')
         return self.fix_imports(method)
@@ -2094,7 +2094,7 @@ class MethodGenerator(object):
         children = search(self.stmt, yangelement_stmts | leaf_stmts)
         method.add_line('return new String[] {')
         for child in children:
-            method.add_line('"'.join([' ' * 4, camelize(child.arg), ',']))
+            method.add_line('"'.join([' ' * 4, child.arg, ',']))
         method.add_line('};')
         return self.fix_imports(method)
 
@@ -2310,7 +2310,7 @@ class LeafMethodGenerator(MethodGenerator):
         if self.default:
             method.add_line(''.join([method.return_type, ' ', self.n2, ' = (',
                                      method.return_type, ')getValue("',
-                                     camelize(self.stmt.arg), '");']))
+                                     self.stmt.arg, '");']))  
             method.add_line('if (' + self.n2 + ' == null) {')
             newValue = ['    ', self.n2, ' = new ', method.return_type, '("',
                         self.default_value]
@@ -2357,7 +2357,7 @@ class LeafMethodGenerator(MethodGenerator):
             method.add_line('return ' + self.n2 + ';')
         else:
             method.add_line(''.join(['return (', method.return_type,
-                                     ')getValue("', camelize(self.stmt.arg), '");']))
+                                     ')getValue("', self.stmt.arg, '");']))
         return [self.fix_imports(method, child=True)]
 
     def setters(self):
@@ -2382,7 +2382,7 @@ class LeafMethodGenerator(MethodGenerator):
                 method.add_line(''.join(['set', normalize(self.stmt.keyword),
                                          'Value(', self.root, '.NAMESPACE,']))
                 method.add_dependency(self.root)
-                method.add_line('    "' + camelize(self.stmt.arg) + '",')
+                method.add_line('    "' + self.stmt.arg + '",')
                 method.add_line('    ' + param_names[0] + ',')
                 method.add_line('    childrenNames());')
             elif self.type_str[0] == 'com.tailf.jnc.YangEmpty':
@@ -2460,7 +2460,7 @@ class LeafMethodGenerator(MethodGenerator):
                                      '"' + self.stmt.arg + '".']))
         method.set_name('unset' + self.n + 'Value')
         method.add_exception('JNCException')
-        method.add_line('delete("' + camelize(self.stmt.arg) + '");')
+        method.add_line('delete("' + self.stmt.arg + '");')
         return self.fix_imports(method, child=True)
 
     def _parent_method(self, method_type):
@@ -2512,7 +2512,7 @@ class LeafMethodGenerator(MethodGenerator):
                                     ' will not have a value.']))
         method.add_line('set' + normalize(self.stmt.keyword) + 'Value(' +
                         self.root + '.NAMESPACE,')
-        method.add_line('    "' + camelize(self.stmt.arg) + '",')
+        method.add_line('    "' + self.stmt.arg + '",')
         method.add_line('    null,')
         method.add_line('    childrenNames());')
         return self.fix_imports(method, child=True)
