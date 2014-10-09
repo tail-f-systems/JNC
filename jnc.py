@@ -1997,7 +1997,7 @@ class MethodGenerator(object):
         res = ['    /* Access methods for']
         if hasattr(self.gen, 'is_optional') and self.gen.is_optional:
             res.append('optional')
-            res.extend([self.stmt.keyword, 'child: "' + self.stmt.arg + '". */'])
+        res.extend([self.stmt.keyword, 'child: "' + self.stmt.arg + '". */'])
         return JavaValue(exact=[' '.join(res)])
 
     def empty_constructor(self):
@@ -2310,7 +2310,7 @@ class LeafMethodGenerator(MethodGenerator):
         if self.default:
             method.add_line(''.join([method.return_type, ' ', self.n2, ' = (',
                                      method.return_type, ')getValue("',
-                                     self.stmt.arg, '");']))  
+                                     self.stmt.arg, '");']))
             method.add_line('if (' + self.n2 + ' == null) {')
             newValue = ['    ', self.n2, ' = new ', method.return_type, '("',
                         self.default_value]
