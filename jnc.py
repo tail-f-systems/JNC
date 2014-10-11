@@ -2257,7 +2257,7 @@ class MethodGenerator(object):
         else:  # List
             res.set_return_type('ElementChildrenIterator')
             return_stmt.append('Children')
-        return_stmt.extend(['Iterator(children, "', camelize(self.stmt.arg), '");'])
+        return_stmt.extend(['Iterator(children, "', self.stmt.arg, '");'])
         res.add_line(''.join(return_stmt))
         return self.fix_imports(res)
 
@@ -2731,7 +2731,7 @@ class ContainerMethodGenerator(MethodGenerator):
                                     ' entry "', self.n2, '".']))
         method.add_javadoc('@return An array of the deleted element nodes.')
         method.add_line(''.join(['this.', self.n2, ' = null;']))
-        method.add_line(''.join(['String path = "', self.n2, '";']))
+        method.add_line(''.join(['String path = "', self.stmt.arg, '";']))
         method.set_return_type('NodeSet')
         method.add_line('return delete(path);')
         return [self.fix_imports(method, child=True)]
@@ -2892,7 +2892,7 @@ class ListMethodGenerator(MethodGenerator):
             javadoc1 = [method_type.capitalize(), 's ', self.stmt.keyword,
                         ' entry "', self.n2, '", with specified keys.']
             javadoc2 = []
-            path = ['String path = "', self.n2]
+            path = ['String path = "', self.stmt.arg]
             if i == 1:
                 javadoc2.append('The keys are specified as strings.')
 
