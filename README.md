@@ -91,12 +91,20 @@ To actually use the generated classes, you need to compile Java client code
 using the JNC library. It might be convenient to make a Jar file with the JNC
 library for this purpose. There are several ways to do this:
 
-1. Run the ant script located in the jnc directory: ant clean all
-2. Manually: Open a terminal, change directory to jnc, compile the classes with
-       javac -d bin -sourcepath src src/com/tailf/jnc/*.java
-   Now change directory to bin and generate the Jar file with
-       jar cvf ../lib/JNC.jar *
-3. Set up a project in eclipse and export the Jar (see previous section).
+1. Run the **ant** script located in the jnc directory: `ant clean jar`
+2. Build the jar using **maven** from the jnc directory: `mvn clean package`
+3. Manually: Open a terminal and enter the following:
+
+          cd jnc
+          mkdir -p lib bin
+          cd lib
+          wget http://repo1.maven.org/maven2/ch/ethz/ganymed/ganymed-ssh2/262/ganymed-ssh2-262.jar
+          cd ..
+          javac -cp lib/ganymed-ssh2-262.jar:. -d bin -sourcepath src src/main/java/com/tailf/jnc/*.java
+          cd bin
+          jar cvf ../lib/JNC.jar *
+          
+4. Set up a project in eclipse and export the Jar (see previous section).
 
 If the ant script fails to run, the most probable reason is that ganymed ssh2
 is not installed in the expected way. Check that the ganymed.dir variable

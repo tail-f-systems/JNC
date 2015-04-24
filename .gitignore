@@ -15,11 +15,14 @@
 *build/
 *ssh-keydir
 *bak
+*asc
 *~
 bin
 pyang
 *JPyang.java
 jnc/lib
+jnc/dist
+jnc/target
 
 **/.idea
 **/*.iml
