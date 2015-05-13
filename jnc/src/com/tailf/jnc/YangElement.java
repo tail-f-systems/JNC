@@ -46,12 +46,12 @@ public abstract class YangElement extends Element {
     /**
      * Structure information. An array of the children names.
      */
-    abstract protected String[] childrenNames();
+    abstract public String[] childrenNames();
 
     /**
      * Structure information. An array of the names of the key children.
      */
-    abstract protected String[] keyNames();
+    abstract public String[] keyNames();
 
     /**
      * Constructor with namespace and name
@@ -120,7 +120,7 @@ public abstract class YangElement extends Element {
      * @return The created element or null if no element was created.
      * @throws YangException if unable to instantiate the child
      */
-    protected static Element createInstance(ElementHandler parser,
+    public static Element createInstance(ElementHandler parser,
             Element parent, String ns, String name) throws YangException {
         final String pkg = getPackage(ns);
         if (pkg == null) {
@@ -316,7 +316,7 @@ public abstract class YangElement extends Element {
         return false;
     }
 
-    protected static String camelize(String s) {
+    public static String camelize(String s) {
         int len = s == null ? 0 : s.length();
         if (len == 0) {
             return "";
@@ -352,7 +352,7 @@ public abstract class YangElement extends Element {
         return s;
     }
 
-    protected static String normalize(String s) {
+    public static String normalize(String s) {
         final String res = camelize(s);
         int start = 0, end = res.length();
 
@@ -951,7 +951,7 @@ public abstract class YangElement extends Element {
      *         attributes and values.
      */
     @Override
-    protected abstract Element cloneShallow();
+    public abstract Element cloneShallow();
 
     /**
      * Clones the contents of this YangElement into a target copy. All content
