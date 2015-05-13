@@ -136,11 +136,7 @@ public abstract class YangElement extends Element {
             } else if (parent instanceof YangElement) {
                 // YangElement child, aware
                 try {
-                    final String methodName = "add" + normalize(name);
-                    final Class<?> parentClass = parent.getClass();
-                    final Method addChild = parentClass.getMethod(
-                            methodName, new Class[] {});
-                    return (Element) addChild.invoke(parent, new Object[] {});
+                    return ((YangElement) parent).addChild(name);
                 } catch (final NoSuchMethodException e) {
                     if (((YangElement) parent).isChild(name)) {
                         // known existing leaf will be handled by endElement
@@ -1075,6 +1071,21 @@ public abstract class YangElement extends Element {
             }
         }
         return false;
+    }
+
+    /**
+     * Convenience method to create and add a child by name, using reflection.
+     *
+     * @param childName The name of the child to add
+     * @return The added child.
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     */
+    public Element addChild(String childName) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        final String methodName = "add" + normalize(childName);
+        final Method addChild = getClass().getMethod(methodName, new Class[] {});
+        return (Element) addChild.invoke(this, new Object[] {});
     }
 
 }
