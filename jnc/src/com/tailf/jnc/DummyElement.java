@@ -11,7 +11,7 @@ class DummyElement extends YangElement {
      * Structure information. An array of the children names.
      */
     @Override
-    protected String[] childrenNames() {
+    public String[] childrenNames() {
         return new String[0];
     }
 
@@ -19,7 +19,7 @@ class DummyElement extends YangElement {
      * Structure information. An array of the names of the key children.
      */
     @Override
-    protected String[] keyNames() {
+    public String[] keyNames() {
         return new String[0];
     }
 
@@ -43,7 +43,7 @@ class DummyElement extends YangElement {
      * @return A clone of the object. Children are not included.
      */
     @Override
-    protected Element cloneShallow() {
+    public Element cloneShallow() {
         try {
             return cloneShallowContent(new DummyElement(namespace, name));
         } catch (final Exception e) {
