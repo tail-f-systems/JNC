@@ -75,6 +75,11 @@
 
     <target name="jar" depends="test">
         <jar destfile="${build-jar}/JNC.jar" basedir="${build-main}"/>
+        <!-- Build a jar file which includes the sourcce code -->
+        <jar destfile="${build-jar}/JNC-sources.jar">
+            <fileset dir="${build-main}" />
+            <fileset dir="${src-main}" includes="**/*.java"/>
+        </jar>
         <!-- Building a second copy of the jar for maven -->
         <jar destfile="${jar}" basedir="${build-main}"/>
     </target>

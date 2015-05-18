@@ -46,12 +46,12 @@ public abstract class YangElement extends Element {
     /**
      * Structure information. An array of the children names.
      */
-    abstract protected String[] childrenNames();
+    abstract public String[] childrenNames();
 
     /**
      * Structure information. An array of the names of the key children.
      */
-    abstract protected String[] keyNames();
+    abstract public String[] keyNames();
 
     /**
      * Constructor with namespace and name
@@ -120,7 +120,7 @@ public abstract class YangElement extends Element {
      * @return The created element or null if no element was created.
      * @throws YangException if unable to instantiate the child
      */
-    protected static Element createInstance(ElementHandler parser,
+    public static Element createInstance(ElementHandler parser,
             Element parent, String ns, String name) throws YangException {
         final String pkg = getPackage(ns);
         if (pkg == null) {
@@ -136,11 +136,7 @@ public abstract class YangElement extends Element {
             } else if (parent instanceof YangElement) {
                 // YangElement child, aware
                 try {
-                    final String methodName = "add" + normalize(name);
-                    final Class<?> parentClass = parent.getClass();
-                    final Method addChild = parentClass.getMethod(
-                            methodName, new Class[] {});
-                    return (Element) addChild.invoke(parent, new Object[] {});
+                    return ((YangElement) parent).addChild(name);
                 } catch (final NoSuchMethodException e) {
                     if (((YangElement) parent).isChild(name)) {
                         // known existing leaf will be handled by endElement
@@ -316,7 +312,7 @@ public abstract class YangElement extends Element {
         return false;
     }
 
-    protected static String camelize(String s) {
+    public static String camelize(String s) {
         int len = s == null ? 0 : s.length();
         if (len == 0) {
             return "";
@@ -352,7 +348,7 @@ public abstract class YangElement extends Element {
         return s;
     }
 
-    protected static String normalize(String s) {
+    public static String normalize(String s) {
         final String res = camelize(s);
         int start = 0, end = res.length();
 
@@ -951,7 +947,7 @@ public abstract class YangElement extends Element {
      *         attributes and values.
      */
     @Override
-    protected abstract Element cloneShallow();
+    public abstract Element cloneShallow();
 
     /**
      * Clones the contents of this YangElement into a target copy. All content
@@ -1075,6 +1071,21 @@ public abstract class YangElement extends Element {
             }
         }
         return false;
+    }
+
+    /**
+     * Convenience method to create and add a child by name, using reflection.
+     *
+     * @param childName The name of the child to add
+     * @return The added child.
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     */
+    public Element addChild(String childName) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        final String methodName = "add" + normalize(childName);
+        final Method addChild = getClass().getMethod(methodName, new Class[] {});
+        return (Element) addChild.invoke(this, new Object[] {});
     }
 
 }
