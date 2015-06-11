@@ -17,7 +17,7 @@ usage:
 # Where is ConfD installed? Make sure CONFD_DIR points it out
 
 ifndef CONFD_DIR
-$(error "Enviroment variable CONFD_DIR has not been set. Please set this variable, e.g. by sourcing the rc script located in your ConfD installation directory.") 
+$(error "Enviroment variable CONFD_DIR has not been set. Please set this variable, e.g. by sourcing the rc script located in your ConfD installation directory.")
 endif
 
 # Include standard ConfD build definitions and rules
@@ -36,15 +36,11 @@ CONFD_HOST  ?= localhost
 CONFD_FLAGS ?=
 START_FLAGS ?=
 
-all: ietf-inet-types.fxs hosts.fxs hosts.xsd ssh-keydir $(CDB_DIR)/hosts.xml
+all: ietf-inet-types.fxs hosts.fxs ssh-keydir $(CDB_DIR)/hosts.xml
 	@echo "Build complete"
 
 hosts.fxs: ../../yang/hosts.yang
 	$(CONFDC) --java-package com.example.test -c ../../yang/hosts.yang
-
-hosts.xsd: hosts.fxs
-	$(CONFDC) -f $(CONFD_DIR)/etc/confd/ietf-inet-types.fxs \
-	--emit-xsd hosts.xsd hosts.fxs
 
 ietf-inet-types.fxs:
 	cp $(CONFD_DIR)/etc/confd/ietf-inet-types.fxs ietf-inet-types.fxs
@@ -57,9 +53,9 @@ $(CDB_DIR)/%.xml: %.xml $(CDB_DIR)
 	@touch $(CDB_DIR)/*.xml
 
 action_script:
-	-echo "#!/bin/sh  " > /tmp/action_script.sh 
-	-echo "echo res MYRES" >> /tmp/action_script.sh 
-	-echo "exit 0  " >> /tmp/action_script.sh 
+	-echo "#!/bin/sh  " > /tmp/action_script.sh
+	-echo "echo res MYRES" >> /tmp/action_script.sh
+	-echo "exit 0  " >> /tmp/action_script.sh
 	-chmod +x /tmp/action_script.sh
 
 ######################################################################
