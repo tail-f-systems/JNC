@@ -46,6 +46,11 @@ public class Element implements Serializable {
     public static final String NETCONF_NAMESPACE = "urn:ietf:params:xml:ns:netconf:base:1.0";
     public static final String OPERATION = "operation";
 
+    public static final String CREATE = "create";
+    public static final String DELETE = "delete";
+    public static final String REPLACE = "replace";
+    public static final String MERGE = "merge";
+
     /**
      * The namespace this element name belongs to.
      */
@@ -1285,11 +1290,19 @@ public class Element implements Serializable {
     /* Mark operations. Uses the nc:operations attribute */
 
     /**
-     * Removes the operation attribute from a node. This is eqvivalent to:
+     * Removes the operation attribute from a node. This is equivalent to:
      * <code>removeAttr(Element.NETCONF_NAMESPACE,"operation");</code> see @removeAttr
      */
     public void removeMark() {
         removeAttr(NETCONF_NAMESPACE, OPERATION);
+    }
+
+    /**
+     * Sets the operation attribute from a node. This is equivalent to:
+     * <code>setAttr(Element.NETCONF_NAMESPACE,"operation",operation);</code> see @setAttr
+     */
+    public void setMark(String operation) {
+        setAttr(NETCONF_NAMESPACE, OPERATION, operation);
     }
 
     /**
@@ -1309,7 +1322,7 @@ public class Element implements Serializable {
      * Marks a node with operation delete.
      */
     public void markDelete() {
-        setAttr(NETCONF_NAMESPACE, OPERATION, "delete");
+        setMark(DELETE);
     }
 
     /**
@@ -1333,7 +1346,7 @@ public class Element implements Serializable {
      * Marks a node with operation replace.
      */
     public void markReplace() {
-        setAttr(NETCONF_NAMESPACE, OPERATION, "replace");
+        setMark(REPLACE);
     }
 
     /**
@@ -1357,7 +1370,7 @@ public class Element implements Serializable {
      * Marks a node with operation merge.
      */
     public void markMerge() {
-        setAttr(NETCONF_NAMESPACE, OPERATION, "merge");
+        setMark(MERGE);
     }
 
     /**
@@ -1381,7 +1394,7 @@ public class Element implements Serializable {
      * Marks a node with operation create
      */
     public void markCreate() {
-        setAttr(NETCONF_NAMESPACE, OPERATION, "create");
+        setMark(CREATE);
     }
 
     /**
