@@ -47,14 +47,14 @@
 
     <target name="compile" depends="clean">
         <mkdir dir="${build-main}"/>
-        <javac srcdir="${src-main}" destdir="${build-main}" includeantruntime="false">
+        <javac srcdir="${src-main}" destdir="${build-main}" debug="true" includeantruntime="false">
             <classpath refid="classpath.base"/>
         </javac>
     </target>
 
     <target name="compile-test" depends="compile">
         <mkdir dir="${build-test}"/>
-        <javac srcdir="${src-test}" destdir="${build-test}" includeantruntime="false">
+        <javac srcdir="${src-test}" destdir="${build-test}" debug="true" includeantruntime="false">
             <classpath refid="classpath.test"/>
         </javac>
     </target>
