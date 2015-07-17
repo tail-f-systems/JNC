@@ -126,6 +126,14 @@ public class JNCException extends Exception {
     public static final int MESSAGE_ID_MISMATCH = -13;
 
     /**
+     * RPC errors associated with this exception.
+     * <code>null</code> if no RPC errors were parsed.
+     */
+    public RpcError[] getRpcErrors() {
+        return rpcErrors;
+    }
+
+    /**
      * The toString method uses both of errorCode and opaqueData fields to
      * generate an appropriate error string.
      */
