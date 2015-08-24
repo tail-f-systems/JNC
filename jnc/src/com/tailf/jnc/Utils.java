@@ -1,9 +1,20 @@
 package com.tailf.jnc;
 
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Text;
 
 final class Utils {
 
@@ -188,6 +199,24 @@ final class Utils {
             YangException.throwException(true, e);
         }
         return matches;
+    }
+
+    // Thanks Dimitris Kolovos for the code below
+    public static String escapeXml(String original) {
+        String escaped = null;
+        try {
+            Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            Text text = document.createTextNode(original);
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            DOMSource source = new DOMSource(text);
+            StringWriter writer = new StringWriter();
+            StreamResult result = new StreamResult(writer);
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            transformer.transform(source, result);
+            escaped = writer.toString();
+        } catch (Exception ignored) {
+        }
+        return (escaped != null) ? escaped : original ;
     }
 
 }
