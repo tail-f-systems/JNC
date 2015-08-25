@@ -1815,7 +1815,7 @@ public class Element implements Serializable {
             }
         } else if (value != null) {
             // otherwise, add value (if any)
-            out.print(">" + value.toString());
+            out.print(">" + Utils.escapeXml(value.toString()));
         } else {
 	    // self-closing tag
 	    out.print("/>" + (newline_at_end ? "\n" : ""));
