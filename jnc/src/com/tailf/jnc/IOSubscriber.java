@@ -113,7 +113,7 @@ public abstract class IOSubscriber {
         }
     }
 
-    void outputPrint(int iVal) {
+    void outputPrint(long iVal) {
         final StringBuffer tmp = new StringBuffer(16);
         tmp.append(iVal);
         for (int i = 0; i < tmp.length(); i++) {
