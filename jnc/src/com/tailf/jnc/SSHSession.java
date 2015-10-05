@@ -229,7 +229,7 @@ public class SSHSession implements Transport {
      * @param iVal Text to send to the stream.
      */
     @Override
-    public void print(int iVal) {
+    public void print(long iVal) {
         for (final IOSubscriber sub : ioSubscribers) {
             sub.outputPrint(iVal);
         }

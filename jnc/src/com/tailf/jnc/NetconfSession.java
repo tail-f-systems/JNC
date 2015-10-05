@@ -161,7 +161,7 @@ public class NetconfSession {
      * Session identifier. Received from the initial <code>hello</code>
      * message.
      */
-    public int sessionId;
+    public long sessionId;
 
     /**
      * The capability elements for the session. Retrieved from
@@ -323,7 +323,7 @@ public class NetconfSession {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "hello contains no session identifier");
         }
-        sessionId = Integer.parseInt((String) sess.value);
+        sessionId = Long.parseLong((String) sess.value);
         trace("sessionId = " + sessionId);
     }
 
@@ -1169,7 +1169,7 @@ public class NetconfSession {
      * 
      * @param sessionId The id of the session to terminate
      */
-    public void killSession(int sessionId) throws JNCException, IOException {
+    public void killSession(long sessionId) throws JNCException, IOException {
         trace("killSession: " + sessionId);
         if (sessionId == this.sessionId) {
             throw new JNCException(JNCException.SESSION_ERROR,
@@ -2338,7 +2338,7 @@ public class NetconfSession {
      * &lt;/rpc&gt;
      * </pre>
      */
-    int encode_killSession(Transport out, int sessionId) {
+    int encode_killSession(Transport out, long sessionId) {
         final int mid = encode_rpc_begin(out);
         out.println("<" + nc + "kill-session>");
         out.print("<" + nc + "session-id>");
