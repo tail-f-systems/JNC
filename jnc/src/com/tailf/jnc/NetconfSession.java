@@ -454,6 +454,18 @@ public class NetconfSession {
     }
 
     /**
+     * Calls rpc method but does not read a response.
+     * <p>
+     * Returns the request-id used in the message.
+     */
+    public int sendRpc(Element data) throws JNCException, IOException {
+        trace("send rpc: " + data.toXMLString());
+        final int mid = encode_rpc(out, data);
+        out.flush();
+        return mid;
+    }
+
+    /**
      * Gets the device configuration data specified by an xpath expression. The
      * <code>:xpath</code> capability must be supported by the server.
      * 
