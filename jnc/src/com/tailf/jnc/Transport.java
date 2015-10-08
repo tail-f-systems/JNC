@@ -28,7 +28,7 @@ public interface Transport {
     /**
      * Prints an integer to the transport output stream.
      */
-    public void print(int i);
+    public void print(long i);
 
     /**
      * Prints a string to the transport output stream.
