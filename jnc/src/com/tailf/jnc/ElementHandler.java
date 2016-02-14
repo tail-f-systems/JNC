@@ -36,6 +36,7 @@ class ElementHandler extends DefaultHandler {
 
         if (unknownLevel > 0) {
             unkownStartElement(uri, localName, attributes);
+            unknownLevel++;
             return;
         }
         final Element parent = current;
