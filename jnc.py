@@ -139,7 +139,7 @@ class JNCPlugin(plugin.PyangPlugin):
     def setup_ctx(self, ctx):
         """Called after ctx has been set up in main module. Checks if the
         jnc help option was supplied and if not, that the -d or
-        --java-package was used.
+        --jnc-output was used.
 
         ctx -- Context object as defined in __init__.py
 
@@ -150,7 +150,7 @@ class JNCPlugin(plugin.PyangPlugin):
         if ctx.opts.format == 'jnc':
             if not ctx.opts.directory:
                 ctx.opts.directory = 'src/gen'
-                print_warning(msg=('Option -d (or --java-package) not set, ' +
+                print_warning(msg=('Option -d (or --jnc-output) not set, ' +
                     'defaulting to "src/gen".'))
             elif 'src' not in ctx.opts.directory:
                 ctx.opts.directory = 'src/gen'
@@ -168,7 +168,7 @@ class JNCPlugin(plugin.PyangPlugin):
         """Generates Java classes from the YANG module supplied to pyang.
 
         The generated classes are placed in the directory specified by the '-d'
-        or '--java-package' flag, or in "gen" if no such flag was provided,
+        or '--jnc-output' flag, or in "gen" if no such flag was provided,
         using the 'directory' attribute of ctx. If there are existing files
         in the output directory with the same name as the generated classes,
         they are silently overwritten.
