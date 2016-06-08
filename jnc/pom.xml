@@ -31,6 +31,11 @@
     <url>git@github.com:tail-f-systems/JNC.git</url>
   </scm>
 
+	<build>
+		<!-- Specify maven non-standard source folder -->
+		<sourceDirectory>src</sourceDirectory>
+	</build>
+	
   <dependencies>
     <dependency>
       <groupId>ch.ethz.ganymed</groupId>
