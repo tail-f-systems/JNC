@@ -2484,9 +2484,11 @@ public class NetconfSession {
         final String prefix = Element.defaultPrefixes
                 .nsToPrefix(Capabilities.NS_NOTIFICATION);
         final String ncn = mk_prefix_colon(prefix);
+        final String xmlnsAttr = mk_xmlns_attr(prefix,
+                Capabilities.NS_NOTIFICATION);
 
         final int mid = encode_rpc_begin(out);
-        out.println("<" + ncn + "create-subscription>");
+        out.println("<" + ncn + "create-subscription " + xmlnsAttr + ">");
         if (stream != null) {
             out.print("<" + ncn + STREAM_GT);
             out.print(stream);
