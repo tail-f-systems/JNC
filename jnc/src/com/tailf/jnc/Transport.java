@@ -59,4 +59,17 @@ public interface Transport {
      * Closes the Transport session/connection.
      */
     public void close();
+
+    /** 
+     * Sets the framing for the session for Netconf 1.1 support
+     */
+    public void setFraming (Framing f);
+    
+    /**
+     * Enum defining the framing types
+     */
+    public enum Framing {
+	END_OF_MESSAGE,
+        CHUNKED
+    }
 }

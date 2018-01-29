@@ -31,7 +31,12 @@ public class Capabilities {
      */
     public static final String NETCONF_BASE_CAPABILITY = URN_IETF_PARAMS +
     		"netconf:base:1.0";
-
+    /**
+     * String constant for the NETCONF base capability 1.1
+     */
+    public static final String NETCONF_BASE_CAPABILITY_1_1 = URN_IETF_PARAMS +
+    		"netconf:base:1.1";
+    
     /**
      * String constant for the <code>:writable-running</code> capability.
      * "urn:ietf:params:netconf:capability:writable-running:1.0".
@@ -156,6 +161,7 @@ public class Capabilities {
      * Capabilites
      */
     protected boolean baseCapability = false;
+    protected boolean baseCapability_v1_1 = false;
     protected boolean writableRunningCapability = false;
     protected boolean candidateCapability = false;
     protected boolean confirmedCommitCapability = false;
@@ -348,6 +354,8 @@ public class Capabilities {
             capas.add(new Capa(uri, rev));
             if (uri.equals(NETCONF_BASE_CAPABILITY)) {
                 baseCapability = true;
+            } else if (uri.equals(NETCONF_BASE_CAPABILITY_1_1)) {
+            	baseCapability_v1_1 = true;
             } else if (uri.equals(WRITABLE_RUNNING_CAPABILITY)) {
                 writableRunningCapability = true;
             } else if (uri.equals(CANDIDATE_CAPABILITY)) {

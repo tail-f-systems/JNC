@@ -2,6 +2,7 @@ package com.tailf.jnc;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import com.tailf.jnc.Transport.Framing;
 
 /**
  * A NETCONF session class. It makes it possible to connect to a NETCONF agent
@@ -312,11 +313,14 @@ public class NetconfSession {
         trace("capabilities: \n" + capatree.toXMLString());
 
         capabilities = new Capabilities(capatree);
-        if (!capabilities.baseCapability) {
+        if (!capabilities.baseCapability && !capabilities.baseCapability_v1_1) {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "server does not support NETCONF base capability: "
                             + Capabilities.NETCONF_BASE_CAPABILITY);
         }
+        if (capabilities.baseCapability_v1_1)
+        	out.setFraming(Framing.CHUNKED);
+        
         // lookup session id
         final Element sess = t.getFirst("self::hello/session-id");
         if (sess == null) {
@@ -1568,12 +1572,14 @@ public class NetconfSession {
 
     /**
      * Encodes the hello message. The capabilities advertised from the client
-     * side are the base NETCONF capability.
+     * side are the base NETCONF capability for versions 1.0 and 1.1.
      */
     void encode_hello(Transport out) {
         out.print("<hello xmlns=\"" + Capabilities.NS_NETCONF + "\">");
         out.print("<capabilities>");
         out.println("<capability>" + Capabilities.NETCONF_BASE_CAPABILITY
+                + "</capability>");
+        out.println("<capability>" + Capabilities.NETCONF_BASE_CAPABILITY_1_1
                 + "</capability>");
         /* List proprietary client capabilities */
         if (proprietaryClientCaps != null) {
