@@ -114,7 +114,6 @@ public class SSHSession implements Transport {
      *         server side has closed its end of the ssh socket. To explictly
      *         just check for that, use the serverSideClosed() method.
      */
-    @Override
     public boolean ready() throws IOException {
         if (in.ready()) {
             return true;
@@ -165,7 +164,6 @@ public class SSHSession implements Transport {
      * replies as described in <a target="_top"
      * href="ftp://ftp.rfc-editor.org/in-notes/rfc4742.txt">RFC 4742</a>.
      */
-    @Override
     public StringBuffer readOne() throws IOException, JNCException {
         final StringWriter wr = new StringWriter();
         int ch;
@@ -228,7 +226,6 @@ public class SSHSession implements Transport {
      *
      * @param iVal Text to send to the stream.
      */
-    @Override
     public void print(long iVal) {
         for (final IOSubscriber sub : ioSubscribers) {
             sub.outputPrint(iVal);
@@ -241,7 +238,6 @@ public class SSHSession implements Transport {
      *
      * @param s Text to send to the stream.
      */
-    @Override
     public void print(String s) {
         for (final IOSubscriber sub : ioSubscribers) {
             sub.outputPrint(s);
@@ -255,7 +251,6 @@ public class SSHSession implements Transport {
      *
      * @param iVal Text to send to the stream.
      */
-    @Override
     public void println(int iVal) {
         for (final IOSubscriber sub : ioSubscribers) {
             sub.outputPrintln(iVal);
@@ -269,7 +264,6 @@ public class SSHSession implements Transport {
      *
      * @param s Text to send to the stream.
      */
-    @Override
     public void println(String s) {
         for (final IOSubscriber sub : ioSubscribers) {
             sub.outputPrintln(s);
@@ -312,7 +306,6 @@ public class SSHSession implements Transport {
      * target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc4742.txt">RFC
      * 4742</a>, to signal that the last part of the reply has been sent.
      */
-    @Override
     public void flush() {
         out.print(endmarker);
         out.flush();
@@ -348,7 +341,6 @@ public class SSHSession implements Transport {
     /**
      * Closes the SSH channnel
      */
-    @Override
     public void close() {
         session.close();
     }
