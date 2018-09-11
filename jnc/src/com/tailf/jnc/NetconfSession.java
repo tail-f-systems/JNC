@@ -204,6 +204,12 @@ public class NetconfSession {
     Transport in;
 
     /**
+     * netconf client version: default 1.0
+     */
+
+    NetconfVersion version = NetconfVersion.AUTO;
+
+    /**
      * Creates a new session object using the given transport object. This will
      * initialize the transport and send out an initial hello message to the
      * server.
@@ -255,6 +261,15 @@ public class NetconfSession {
         out = transport;
         in = transport; // same
         this.parser = parser;
+        hello();
+    }
+
+    public NetconfSession(Transport transport, XMLParser parser, NetconfVersion version)
+            throws JNCException, IOException {
+        out = transport;
+        in = transport; // same
+        this.parser = parser;
+        this.version = version;
         hello();
     }
 
@@ -318,9 +333,11 @@ public class NetconfSession {
                     "server does not support NETCONF base capability: "
                             + Capabilities.NETCONF_BASE_CAPABILITY);
         }
-        if (capabilities.baseCapability_v1_1)
-        	out.setFraming(Framing.CHUNKED);
-        
+
+        if (capabilities.baseCapability_v1_1 &&
+                ( NetconfVersion.V_1_1 == version || NetconfVersion.AUTO == version )){
+            out.setFraming(Framing.CHUNKED);
+        }
         // lookup session id
         final Element sess = t.getFirst("self::hello/session-id");
         if (sess == null) {
@@ -366,7 +383,7 @@ public class NetconfSession {
      */
     public Element rpc(Element request) throws IOException, JNCException {
         // print, but no newline at the end
-        request.encode(out, false, capabilities);
+        out.print(request.encodedXMLString(false));
         out.flush();
         final StringBuffer reply = in.readOne();
         return parser.parse(reply.toString());
@@ -403,7 +420,7 @@ public class NetconfSession {
      */
     public int sendRequest(Element request) throws IOException, JNCException {
         // print, but no newline at the end
-        request.encode(out, false, capabilities);
+        out.print(request.encodedXMLString(false));
         out.flush();
         return message_id - 1; // FIXME
     }
@@ -442,9 +459,10 @@ public class NetconfSession {
      */
     public NodeSet getConfig(int datastore) throws JNCException, IOException {
         trace("getConfig: " + datastoreToString(datastore));
-        final int mid = encode_getConfig(out, encode_datastore(datastore));
+        RPCRequest rpcRequest = prepare_getConfig_message(encode_datastore(datastore));
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        return recv_rpc_reply_data(mid);
+        return recv_rpc_reply_data(rpcRequest.getMsgId());
     }
 
     /**
@@ -452,9 +470,10 @@ public class NetconfSession {
      */
     public NodeSet callRpc(Element data) throws JNCException, IOException {
         trace("call: " + data.toXMLString());
-        final int mid = encode_rpc(out, data);
+        RPCRequest rpcRequest = prepare_RPC_message(data);
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        return recv_call_rpc_reply(data, mid);
+        return recv_call_rpc_reply(data, rpcRequest.getMsgId());
     }
 
     /**
@@ -464,9 +483,10 @@ public class NetconfSession {
      */
     public int sendRpc(Element data) throws JNCException, IOException {
         trace("send rpc: " + data.toXMLString());
-        final int mid = encode_rpc(out, data);
+        RPCRequest rpcRequest = prepare_RPC_message(data);
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        return mid;
+        return rpcRequest.getMsgId();
     }
 
     /**
@@ -490,10 +510,10 @@ public class NetconfSession {
             throws JNCException, IOException {
         trace("getConfig: " + datastoreToString(datastore) + "\n"
                 + subtreeFilter.toXMLString());
-        final int mid = encode_getConfig(out, encode_datastore(datastore),
-                subtreeFilter);
+        RPCRequest rpcRequest = prepare_getConfig_message(encode_datastore(datastore), subtreeFilter);
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        return recv_rpc_reply_data(mid);
+        return recv_rpc_reply_data(rpcRequest.getMsgId());
     }
 
     /**
@@ -511,10 +531,10 @@ public class NetconfSession {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "the :xpath capability is not supported by server");
         }
-        final int mid = encode_getConfig(out, encode_datastore(datastore),
-                xpath);
+        RPCRequest rpcRequest = prepare_getConfig_message(encode_datastore(datastore), xpath);
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        return recv_rpc_reply_data(mid);
+        return recv_rpc_reply_data(rpcRequest.getMsgId());
     }
 
     /**
@@ -522,9 +542,10 @@ public class NetconfSession {
      */
     public NodeSet get() throws JNCException, IOException {
         trace("get: \"\"");
-        final int mid = encode_get(out, "");
+        RPCRequest rpcRequest = prepare_get_message("");
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        return recv_rpc_reply_data(mid);
+        return recv_rpc_reply_data(rpcRequest.getMsgId());
     }
 
     /**
@@ -534,10 +555,11 @@ public class NetconfSession {
      */
     public NodeSet get(Element subtreeFilter) throws JNCException,
             IOException {
-        trace("get: " + subtreeFilter.toXMLString());
-        final int mid = encode_get(out, subtreeFilter);
+        trace("get: " + (null!=subtreeFilter?subtreeFilter.toXMLString(): null));
+        RPCRequest rpcRequest = prepare_get_message(subtreeFilter);
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        return recv_rpc_reply_data(mid);
+        return recv_rpc_reply_data(rpcRequest.getMsgId());
     }
 
     /**
@@ -552,9 +574,10 @@ public class NetconfSession {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "the :xpath capability is not supported by server");
         }
-        final int mid = encode_get(out, xpath);
+        RPCRequest rpcRequest = prepare_get_message(xpath);
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        return recv_rpc_reply_data(mid);
+        return recv_rpc_reply_data(rpcRequest.getMsgId());
     }
 
     /**
@@ -593,20 +616,22 @@ public class NetconfSession {
             throws JNCException, IOException {
         trace("editConfig: target=" + datastoreToString(datastore) + "\n"
                 + configTree.toXMLString());
-        final int mid = encode_editConfig(out, encode_datastore(datastore),
-                configTree);
+        RPCRequest rpcRequest = prepare_editConfig_message(encode_datastore(datastore),
+                new NodeSet(configTree));
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok(mid);
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     public void editConfig(int datastore, NodeSet configTrees)
             throws JNCException, IOException {
         trace("editConfig: target=" + datastoreToString(datastore) + "\n"
                 + configTrees.toXMLString());
-        final int mid = encode_editConfig(out, encode_datastore(datastore),
-                configTrees);
+        RPCRequest rpcRequest = prepare_editConfig_message(encode_datastore(datastore), configTrees);
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok(mid);
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
+
     }
 
     /**
@@ -621,10 +646,11 @@ public class NetconfSession {
             IOException {
         trace("editConfig: target=" + datastoreToString(datastore)
                 + " source=" + url);
-        final int mid = encode_editConfig(out, encode_datastore(datastore),
-                encode_url(url));
+        RPCRequest rpcRequest = prepare_editConfig_message(encode_datastore(datastore), url);
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok(mid);
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
+
     }
 
     /**
@@ -817,9 +843,10 @@ public class NetconfSession {
 
         trace("copyConfig: target=" + datastoreToString(target) + "\n"
                 + sourceTrees.toXMLString());
-        encode_copyConfig(out, sourceTrees, encode_datastore(target));
+        RPCRequest rpcRequest = prepare_copyConfig_message(sourceTrees, encode_datastore(target));
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok();
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -839,9 +866,10 @@ public class NetconfSession {
 
         trace("copyConfig: target=" + targetUrl + "\n"
                 + sourceTrees.toXMLString());
-        encode_copyConfig(out, sourceTrees, encode_url(targetUrl));
+        RPCRequest rpcRequest = prepare_copyConfig_message(sourceTrees, encode_url(targetUrl));
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok();
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -856,10 +884,10 @@ public class NetconfSession {
             IOException {
         trace("copyConfig: " + datastoreToString(source) + " "
                 + datastoreToString(target));
-        encode_copyConfig(out, encode_datastore(source),
-                encode_datastore(target));
+        RPCRequest rpcRequest = prepare_copyConfig_message(encode_datastore(source), encode_datastore(target));
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok();
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -873,10 +901,10 @@ public class NetconfSession {
             IOException {
         trace("copyConfig: source=" + datastoreToString(source) + " target="
                 + targetUrl);
-        encode_copyConfig(out, encode_datastore(source),
-                encode_url(targetUrl));
+        RPCRequest rpcRequest = prepare_copyConfig_message(encode_datastore(source), encode_url(targetUrl));
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok();
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -890,9 +918,10 @@ public class NetconfSession {
     public void copyConfig(String sourceUrl, String targetUrl)
             throws JNCException, IOException {
         trace("copyConfig: source=" + sourceUrl + " target=" + targetUrl);
-        encode_copyConfig(out, encode_url(sourceUrl), encode_url(targetUrl));
+        RPCRequest rpcRequest = prepare_copyConfig_message(encode_url(sourceUrl), encode_url(targetUrl));
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok();
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -906,10 +935,10 @@ public class NetconfSession {
             IOException {
         trace("copyConfig: source=" + sourceUrl + " target="
                 + datastoreToString(target));
-        encode_copyConfig(out, encode_url(sourceUrl),
-                encode_datastore(target));
+        RPCRequest rpcRequest = prepare_copyConfig_message(encode_url(sourceUrl), encode_datastore(target));
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok();
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -920,9 +949,10 @@ public class NetconfSession {
      */
     public void deleteConfig(int datastore) throws JNCException, IOException {
         trace("deleteConfig: " + datastoreToString(datastore));
-        encode_deleteConfig(out, encode_datastore(datastore));
+        RPCRequest rpcRequest = prepare_deleteConfig_message(encode_datastore(datastore));
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok();
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -933,9 +963,10 @@ public class NetconfSession {
     public void deleteConfig(String targetUrl) throws JNCException,
             IOException {
         trace("deleteConfig: " + targetUrl);
-        encode_deleteConfig(out, encode_url(targetUrl));
+        RPCRequest rpcRequest = prepare_deleteConfig_message(encode_url(targetUrl));
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok();
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -952,7 +983,8 @@ public class NetconfSession {
      */
     public void lock(int datastore) throws JNCException, IOException {
         trace("lock: " + datastoreToString(datastore));
-        encode_lock(out, encode_datastore(datastore));
+        RPCRequest rpcRequest = prepare_lock_message(encode_datastore(datastore));
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
         recv_rpc_reply_ok();
     }
@@ -965,7 +997,8 @@ public class NetconfSession {
      */
     public void unlock(int datastore) throws JNCException, IOException {
         trace("unlock: " + datastoreToString(datastore));
-        encode_unlock(out, encode_datastore(datastore));
+        RPCRequest rpcRequest = prepare_unlock_message(encode_datastore(datastore));
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
         recv_rpc_reply_ok();
     }
@@ -1013,9 +1046,10 @@ public class NetconfSession {
         // if (!xpathCapability)
         // throw new JNCException(JNCException.SESSION_ERROR,
         // "capability :xpath is not supported by server");
-        final int mid = encode_lockPartial(out, select);
+        RPCRequest rpcRequest = prepare_lockPartial_message(select);
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        final NodeSet reply = recv_rpc_reply_lockPartial(mid);
+        final NodeSet reply = recv_rpc_reply_lockPartial(rpcRequest.getMsgId());
         try {
             final Element t = reply.first().getFirst("self::lock-id");
             return Integer.parseInt((String) t.value);
@@ -1053,9 +1087,10 @@ public class NetconfSession {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "capability :xpath is not supported by server");
         }
-        final int mid = encode_unlockPartial(out, lockId);
+        RPCRequest rpcRequest = prepare_unlockPartial_message(lockId);
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok(mid);
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -1085,9 +1120,10 @@ public class NetconfSession {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "the :candidate capability is not supported by server");
         }
-        final int mid = encode_commit(out);
+        RPCRequest rpcRequest = prepare_commit_message();
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok(mid);
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -1136,9 +1172,10 @@ public class NetconfSession {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "the :confirmed-commit capability is not supported by server");
         }
-        final int mid = encode_confirmedCommit(out, timeout);
+        RPCRequest rpcRequest = prepare_confirmedCommit_message(timeout);
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok(mid);
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -1152,9 +1189,10 @@ public class NetconfSession {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "the :candidate capability is not supported by server");
         }
-        final int mid = encode_discardChanges(out);
+        RPCRequest rpcRequest = prepare_discardChanges_message();
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok(mid);
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -1167,9 +1205,10 @@ public class NetconfSession {
      */
     public void closeSession() throws JNCException, IOException {
         trace("closeSession");
-        final int mid = encode_closeSession(out);
+        RPCRequest rpcRequest = prepare_closeSession_message();
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok(mid);
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -1191,9 +1230,10 @@ public class NetconfSession {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "illegal to use kill-session on own session id");
         }
-        final int mid = encode_killSession(out, sessionId);
+        RPCRequest rpcRequest = prepare_killSession_message(sessionId);
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok(mid);
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -1208,9 +1248,10 @@ public class NetconfSession {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "capability :validate is not supported by server");
         }
-        final int mid = encode_validate(out, configTree);
+        RPCRequest rpcRequest = prepare_validate_message(configTree);
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok(mid);
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -1225,9 +1266,10 @@ public class NetconfSession {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "capability :validate is not supported by server");
         }
-        final int mid = encode_validate(out, encode_datastore(datastore));
+        RPCRequest rpcRequest = prepare_validate_message(encode_datastore(datastore));
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok(mid);
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -1243,9 +1285,10 @@ public class NetconfSession {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "capability :validate is not supported by server");
         }
-        final int mid = encode_validate(out, encode_url(url));
+        RPCRequest rpcRequest = prepare_validate_message(encode_url(url));
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok(mid);
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -1325,10 +1368,11 @@ public class NetconfSession {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "capability :notification is not supported by server");
         }
-        final int mid = encode_createSubscription(out, streamName,
+        RPCRequest rpcRequest = prepare_createSubscription_message(streamName,
                 eventFilter, startTime, stopTime);
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok(mid);
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -1356,10 +1400,11 @@ public class NetconfSession {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "capability :xpath is not supported by server");
         }
-        final int mid = encode_createSubscription(out, streamName,
+        RPCRequest rpcRequest = prepare_createSubscription_message(streamName,
                 eventFilter, startTime, stopTime);
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
-        recv_rpc_reply_ok(mid);
+        recv_rpc_reply_ok(rpcRequest.getMsgId());
     }
 
     /**
@@ -1411,9 +1456,11 @@ public class NetconfSession {
      */
     public Element action(Element data) throws JNCException, IOException {
         trace("action: " + data.toXMLString());
-        encode_action(out, data);
+        RPCRequest rpcRequest = prepare_action_message(data);
+        out.print(rpcRequest.getMessage().toString());
         out.flush();
         return recv_rpc_reply_ok(null);
+
     }
 
     /* Receive from session */
@@ -1579,8 +1626,11 @@ public class NetconfSession {
         out.print("<capabilities>");
         out.println("<capability>" + Capabilities.NETCONF_BASE_CAPABILITY
                 + "</capability>");
-        out.println("<capability>" + Capabilities.NETCONF_BASE_CAPABILITY_1_1
-                + "</capability>");
+        if(NetconfVersion.V_1_1 == version || NetconfVersion.AUTO == version)
+        {
+            out.println("<capability>" + Capabilities.NETCONF_BASE_CAPABILITY_1_1
+                    + "</capability>");
+        }
         /* List proprietary client capabilities */
         if (proprietaryClientCaps != null) {
             for (int i = 0; i < proprietaryClientCaps.size(); i++) {
@@ -2617,5 +2667,594 @@ public class NetconfSession {
                             + ", received rpc-reply with message-id="
                             + returned_id);
         }
+    }
+
+
+    class RPCRequest
+    {
+        final int msgId;
+        StringBuilder message;
+
+        RPCRequest()
+        {
+            msgId = message_id++ ;
+            message = new StringBuilder();
+        }
+
+        public int getMsgId()
+        {
+            return msgId;
+        }
+
+        public StringBuilder getMessage()
+        {
+            return message;
+        }
+
+        void add_rpc_begin(Attribute attr)
+        {
+            final String prefix = Element.defaultPrefixes
+                    .nsToPrefix(Element.NETCONF_NAMESPACE);
+            nc = mk_prefix_colon(prefix);
+            final String xmlnsAttr = mk_xmlns_attr(prefix,
+                    Element.NETCONF_NAMESPACE);
+
+            StringBuilder rpc_begin  = new StringBuilder("<" + nc + "rpc " + xmlnsAttr + " " +
+                    nc + "message-id=\"" + msgId + "\"");
+            if (attr != null) {
+                rpc_begin.append(" ").append(attr.toXMLString(null));
+            }
+            rpc_begin.append(">");
+            message.append(rpc_begin.toString());
+        }
+
+        void add_rpc_end()
+        {
+            message.append("\n</" + nc + "rpc>");
+        }
+
+        /**
+         * Encode default-operation for editConfig.
+         */
+        void encode_defaultOperation() throws JNCException {
+            switch (defaultOperation) {
+                case NOT_SET:
+                    return;
+                case MERGE:
+                    message.append("\n<" + nc + "default-operation>merge</" + nc
+                            + "default-operation>");
+                    return;
+                case REPLACE:
+                    message.append("\n<" + nc + "default-operation>replace</" + nc
+                            + "default-operation>");
+                    return;
+                case NONE:
+                    message.append("\n<" + nc + "default-operation>none</" + nc
+                            + "default-operation>");
+                    return;
+                default:
+                    throw new JNCException(JNCException.SESSION_ERROR,
+                            "unknown default-operation value: " + defaultOperation);
+            }
+        }
+
+        /**
+         * Encode test-option for editConfig
+         */
+        void encode_testOption() throws JNCException {
+            switch (testOption) {
+                case NOT_SET:
+                    return;
+                case SET:
+                    if (!capabilities.hasValidate()) {
+                        throw new JNCException(JNCException.SESSION_ERROR,
+                                "test-option is given but the :validate "
+                                        + "capability is not supported by server");
+                    }
+                    message.append("\n<" + nc + "test-option>set</" + nc + "test-option>");
+                    return;
+                case TEST_THEN_SET:
+                    if (!capabilities.hasValidate()) {
+                        throw new JNCException(JNCException.SESSION_ERROR,
+                                "test-option is given but the :validate "
+                                        + "capability is not supported by server");
+                    }
+                    message.append("\n<" + nc + "test-option>test-then-set</" + nc
+                            + "test-option>");
+                    return;
+                case TEST_ONLY:
+                    if (!capabilities.hasValidate()) {
+                        throw new JNCException(JNCException.SESSION_ERROR,
+                                "test-option is given but the :validate "
+                                        + "capability is not supported by server");
+                    }
+                    message.append("\n<" + nc + "test-option>test-only</" + nc
+                            + "test-option>");
+                    return;
+                default:
+                    throw new JNCException(JNCException.SESSION_ERROR,
+                            "unknown test-option value: " + testOption);
+            }
+        }
+
+        /**
+         * Encode error-option for editConfig
+         */
+        void encode_errorOption() throws JNCException {
+            switch (errorOption) {
+                case NOT_SET:
+                    return;
+                case STOP_ON_ERROR:
+                    message.append("\n<" + nc + "error-option>stop-on-error</" + nc
+                            + "error-option>");
+                    return;
+                case CONTINUE_ON_ERROR:
+                    message.append("\n<" + nc + "error-option>continue-on-error</" + nc
+                            + "error-option>");
+                    return;
+                case ROLLBACK_ON_ERROR:
+                    if (!capabilities.hasRollbackOnError()) {
+                        throw new JNCException(JNCException.SESSION_ERROR,
+                                "the :rollback-on-error capability "
+                                        + "is used but not supported by server");
+                    }
+                    message.append("\n<" + nc + "error-option>rollback-on-error</" + nc
+                            + "error-option>");
+                    return;
+                default:
+                    throw new JNCException(JNCException.SESSION_ERROR,
+                            "unknown error-option value: " + errorOption);
+            }
+        }
+
+    }
+
+    RPCRequest prepare_get_message(Element subtreeFilter)
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(withDefaultsAttr);
+        rpc_msg.getMessage().append("\n<" + nc + GET_GT);
+        rpc_msg.getMessage().append("\n<" + nc + FILTER + nc + "type=\"subtree\">");
+        if(null != subtreeFilter)
+        {
+            rpc_msg.getMessage().append("\n" + subtreeFilter.encodedXMLString(false));
+        }
+        rpc_msg.getMessage().append("\n</" + nc + FILTER_GT);
+        rpc_msg.getMessage().append("\n</" + nc + GET_GT);
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    RPCRequest prepare_get_message(String xpath)
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(withDefaultsAttr);
+
+        rpc_msg.getMessage().append("\n<" + nc + GET_GT);
+        if (xpath != null && xpath.length() > 0) {
+            rpc_msg.getMessage().append("\n<" + nc + FILTER + nc + "type=\"xpath\" " + nc
+                    + "select=\"");
+            rpc_msg.getMessage().append(xpath);
+            rpc_msg.getMessage().append("\"/>");
+        }
+        rpc_msg.getMessage().append("\n</" + nc + GET_GT);
+
+        rpc_msg.add_rpc_end();
+        return rpc_msg;
+    }
+
+
+    private RPCRequest prepare_getConfig_message(String source, Element subtreeFilter)
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(withDefaultsAttr);
+
+        rpc_msg.getMessage().append("\n<" + nc + GET_CONFIG_GT);
+        rpc_msg.getMessage().append("\n<" + nc + SOURCE_GT);
+        rpc_msg.getMessage().append("\n" + source);
+        rpc_msg.getMessage().append("\n</" + nc + SOURCE_GT);
+        rpc_msg.getMessage().append("\n<" + nc + FILTER + nc + "type=\"subtree\">");
+        rpc_msg.getMessage().append("\n" + subtreeFilter.encodedXMLString(false));
+        rpc_msg.getMessage().append("\n</" + nc + FILTER_GT);
+        rpc_msg.getMessage().append("\n</" + nc + GET_CONFIG_GT);
+
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_getConfig_message(String source, String xpath)
+    {
+
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(withDefaultsAttr);
+        rpc_msg.getMessage().append("\n<" + nc + GET_CONFIG_GT);
+        rpc_msg.getMessage().append("\n<" + nc + SOURCE_GT);
+        rpc_msg.getMessage().append("\n" + source);
+        rpc_msg.getMessage().append("\n</" + nc + SOURCE_GT);
+        if (xpath != null && xpath.length() > 0) {
+            rpc_msg.getMessage().append("\n<" + nc + FILTER + nc + "type=\"xpath\" " + nc
+                    + "select=\"");
+            rpc_msg.getMessage().append(xpath);
+            rpc_msg.getMessage().append("\"/>");
+        }
+        rpc_msg.getMessage().append("\n</" + nc + GET_CONFIG_GT);
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_getConfig_message(String source)
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(withDefaultsAttr);
+        rpc_msg.getMessage().append("\n<" + nc + GET_CONFIG_GT);
+        rpc_msg.getMessage().append("\n<" + nc + SOURCE_GT);
+        rpc_msg.getMessage().append("\n" + source);
+        rpc_msg.getMessage().append("\n</" + nc + SOURCE_GT);
+        rpc_msg.getMessage().append("\n</" + nc + GET_CONFIG_GT);
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+
+    private RPCRequest prepare_editConfig_message(String target, NodeSet configTrees) throws JNCException
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+
+        rpc_msg.getMessage().append("\n<" + nc + EDIT_CONFIG_GT);
+        rpc_msg.getMessage().append("\n<" + nc + TARGET_GT);
+        rpc_msg.getMessage().append("\n" + target);
+        rpc_msg.getMessage().append("\n</" + nc + TARGET_GT);
+        rpc_msg.encode_defaultOperation();
+        rpc_msg.encode_testOption();
+        rpc_msg.encode_errorOption();
+        rpc_msg.getMessage().append("\n<" + nc + CONFIG_GT);
+        rpc_msg.getMessage().append("\n" + configTrees.encodedXMLString());
+        rpc_msg.getMessage().append("\n</" + nc + CONFIG_GT);
+        rpc_msg.getMessage().append("\n</" + nc + EDIT_CONFIG_GT);
+
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_editConfig_message(String target, String url) throws JNCException
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+
+        rpc_msg.getMessage().append("\n<" + nc + EDIT_CONFIG_GT);
+        rpc_msg.getMessage().append("\n<" + nc + TARGET_GT);
+        rpc_msg.getMessage().append("\n" + target);
+        rpc_msg.getMessage().append("\n</" + nc + TARGET_GT);
+        rpc_msg.encode_defaultOperation();
+        rpc_msg.encode_testOption();
+        rpc_msg.encode_errorOption();
+        rpc_msg.getMessage().append("\n" + url);
+        rpc_msg.getMessage().append("\n</" + nc + EDIT_CONFIG_GT);
+
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_copyConfig_message(NodeSet sourceTrees, String target) throws JNCException
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+
+        rpc_msg.getMessage().append("\n<" + nc + COPY_CONFIG_GT);
+        rpc_msg.getMessage().append("\n<" + nc + TARGET_GT);
+        rpc_msg.getMessage().append("\n" + target);
+        rpc_msg.getMessage().append("\n</" + nc + TARGET_GT);
+        rpc_msg.getMessage().append("\n<" + nc + SOURCE_GT);
+        rpc_msg.getMessage().append("\n<" + nc + CONFIG_GT);
+        rpc_msg.getMessage().append("\n" + sourceTrees.encodedXMLString());
+        rpc_msg.getMessage().append("\n</" + nc + CONFIG_GT);
+        rpc_msg.getMessage().append("\n</" + nc + SOURCE_GT);
+        rpc_msg.getMessage().append("\n</" + nc + COPY_CONFIG_GT);
+
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_copyConfig_message(String source, String target) throws JNCException
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(withDefaultsAttr);
+
+        rpc_msg.getMessage().append("\n<" + nc + COPY_CONFIG_GT);
+        rpc_msg.getMessage().append("\n<" + nc + TARGET_GT);
+        rpc_msg.getMessage().append("\n" + target);
+        rpc_msg.getMessage().append("\n</" + nc + TARGET_GT);
+        rpc_msg.getMessage().append("\n<" + nc + SOURCE_GT);
+        rpc_msg.getMessage().append("\n" + source);
+        rpc_msg.getMessage().append("\n</" + nc + SOURCE_GT);
+        rpc_msg.getMessage().append("\n</" + nc + COPY_CONFIG_GT);
+
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_deleteConfig_message(String target)
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+
+        rpc_msg.getMessage().append("\n<" + nc + "delete-config>");
+        rpc_msg.getMessage().append("\n<" + nc + TARGET_GT);
+        rpc_msg.getMessage().append("\n" + target);
+        rpc_msg.getMessage().append("\n</" + nc + TARGET_GT);
+        rpc_msg.getMessage().append("\n</" + nc + "delete-config>");
+
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_RPC_message(Element data)
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+        rpc_msg.getMessage().append("\n" + data.encodedXMLString(false));
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_lock_message(String target)
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+
+        rpc_msg.getMessage().append("\n<" + nc + "lock>");
+        rpc_msg.getMessage().append("\n<" + nc + TARGET_GT);
+        rpc_msg.getMessage().append("\n" + target);
+        rpc_msg.getMessage().append("\n</" + nc + TARGET_GT);
+        rpc_msg.getMessage().append("\n</" + nc + "lock>");
+
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_unlock_message(String target)
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+
+        rpc_msg.getMessage().append("\n<" + nc + "unlock>");
+        rpc_msg.getMessage().append("\n<" + nc + TARGET_GT);
+        rpc_msg.getMessage().append("\n" + target);
+        rpc_msg.getMessage().append("\n</" + nc + TARGET_GT);
+        rpc_msg.getMessage().append("\n</" + nc + "unlock>");
+
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_lockPartial_message(String[] select)
+    {
+        final String prefix = Element.defaultPrefixes
+                .nsToPrefix(Capabilities.NS_PARTIAL_LOCK);
+        final String pl = mk_prefix_colon(prefix);
+        final String xmlnsAttr = mk_xmlns_attr(prefix,
+                Capabilities.NS_PARTIAL_LOCK);
+
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+
+        rpc_msg.getMessage().append("\n<" + pl + "partial-lock " + xmlnsAttr + ">");
+        for (int i = 0; i < select.length; i++) {
+            rpc_msg.getMessage().append("\n<" + pl + "select>");
+            rpc_msg.getMessage().append(select[i]);
+            rpc_msg.getMessage().append("\n</" + pl + "select>");
+        }
+        rpc_msg.getMessage().append("\n</" + pl + "partial-lock>");
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_unlockPartial_message(int lockId)
+    {
+        final String prefix = Element.defaultPrefixes
+                .nsToPrefix(Capabilities.NS_PARTIAL_LOCK);
+        final String pl = mk_prefix_colon(prefix);
+        final String xmlnsAttr = mk_xmlns_attr(prefix,
+                Capabilities.NS_PARTIAL_LOCK);
+
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+
+        rpc_msg.getMessage().append("\n<" + pl + "partial-unlock " + xmlnsAttr + ">");
+        rpc_msg.getMessage().append("\n<" + pl + "lock-id>");
+        rpc_msg.getMessage().append("\n" + lockId);
+        rpc_msg.getMessage().append("\n</" + pl + "lock-id>");
+        rpc_msg.getMessage().append("\n</" + pl + "partial-unlock>");
+
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_commit_message()
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+        rpc_msg.getMessage().append("\n<" + nc + "commit/>");
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_confirmedCommit_message(int timeout)
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+
+        rpc_msg.getMessage().append("\n<" + nc + "commit>");
+        rpc_msg.getMessage().append("\n<" + nc + "confirmed/>");
+        rpc_msg.getMessage().append("\n<" + nc + "confirm-timeout>");
+        rpc_msg.getMessage().append("\n" + Integer.valueOf(timeout).toString());
+        rpc_msg.getMessage().append("\n</" + nc + "confirm-timeout>");
+        rpc_msg.getMessage().append("\n</" + nc + "commit>");
+
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_discardChanges_message()
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+        rpc_msg.getMessage().append("\n<" + nc + "discard-changes/>");
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_closeSession_message()
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+        rpc_msg.getMessage().append("\n<" + nc + "close-session/>");
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_killSession_message(long sessionId)
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+
+        rpc_msg.getMessage().append("\n<" + nc + "kill-session>");
+        rpc_msg.getMessage().append("\n<" + nc + "session-id>");
+        rpc_msg.getMessage().append("\n" + sessionId);
+        rpc_msg.getMessage().append("\n</" + nc + "session-id>");
+        rpc_msg.getMessage().append("\n</" + nc + "kill-session>");
+
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_validate_message(Element configTree)
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+
+        rpc_msg.getMessage().append("\n<" + nc + VALIDATE_GT);
+        rpc_msg.getMessage().append("\n<" + nc + SOURCE_GT);
+        rpc_msg.getMessage().append("\n<" + nc + CONFIG_GT);
+        rpc_msg.getMessage().append("\n" + configTree.encodedXMLString(false));
+        rpc_msg.getMessage().append("\n</" + nc + CONFIG_GT);
+        rpc_msg.getMessage().append("\n</" + nc + SOURCE_GT);
+        rpc_msg.getMessage().append("\n</" + nc + VALIDATE_GT);
+
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_validate_message(String source)
+    {
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+
+        rpc_msg.getMessage().append("\n<" + nc + VALIDATE_GT);
+        rpc_msg.getMessage().append("\n<" + nc + SOURCE_GT);
+        rpc_msg.getMessage().append("\n" + source);
+        rpc_msg.getMessage().append("\n</" + nc + SOURCE_GT);
+        rpc_msg.getMessage().append("\n</" + nc + VALIDATE_GT);
+
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_createSubscription_message(String stream,
+         String filter, String startTime, String stopTime)
+    {
+        final String prefix = Element.defaultPrefixes
+                .nsToPrefix(Capabilities.NS_NOTIFICATION);
+        final String ncn = mk_prefix_colon(prefix);
+        final String xmlnsAttr = mk_xmlns_attr(prefix,
+                Capabilities.NS_NOTIFICATION);
+
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+
+        rpc_msg.getMessage().append("\n<" + ncn + "create-subscription " + xmlnsAttr + ">");
+        if (stream != null) {
+            rpc_msg.getMessage().append("\n<" + ncn + STREAM_GT);
+            rpc_msg.getMessage().append("\n" + stream);
+            rpc_msg.getMessage().append("\n</" + ncn + STREAM_GT);
+        }
+        if (filter != null) {
+            rpc_msg.getMessage().append("\n<" + ncn + FILTER + ncn + "type='xpath'>");
+            rpc_msg.getMessage().append("\n" + filter);
+            rpc_msg.getMessage().append("\n</" + ncn + FILTER_GT);
+        }
+        if (startTime != null) {
+            rpc_msg.getMessage().append("\n<" + ncn + START_TIME_GT);
+            rpc_msg.getMessage().append("\n" + startTime);
+            rpc_msg.getMessage().append("\n</" + ncn + START_TIME_GT);
+        }
+        if (stopTime != null) {
+            rpc_msg.getMessage().append("\n<" + ncn + STOP_TIME_GT);
+            rpc_msg.getMessage().append("\n" + stopTime);
+            rpc_msg.getMessage().append("\n</" + ncn + STOP_TIME_GT);
+        }
+        rpc_msg.getMessage().append("\n</" + ncn + "create-subscription>");
+
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_createSubscription_message(String stream,
+            NodeSet eventFilter, String startTime, String stopTime) throws JNCException
+    {
+        final String prefix = Element.defaultPrefixes
+                .nsToPrefix(Capabilities.NS_NOTIFICATION);
+        final String ncn = mk_prefix_colon(prefix);
+        final String xmlnsAttr = mk_xmlns_attr(prefix,
+                Capabilities.NS_NOTIFICATION);
+
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+
+        rpc_msg.getMessage().append("\n<" + ncn + "create-subscription " + xmlnsAttr + ">");
+        if (stream != null) {
+            rpc_msg.getMessage().append("\n<" + ncn + STREAM_GT);
+            rpc_msg.getMessage().append("\n" + stream);
+            rpc_msg.getMessage().append("\n</" + ncn + STREAM_GT);
+        }
+        if (eventFilter != null) {
+            rpc_msg.getMessage().append("\n<" + ncn + FILTER + ncn + "type='subtree'>");
+            rpc_msg.getMessage().append("\n" + eventFilter.encodedXMLString());
+            rpc_msg.getMessage().append("\n</" + ncn + FILTER_GT);
+        }
+        if (startTime != null) {
+            rpc_msg.getMessage().append("\n<" + ncn + START_TIME_GT);
+            rpc_msg.getMessage().append("\n" + startTime);
+            rpc_msg.getMessage().append("\n</" + ncn + START_TIME_GT);
+        }
+        if (stopTime != null) {
+            rpc_msg.getMessage().append("\n<" + ncn + STOP_TIME_GT);
+            rpc_msg.getMessage().append("\n" + stopTime);
+            rpc_msg.getMessage().append("\n</" + ncn + STOP_TIME_GT);
+        }
+        rpc_msg.getMessage().append("\n</" + ncn + "create-subscription>");
+
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
+    }
+
+    private RPCRequest prepare_action_message(Element data)
+    {
+        final String prefix = Element.defaultPrefixes.nsToPrefix(Capabilities.NS_ACTIONS);
+        final String act = mk_prefix_colon(prefix);
+        final String xmlnsAttr = mk_xmlns_attr(prefix, Capabilities.NS_ACTIONS);
+
+        RPCRequest rpc_msg = new RPCRequest();
+        rpc_msg.add_rpc_begin(null);
+
+        rpc_msg.getMessage().append("\n<" + act + "action " + xmlnsAttr + ">");
+        rpc_msg.getMessage().append("\n<" + act + "data>");
+        rpc_msg.getMessage().append("\n" + data.encodedXMLString(false));
+        rpc_msg.getMessage().append("\n</" + act + "data>");
+        rpc_msg.getMessage().append("\n</" + act + "action>");
+
+        rpc_msg.add_rpc_end();
+        return  rpc_msg;
     }
 }

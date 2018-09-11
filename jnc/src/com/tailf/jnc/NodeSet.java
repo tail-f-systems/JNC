@@ -154,4 +154,12 @@ public class NodeSet extends ArrayList<Element> {
         }
     }
 
+    public String encodedXMLString() throws JNCException {
+        StringBuffer s = new StringBuffer();
+        for (final Element elem : this) {
+            s.append(elem.encodedXMLString(false));
+        }
+        return s.toString();
+    }
+
 }

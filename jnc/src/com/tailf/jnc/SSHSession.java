@@ -1,10 +1,12 @@
 package com.tailf.jnc;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigInteger;
@@ -228,7 +230,7 @@ public class SSHSession implements Transport {
             		 throw new IOException("Incorrect framing");
             	for (int i = 1; i < max_chunk_bytes; i++) {
             		ch = in.read();
-            		if (i <= end_v1_1 && ch == endmarker_v1_1.charAt(i)) {
+            		if (i <= end_v1_1 && ch == endmarker_v1_1.charAt(i) && chunkSizeSW.toString().length()==0) {
             			if (i == end_v1_1) {
             				return wr.getBuffer();
             			}
@@ -282,16 +284,13 @@ public class SSHSession implements Transport {
      */
    @Override
     public void print(long iVal) {
-        for (final IOSubscriber sub : ioSubscribers) {
-            sub.outputPrint(iVal);
+
+        String data = String.valueOf(iVal);
+        if (framing.equals(Framing.CHUNKED)){
+            data =  "\n#"+data.length()+"\n"+data;
         }
-        if (framing.equals(Framing.END_OF_MESSAGE))
-        	out.print(iVal);
-        else if (framing.equals(Framing.CHUNKED)){
-        	String data = String.valueOf(iVal);
-        	out.print("\n#"+data.length()+"\n"+data);
-        }
-        	
+        trace(data);
+        out.print(data);
     }
 
     /**
@@ -301,14 +300,13 @@ public class SSHSession implements Transport {
      */
     @Override
     public void print(String s) {
-        for (final IOSubscriber sub : ioSubscribers) {
-            sub.outputPrint(s);
+        String data = s;
+        if (framing.equals(Framing.CHUNKED)){
+            int length = s.length();
+            data = "\n#" + length + "\n" + s;
         }
-        if (framing.equals(Framing.END_OF_MESSAGE))
-        	out.print(s);
-        else if (framing.equals(Framing.CHUNKED)){
-        	out.print("\n#"+s.length()+"\n"+s);
-        }
+        trace(data);
+        out.print(data);
     }
 
     /**
@@ -319,16 +317,14 @@ public class SSHSession implements Transport {
      */
     @Override
     public void println(int iVal) {
-        for (final IOSubscriber sub : ioSubscribers) {
-            sub.outputPrintln(iVal);
+        String data = String.valueOf(iVal);
+        if (framing.equals(Framing.CHUNKED)){
+            //Integer length = data.length() +1;
+            data =  "\n#" + data + "\n";
         }
-        if (framing.equals(Framing.END_OF_MESSAGE))
-        	out.println(iVal);
-        else if (framing.equals(Framing.CHUNKED)){
-        	String data = String.valueOf(iVal);
-        	Integer length = +data.length() +1;
-        	out.print("\n#"+length+"\n"+data+"\n");
-        }
+        trace(data);
+        out.print(data);
+
     }
 
     /**
@@ -339,15 +335,13 @@ public class SSHSession implements Transport {
      */
     @Override
     public void println(String s) {
-        for (final IOSubscriber sub : ioSubscribers) {
-            sub.outputPrintln(s);
+
+        String data = s;
+        if (framing.equals(Framing.CHUNKED)){
+            data =  "\n#" + s.length() + "\n" + s;
         }
-        if (framing.equals(Framing.END_OF_MESSAGE))
-        	out.println(s);
-        else if (framing.equals(Framing.CHUNKED)){
-        	Integer length = +s.length() +1;
-        	out.print("\n#"+length+"\n"+s+"\n");
-        }
+        trace(data);
+        out.println(data);
     }
 
     /**
@@ -387,15 +381,14 @@ public class SSHSession implements Transport {
      */
     @Override
     public void flush() {
-    	if (framing.equals(Framing.END_OF_MESSAGE)) { 
+    	if (framing.equals(Framing.END_OF_MESSAGE)) {
     		out.print(endmarker);
+            trace(endmarker);
     	} else if (framing.equals(Framing.CHUNKED)) {
     		out.print(endmarker_v1_1);
+    		trace(endmarker_v1_1);
     	}
         out.flush();
-        for (final IOSubscriber sub : ioSubscribers) {
-            sub.outputFlush(endmarker);
-        }
     }
 
     /**
