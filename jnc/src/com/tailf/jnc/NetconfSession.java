@@ -2642,9 +2642,12 @@ public class NetconfSession {
     /**
      * Printout trace if 'debug'-flag is enabled.
      */
-    private static void trace(String s) {
+    private void trace(String s) {
+        for (final IOSubscriber sub : getTransport().getIOSubscribers()) {
+            sub.output(s);
+        }
         if (Element.debugLevel >= Element.DEBUG_LEVEL_SESSION) {
-            System.err.println("*NetconfSession: " + s);
+            System.err.println("*NetconfSession:@" + getTransport().getDeviceConnectionInfo() + "\n" + s);
         }
     }
 

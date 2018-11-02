@@ -267,7 +267,7 @@ public class Device implements Serializable {
      */
     public void closeSession(String sessionName) {
         final SessionConnData data = removeConnData(sessionName);
-        if (data.session != null) {
+        if (data != null && data.session != null) {
             try {
                 // data.session.closeSession();
                 data.sshSession.close();

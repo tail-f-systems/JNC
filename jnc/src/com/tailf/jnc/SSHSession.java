@@ -12,6 +12,7 @@ import java.io.StringWriter;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Session;
@@ -226,8 +227,8 @@ public class SSHSession implements Transport {
             	
 //            	buffer[0] = ch;
 
-            	if (! (ch == endmarker_v1_1.charAt(0))) 
-            		 throw new IOException("Incorrect framing");
+            	if (! (ch == endmarker_v1_1.charAt(0)))
+            		 throw new IOException("Incorrect framing:" + "Char found:=>" + ch);
             	for (int i = 1; i < max_chunk_bytes; i++) {
             		ch = in.read();
             		if (i <= end_v1_1 && ch == endmarker_v1_1.charAt(i) && chunkSizeSW.toString().length()==0) {
@@ -381,13 +382,12 @@ public class SSHSession implements Transport {
      */
     @Override
     public void flush() {
-    	if (framing.equals(Framing.END_OF_MESSAGE)) {
-    		out.print(endmarker);
-            trace(endmarker);
-    	} else if (framing.equals(Framing.CHUNKED)) {
-    		out.print(endmarker_v1_1);
-    		trace(endmarker_v1_1);
+        String marker = endmarker;
+    	if (framing.equals(Framing.CHUNKED)) {
+            marker = endmarker_v1_1;
     	}
+        out.print(marker);
+        trace(marker);
         out.flush();
     }
 
@@ -425,12 +425,25 @@ public class SSHSession implements Transport {
 
     /* help functions */
 
+    public String getDeviceConnectionInfo()
+    {
+        return getSSHConnection().getConnection().getHostname()+":"+getSSHConnection().getConnection().getPort();
+    }
+
+    public Collection<IOSubscriber> getIOSubscribers()
+    {
+        return ioSubscribers;
+    }
+
     /**
      * Printout trace if 'debug'-flag is enabled.
      */
-    private static void trace(String s) {
+    private  void trace(String s) {
+        for (final IOSubscriber sub : ioSubscribers) {
+            sub.output("*SSHSession:" + s);
+        }
         if (Element.debugLevel >= Element.DEBUG_LEVEL_TRANSPORT) {
-            System.err.println("*SSHSession: " + s);
+            System.err.println("*SSHSession:@" + getDeviceConnectionInfo() + "\n" + s);
         }
     }
 }

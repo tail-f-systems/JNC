@@ -1,6 +1,7 @@
 package com.tailf.jnc;
 
 import java.io.IOException;
+import java.util.Collection;
 
 /**
  * A NETCONF transport interface. This interface can be used to write custom
@@ -64,7 +65,14 @@ public interface Transport {
      * Sets the framing for the session for Netconf 1.1 support
      */
     public void setFraming (Framing f);
-    
+
+    /**
+     * get hostname
+     */
+    public String getDeviceConnectionInfo();
+
+    public Collection<IOSubscriber> getIOSubscribers();
+
     /**
      * Enum defining the framing types
      */
