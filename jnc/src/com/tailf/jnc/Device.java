@@ -267,7 +267,7 @@ public class Device implements Serializable {
      */
     public void closeSession(String sessionName) {
         final SessionConnData data = removeConnData(sessionName);
-        if (data.session != null) {
+        if (data != null && data.session != null) {
             try {
                 // data.session.closeSession();
                 data.sshSession.close();
@@ -403,7 +403,13 @@ public class Device implements Serializable {
      * @param sub IO subscriber for trace messages.
      * @param sessionName symbolic Name of the session
      */
+
     public void newSession(IOSubscriber sub, String sessionName)
+            throws JNCException, IOException {
+        newSession(sub, sessionName, NetconfVersion.AUTO);
+    }
+
+    public void newSession(IOSubscriber sub, String sessionName, NetconfVersion netconfVersion)
             throws JNCException, IOException {
         final SessionConnData data = getConnData(sessionName);
         // always create the configTree
@@ -420,7 +426,7 @@ public class Device implements Serializable {
         if (sub != null) {
             sshSession.addSubscriber(sub);
         }
-        final NetconfSession session = new NetconfSession(sshSession, parser);
+        final NetconfSession session = new NetconfSession(sshSession, parser, netconfVersion);
         final SessionConnData d = new SessionConnData(sessionName,
                 sshSession, session);
         connSessions.add(d);

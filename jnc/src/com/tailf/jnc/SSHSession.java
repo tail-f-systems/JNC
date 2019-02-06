@@ -1,13 +1,18 @@
 package com.tailf.jnc;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Session;
@@ -41,7 +46,12 @@ public class SSHSession implements Transport {
     protected long readTimeout = 0; // millisecs
 
     private static final String endmarker = "]]>]]>";
+    private static final String endmarker_v1_1 = "\n##\n";
+    private static final int max_chunk_bytes = 13;
+    private static final long max_chunk_size = 4294967295L;
     private static final int end = endmarker.length() - 1;
+    private static final int end_v1_1 = endmarker_v1_1.length() - 1;
+    private Framing framing = Framing.END_OF_MESSAGE;
 
     /**
      * Constructor for SSH session object. This method creates a a new SSh
@@ -76,6 +86,11 @@ public class SSHSession implements Transport {
         out = new PrintWriter(os, false);
         ioSubscribers = new ArrayList<IOSubscriber>();
         // hello will be done by NetconfSession
+    }
+    
+    // Sets the framing to accommodate Netconf 1.1
+    public void setFraming (Framing f) {
+    	framing = f;
     }
 
     /**
@@ -189,22 +204,62 @@ public class SSHSession implements Transport {
                 trace("end of input (-1)");
                 throw new IOException("Session closed");
             }
+            if (framing.equals(Framing.END_OF_MESSAGE)) {
+	            for (int i=0; i < endmarker.length(); i++) {
+	                if (ch == endmarker.charAt(i)) {
+	                    if (i < end) {
+	                        ch = in.read();
+	                    } else {
+	                        for (final IOSubscriber sub : ioSubscribers) {
+	                            sub.inputFlush(endmarker.substring(0, end));
+	                        }
+	                        return wr.getBuffer();
+	                    }
+	                } else {
+	                    subInputChar(wr, endmarker.substring(0, i));
+	                    subInputChar(wr, ch);
+	                    break;
+	                }
+	            }
+            } else if (framing.equals(Framing.CHUNKED)) {
+ //           	int[] buffer = new int[max_chunk_bytes];
+            	StringWriter chunkSizeSW = new StringWriter(10);
+            	
+//            	buffer[0] = ch;
 
-            for (int i=0; i < endmarker.length(); i++) {
-                if (ch == endmarker.charAt(i)) {
-                    if (i < end) {
-                        ch = in.read();
-                    } else {
-                        for (final IOSubscriber sub : ioSubscribers) {
-                            sub.inputFlush(endmarker.substring(0, end));
-                        }
-                        return wr.getBuffer();
-                    }
-                } else {
-                    subInputChar(wr, endmarker.substring(0, i));
-                    subInputChar(wr, ch);
-                    break;
-                }
+            	if (! (ch == endmarker_v1_1.charAt(0)))
+            		 throw new IOException("Incorrect framing:" + "Char found:=>" + ch);
+            	for (int i = 1; i < max_chunk_bytes; i++) {
+            		ch = in.read();
+            		if (i <= end_v1_1 && ch == endmarker_v1_1.charAt(i) && chunkSizeSW.toString().length()==0) {
+            			if (i == end_v1_1) {
+            				return wr.getBuffer();
+            			}
+            		} else {
+//	            		buffer[i] = ch;
+	            		if (ch == 0x0A)
+	            			break;
+			            if ((i == 2 && (ch < 0x31 || ch > 0x39)) || (i > 2 && (ch < 0x30 || ch > 0x39)))
+			            	throw new IOException("Incorrect framing: chunk size not a digit");
+	            		if (i > 1) {
+	            			chunkSizeSW.write(ch);
+	            		}
+            		}
+            	}
+//            	System.out.println(Arrays.toString(buffer));
+//            	System.out.println(chunkSizeSW.toString());
+            	long chunkSize = Long.parseLong(chunkSizeSW.toString());
+            	if (chunkSize > max_chunk_size)
+            		 throw new IOException("Incorrect framing: chunk size exceeds maximum allowed");
+            	
+            	StringWriter data = new StringWriter(10);
+            	
+            	for (long i= 1; i <= chunkSize; i++) {
+            		ch = in.read();
+            		subInputChar(wr, ch);
+            		data.write(ch);
+            	}
+//            	System.out.println("Message: " + data.toString());
             }
         }
     }
@@ -228,12 +283,15 @@ public class SSHSession implements Transport {
      *
      * @param iVal Text to send to the stream.
      */
-    @Override
+   @Override
     public void print(long iVal) {
-        for (final IOSubscriber sub : ioSubscribers) {
-            sub.outputPrint(iVal);
+
+        String data = String.valueOf(iVal);
+        if (framing.equals(Framing.CHUNKED)){
+            data =  "\n#"+data.length()+"\n"+data;
         }
-        out.print(iVal);
+        trace(data);
+        out.print(data);
     }
 
     /**
@@ -243,10 +301,13 @@ public class SSHSession implements Transport {
      */
     @Override
     public void print(String s) {
-        for (final IOSubscriber sub : ioSubscribers) {
-            sub.outputPrint(s);
+        String data = s;
+        if (framing.equals(Framing.CHUNKED)){
+            int length = s.length();
+            data = "\n#" + length + "\n" + s;
         }
-        out.print(s);
+        trace(data);
+        out.print(data);
     }
 
     /**
@@ -257,10 +318,14 @@ public class SSHSession implements Transport {
      */
     @Override
     public void println(int iVal) {
-        for (final IOSubscriber sub : ioSubscribers) {
-            sub.outputPrintln(iVal);
+        String data = String.valueOf(iVal);
+        if (framing.equals(Framing.CHUNKED)){
+            //Integer length = data.length() +1;
+            data =  "\n#" + data + "\n";
         }
-        out.println(iVal);
+        trace(data);
+        out.print(data);
+
     }
 
     /**
@@ -271,10 +336,13 @@ public class SSHSession implements Transport {
      */
     @Override
     public void println(String s) {
-        for (final IOSubscriber sub : ioSubscribers) {
-            sub.outputPrintln(s);
+
+        String data = s;
+        if (framing.equals(Framing.CHUNKED)){
+            data =  "\n#" + s.length() + "\n" + s;
         }
-        out.println(s);
+        trace(data);
+        out.println(data);
     }
 
     /**
@@ -314,11 +382,13 @@ public class SSHSession implements Transport {
      */
     @Override
     public void flush() {
-        out.print(endmarker);
+        String marker = endmarker;
+    	if (framing.equals(Framing.CHUNKED)) {
+            marker = endmarker_v1_1;
+    	}
+        out.print(marker);
+        trace(marker);
         out.flush();
-        for (final IOSubscriber sub : ioSubscribers) {
-            sub.outputFlush(endmarker);
-        }
     }
 
     /**
@@ -355,12 +425,25 @@ public class SSHSession implements Transport {
 
     /* help functions */
 
+    public String getDeviceConnectionInfo()
+    {
+        return getSSHConnection().getConnection().getHostname()+":"+getSSHConnection().getConnection().getPort();
+    }
+
+    public Collection<IOSubscriber> getIOSubscribers()
+    {
+        return ioSubscribers;
+    }
+
     /**
      * Printout trace if 'debug'-flag is enabled.
      */
-    private static void trace(String s) {
+    private  void trace(String s) {
+        for (final IOSubscriber sub : ioSubscribers) {
+            sub.output("*SSHSession:" + s);
+        }
         if (Element.debugLevel >= Element.DEBUG_LEVEL_TRANSPORT) {
-            System.err.println("*SSHSession: " + s);
+            System.err.println("*SSHSession:@" + getDeviceConnectionInfo() + "\n" + s);
         }
     }
 }
