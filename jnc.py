@@ -57,7 +57,8 @@ class JNCPlugin(plugin.PyangPlugin):
     this plug-in.
 
     """
-
+    name = "jnc"
+    
     def __init__(self):
         self.done = set([])  # Helps avoiding processing modules more than once
 
