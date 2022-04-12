@@ -127,7 +127,7 @@ class JNCPlugin(plugin.PyangPlugin):
                 dest='import_on_demand',
                 action='store_true',
                 help='Use non explicit imports where possible.'),
-           optparse.make_option(
+            optparse.make_option(
                 '--jnc-classpath-schema-loading',
                 dest='classpath_schema_loading',
                 action='store_true',
@@ -151,11 +151,11 @@ class JNCPlugin(plugin.PyangPlugin):
             if not ctx.opts.directory:
                 ctx.opts.directory = 'src/gen'
                 print_warning(msg=('Option -d (or --jnc-output) not set, ' +
-                    'defaulting to "src/gen".'))
+                                   'defaulting to "src/gen".'))
             elif 'src' not in ctx.opts.directory:
                 ctx.opts.directory = 'src/gen'
                 print_warning(msg=('No "src" in output directory path, ' +
-                    'defaulting to "src/gen".'))
+                                   'defaulting to "src/gen".'))
             ctx.rootpkg = ctx.opts.directory.rpartition('src')[2][1:]
             self.ctx = ctx
             self.d = ctx.opts.directory.split('.')
@@ -186,12 +186,12 @@ class JNCPlugin(plugin.PyangPlugin):
         if not ctx.opts.ignore:
             for (epos, etag, _) in ctx.errors:
                 if (error.is_error(error.err_level(etag)) and
-                    etag in ('MODULE_NOT_FOUND', 'MODULE_NOT_FOUND_REV')):
+                        etag in ('MODULE_NOT_FOUND', 'MODULE_NOT_FOUND_REV')):
                     self.fatal("%s contains errors" % epos.top.arg)
                 if (etag in ('TYPE_NOT_FOUND', 'FEATURE_NOT_FOUND',
-                    'IDENTITY_NOT_FOUND', 'GROUPING_NOT_FOUND')):
+                             'IDENTITY_NOT_FOUND', 'GROUPING_NOT_FOUND')):
                     print_warning(msg=(etag.lower() + ', generated class ' +
-                        'hierarchy might be incomplete.'), key=etag)
+                                  'hierarchy might be incomplete.'), key=etag)
                 else:
                     print_warning(msg=(etag.lower() + ', aborting.'), key=etag)
                     self.fatal("%s contains errors" % epos.top.arg)
@@ -243,10 +243,12 @@ class JNCPlugin(plugin.PyangPlugin):
         if not self.ctx.opts.no_classes:
             # Generate Java classes
             src = ('module "' + module.arg + '", revision: "' +
-                util.get_latest_revision(module) + '".')
-            generator = ClassGenerator(module,
+                   util.get_latest_revision(module) + '".')
+            generator = ClassGenerator(
+                module,
                 path=os.sep.join([self.ctx.opts.directory, subpkg]),
-                package=fullpkg, src=src, ctx=self.ctx)
+                package=fullpkg, src=src, ctx=self.ctx
+            )
             generator.generate()
 
         if not self.ctx.opts.no_schema:
@@ -353,7 +355,7 @@ com_tailf_jnc = {'Attribute', 'Capabilities', 'ConfDSession',
 java_reserved_words = {'abstract', 'assert', 'boolean', 'break', 'byte',
                        'case', 'catch', 'char', 'class', 'const', 'continue',
                        'default', 'double', 'do', 'else', 'enum', 'extends',
-                       'false','final', 'finally', 'float', 'for', 'goto',
+                       'false', 'final', 'finally', 'float', 'for', 'goto',
                        'if', 'implements', 'import', 'instanceof', 'int',
                        'interface', 'long', 'native', 'new', 'null', 'package',
                        'private', 'protected', 'public', 'return', 'short',
@@ -409,7 +411,8 @@ node_stmts = module_stmts | yangelement_stmts | leaf_stmts
 
 package_info = '''/**
  * This class hierarchy was generated from the Yang module{0}
- * by the <a target="_top" href="https://github.com/tail-f-systems/JNC">JNC</a> plugin of <a target="_top" href="http://code.google.com/p/pyang/">pyang</a>.
+ * by the <a target="_top" href="https://github.com/tail-f-systems/JNC">JNC</a>
+ * plugin of <a target="_top" href="http://code.google.com/p/pyang/">pyang</a>.
  * The generated classes may be used to manipulate pieces of configuration data
  * with NETCONF operations such as edit-config, delete-config and lock. These
  * operations are typically accessed through the JNC Java library by
@@ -454,14 +457,14 @@ def print_warning(msg='', key='', ctx=None):
 
     """
     if ((not key or key not in outputted_warnings) and
-        (not ctx or ctx.opts.debug or ctx.opts.verbose)):
+            (not ctx or ctx.opts.debug or ctx.opts.verbose)):
         if msg:
             sys.stderr.write('WARNING: ' + msg)
             if key:
                 outputted_warnings.append(key)
         else:
             print_warning(('No support for type "' + key + '", defaulting ' +
-                'to string.'), key, ctx)
+                           'to string.'), key, ctx)
 
 
 def write_file(d, file_name, file_content, ctx):
@@ -482,7 +485,8 @@ def write_file(d, file_name, file_content, ctx):
         os.chdir(d)
     except OSError as exc:
         if exc.errno == errno.ENOTDIR:
-            print_warning(msg=('Unable to change directory to ' + d +
+            print_warning(msg=(
+                'Unable to change directory to ' + d +
                 '. Probably a non-directory file with same name as one of ' +
                 'the subdirectories already exists.'), key=d, ctx=ctx)
         else:
@@ -636,7 +640,7 @@ def normalize(string):
     return res
 
 
-def flatten(l):
+def flatten(iterable):
     """Returns a flattened version of iterable l
 
     l must not have an attribute named values unless the return value values()
@@ -645,9 +649,9 @@ def flatten(l):
     Example: flatten([['12', '34'], ['56', ['7']]]) = ['12', '34', '56', '7']
     """
     res = []
-    while hasattr(l, 'values'):
-        l = list(l.values())
-    for item in l:
+    while hasattr(iterable, 'values'):
+        iterable = list(iterable.values())
+    for item in iterable:
         try:
             assert not isinstance(item, str)
             iter(item)
@@ -665,7 +669,8 @@ def get_types(yang_type, ctx):
     """
     if yang_type.keyword in leaf_stmts:
         yang_type = search_one(yang_type, 'type')
-    assert yang_type.keyword in ('type', 'typedef'), 'argument is type, typedef or leaf'
+    assert yang_type.keyword in ('type', 'typedef'), \
+        'argument is type, typedef or leaf'
     if yang_type.arg == 'leafref':
         return get_types(yang_type.parent.i_leafref.i_target_node, ctx)
     primitive = normalize(yang_type.arg)
@@ -684,7 +689,7 @@ def get_types(yang_type, ctx):
     elif yang_type.arg == 'decimal64':
         primitive = 'BigDecimal'
     elif yang_type.arg in ('int8', 'int16', 'int32', 'int64', 'uint8',
-            'uint16', 'uint32', 'uint64'):
+                           'uint16', 'uint32', 'uint64'):
         integer_type = ['long', 'int', 'short', 'byte']
         if yang_type.arg[:1] == 'u':  # Unsigned
             integer_type.pop()
@@ -707,7 +712,7 @@ def get_types(yang_type, ctx):
             else:
                 pkg = get_package(yang_type, ctx)
                 name = normalize(yang_type.arg)
-                print_warning(key=pkg  + '.' + name, ctx=ctx)
+                print_warning(key=pkg + '.' + name, ctx=ctx)
         else:
             basetype = get_base_type(typedef)
             jnc, primitive = get_types(basetype, ctx)
@@ -826,7 +831,7 @@ def is_config(stmt):
     config = None
     while config is None and stmt is not None:
         if stmt.keyword == 'notification':
-            return False # stmt is not config if part of a notification tree
+            return False    # stmt is not config if part of a notification tree
         config = search_one(stmt, 'config')
         stmt = get_parent(stmt)
     return config is None or config.arg == 'true'
@@ -839,14 +844,15 @@ class SchemaNode(object):
         self.tagpath = tagpath
 
     def as_list(self):
-        """Returns a string list repr "node" element content for an XML schema"""
+        """Returns a string list repr "node" element content
+           for an XML schema"""
         res = ['<node>']
         stmt = self.stmt
         res.append('<tagpath>' + self.tagpath + '</tagpath>')
         top_stmt = get_module(stmt)
         if top_stmt.keyword == 'module':
             module = top_stmt
-        else:  #submodule
+        else:   # submodule
             modulename = search_one(top_stmt, 'belongs-to').arg
             for (name, rev) in top_stmt.i_ctx.modules:
                 if name == modulename:
@@ -868,8 +874,8 @@ class SchemaNode(object):
         if parent:
             key = search_one(parent, 'key')
         isKey = key is not None and key.arg == stmt.arg
-        childOfContainerOrList = (parent
-                and parent.keyword in yangelement_stmts)
+        childOfContainerOrList = (
+            parent and parent.keyword in yangelement_stmts)
         if (isKey or stmt.keyword in ('module', 'submodule')
                 or (childOfContainerOrList
                     and stmt.keyword in ('container', 'notification'))):
@@ -912,7 +918,7 @@ class SchemaGenerator(object):
             node = SchemaNode(stmt, subpath)
             res.extend(node.as_list())
             substmt_generator = SchemaGenerator(search(stmt, node_stmts),
-                subpath, self.ctx)
+                                                subpath, self.ctx)
             res.extend(substmt_generator.schema_nodes())
         return res
 
@@ -921,7 +927,8 @@ class YangType(object):
     """Provides an interface to maintain a list of defined yang types"""
 
     def __init__(self):
-        self.defined_types = ['empty', 'int8', 'int16', 'int32', 'int64',
+        self.defined_types = [
+            'empty', 'int8', 'int16', 'int32', 'int64',
             'uint8', 'uint16', 'uint32', 'uint64', 'binary', 'bits', 'boolean',
             'decimal64', 'enumeration', 'identityref', 'instance-identifier',
             'leafref', 'string', 'union']  # Use set instead!
@@ -958,7 +965,8 @@ class ClassGenerator(object):
         """
         self.stmt = stmt
         self.path = path
-        self.package = None if package is None else package.replace(os.sep, '.')
+        self.package = None if package is None else package.replace(os.sep,
+                                                                    '.')
         self.src = src
         self.ctx = ctx
         self.ns = ns
@@ -1005,12 +1013,12 @@ class ClassGenerator(object):
         # Namespace and prefix
         ns_arg = search_one(self.stmt, 'namespace').arg
         prefix = search_one(self.stmt, 'prefix')
-        
+
         # Add root to class_hierarchy dict
         if self.rootpkg not in class_hierarchy:
             class_hierarchy[self.rootpkg] = set([])
         class_hierarchy[self.rootpkg].add(self.n)
-        
+
         # Add all classes that will be generated to class_hierarchy dict
         def record(stmt, package):
             for ch in search(stmt, yangelement_stmts):
@@ -1053,10 +1061,10 @@ class ClassGenerator(object):
                                    str(stmt.pos.line), ' in\n * ',
                                    stmt.pos.ref])
             java_class = JavaClass(filename=name + '.java',
-                                        package=self.package,
-                                        description=description,
-                                        source=self.src,
-                                        superclass='YangElement')
+                                   package=self.package,
+                                   description=description,
+                                   source=self.src,
+                                   superclass='YangElement')
             if self.ctx.opts.verbose:
                 print('Generating Java class "' + name + '.java' + '"...')
 
@@ -1088,15 +1096,18 @@ class ClassGenerator(object):
 
         # Generate classes for children and keep track of augmented modules
         for stmt in search(self.stmt, list(yangelement_stmts | {'augment'})):
-            child_generator = ClassGenerator(stmt, package=self.package,
+            child_generator = ClassGenerator(
+                stmt, package=self.package,
                 ns=ns_arg, prefix_name=self.n, parent=self)
             child_generator.generate()
 
         # Generate root class
         if self.ctx.opts.verbose:
             print('Generating Java class "' + self.filename + '"...')
-        self.java_class = JavaClass(filename=self.filename,
-                package=self.package, description=('The root class for namespace ' +
+        self.java_class = JavaClass(
+                filename=self.filename,
+                package=self.package, description=(
+                    'The root class for namespace ' +
                     ns_arg + ' (accessible from \n * ' + self.n +
                     '.NAMESPACE) with prefix "' + prefix.arg + '" (' + self.n +
                     '.PREFIX).'),
@@ -1118,7 +1129,8 @@ class ClassGenerator(object):
         enabler.exceptions = ['JNCException']  # XXX: Don't use add method
         enabler.add_dependency('com.tailf.jnc.JNCException')
         enabler.modifiers = ['public', 'static']
-        enabler.add_javadoc('Enable the elements in this namespace to be aware')
+        enabler.add_javadoc(
+            'Enable the elements in this namespace to be aware')
         enabler.add_javadoc('of the data model and use the generated classes.')
         enabler.add_line('"'.join(['YangElement.setPackage(NAMESPACE, ',
                                    self.java_class.package, ');']))
@@ -1136,7 +1148,8 @@ class ClassGenerator(object):
         reg.add_javadoc('CsNode entries for all tagpaths')
         reg.add_line('SchemaParser parser = new SchemaParser();')
         reg.add_dependency('com.tailf.jnc.SchemaParser')
-        reg.add_line('HashMap<Tagpath, SchemaNode> h = SchemaTree.create(NAMESPACE);')
+        reg.add_line(
+            'HashMap<Tagpath, SchemaNode> h = SchemaTree.create(NAMESPACE);')
         reg.add_dependency('java.util.HashMap')
         reg.add_dependency('com.tailf.jnc.Tagpath')
         reg.add_dependency('com.tailf.jnc.SchemaNode')
@@ -1144,7 +1157,10 @@ class ClassGenerator(object):
         schema = os.sep.join([self.ctx.opts.directory.replace('.', os.sep),
                               self.n2, normalize(prefix.arg)])
         if self.ctx.opts.classpath_schema_loading:
-            reg.add_line('parser.findAndReadFile("' + normalize(prefix.arg) + '.schema", h, ' + normalize(prefix.arg) + '.class);')
+            reg.add_line(
+                'parser.findAndReadFile("' +
+                normalize(prefix.arg) + '.schema", h, ' +
+                normalize(prefix.arg) + '.class);')
         else:
             reg.add_line('parser.readFile("' + schema + '.schema", h);')
         self.java_class.add_schema_registrator(reg)
@@ -1174,7 +1190,8 @@ class ClassGenerator(object):
         all_fully_qualified = True
         fully_qualified = False
 
-        self.java_class = JavaClass(filename=self.filename,
+        self.java_class = JavaClass(
+                filename=self.filename,
                 package=self.package,
                 description=''.join(['This class represents an element from ',
                                      '\n * the namespace ', self.ns,
@@ -1194,7 +1211,7 @@ class ClassGenerator(object):
                 if ch_arg == self.n and not fully_qualified:
                     fully_qualified = True
                     s = ('\n * <p>\n * Children with the same name as this ' +
-                        'class are fully qualified.')
+                         'class are fully qualified.')
                     self.java_class.description += s
                 else:
                     all_fully_qualified = False
@@ -1212,7 +1229,8 @@ class ClassGenerator(object):
 
         if self.ctx.opts.debug or self.ctx.opts.verbose:
             if package_generated:
-                print('pkg ' + '.'.join([self.package, self.n2]) + ' generated')
+                print(
+                    'pkg ' + '.'.join([self.package, self.n2]) + ' generated')
             if self.ctx.opts.verbose:
                 print('Generating "' + self.filename + '"...')
 
@@ -1268,7 +1286,8 @@ class ClassGenerator(object):
         add = self.java_class.append_access_method  # XXX: add is a function
         if sub.keyword in yangelement_stmts:
             pkg = self.package + '.' + self.n2
-            child_generator = ClassGenerator(stmt=sub, package=pkg,
+            child_generator = ClassGenerator(
+                stmt=sub, package=pkg,
                 path=self.path + os.sep + self.n2,
                 ns=None, prefix_name=None, parent=self)
             child_generator.generate()
@@ -1280,6 +1299,7 @@ class ClassGenerator(object):
                 field = ''
             for access_method in child_gen.parent_access_methods():
                 name = normalize(sub.arg)
+
                 def f(s):
                     f_name = '.'.join([pkg, name])
                     res = s.replace(name, f_name)
@@ -1287,10 +1307,12 @@ class ClassGenerator(object):
                     return res
                 if (name == self.n and isinstance(access_method, JavaMethod)):
                     access_method.return_type = f(access_method.return_type)
-                    access_method.parameters = [f(x) for x in access_method.parameters]
+                    access_method.parameters = [
+                        f(x) for x in access_method.parameters]
                     access_method.body = [f(x) for x in access_method.body]
                 elif name == self.n:
-                    access_method.modifiers = [f(x) for x in access_method.modifiers]
+                    access_method.modifiers = [
+                        f(x) for x in access_method.modifiers]
                 add(sub.arg, access_method)
         elif sub.keyword in leaf_stmts:
             child_gen = MethodGenerator(sub, self.ctx)
@@ -1395,10 +1417,10 @@ class JavaClass(object):
                  superclass=None, interfaces=None, source='<unknown>.yang'):
         """Constructor.
 
-        filename    -- Should preferably not contain a complete path since it is
-                       displayed in a Java comment in the beginning of the code.
-        package     -- Should be just the name of the package in which the class
-                       will be included.
+        filename    -- Should preferably not contain a complete path since it's
+                       displayed in Java comment in the beginning of the code.
+        package     -- Should be just the name of the package in which the
+                       class will be included.
         imports     -- Should be a list of names of imported libraries.
         description -- Defines the class semantics.
         body        -- Should contain the actual code of the class if it is not
@@ -1487,7 +1509,8 @@ class JavaClass(object):
         before it is returned."""
         if self.body is None:
             self.body = []
-            if self.superclass is not None or 'Serializable' in self.interfaces:
+            if self.superclass is not None or \
+               'Serializable' in self.interfaces:
                 self.body.extend(JavaValue(
                     modifiers=['private', 'static', 'final', 'long'],
                     name='serialVersionUID', value='1L').as_list())
@@ -1540,7 +1563,8 @@ class JavaClass(object):
                 if hasattr(method, 'imports'):
                     self.imports |= method.imports
                 if hasattr(method, 'exceptions'):
-                    self.imports |= ['com.tailf.jnc.' + s for s in method.exceptions]
+                    self.imports |= [
+                        'com.tailf.jnc.' + s for s in method.exceptions]
         if self.superclass:
             self.imports.add(get_import(self.superclass))
         imported_classes = []
@@ -1550,7 +1574,7 @@ class JavaClass(object):
                 pkg, _, cls = import_.rpartition('.')
                 if (cls != self.filename.split('.')[0]
                         and (pkg != 'com.tailf.jnc' or cls in com_tailf_jnc
-                            or cls == '*')):
+                             or cls == '*')):
                     if cls in imported_classes:
                         continue
                     else:
@@ -1725,7 +1749,8 @@ class JavaValue(object):
         lines = []
         if self.javadocs:
             lines.append(self.indent + '/**')
-            lines.extend([self.indent + ' * ' + line for line in self.javadocs])
+            lines.extend(
+                [self.indent + ' * ' + line for line in self.javadocs])
             lines.append(self.indent + ' */')
         return lines
 
@@ -1739,7 +1764,8 @@ class JavaValue(object):
             if self.value is not None:
                 declaration.append('=')
                 declaration.append(self.value)
-            self.exact.append(''.join([self.indent, ' '.join(declaration), ';']))
+            self.exact.append(
+                ''.join([self.indent, ' '.join(declaration), ';']))
         return self.exact
 
 
@@ -1899,7 +1925,7 @@ class MethodGenerator(object):
         self.is_top_level = get_parent(self.stmt) == self.module_stmt
         self.is_augmented = self.module_stmt != get_module(stmt.parent)
         assert (self.is_container or self.is_list or self.is_typedef
-            or self.is_leaf or self.is_leaflist)
+                or self.is_leaf or self.is_leaflist)
         self.gen = self
         if type(self) is MethodGenerator:
             if self.is_typedef:
@@ -1949,7 +1975,6 @@ class MethodGenerator(object):
                         imports.add('.'.join([self.pkg, import_]))
                     else:
                         imports.add(import_)
-                        
 
         for dependency in imports:
             if dependency.startswith(('java.math', 'java.util',
@@ -1957,7 +1982,8 @@ class MethodGenerator(object):
                 res.add(dependency)
                 continue
             elif dependency.endswith('>'):
-                for token in [_f for _f in re.findall(r'\w+', dependency) if _f]:
+                for token in [
+                        _f for _f in re.findall(r'\w+', dependency) if _f]:
                     res.add(self.canonical_import(token, child))
             elif dependency.endswith(']'):
                 assert dependency[:-2] and dependency[-2:] == '[]'
@@ -2037,7 +2063,8 @@ class MethodGenerator(object):
                                              'Value().toString()']))
             keys = ', '.join(getter_calls)
         for i, cloner in enumerate(cloners):
-            cloner.add_javadoc('Clones this object, returning' + a[i] + 'copy.')
+            cloner.add_javadoc(
+                'Clones this object, returning' + a[i] + 'copy.')
             cloner.add_javadoc('@return A clone of the object.' + b[i])
             cloner.return_type = self.n
             cloner.set_name('clone' + c[i])
@@ -2069,7 +2096,8 @@ class MethodGenerator(object):
             return None
         method = JavaMethod(modifiers=['public'], name='keyNames')
         method.set_return_type('String[]')
-        method.add_javadoc('@return An array with the identifiers of any key children')
+        method.add_javadoc(
+            '@return An array with the identifiers of any key children')
         if self.is_container or not self.gen.is_config:
             method.add_line('return null;')
         else:
@@ -2090,7 +2118,8 @@ class MethodGenerator(object):
             return None
         method = JavaMethod(modifiers=['public'], name='childrenNames')
         method.set_return_type('String[]')
-        method.add_javadoc('@return An array with the identifiers of any children, in order.')
+        method.add_javadoc(
+            '@return An array with the identifiers of any children, in order.')
         children = search(self.stmt, yangelement_stmts | leaf_stmts)
         method.add_line('return new String[] {')
         for child in children:
@@ -2115,7 +2144,8 @@ class MethodGenerator(object):
             fields = OrderedSet()
         cond = ''
         for field in fields:  # could do reversed(fields) to preserve order
-            add_child.add_line(''.join([cond, 'if (child instanceof ',
+            add_child.add_line(''.join([
+                    cond, 'if (child instanceof ',
                     normalize(field), ') ', camelize(field), ' = (',
                     normalize(field), ')child;']))
             add_child.add_dependency(normalize(field))
@@ -2184,7 +2214,8 @@ class MethodGenerator(object):
             javadoc2 = []
             if i == 0:  # Add existing object
                 javadoc1.append(', using an existing object.')
-                javadoc2.append(' '.join(['@param', self.n2, 'The object to add.']))
+                javadoc2.append(
+                    ' '.join(['@param', self.n2, 'The object to add.']))
                 method.add_parameter(self.n, self.n2)
             elif self.is_list and i in {1, 2} and len(res) == 4:
                 # Add child with String or JNC type keys
@@ -2206,8 +2237,10 @@ class MethodGenerator(object):
                 method.add_line(''.join(new_child))
             else:  # Create new, for subtree filter usage
                 javadoc1.append('.')
-                javadoc2.append('This method is used for creating subtree filters.')
-                method.add_line(' '.join([self.n, self.n2, '= new', self.n + '();']))
+                javadoc2.append(
+                    'This method is used for creating subtree filters.')
+                method.add_line(
+                    ' '.join([self.n, self.n2, '= new', self.n + '();']))
             method.add_javadoc(''.join(javadoc1))
             for javadoc in javadoc2:
                 method.add_javadoc(javadoc)
@@ -2217,7 +2250,8 @@ class MethodGenerator(object):
             if self.is_list and i in {1, 2} and len(res) == 4:
                 method.add_line('return ' + method.name + '(' + self.n2 + ');')
             else:
-                method.add_line('insertChild(' + self.n2 + ', childrenNames());')
+                method.add_line(
+                    'insertChild(' + self.n2 + ', childrenNames());')
                 method.add_line('return ' + self.n2 + ';')
             self.fix_imports(method, child=True)
         return res
@@ -2302,9 +2336,11 @@ class LeafMethodGenerator(MethodGenerator):
                                self.stmt.keyword +
                                ' exists; <code>null</code> otherwise.')
         else:
-            method.add_javadoc('Gets the value for child ' + self.stmt.keyword +
+            method.add_javadoc('Gets the value for child ' +
+                               self.stmt.keyword +
                                ' "' + self.stmt.arg + '".')
-            method.add_javadoc('@return The value of the ' + self.stmt.keyword + '.')
+            method.add_javadoc(
+                '@return The value of the ' + self.stmt.keyword + '.')
 
         # Leaves with a default value returns it instead of null
         if self.default:
@@ -2369,12 +2405,14 @@ class LeafMethodGenerator(MethodGenerator):
         for i, method in enumerate(res):
             param_names = [self.n2 + 'Value']
             method.add_exception('JNCException')
-            method.add_javadoc('Sets the value for child ' + self.stmt.keyword +
+            method.add_javadoc('Sets the value for child ' +
+                               self.stmt.keyword +
                                ' "' + self.stmt.arg + '",')
             if i == 0:
                 param_types = [value_type]
                 if not self.is_typedef:
-                    method.add_javadoc('using instance of generated typedef class.')
+                    method.add_javadoc(
+                        'using instance of generated typedef class.')
                 else:
                     method.add_javadoc('using a JNC type value.')
                 method.add_javadoc(' '.join(['@param', param_names[0],
@@ -2389,9 +2427,12 @@ class LeafMethodGenerator(MethodGenerator):
                 method.add_javadoc('by instantiating it (value n/a).')
                 param_types = []  # Add parameter here to get correct javadoc
                 method.add_parameter('String', param_names[0])
-                method.add_javadoc(' '.join(['@param', param_names[0], 'ignored.']))
-                l = [name, '(new ', method.add_dependency(value_type), '());']
-                method.add_line(''.join(l))
+                method.add_javadoc(
+                    ' '.join(['@param', param_names[0], 'ignored.']))
+                iterable = [
+                    name, '(new ', method.add_dependency(value_type),
+                    '());']
+                method.add_line(''.join(iterable))
             else:
                 line = [name, '(new ', method.add_dependency(value_type),
                         '(', param_names[0]]
@@ -2434,7 +2475,7 @@ class LeafMethodGenerator(MethodGenerator):
                     smap.append('},')
                     imap.append('}')
                     method.add_line(''.join(['    new BigInteger("',
-                                                  str(mask), '"),']))
+                                            str(mask), '"),']))
                     method.add_line(''.join(smap))
                     method.add_line(''.join(imap))
                     line = []
@@ -2481,7 +2522,7 @@ class LeafMethodGenerator(MethodGenerator):
             if i == 1:
                 method.add_javadoc('The value is specified as a string.')
             method.add_javadoc(''.join(['@param ', self.n2, 'Value Value to ',
-                                     method_type, '.']))
+                                        method_type, '.']))
             param_type = 'String'
             if i == 0:
                 param_type = self.type_str[0]
@@ -2506,7 +2547,8 @@ class LeafMethodGenerator(MethodGenerator):
     def adders(self):
         method = JavaMethod(name=('add' + self.n))
         method.add_exception('JNCException')
-        method.add_javadoc('This method is used for creating a subtree filter.')
+        method.add_javadoc(
+            'This method is used for creating a subtree filter.')
         method.add_javadoc(''.join(['The added "', self.stmt.arg, '" ',
                                     self.stmt.keyword,
                                     ' will not have a value.']))
@@ -2544,7 +2586,8 @@ class LeafMethodGenerator(MethodGenerator):
                     param_type = 'String'
                 mark_method.add_parameter(param_type, self.n2 + 'Value')
                 mark_method.add_javadoc(javadoc)
-            mark_method.add_line('markLeaf' + normalize(op) + '("' + path + '");')
+            mark_method.add_line(
+                'markLeaf' + normalize(op) + '("' + path + '");')
             self.fix_imports(mark_method, child=True)
         return mark_methods
 
@@ -2644,7 +2687,7 @@ class TypedefMethodGenerator(MethodGenerator):
                 constructor.add_line(''.join(smap))
                 constructor.add_line(''.join(imap))
                 constructor.add_line(');')
-            
+
             # Add call to check method if type has constraints
             if self.needs_check:
                 constructor.add_line('check();')
@@ -2761,11 +2804,13 @@ class ListMethodGenerator(MethodGenerator):
             except AttributeError:
                 self.is_config = False  # is_config produced wrong value
 
-        findkey = lambda k: search_one(self.stmt, 'leaf', arg=k)
+        def findkey(k):
+            search_one(self.stmt, 'leaf', arg=k)
         self.key_stmts = [findkey(k) for k in self.keys]
 
-        notstring = lambda k: get_types(k, ctx)[1] != 'String'
-        self.is_string = not all(notstring(k) for k in  self.key_stmts)
+        def notstring(k):
+            get_types(k, ctx)[1] != 'String'
+        self.is_string = not all(notstring(k) for k in self.key_stmts)
 
     def value_constructors(self):
         """Returns a list of constructors for configuration data lists"""
@@ -2899,12 +2944,12 @@ class ListMethodGenerator(MethodGenerator):
             for key in self.gen.key_stmts:
                 key_arg = camelize(key.arg)
                 javadoc2.append(''.join(['@param ', key_arg,
-                    'Value Key argument of child.']))
+                                'Value Key argument of child.']))
                 param_type = 'String'
                 if i == 0:
                     param_type, _ = get_types(key, self.ctx)
                 method.add_parameter(param_type, key_arg + 'Value')
-                path.extend(['[', key_arg, '=\'" + ',key_arg, 'Value + "\']'])
+                path.extend(['[', key_arg, '=\'" + ', key_arg, 'Value + "\']'])
             path.append('";')
 
             method.add_javadoc(''.join(javadoc1))
