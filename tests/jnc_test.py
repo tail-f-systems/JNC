@@ -12,6 +12,7 @@ import unittest
 
 import jnc
 
+
 class Test(unittest.TestCase):
 
     def test__camelize__when_string_is_all_upper_case(self):
@@ -78,7 +79,8 @@ class Test(unittest.TestCase):
         message = 'will remove all except consecutive and trailing'
         assert result == expected, message + ' but was ' + result
 
+
 if __name__ == "__main__":
     """Launch all unit tests"""
-    #import sys;sys.argv = ['', 'Test.testCapitalize_first']  # Only one
+    # import sys;sys.argv = ['', 'Test.testCapitalize_first']  # Only one
     unittest.main()
