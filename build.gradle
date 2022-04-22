@@ -1,0 +1,47 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id 'com.github.ben-manes.versions' version '0.42.0' // gradle dependencyUpdates -Drevision=release
+    id 'java-library'
+    id 'idea'
+}
+
+repositories {
+    mavenCentral()
+}
+
+// Define dependencies
+dependencies {
+    implementation 'ch.ethz.ganymed:ganymed-ssh2:262'
+    testImplementation 'junit:junit:4.11'
+    testImplementation 'org.hamcrest:hamcrest-all:1.3'
+}
+
+def manifestAttrs = [
+        'Implementation-Title'  : project.name,
+        'Implementation-Version': project.version,
+        'Specification-Vendor'  : project.author,
+        'Built-By'              : project.author,
+        'Specification-Title'   : project.name,
+        'Extension-Name'        : project.name,
+        'Specification-Version' : project.version
+]
+
+jar {
+    manifest {
+        attributes(manifestAttrs)
+    }
+}
+
+java {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.11'
+    withSourcesJar()
+    withJavadocJar()
+}
+
+
