@@ -202,10 +202,9 @@ class JNCPlugin(plugin.PyangPlugin):
         while num_modules != len(module_set):
             num_modules = len(module_set)
             for module in list(module_set):
-                imported = map(lambda x: x.arg, search(module, 'import'))
-                included = map(lambda x: x.arg, search(module, 'include'))
+                i_modules = {s.arg for s in search(module, 'import') + search(module, 'include')}
                 for (module_stmt, rev) in self.ctx.modules:
-                    if module_stmt in (imported + included):
+                    if module_stmt in i_modules:
                         module_set.add(self.ctx.modules[(module_stmt, rev)])
 
         # Generate files from main modules
@@ -1215,7 +1214,6 @@ class ClassGenerator(object):
                 print('pkg ' + '.'.join([self.package, self.n2]) + ' generated')
             if self.ctx.opts.verbose:
                 print('Generating "' + self.filename + '"...')
-
         gen = MethodGenerator(stmt, self.ctx)
 
         for constructor in gen.constructors():
@@ -1655,6 +1653,10 @@ class JavaValue(object):
                 return False
         return True
 
+    items = ('value', 'default_modifiers', 'name')
+    def __hash__(self):
+        return tuple(getattr(self, attr, None) for attr in self.items).__hash__()
+
     def __ne__(self, other):
         """Returns True iff self and other represents different values"""
         return not self.__eq__(other)
@@ -1811,6 +1813,9 @@ class JavaMethod(JavaValue):
 
         self.exact = exact
         self.default_modifiers = True
+
+    def __hash__(self):
+        return id(self)
 
     def set_return_type(self, return_type):
         """Sets the type of the return value of this method"""
