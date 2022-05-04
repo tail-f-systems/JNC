@@ -1,0 +1,38 @@
+plugins {
+    id 'application'
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+// Define dependencies
+dependencies {
+    implementation fileTree(dir: '../../build/libs', include: '*.jar')
+    implementation 'ch.ethz.ganymed:ganymed-ssh2:262'
+    testImplementation 'junit:junit:4.11'
+    testImplementation 'org.hamcrest:hamcrest-all:1.3'
+}
+
+def genSrc1 ="${buildDir}/generated/src/gen/com/example/test"
+def genSrc2 ="${buildDir}/generated/src/gen/com/example/test/inet"
+
+def generateSources = tasks.register("generateSources") {
+    outputs.dirs([genSrc1, genSrc2])
+    doLast {
+        println "GEN"
+        def script = "pyang -p $System.env.CONFD_DIR/src/confd/yang --plugindir ../.. -f jnc --jnc-output ${genSrc1} ../yang/hosts.yang".execute()
+        script.waitForProcessOutput(System.out, System.err)
+        script = "pyang --plugindir ../.. -f jnc --jnc-output ${genSrc2} $System.env.CONFD_DIR/src/confd/yang/ietf-inet-types.yang".execute()
+        script.waitForProcessOutput(System.out, System.err)
+    }
+}
+
+compileJava.dependsOn(generateSources)
+
+sourceSets.main.java.srcDirs = ['src/app', genSrc1, genSrc2]
+
+application {
+    mainClass = 'simple.Main'
+}
