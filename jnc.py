@@ -1669,7 +1669,7 @@ class JavaValue(object):
                          warning is printed with the msg "Unknown attribute"
                          followed by the attribute name. The value is added,
                          appended or assigned, depending on if the attribute is
-                         a MutableSet, a list or something else, respectively.
+                         a set, a list or something else, respectively.
         value         -- Typically a String, but can be anything, really.
 
         The 'exact' cache is invalidated is the attribute exists.
@@ -1679,7 +1679,7 @@ class JavaValue(object):
             data = getattr(self, attr)
             if isinstance(data, list):
                 data.append(value)
-            elif isinstance(data, collections.MutableSet):
+            elif isinstance(data, collections.abc.MutableSet):
                 data.add(value)
             else:
                 setattr(self, attr, value)
@@ -1939,10 +1939,10 @@ class MethodGenerator(object):
             return get_import(import_)
 
     def fix_imports(self, method, child=False):
-        res = set([])
+        res = OrderedSet([])
         imports = method.imports
         if self.ctx.opts.import_on_demand:
-            imports = set([])
+            imports = OrderedSet([])
             pkg = self.pkg
             if child:
                 pkg = pkg.rpartition('.')[0]
@@ -2950,7 +2950,7 @@ class ListMethodGenerator(MethodGenerator):
         return res
 
 
-class OrderedSet(collections.MutableSet):
+class OrderedSet(collections.abc.MutableSet):
     """A set of unique items that preserves the insertion order.
 
     Created by: Raymond Hettinger 2009-03-19
