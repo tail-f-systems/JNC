@@ -23,10 +23,10 @@
     <mkdir dir="${gen.dir}/com/example/test"/>
     <mkdir dir="${gen.dir}/com/example/test/inet"/>
     <exec executable="${pyang}" failonerror="true">
-     <arg line="-f jnc --jnc-output src/gen/com/example/test ../yang/hosts.yang"/>
+     <arg line="-p ${env.CONFD_DIR}/src/confd/yang --plugindir ../.. -f jnc --jnc-output src/gen/com/example/test ../yang/hosts.yang"/>
     </exec>
     <exec executable="${pyang}" failonerror="true">
-     <arg line="-f jnc --jnc-output src/gen/com/example/test/inet ${env.CONFD_DIR}/src/confd/yang/ietf-inet-types.yang"/>
+     <arg line="--plugindir ../.. -f jnc --jnc-output src/gen/com/example/test/inet ${env.CONFD_DIR}/src/confd/yang/ietf-inet-types.yang"/>
     </exec>
   </target>
 
