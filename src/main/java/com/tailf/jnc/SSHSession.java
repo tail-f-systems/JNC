@@ -9,19 +9,18 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 
-import ch.ethz.ssh2.ChannelCondition;
-import ch.ethz.ssh2.Session;
+import net.schmizz.sshj.common.SSHException;
+import net.schmizz.sshj.connection.channel.direct.Session;
 
 /**
  * A SSH NETCONF transport. Can be used whenever {@link NetconfSession} intends
- * to use SSH for its transport. This class uses the Ganymed SSH
- * implementation. (<a
- * href="http://www.ganymed.ethz.ch/ssh2/">http://www.ganymed
- * .ethz.ch/ssh2/</a>)
+ * to use SSH for its transport. This class uses the SSHJ
+ * implementation. 
  * <p>
  * Example:
  *
  * <pre>
+ * TODO: fix this
  * SSHConnection c = new SSHConnection(&quot;127.0.0.1&quot;, 789);
  * c.authenticateWithPassword(&quot;ola&quot;, &quot;secret&quot;);
  * SSHSession ssh = new SSHSession(c);
@@ -34,6 +33,7 @@ public class SSHSession implements Transport {
 
     private SSHConnection connection = null;
     private Session session = null;
+    private Session.Subsystem subsys;
 
     private BufferedReader in = null;
     private PrintWriter out = null;
@@ -66,12 +66,11 @@ public class SSHSession implements Transport {
         this.readTimeout = readTimeout;
         connection = con;
 
-        session = con.connection.openSession();
-        session.startSubSystem("netconf");
-        // initStreams
+        session = con.client.startSession();
+        subsys = session.startSubsystem("netconf");
 
-        final InputStream is = session.getStdout();
-        final OutputStream os = session.getStdin();
+        final InputStream is = subsys.getInputStream();
+        final OutputStream os = session.getOutputStream();
         in = new BufferedReader(new InputStreamReader(is));
         out = new PrintWriter(os, false);
         ioSubscribers = new ArrayList<IOSubscriber>();
@@ -116,11 +115,8 @@ public class SSHSession implements Transport {
      */
     @Override
     public boolean ready() throws IOException {
-        if (in.ready()) {
-            return true;
-        }
-        final int conditionSet = session.waitForCondition(0xffffffff, 1);
-        return (conditionSet & ChannelCondition.TIMEOUT) != ChannelCondition.TIMEOUT;
+        // TODO: test
+        return subsys.getInputStream().available() > 0;
     }
 
     /**
@@ -128,10 +124,8 @@ public class SSHSession implements Transport {
      * the ssh socket
      */
     public boolean serverSideClosed() throws IOException {
-        int conditionSet = ChannelCondition.TIMEOUT & ChannelCondition.CLOSED
-                & ChannelCondition.EOF;
-        conditionSet = session.waitForCondition(conditionSet, 1);
-        return (conditionSet & ChannelCondition.TIMEOUT) != ChannelCondition.TIMEOUT;
+        // TODO: does this work even for timed-out connection?
+        return session.isEOF();
     }
 
     /**
@@ -148,7 +142,7 @@ public class SSHSession implements Transport {
         int ret = 0;
         while (true) {
             try {
-                if (!(ready())) {
+                if (! ready()) {
                     return ret;
                 }
                 in.read();
@@ -170,19 +164,7 @@ public class SSHSession implements Transport {
         final StringWriter wr = new StringWriter();
         int ch;
         while (true) {
-            if ((readTimeout > 0) && !in.ready()) { // else we want to block
-                final int conditionSet = session.waitForCondition(0xffffffff,
-                        readTimeout);
-                if ((conditionSet & ChannelCondition.TIMEOUT) == ChannelCondition.TIMEOUT) {
-                    // it's a timeout - there is nothing to
-                    // read, not even eof
-                    throw new JNCException(JNCException.TIMEOUT_ERROR,
-                             Long.valueOf(readTimeout));
-                }
-            }
-
-            // If readTimeout /= 0 we're guaranteed to not block
-            // If its == 0, we want to block
+            // TODO: no support for recv timeout
 
             ch = in.read();
             if (ch == -1) {
@@ -350,7 +332,11 @@ public class SSHSession implements Transport {
      */
     @Override
     public void close() {
-        session.close();
+        try {
+            session.close();
+        } catch (SSHException e) {
+            System.out.println("Exception caught while closing " + e);
+        }
     }
 
     /* help functions */

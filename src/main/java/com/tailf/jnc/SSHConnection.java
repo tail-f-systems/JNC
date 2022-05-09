@@ -3,7 +3,8 @@ package com.tailf.jnc;
 import java.io.File;
 import java.io.IOException;
 
-import ch.ethz.ssh2.Connection;
+import net.schmizz.sshj.SSHClient;
+import net.schmizz.sshj.userauth.UserAuthException;
 
 /**
  * A SSH NETCONF connection class. Can be used whenever {@link NetconfSession}
@@ -20,7 +21,7 @@ import ch.ethz.ssh2.Connection;
  */
 public class SSHConnection {
 
-    Connection connection = null;
+    SSHClient client = null;
 
     /**
      * By default we connect to the IANA registered port for NETCONF which is
@@ -55,8 +56,11 @@ public class SSHConnection {
     public SSHConnection(String host, int port, int connectTimeout)
             throws IOException, JNCException {
 
-        connection = new Connection(host, port);
-        connection.connect(null, connectTimeout, 0);
+        client = new SSHClient();
+        client.setTimeout(connectTimeout);
+        // TODO: check the host conditionally
+        client.addHostKeyVerifier(new net.schmizz.sshj.transport.verification.PromiscuousVerifier());
+        client.connect(host, port);
     }
 
     /**
@@ -83,30 +87,17 @@ public class SSHConnection {
      */
     public SSHConnection(String host, int port, int connectTimeout,
             int kexTimeout) throws IOException, JNCException {
-        connection = new Connection(host, port);
-        connection.connect(null, connectTimeout, kexTimeout);
+        client = new SSHClient();
+        client.setTimeout(connectTimeout);
+        client.getTransport().setTimeoutMs(kexTimeout);
+        client.connect(host, port);
     }
 
     /**
-     * @return the underlying Ganymed connection object This is required if
-     *         wish to use the addConnectionMonitor() method in the ganymed
-     *         Connection class.
-     * 
+     * TODO: needed?
      */
-
-    Connection getConnection() {
-        return connection;
-    }
-
-    /**
-     * This is required if wish to have access to the ganymed connection object
-     * outside of this package.
-     * 
-     * @return the underlying Ganymed connection object
-     */
-
-    public Connection getGanymedConnection() {
-        return connection;
+    SSHClient getClient() {
+        return client;
     }
 
     /**
@@ -118,47 +109,53 @@ public class SSHConnection {
      **/
     public void authenticateWithPassword(String user, String password)
             throws IOException, JNCException {
-        if (!connection.authenticateWithPassword(user, password)) {
-            throw new JNCException(JNCException.AUTH_FAILED, this);
+        try {
+            client.authPassword(user, password);
+        } catch (UserAuthException e) {
+            throw new JNCException(JNCException.AUTH_FAILED, e);
         }
     }
 
-    /**
-     * Authenticate with the name of a file containing the private key See
-     * ganymed docs for full explanation, use null for password if the key
-     * doesn't have a passphrase.
-     * 
-     * @param user User name.
-     * @param pemFile Fila name.
-     * @param password Password.
-     **/
-    public void authenticateWithPublicKeyFile(String user, File pemFile,
-            String password) throws IOException, JNCException {
-        if (!connection.authenticateWithPublicKey(user, pemFile, password)) {
-            throw new JNCException(JNCException.AUTH_FAILED, this);
-        }
-    }
+    // /**
+    //  * Authenticate with the name of a file containing the private key See
+    //  * ganymed docs for full explanation, use null for password if the key
+    //  * doesn't have a passphrase.
+    //  * 
+    //  * @param user User name.
+    //  * @param pemFile Fila name.
+    //  * @param password Password.
+    //  **/
+    // public void authenticateWithPublicKeyFile(String user, File pemFile,
+    //         String password) throws IOException, JNCException {
+    //     if (!client.authPublicKey(user, pemFile, password)) {
+    //         throw new JNCException(JNCException.AUTH_FAILED, this);
+    //     }
+    // }
 
-    /**
-     * Authenticate with a private key. See ganymed docs for full explanation,
-     * use null for password if the key doesn't have a passphrase.
-     * 
-     * @param user User name.
-     * @param pemPrivateKey Private key.
-     * @param pass Passphrase.
-     **/
-    public void authenticateWithPublicKey(String user, char[] pemPrivateKey,
-            String pass) throws IOException, JNCException {
-        if (!connection.authenticateWithPublicKey(user, pemPrivateKey, pass)) {
-            throw new JNCException(JNCException.AUTH_FAILED, this);
-        }
-    }
+    // /**
+    //  * Authenticate with a private key. See ganymed docs for full explanation,
+    //  * use null for password if the key doesn't have a passphrase.
+    //  * 
+    //  * @param user User name.
+    //  * @param pemPrivateKey Private key.
+    //  * @param pass Passphrase.
+    //  **/
+    // public void authenticateWithPublicKey(String user, char[] pemPrivateKey,
+    //         String pass) throws IOException, JNCException {
+    //     if (!connection.authenticateWithPublicKey(user, pemPrivateKey, pass)) {
+    //         throw new JNCException(JNCException.AUTH_FAILED, this);
+    //     }
+    // }
 
     /**
      * Closes the SSH session/connection.
      */
     public void close() {
-        connection.close();
+        try {
+            client.close();
+        } catch (IOException e) {
+            System.out.println("Exception in close(): " + e);
+        }
     }
 
 }
