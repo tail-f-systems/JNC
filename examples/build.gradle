@@ -1,0 +1,22 @@
+plugins {
+    id 'application'
+}
+
+ext {
+    JNCDir = "$project.rootDir/.."
+}
+
+// Define dependencies
+subprojects {
+    apply plugin: 'java'
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation fileTree(dir: "$JNCDir/build/libs", include: 'JNC*.jar')
+        implementation 'ch.ethz.ganymed:ganymed-ssh2:262'
+        testImplementation 'junit:junit:4.11'
+        testImplementation 'org.hamcrest:hamcrest-all:1.3'
+    }
+}
