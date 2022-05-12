@@ -2,6 +2,35 @@ plugins {
     id 'application'
 }
 
+//https://tomgregory.com/gradle-task-inputs-and-outputs/
+
+class PyangTask extends DefaultTask {
+    @Internal
+    String initMessage = 'Generating JNC classes...'
+
+    @OutputDirectory
+    File outputDir;
+
+    @Optional
+    @Input
+    String yangPath = null
+
+    @InputFiles
+    File[] inputFiles;
+
+    @TaskAction
+    def generate() {
+        println initMessage
+
+//        def gen = new JavaClassGenerator()
+//                        .loadFromFiles(inputFiles())
+//                        .save(outputDir())
+
+        println "Generated ${inputFiles.size()} to ${outputDir.getPath()} path ${yangPath}"
+        //println "Generated "
+    }
+}
+
 def genSrc1 ="${buildDir}/generated/src/gen/com/example/test"
 def genSrc2 ="${buildDir}/generated/src/gen/com/example/test/inet"
 
@@ -14,6 +43,13 @@ def generateSources = tasks.register("generateSources") {
         script.waitForProcessOutput(System.out, System.err)
     }
 }
+
+tasks.register("pyang", PyangTask) {
+    outputDir = new File(genSrc1)
+    yangPath = "$System.env.CONFD_DIR/src/confd/yang"
+    inputFiles = [new File("../yang/hosts.yang")]
+}
+
 
 compileJava.dependsOn(generateSources)
 
