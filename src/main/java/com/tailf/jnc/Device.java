@@ -338,20 +338,37 @@ public class Device implements Serializable {
     /**
      * This method finds the {@link DeviceUser} associated to the localUser
      * user name and SSH connects to the device, this method must be called
-     * prior to establishing any sessions (channels)
+     * prior to establishing any sessions (channels).
+     *
+     * The connection requires host key check.
      */
     public void connect(String localUser) throws IOException, JNCException {
-        connect(localUser, 0);
+        connect(localUser, 0, true);
     }
 
     /**
-     * This connect() method has an additional timeout paramater. This is not
-     * the same thing as the readTimeout. The connectTimeout only applies to
-     * the actual connect.
+     * Connect to the device with given connection timeout.
      * 
      * @param localUser The name of a local (for the EMS) user
+     * @param connectTimeout Initial connection timeout (in milliseconds)
+     * @param verifyHost If true, check host's key against the standard
+     * known_hosts file
      */
-    public void connect(String localUser, int connectTimeout)
+    public void connect(String localUser, int connectTimeout, boolean verifyHost)
+            throws IOException, JNCException {
+        connect(localUser, connectTimeout, verifyHost ? "~/.ssh/known_hosts" : null);
+    }
+
+    /**
+     * Connect to the device with given connection timeout and given known hosts
+     * file.
+     *
+     * @param localUser The name of a local (for the EMS) user
+     * @param connectTimeout Initial connection timeout (in milliseconds)
+     * @param knownHostsFile If non-null, check host's key against the
+     * known_hosts file
+     */
+    public void connect(String localUser, int connectTimeout, String knownHostsFile)
             throws IOException, JNCException {
         DeviceUser u = null;
         for (int i = 0; i < users.size(); i++) {
@@ -365,7 +382,9 @@ public class Device implements Serializable {
             throw new JNCException(JNCException.AUTH_FAILED, "No such user: "
                     + localUser);
         }
-        con = new SSHConnection(mgmt_ip, mgmt_port, connectTimeout);
+        con = new SSHConnection()
+            .setHostVerification(knownHostsFile)
+            .connect(mgmt_ip, mgmt_port, connectTimeout);
         auth(u);
     }
 

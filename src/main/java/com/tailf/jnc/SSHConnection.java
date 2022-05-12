@@ -5,6 +5,9 @@ import java.io.IOException;
 
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.userauth.UserAuthException;
+import net.schmizz.sshj.transport.verification.HostKeyVerifier;
+import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
+import net.schmizz.sshj.transport.verification.OpenSSHKnownHosts;
 
 /**
  * A SSH NETCONF connection class. Can be used whenever {@link NetconfSession}
@@ -23,14 +26,29 @@ public class SSHConnection {
 
     SSHClient client = null;
 
+    public SSHConnection() {
+        client = new SSHClient();
+    }
+
+    public SSHConnection setHostVerification(String knownHostsFile) throws IOException {
+        HostKeyVerifier verifier;
+        if (knownHostsFile == null) {
+            verifier = new PromiscuousVerifier();
+        } else {
+            verifier = new OpenSSHKnownHosts(new File(knownHostsFile));
+        }
+        client.addHostKeyVerifier(verifier);
+        return this;
+    }
+
     /**
      * By default we connect to the IANA registered port for NETCONF which is
      * 830
      * 
      * @param host Host or IP address to connect to
      */
-    public SSHConnection(String host) throws IOException, JNCException {
-        this(host, 830, 0);
+    public SSHConnection connect(String host) throws IOException, JNCException {
+        return connect(host, 830, 0);
     }
 
     /**
@@ -40,9 +58,9 @@ public class SSHConnection {
      * @param host Host name.
      * @param port Port number to connect to.
      */
-    public SSHConnection(String host, int port) throws IOException,
-            JNCException {
-        this(host, port, 0);
+    public SSHConnection connect(String host, int port) throws IOException,
+                                                 JNCException {
+        return connect(host, port, 0);
     }
 
     /**
@@ -53,14 +71,9 @@ public class SSHConnection {
      * @param port Port number to connect to.
      * @param connectTimeout
      */
-    public SSHConnection(String host, int port, int connectTimeout)
-            throws IOException, JNCException {
-
-        client = new SSHClient();
-        client.setTimeout(connectTimeout);
-        // TODO: check the host conditionally
-        client.addHostKeyVerifier(new net.schmizz.sshj.transport.verification.PromiscuousVerifier());
-        client.connect(host, port);
+    public SSHConnection connect(String host, int port, int connectTimeout)
+        throws IOException, JNCException {
+        return connect(host, port, connectTimeout, 0);
     }
 
     /**
@@ -85,12 +98,12 @@ public class SSHConnection {
      *             <code>connect()</code> again without having called
      *             {@link #close()} first.
      */
-    public SSHConnection(String host, int port, int connectTimeout,
-            int kexTimeout) throws IOException, JNCException {
-        client = new SSHClient();
+    public SSHConnection connect(String host, int port, int connectTimeout,
+                        int kexTimeout) throws IOException, JNCException {
         client.setTimeout(connectTimeout);
         client.getTransport().setTimeoutMs(kexTimeout);
         client.connect(host, port);
+        return this;
     }
 
     /**
