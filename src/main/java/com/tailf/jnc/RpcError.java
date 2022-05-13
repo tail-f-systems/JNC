@@ -70,7 +70,7 @@ public class RpcError {
      * implementation-specific error condition, if one exists. This element
      * will not be present if no appropriate application error tag can be
      * associated with a particular error condition.
-     * 
+     *
      */
     public String errorAppTag;
 
@@ -84,7 +84,7 @@ public class RpcError {
      * When the XPath expression is interpreted, the set of namespace
      * declarations are those in scope on the rpc-error element, including the
      * default namespace.
-     * 
+     *
      */
     public String errorPath;
 
@@ -104,7 +104,7 @@ public class RpcError {
 
     /**
      * Constructor, initialized with an rpc-error element tree.
-     * 
+     *
      * @param The rpc-error element tree to initialize with.
      */
     public RpcError(Element data) {

@@ -56,14 +56,14 @@ public class ConfigurationMergeHandler {
         //         may need to be added to the exising A0.
 
         final int masterElementDepth = determineElementDepth(deepestMasterElement);
-        final boolean matchingMasterElementNeedsToBeRemoved = (masterElementDepth == pathComponents.size());
+        final boolean matchingMasterElementNeedsToBeRemoved = masterElementDepth == pathComponents.size();
 
         final Element fragmentElementToBeAdded = identifySubFragmentToBeAdded(configurationFragment,
                 pathComponents, masterElementDepth);
 
         // If there is no matching element in the update node set, we know that any matching element in the
         // original node set will need to be deleted.
-        final boolean updateFragmentNeedsToBeAdded = (null != fragmentElementToBeAdded);
+        final boolean updateFragmentNeedsToBeAdded = null != fragmentElementToBeAdded;
 
         // We can now update the original node set.
         // What form this takes depends on:
@@ -243,8 +243,7 @@ public class ConfigurationMergeHandler {
     // Determines the index of the last character of a key name.
     private int scanName(final byte[] buf, final int startPos) {
         int i = startPos;
-        while ((i < buf.length)
-                && (buf[i] != '/') && (buf[i] != '[')) {
+        while (i < buf.length && buf[i] != '/' && buf[i] != '[') {
             i++;
         }
         return i;
@@ -260,7 +259,7 @@ public class ConfigurationMergeHandler {
                 byte quoteChar = 0;
                 int j = i;
                 int quoted = 0;
-                while ((j < buf.length) && ((buf[j] != '=') && (buf[j] != ']'))) {
+                while (j < buf.length && buf[j] != '=' && buf[j] != ']') {
                     j++;
                 }
                 if (buf[j] == '=') {
@@ -268,8 +267,8 @@ public class ConfigurationMergeHandler {
                     i = j + 1;
                     j = i;
                 }
-                while ((j < buf.length) && ((quoteChar != 0) || (buf[j] != ']'))) {
-                    if ((buf[j] == '\"') || (buf[j] == '\'')) {
+                while (j < buf.length && (quoteChar != 0 || buf[j] != ']')) {
+                    if (buf[j] == '\"' || buf[j] == '\'') {
                         if (quoteChar == 0) {
                             quoteChar = buf[j];
                         } else {
@@ -299,11 +298,11 @@ public class ConfigurationMergeHandler {
     // Determines whether a set of key elements match a full set of XPath keys
     private boolean areMatchingKeys(final NodeSet keyElements, final List<Key> keys) {
 
-        if ((keys == null) || (keys.isEmpty())) {
+        if (keys == null || keys.isEmpty()) {
             return true;
         }
 
-        if ((keyElements == null) || (keyElements.size() < keys.size())) {
+        if (keyElements == null || keyElements.size() < keys.size()) {
             return false;
         }
 

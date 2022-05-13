@@ -7,7 +7,7 @@ import java.math.BigDecimal;
  * 
  * @author emil@tail-f.com
  */
-abstract class YangBaseType<T> implements YangType<T> {
+abstract class YangBaseType<T> implements Cloneable, YangType<T> {
 
     private static final long serialVersionUID = 1L;
 
@@ -23,6 +23,7 @@ abstract class YangBaseType<T> implements YangType<T> {
      * initialized when calling this method.
      */
     public YangBaseType() {
+        // Intentionally blank.
     }
 
     /**

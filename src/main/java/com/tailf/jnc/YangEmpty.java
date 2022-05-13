@@ -2,18 +2,12 @@ package com.tailf.jnc;
 
 /**
  * Implements the built-in YANG data type "empty".
- * 
+ *
  * @author emil@tail-f.com
  */
 public class YangEmpty implements YangType<YangEmpty> {
 
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Creates a YangEmpty object.
-     */
-    public YangEmpty() {
-    }
 
     /*
      * (non-Javadoc)
@@ -30,11 +24,12 @@ public class YangEmpty implements YangType<YangEmpty> {
      */
     @Override
     public void check() throws YangException {
+        // Intentionally empty.
     }
 
     /**
      * Compares type of obj with this object to see if they can be equal.
-     * 
+     *
      * @param obj Object to compare type with.
      * @return true if obj is an instance of YangEmpty; false otherwise.
      */
@@ -45,7 +40,7 @@ public class YangEmpty implements YangType<YangEmpty> {
 
     /**
      * This method doesn't do anything, but is part of the interface
-     * 
+     *
      * @param s ignored
      * @throws YangException always, since this object is immutable
      */
@@ -56,7 +51,7 @@ public class YangEmpty implements YangType<YangEmpty> {
 
     /**
      * This method doesn't do anything, but is part of the interface
-     * 
+     *
      * @param value ignored
      * @throws YangException always, since this object is immutable
      */
@@ -72,7 +67,7 @@ public class YangEmpty implements YangType<YangEmpty> {
     public YangEmpty getValue() {
         return this;
     }
-    
+
     /**
      * @return An empty string.
      */

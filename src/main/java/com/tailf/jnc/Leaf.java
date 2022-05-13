@@ -5,10 +5,10 @@ package com.tailf.jnc;
  * <p>
  * YangElement classes generated from the JNC pyang plugin may instantiate this
  * class for leaf values.
- * 
+ *
  * @see YangElement
  */
-public class Leaf extends Element {
+public class Leaf extends Element implements Cloneable {
 
     private static final long serialVersionUID = 1L;
 
@@ -21,7 +21,7 @@ public class Leaf extends Element {
     private SchemaNode n = null;
 
     @Override
-    protected void encode(Transport out, boolean newline_at_end,
+    protected void encode(Transport out, boolean newlineAtEnd,
             Capabilities capas) throws JNCException {
         if (RevisionInfo.olderRevisionSupportEnabled && capas != null) {
             if (tp == null) {
@@ -62,14 +62,14 @@ public class Leaf extends Element {
                             // nothing to do
                             break;
                         default:
-                            ;
+                            break;
                         }
 
                     }
                 }
             }
         }
-        super.encode(out, newline_at_end, capas);
+        super.encode(out, newlineAtEnd, capas);
     }
 
     @Override
@@ -90,8 +90,8 @@ public class Leaf extends Element {
         if (keys == null) {
             return false;
         }
-        for (int i = 0; i < keys.length; i++) {
-            if (name.equals(keys[i])) {
+        for (String key: keys) {
+            if (name.equals(key)) {
                 return true;
             }
         }

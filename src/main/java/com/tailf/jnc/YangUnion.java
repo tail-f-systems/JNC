@@ -13,18 +13,18 @@ import java.util.Arrays;
  * specified in the "type" statement, until a match is found. Any default value
  * or "units" property defined in the member types is not inherited by the
  * union type.
- * 
+ *
  * @author emil@tail-f.com
  */
 public class YangUnion extends YangBaseType<YangType<?>> {
 
     private static final long serialVersionUID = 1L;
-    
+
     /**
      * An array of the allowed types, ordered as in the YANG module.
      */
     private String[] memberTypes;
-    
+
     /**
      * Get the types allowed for this union.
      *
@@ -32,12 +32,12 @@ public class YangUnion extends YangBaseType<YangType<?>> {
      */
     protected String[] memberTypes() {
         return memberTypes;
-    };
+    }
 
     /**
      * Creates a YangUnion object from a java.lang.String representing a value
      * of one of the member types.
-     * 
+     *
      * @param value The Java String.
      * @param memberTypes A string array with the types of the union
      * @throws YangException If an invariant was broken during assignment.
@@ -50,7 +50,7 @@ public class YangUnion extends YangBaseType<YangType<?>> {
     /**
      * Creates a YangUnion object from a YangType, which should be an instance
      * of one of the member types.
-     * 
+     *
      * @param value The Object to use as value.
      * @param memberTypes A string array with the types of the union
      * @throws YangException If an invariant was broken during assignment, for
@@ -63,7 +63,7 @@ public class YangUnion extends YangBaseType<YangType<?>> {
 
     /**
      * Sets the value of this object using a java.lang.String.
-     * 
+     *
      * @param value The Java String.
      * @throws YangException If an invariant was broken during assignment.
      */
@@ -77,7 +77,7 @@ public class YangUnion extends YangBaseType<YangType<?>> {
 
     /**
      * Sets the value of this object using an Object.
-     * 
+     *
      * @param value The Object to set as the new value.
      * @throws YangException If an invariant was broken during assignment.
      */
@@ -91,7 +91,7 @@ public class YangUnion extends YangBaseType<YangType<?>> {
 
     /**
      * Parses a value of a member type
-     * 
+     *
      * @param s String representation of member type value
      * @return first valid value, or null if none
      */
@@ -107,32 +107,29 @@ public class YangUnion extends YangBaseType<YangType<?>> {
                 if (o instanceof YangType<?>) {
                     return (YangType<?>) o;
                 }
-            } catch (InvocationTargetException e) {
-            } catch (NoSuchMethodException e) {
-            } catch (IllegalAccessException e) {
-            } catch (InstantiationException e) {
-            } catch (ClassNotFoundException e) {
+            } catch (InvocationTargetException|NoSuchMethodException|IllegalAccessException|InstantiationException|ClassNotFoundException e) {
+                continue;
             }
             // Unable to instantiate a value of this memberType - try next
         }
         return null;
     }
-    
-    /**
-     * Checks that the value of this object is not null and is instance of a
-     * member type. Called in constructors and value setters.
-     * 
-     * @throws YangException If the value of this object is invalid.
-     */
-    @Override
-    public void check() throws YangException {
-        super.check();
-        // TODO: Check that value is instance of a member type
-    }
+
+    // /**
+    //  * Checks that the value of this object is not null and is instance of a
+    //  * member type. Called in constructors and value setters.
+    //  *
+    //  * @throws YangException If the value of this object is invalid.
+    //  */
+    // @Override
+    // public void check() throws YangException {
+    //     super.check();
+    //     // TODO: Check that value is instance of a member type
+    // }
 
     /**
      * Compares type of obj with this object to see if they can be equal.
-     * 
+     *
      * @param obj Object to compare type with.
      * @return true if obj is an instance of YangUnion; false otherwise.
      */
@@ -140,20 +137,20 @@ public class YangUnion extends YangBaseType<YangType<?>> {
     public boolean canEqual(Object obj) {
         return obj instanceof YangUnion;
     }
-    
+
     /**
      * Compares this union with another object for equality.
-     * 
+     *
      * @param obj The object to compare with.
      * @return true if obj is a a union with equal value and member types;
      *         false otherwise.
      */
     @Override
     public boolean equals(Object obj) {
-        return (canEqual(obj)
-                && java.util.Arrays.equals(memberTypes,
+        return canEqual(obj)
+                && Arrays.equals(memberTypes,
                         ((YangUnion)obj).memberTypes)
-                && super.equals(obj));
+                && super.equals(obj);
     }
 
     /*
@@ -163,7 +160,7 @@ public class YangUnion extends YangBaseType<YangType<?>> {
     @Override
     public int hashCode() {
         final int hash = super.hashCode();
-        return (memberTypes == null) ? hash : (hash + Arrays.hashCode(memberTypes));
+        return (memberTypes == null) ? hash : hash + Arrays.hashCode(memberTypes);
     }
 
     /*

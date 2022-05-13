@@ -92,5 +92,6 @@ public class ElementLeafListValueIterator implements Iterator<Object> {
      */
     @Override
     public void remove() {
+        // Intentionally blank.
     }
 }

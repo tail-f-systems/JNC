@@ -61,7 +61,7 @@ public class YangUInt64 extends YangBaseInt<BigInteger> {
         try {
             return new BigDecimal(s).toBigIntegerExact();
         } catch (final ArithmeticException e) {
-            throw new NumberFormatException(e.toString());
+            throw (NumberFormatException )new NumberFormatException().initCause(e);
         }
     }
 

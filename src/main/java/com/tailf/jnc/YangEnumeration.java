@@ -6,7 +6,7 @@ import java.util.Arrays;
  * Implements the built-in YANG data type "enumeration".
  * <p>
  * An enumeration checker method is provided.
- * 
+ *
  * @author emil@tail-f.com
  */
 public class YangEnumeration extends YangBaseString {
@@ -17,7 +17,7 @@ public class YangEnumeration extends YangBaseString {
      * An array of the allowed names, ordered as in the YANG module.
      */
     private String[] enums;
-    
+
     /**
      * Get the allowed type names for this enumeration.
      *
@@ -25,12 +25,12 @@ public class YangEnumeration extends YangBaseString {
      */
     protected String[] enums() {
         return enums;
-    };
+    }
 
     /**
      * Creates an YangEnumeration object given an enum (as a String) and an
      * array of the allowed enum names.
-     * 
+     *
      * @param value The enum name
      * @param enums The allowed type names of the enumeration.
      * @throws YangException If an invariant was broken during assignment.
@@ -66,7 +66,7 @@ public class YangEnumeration extends YangBaseString {
 
     /**
      * Compares type of obj with this object to see if they can be equal.
-     * 
+     *
      * @param obj Object to compare type with.
      * @return true if obj is an instance of YangEnumeration or
      *         java.lang.String; false otherwise.
@@ -75,19 +75,19 @@ public class YangEnumeration extends YangBaseString {
     public boolean canEqual(Object obj) {
         return obj instanceof YangEnumeration;
     }
-    
+
     /**
      * Compares this enumeration with another object for equality.
-     * 
+     *
      * @param obj The object to compare with.
      * @return true if obj is an enumeration with same value and enum names;
      *         false otherwise.
      */
     @Override
     public boolean equals(Object obj) {
-        return (canEqual(obj)
-                && java.util.Arrays.equals(enums, ((YangEnumeration)obj).enums)
-                && super.equals(obj));
+        return canEqual(obj)
+                && Arrays.equals(enums, ((YangEnumeration)obj).enums)
+                && super.equals(obj);
     }
 
     /*
@@ -97,9 +97,9 @@ public class YangEnumeration extends YangBaseString {
     @Override
     public int hashCode() {
         final int hash = super.hashCode();
-        return (enums == null) ? hash : (hash + Arrays.hashCode(enums));
+        return enums == null ? hash : hash + Arrays.hashCode(enums);
     }
-    
+
     /*
      * (non-Javadoc)
      * @see com.tailf.jnc.YangBaseString#cloneShallow()

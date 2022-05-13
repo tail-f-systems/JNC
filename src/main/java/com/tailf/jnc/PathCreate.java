@@ -6,7 +6,7 @@ package com.tailf.jnc;
  * The result of evaluating a "path create" expression is a new {@link Element}
  * node tree. A configuration tree can easily be created with this class.
  * <p>
- * 
+ *
  * Example:
  * <pre>
  * PathCreate path = new PathCreate(&quot;/hosts/host[name='john', age=42]&quot;);
@@ -21,7 +21,7 @@ public class PathCreate extends Path {
      * <p>
      * See {@link PathCreate} for more information about path create
      * expressions.
-     * 
+     *
      * @param pathStr A "path create" string
      */
     public PathCreate(String pathStr) throws JNCException {
@@ -31,13 +31,14 @@ public class PathCreate extends Path {
 
     /**
      * Evaluates the path expression and build a new Element subtree.
-     * 
+     *
      * @param prefixMap Prefix mappings
      * @return A new element tree
      */
     public Element eval(PrefixMap prefixMap) throws JNCException {
-        trace("eval(): " + this);
-        Element top = null, parent = null;
+        trace("eval(): {}", this);
+        Element top = null;
+        Element parent = null;
 
         for (final LocationStep step : locationSteps) {
             final Element child = step.createElem(prefixMap, parent);
@@ -63,7 +64,7 @@ public class PathCreate extends Path {
                     "cannot eval location step: " + step + " in create path");
         }
         final LocationStep locStep = locationSteps.get(step);
-        trace("evalStep(): step=" + step + ", " + locStep);
+        trace("evalStep(): step={}, {}", step, locStep);
         return locStep.createElem(prefixMap, parent);
     }
 
@@ -83,9 +84,9 @@ public class PathCreate extends Path {
 
     /* help functions */
 
-    private static void trace(String s) {
+    private static void trace(String format, Object ... args) {
         if (Element.debugLevel >= Element.DEBUG_LEVEL_PATHCREATE) {
-            System.err.println("*PathCreate: " + s);
+            System.err.println(String.format("*PathCreate: " + format, args));
         }
     }
 
