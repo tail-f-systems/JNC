@@ -100,7 +100,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
      */
     @Override
     public boolean canEqual(Object obj) {
-        return (obj instanceof YangBits);
+        return obj instanceof YangBits;
     }
 
     /*
@@ -181,7 +181,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
      * 
      * @param v YangBits instance to fetch value from.
      */
-    public void AND(YangBits v) {
+    public void and(YangBits v) {
         value = value.and(v.getValue());
     }
 
@@ -190,7 +190,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
      * 
      * @param v YangBits instance to fetch value from.
      */
-    public void OR(YangBits v) {
+    public void or(YangBits v) {
         value = value.or(v.getValue());
     }
 
@@ -199,7 +199,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
      * 
      * @param v YangBits instance to fetch value from.
      */
-    public void XOR(YangBits v) {
+    public void xor(YangBits v) {
         value = value.xor(v.getValue());
     }
 

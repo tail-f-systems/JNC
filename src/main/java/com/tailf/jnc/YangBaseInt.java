@@ -28,7 +28,7 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
 
     /**
      * Creates a YangBaseInt object from a String.
-     * 
+     *
      * @param s The string.
      * @param minValue Lower bound for the value of this object.
      * @param maxValue Upper bound for the value of this object.
@@ -42,7 +42,7 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
 
     /**
      * Creates a YangBaseInt object from a value of type T.
-     * 
+     *
      * @param value The initial value of the new YangBaseInt object.
      * @throws YangException If an invariant was broken during initialization,
      *             or if minValue is larger than maxValue.
@@ -54,7 +54,7 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
 
     /**
      * Sets the MIN_VALUE and MAX_VALUE fields of this object.
-     * 
+     *
      * @param minValue value to set MIN_VALUE to.
      * @param maxValue value to set MAX_VALUE to.
      * @throws YangException If minValue is larger than maxValue.
@@ -95,7 +95,7 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
      * addition to those handled by the {@link YangBaseInt#valid} method should
      * override this method and throw a YangException if such an invariant has
      * been violated.
-     * 
+     *
      * @throws YangException If the value of this object is null or invalid.
      */
     @Override
@@ -108,7 +108,7 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
      * Returns a value of type T given a String. No implementation should use
      * this.value - this method would be static if Java allowed for abstract
      * static classes.
-     * 
+     *
      * @param s A string representation of a value of type T.
      * @return A T value parsed from s.
      * @throws NumberFormatException If unable to parse a value of type T.
@@ -117,7 +117,7 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.yang.YangType#fromString(java.lang.String)
      */
     @Override
@@ -134,20 +134,20 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
      * <p>
      * If a subclass of this class overrides the equals method, this method
      * should be overridden as well.
-     * 
+     *
      * @param obj Object to compare type with.
      * @return true if obj type is compatible; false otherwise.
      */
     @Override
     public boolean canEqual(Object obj) {
-        return (obj instanceof YangBaseInt);
+        return obj instanceof YangBaseInt;
     }
 
     /** ---------- Restrictions ---------- */
 
     /**
      * Checks that the value of this object equals another value.
-     * 
+     *
      * @param value The value to compare against.
      * @throws YangException If comparison does not evaluate to true or if the
      *             value argument is not {@link YangBaseInt#valid}.
@@ -159,7 +159,7 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
 
     /**
      * Checks that the value of this object is not smaller than the min-value.
-     * 
+     *
      * @param min The min-value to compare against.
      * @throws YangException If value is smaller than min or min is invalid.
      */
@@ -170,7 +170,7 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
 
     /**
      * Checks that the value of this object is not larger than the max-value.
-     * 
+     *
      * @param max The max-value to compare against.
      * @throws YangException If value is larger than max or max is invalid.
      */

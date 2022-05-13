@@ -15,6 +15,7 @@ public class PrefixMap extends ArrayList<Prefix> {
      * Creates an empty prefix map object.
      */
     public PrefixMap() {
+        // Intentionally empty.
     }
 
     /**
@@ -63,7 +64,7 @@ public class PrefixMap extends ArrayList<Prefix> {
      * @param prefixes Prefix mappings
      */
     public void set(PrefixMap prefixes) {
-        trace("set: " + prefixes);
+        trace("set: {}", prefixes);
         for (Prefix p : prefixes) {
             set(p);
         }
@@ -77,7 +78,7 @@ public class PrefixMap extends ArrayList<Prefix> {
     public void set(Prefix prefix) {
         final int index = indexOfName(prefix.name);
         if (index == -1) {
-            if (prefix.name.equals("")) {
+            if ("".equals(prefix.name)) {
                 add(0, prefix); // add default prefix first in the prefix map
             } else {
                 add(prefix);
@@ -177,9 +178,9 @@ public class PrefixMap extends ArrayList<Prefix> {
     /**
      * Printout trace if 'debug'-flag is enabled.
      */
-    private void trace(String s) {
+    private void trace(String format, Object ... args) {
         if (Element.debugLevel >= Element.DEBUG_LEVEL_PREFIXMAP) {
-            System.err.println("*PrefixMap: " + s);
+            System.err.println(String.format("*PrefixMap: " + format, args));
         }
     }
 

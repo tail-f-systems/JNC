@@ -64,6 +64,7 @@ public class YangBinary extends YangBaseType<String> {
      */
     @Override
     public void check() throws YangException {
+        // Intentionally empty.
     }
 
     /**
@@ -162,6 +163,10 @@ public class YangBinary extends YangBaseType<String> {
      * @author Christian d'Heureuse
      */
     private static class Base64Coder {
+
+        private Base64Coder() {
+            throw new UnsupportedOperationException("Cannot instantiate class Base64Coder");
+        }
 
         /**
          * Mapping table from 6-bit nibbles to Base64 characters.
@@ -327,13 +332,6 @@ public class YangBinary extends YangBaseType<String> {
             }
             return out;
         }
-
-        /**
-         * Dummy constructor.
-         */
-        private Base64Coder() {
-        }
-
     }
 
 }

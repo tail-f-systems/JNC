@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 /**
  * Implements the built-in YANG data type "decimal64".
- * 
+ *
  * @author emil@tail-f.com
  */
 public class YangDecimal64 extends YangBaseInt<BigDecimal> {
@@ -13,14 +13,14 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
 
     /**
      * The number of decimals allowed in value.
-     * 
+     *
      * @serial
      */
     private Integer fractionDigits = null;
 
     /**
      * Creates a YangDecimal64 object from a String.
-     * 
+     *
      * @param s The string.
      * @param fractionDigits [1, 18], Number of decimals allowed in value.
      * @throws YangException If value is too small or too large with regard to
@@ -38,7 +38,7 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
 
     /**
      * Creates a YangDecimal64 object from a Number.
-     * 
+     *
      * @param n The Number to initialize the value of this object with.
      * @param fractionDigits [1, 18], Number of decimals allowed in n.
      * @throws YangException If n is too small or too large with regard to the
@@ -52,7 +52,7 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
 
     /**
      * Sets the value of this object using a String.
-     * 
+     *
      * @param value The string.
      * @throws YangException If value is too small or too large with regard to
      *             the fractionDigits of this YangDecimal.
@@ -68,7 +68,7 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
 
     /**
      * Sets the value of this object using a Number.
-     * 
+     *
      * @param n The Number.
      * @throws YangException If value is too small or too large with regard to
      *             the fractionDigits of this YangDecimal.
@@ -81,7 +81,7 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
 
     /**
      * Sets the MIN_VALUE and MAX_VALUE fields of this object.
-     * 
+     *
      * @throws YangException If the fractionDigits field is not set.
      */
     private void setMinMax() throws YangException {
@@ -103,7 +103,7 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.yang.YangType#toString()
      */
     @Override
@@ -113,7 +113,7 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
 
     /**
      * Checks that the value of this object does not violate any invariants.
-     * 
+     *
      * @throws YangException If fractionDigits is not in [1, 18] or if value of
      *             this object is not in [minValue, maxValue].
      */
@@ -130,7 +130,7 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.yang.YangInt#parse(java.lang.String)
      */
     @Override
@@ -140,7 +140,7 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.YangBaseInt#canEqual(java.lang.Object)
      */
     @Override
@@ -150,7 +150,7 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.YangBaseType#equals(java.lang.Object)
      */
     @Override
@@ -159,9 +159,10 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
             final YangDecimal64 other = (YangDecimal64) obj;
             try {
                 exact(other.getValue());
-                return (fractionDigits.equals(other.fractionDigits) && other
-                        .canEqual(this));
+                return fractionDigits.equals(other.fractionDigits)
+                        && other.canEqual(this);
             } catch (final Exception e) {
+                return false;
             } // Different/null value, or can't equal
         }
         return false;
@@ -169,18 +170,18 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.YangBaseType#hashCode()
      */
     @Override
     public int hashCode() {
         final int hash = super.hashCode();
-        return (fractionDigits == null) ? hash : (hash << fractionDigits);
+        return (fractionDigits == null) ? hash : hash << fractionDigits;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.YangBaseType#cloneShallow()
      */
     @Override

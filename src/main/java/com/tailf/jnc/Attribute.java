@@ -8,14 +8,14 @@ import java.io.Serializable;
  * assigned to a {@link Element} using its setAttr method.
  * <p>
  * Example:
- * 
+ *
  * <pre>
  * Element sys = new Element(&quot;http://example.com/config/1.0&quot;, &quot;sys&quot;);
  * sys.setAttr(new Attribute(&quot;enabled&quot;, &quot;yes&quot;));
  * </pre>
  **/
 
-public class Attribute implements Serializable {
+public class Attribute implements Cloneable, Serializable {
 
     private static final long serialVersionUID = 1L;
     public static final String EQUALS_QUOTE = "=\"";
@@ -70,11 +70,11 @@ public class Attribute implements Serializable {
 
     /**
      * Sets the attribute value.
-     * 
+     *
      * @param value Set the value of the attribute
      */
     public void setValue(String value) {
-        trace("setValue: " + name + EQUALS_QUOTE + value + QUOTE);
+        trace("setValue: ", name, EQUALS_QUOTE, value, QUOTE);
         this.value = value;
     }
 
@@ -82,7 +82,7 @@ public class Attribute implements Serializable {
      * Clones the attribute, returning an exact copy.
      */
     @Override
-    public Object clone() {
+    public Attribute clone() {
         return new Attribute(ns, name, value);
     }
 
@@ -155,9 +155,9 @@ public class Attribute implements Serializable {
     /**
      * Printout trace if 'debug'-flag is enabled.
      */
-    private static void trace(String s) {
+    private static void trace(String format, Object ... args) {
         if (Element.debugLevel >= Element.DEBUG_LEVEL_ATTRIBUTE) {
-            System.err.println("*Attribute: " + s);
+            System.err.println(String.format("*Attribute: " + format, args));
         }
     }
 }

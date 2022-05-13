@@ -36,15 +36,15 @@ public class Tagpath {
     @Override
     public int hashCode() {
         int h = 0;
-        for (int i = 0; i < p.length; i++) {
-            h += p[i].hashCode();
+        for (String element : p) {
+            h += element.hashCode();
         }
         return h;
     }
 
     @Override
     public boolean equals(Object o) {
-        if ((o instanceof Tagpath)) {
+        if (o instanceof Tagpath) {
             final Tagpath tp = (Tagpath) o;
             if (tp.p.length == p.length) {
                 for (int i = 0; i < tp.p.length; i++) {

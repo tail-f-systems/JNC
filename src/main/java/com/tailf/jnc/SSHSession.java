@@ -14,13 +14,15 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 import net.schmizz.sshj.common.SSHException;
 import net.schmizz.sshj.connection.channel.direct.Session;
 
 /**
  * A SSH NETCONF transport. Can be used whenever {@link NetconfSession} intends
  * to use SSH for its transport. This class uses the SSHJ
- * implementation. 
+ * implementation.
  * <p>
  * Example:
  *
@@ -47,24 +49,32 @@ public class SSHSession implements Transport {
 
     private BufferedReader in = null;
     private PrintWriter out = null;
-    private final ArrayList<IOSubscriber> ioSubscribers;
+    private final List<IOSubscriber> ioSubscribers;
     protected long readTimeout = 0; // millisecs
 
     private static final String endmarker = "]]>]]>";
     private static final int end = endmarker.length() - 1;
 
     private interface InputWatchdog {
-        public void start();
-        public void watch();
-        public void done();
-        public void terminate();
+        void start();
+        void watch();
+        void done();
+        void terminate();
     }
 
     private class DummyWatchdog implements InputWatchdog {
-        public void start() {}
-        public void watch() {}
-        public void done() {}
-        public void terminate() {}
+        public void start() {
+            // intentionally empty
+        }
+        public void watch() {
+            // intentionally empty
+        }
+        public void done() {
+            // intentionally empty
+        }
+        public void terminate() {
+            // intentionally empty
+        }
     }
 
     private class TimeoutWatchdog extends Thread implements InputWatchdog {
@@ -269,8 +279,7 @@ public class SSHSession implements Transport {
 
     private void subInputChar(StringWriter wr, int ch) {
         wr.write(ch);
-        for (int i = 0; i < ioSubscribers.size(); i++) {
-            final IOSubscriber sub = ioSubscribers.get(i);
+        for (final IOSubscriber sub : ioSubscribers) {
             sub.inputChar(ch);
         }
     }

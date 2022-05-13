@@ -2,9 +2,9 @@ package com.tailf.jnc;
 
 /**
  * Implements the built-in YANG data type "identityref".
- * 
+ *
  * FIXME add toString
- * 
+ *
  * @author emil@tail-f.com
  */
 public class YangIdentityref extends YangBaseType<Element> {
@@ -14,7 +14,7 @@ public class YangIdentityref extends YangBaseType<Element> {
     /**
      * Creates a YangIdentityref object from a String, formatted as described
      * in {@link YangIdentityref#fromString(String)}.
-     * 
+     *
      * @param s The string.
      * @throws YangException If s is improperly formatted.
      */
@@ -24,7 +24,7 @@ public class YangIdentityref extends YangBaseType<Element> {
 
     /**
      * Creates a YangIdentityref object from an Element.
-     * 
+     *
      * @param identity The initial value of the new YangIdentityref object.
      * @throws YangException If an invariant was broken during initialization.
      */
@@ -35,7 +35,7 @@ public class YangIdentityref extends YangBaseType<Element> {
     /**
      * Creates a YangIdentityref object from three strings: identity namespace,
      * prefix and argument/identifier.
-     * 
+     *
      * @param ns identity module namespace
      * @param prefix identity module prefix
      * @param id identity argument/identifier
@@ -48,7 +48,7 @@ public class YangIdentityref extends YangBaseType<Element> {
 
     /**
      * Returns an identity element from a String.
-     * 
+     *
      * @param s The string.
      * @return An Element representing the referenced identity, parsed from s.
      */
@@ -59,7 +59,7 @@ public class YangIdentityref extends YangBaseType<Element> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.YangBaseType#canEqual(java.lang.Object)
      */
     @Override
@@ -69,7 +69,7 @@ public class YangIdentityref extends YangBaseType<Element> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.YangBaseType#cloneShallow()
      */
     @Override

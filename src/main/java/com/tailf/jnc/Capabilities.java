@@ -1,5 +1,6 @@
 package com.tailf.jnc;
 
+import java.util.List;
 import java.util.ArrayList;
 
 public class Capabilities {
@@ -308,8 +309,8 @@ public class Capabilities {
         return urlSchemes;
     }
 
-    private final ArrayList<Capa> capas;
-    private final ArrayList<Capa> data_capas;
+    private final List<Capa> capas;
+    private final List<Capa> data_capas;
 
     static private class Capa {
         String uri;
@@ -340,40 +341,40 @@ public class Capabilities {
 
                 for (final String pair : pairs) {
                     final String kv[] = pair.split("=");
-                    if (kv[0].equals("revision")) {
+                    if ("revision".equals(kv[0])) {
                         rev = kv[1];
                     }
                 }
             }
             capas.add(new Capa(uri, rev));
-            if (uri.equals(NETCONF_BASE_CAPABILITY)) {
+            if (NETCONF_BASE_CAPABILITY.equals(uri)) {
                 baseCapability = true;
-            } else if (uri.equals(WRITABLE_RUNNING_CAPABILITY)) {
+            } else if (WRITABLE_RUNNING_CAPABILITY.equals(uri)) {
                 writableRunningCapability = true;
-            } else if (uri.equals(CANDIDATE_CAPABILITY)) {
+            } else if (CANDIDATE_CAPABILITY.equals(uri)) {
                 candidateCapability = true;
-            } else if (uri.equals(CONFIRMED_COMMIT_CAPABILITY)) {
+            } else if (CONFIRMED_COMMIT_CAPABILITY.equals(uri)) {
                 confirmedCommitCapability = true;
-            } else if (uri.equals(ROLLBACK_ON_ERROR_CAPABILITY)) {
+            } else if (ROLLBACK_ON_ERROR_CAPABILITY.equals(uri)) {
                 rollbackOnErrorCapability = true;
-            } else if (uri.equals(VALIDATE_CAPABILITY)) {
+            } else if (VALIDATE_CAPABILITY.equals(uri)) {
                 validateCapability = true;
-            } else if (uri.equals(NOTIFICATION_CAPABILITY)) {
+            } else if (NOTIFICATION_CAPABILITY.equals(uri)) {
                 notificationCapability = true;
-            } else if (uri.equals(INTERLEAVE_CAPABILITY)) {
+            } else if (INTERLEAVE_CAPABILITY.equals(uri)) {
                 interleaveCapability = true;
-            } else if (uri.equals(STARTUP_CAPABILITY)) {
+            } else if (STARTUP_CAPABILITY.equals(uri)) {
                 startupCapability = true;
             } else if (cap.value.toString().startsWith(URL_CAPABILITY_SCHEME)) {
                 urlCapability = true;
                 final String schemes = cap.value.toString().substring(
                         URL_CAPABILITY_SCHEME.length());
                 urlSchemes = schemes.split(",");
-            } else if (uri.equals(XPATH_CAPABILITY)) {
+            } else if (XPATH_CAPABILITY.equals(uri)) {
                 xpathCapability = true;
-            } else if (uri.equals(PARTIAL_LOCK_CAPABILITY)) {
+            } else if (PARTIAL_LOCK_CAPABILITY.equals(uri)) {
                 partialLockCapability = true;
-            } else if (uri.equals("urn:ietf:params:xml:ns:netconf:base:1.0")) {
+            } else if ("urn:ietf:params:xml:ns:netconf:base:1.0".equals(uri)) {
                 baseCapability = true;
             } else if (uri.equals(URN_IETF_PARAMS_XML_NS_NETCONF +
             		"capability:candidate:1.0")) {
@@ -393,11 +394,11 @@ public class Capabilities {
             }
 
             // tail-f proprietary capas
-            else if (uri.equals(WITH_DEFAULTS_CAPABILITY)) {
+            else if (WITH_DEFAULTS_CAPABILITY.equals(uri)) {
                 withDefaultsCapability = true;
-            } else if (uri.equals(ACTIONS_CAPABILITY)) {
+            } else if (ACTIONS_CAPABILITY.equals(uri)) {
                 actionsCapability = true;
-            } else if (uri.equals(TRANSACTIONS_CAPABILITY)) {
+            } else if (TRANSACTIONS_CAPABILITY.equals(uri)) {
                 transactionsCapability = true;
             } else {
                 // It's either a proper data schema capability or some

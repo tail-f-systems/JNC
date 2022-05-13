@@ -46,7 +46,7 @@ class ElementHandler extends DefaultHandler {
             child = YangElement.createInstance(this, parent, uri, localName);
         } catch (final JNCException e) {
             e.printStackTrace();
-            throw new SAXException(e.toString());
+            throw (SAXException) new SAXException().initCause(e);
         }
 
         if (top == null) {
@@ -124,7 +124,7 @@ class ElementHandler extends DefaultHandler {
             ((YangElement) current).setLeafValue(leafNs, leafName, leafValue);
             } catch (final JNCException e) {
                 e.printStackTrace();
-                throw new SAXException(e.toString());
+                throw (SAXException) new SAXException().initCause(e);
             }
         } else {
             // check that we don't have mixed content

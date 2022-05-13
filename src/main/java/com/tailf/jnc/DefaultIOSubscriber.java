@@ -6,7 +6,7 @@ package com.tailf.jnc;
  * <p>
  * This class is provided as an example of how to write your own IO subscriber,
  * and can be used as it is.
- * 
+ *
  * @see IOSubscriber
  */
 public class DefaultIOSubscriber extends IOSubscriber {
@@ -15,7 +15,7 @@ public class DefaultIOSubscriber extends IOSubscriber {
 
     /**
      * Constructor.
-     * 
+     *
      * @param devName The name of the device.
      */
     public DefaultIOSubscriber(String devName) {
@@ -25,7 +25,7 @@ public class DefaultIOSubscriber extends IOSubscriber {
 
     /**
      * Constructor.
-     * 
+     *
      * @param devName The name of the device.
      * @param rawmode If true 'raw' text will appear instead of pretty
      *            formatted XML.
@@ -37,7 +37,7 @@ public class DefaultIOSubscriber extends IOSubscriber {
 
     /**
      * Will get called as soon as we have input (data which is received).
-     * 
+     *
      * @param s Text being received
      */
     @Override
@@ -48,7 +48,7 @@ public class DefaultIOSubscriber extends IOSubscriber {
 
     /**
      * Will get called as soon as we have output (data which is being sent).
-     * 
+     *
      * @param s Text being sent
      */
     @Override

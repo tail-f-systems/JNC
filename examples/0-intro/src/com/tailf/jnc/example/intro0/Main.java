@@ -7,7 +7,9 @@ import com.tailf.jnc.example.intro0.gen.hosts.Simple;
 import com.tailf.jnc.example.intro0.gen.hosts.hosts.Host;
 
 
-public class Main {
+    private Main() {
+        throw new UnsupportedOperationException();
+    }
 
     private static class Test {
 
@@ -80,9 +82,7 @@ public class Main {
 
         NodeSet getConfig(Device d) throws IOException, JNCException{
             Simple.enable();
-            NodeSet reply = d.getSession("cfg").getConfig(
-NetconfSession.RUNNING);
-            return reply;
+            return d.getSession("cfg").getConfig(NetconfSession.RUNNING);
         }
 
         void getConfig() throws IOException,JNCException{
@@ -121,8 +121,9 @@ NetconfSession.RUNNING);
             ElementChildrenIterator it = h.hostIterator();
             while (it.hasNext()) {
                 Host hst = (Host)it.next();
-                if (hst.getNameValue().equals("joe"))
+                if ("joe".equals(hst.getNameValue())) {
                     hst.markDelete();
+                }
             }
             d.getSession("cfg").editConfig(h);
             // Inspect the updated RUNNING configuration
@@ -159,7 +160,7 @@ NetconfSession.RUNNING);
             System.out.println(h.toXMLString());
         }
 
-        void print_cfg(String s, Device d) throws IOException, JNCException {
+        void printCfg(String s, Device d) throws IOException, JNCException {
         	NodeSet configs = getConfig(d);
             Hosts h = (Hosts) getConfig(configs, "hosts");
              System.out.println(s + " \n" + h.toXMLString());
@@ -167,14 +168,14 @@ NetconfSession.RUNNING);
 
         // Example on how to delete by explicitly constructing
         // the delete path
-        void delete_vera() throws JNCException, IOException {
-            print_cfg("Config With vera ", dev);
+        void deleteVera() throws JNCException, IOException {
+            printCfg("Config With vera ", dev);
             Hosts h = new Hosts();
             Host vera = new Host("vera");
             vera.markDelete();
             h.addHost(vera);
             dev.getSession("cfg").editConfig(h);
-            print_cfg("Config Without vera ", dev);
+            printCfg("Config Without vera ", dev);
         }
 
 
@@ -194,7 +195,7 @@ NetconfSession.RUNNING);
                     System.out.println("errorCode and opaqueData = " + errorStr + "\n");
                 }
                 else {
-                    throw new Exception("Expected1 rpc error");
+                    throw (Exception) new Exception("Expected1 rpc error").initCause(ex);
                 }
             }
         }
@@ -283,23 +284,24 @@ NetconfSession.RUNNING);
             t.writeReadFile();
             break;
         case 7:
-            t.delete_vera();
+            t.deleteVera();
             break;
         case 8:
-            t.delete_no_vera();
+            t.deleteNoVera();
             break;
         case 9:
-            t.create_vera();
+            t.createVera();
             break;
         case 10:
             t.invokeAction();
             break;
         case 11:
-            t.create_vera_space();
+            t.createVeraSpace();
             break;
         default:
             System.out.println("bad testno");
             System.exit(1);
+            break;
         }
     }
 
@@ -316,7 +318,7 @@ NetconfSession.RUNNING);
         boolean trace = false;
         try {
             for (int i=0; i<args.length; i++) {
-                if (args[i].equals("-n")) {
+                if ("-n".equals(args[i])) {
                      try {
                          n = Integer.parseInt(args[++i]);
                      } catch (Exception e) {
@@ -325,7 +327,7 @@ NetconfSession.RUNNING);
                          System.exit(1);
                      }
                 }
-                else if (args[i].equals("-t")) {
+                else if ("-t".equals(args[i])) {
                     trace = true;
                 }
                 else {
@@ -335,8 +337,9 @@ NetconfSession.RUNNING);
             }
 
             Test t = new Test();
-            if (trace)
-                t = new  Test(new Subscriber("mydev"));
+            if (trace) {
+                t = new Test(new Subscriber("mydev"));
+            }
             if (n == -1) {
                 for (int i=1; i< (NUMTESTS+1); i++) {
                     runTest(t, i);
@@ -353,6 +356,3 @@ NetconfSession.RUNNING);
         }
     }
 }
-
-
-
