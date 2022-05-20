@@ -2,19 +2,14 @@ plugins {
     id 'application'
 }
 
-def genSrc ="${buildDir}/generated/src/gen"
-
-def generateSources = tasks.register("generateSources") {
-    outputs.dirs([genSrc])
-    doLast {
-        def script = "pyang --plugindir $JNCDir -f jnc --jnc-output ${genSrc} ietf-interfaces.yang".execute()
-        script.waitForProcessOutput(System.out, System.err)
-    }
+task pyang(type: JncPyangTask) {
+    pluginDir = JNCDir
+    outputDir = new File("${buildDir}/generated/src/gen")
+    inputFiles = [new File("ietf-interfaces.yang")]
 }
 
-compileJava.dependsOn(generateSources)
-
-sourceSets.main.java.srcDirs = ['src/app', genSrc]
+compileJava.dependsOn(pyang)
+sourceSets.main.java.srcDirs = ['src/app', pyang]
 
 application {
     mainClass = 'app.Client'
