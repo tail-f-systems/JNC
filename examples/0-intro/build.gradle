@@ -3,8 +3,7 @@ plugins {
 }
 
 //https://tomgregory.com/gradle-task-inputs-and-outputs/
-
-class PyangTask extends DefaultTask {
+class JncPyangTask extends DefaultTask {
     @OutputDirectory
     File outputDir;
 
@@ -33,16 +32,16 @@ class PyangTask extends DefaultTask {
 
 assert(System.env.CONFD_DIR)
 
-def pyang = tasks.register("pyang", PyangTask) {
+task pyang(type: JncPyangTask) {
     pluginDir = JNCDir
     outputDir = new File("${buildDir}/generated/src/gen/com/example/test")
     yangPath = "$System.env.CONFD_DIR/src/confd/yang"
-    inputFiles = [new File("../yang/hosts.yang")]
+    inputFiles = [new File("$project.rootDir/yang/hosts.yang")]
 }
 
-def pyang2 = tasks.register("pyang2", PyangTask) {
+task pyang2(type: JncPyangTask) {
     pluginDir = JNCDir
-    outputDir = new File("${buildDir}/generated/src/gen/com/example/test")
+    outputDir = new File("${buildDir}/generated/src/gen/com/example/test/inet")
     yangPath = "$System.env.CONFD_DIR/src/confd/yang"
     inputFiles = [new File("$System.env.CONFD_DIR/src/confd/yang/ietf-inet-types.yang")]
 }
