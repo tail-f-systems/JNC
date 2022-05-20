@@ -8,6 +8,11 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.schmizz.sshj.common.SSHException;
 import net.schmizz.sshj.connection.channel.direct.Session;
@@ -20,8 +25,9 @@ import net.schmizz.sshj.connection.channel.direct.Session;
  * Example:
  *
  * <pre>
- * TODO: fix this
- * SSHConnection c = new SSHConnection(&quot;127.0.0.1&quot;, 789);
+ * SSHConnection c = new SSHConnection()
+ *           .setHostVerification(&quot;/home/user/.ssh/known_hosts&quot;)
+ *           .connect(&quot;127.0.0.1&quot;, 789);
  * c.authenticateWithPassword(&quot;ola&quot;, &quot;secret&quot;);
  * SSHSession ssh = new SSHSession(c);
  * NetconfSession dev1 = new NetconfSession(ssh);
@@ -31,9 +37,13 @@ import net.schmizz.sshj.connection.channel.direct.Session;
 
 public class SSHSession implements Transport {
 
+    protected final Logger log = LoggerFactory.getLogger(getClass());
+
     private SSHConnection connection = null;
     private Session session = null;
     private Session.Subsystem subsys;
+
+    private InputWatchdog watchdog;
 
     private BufferedReader in = null;
     private PrintWriter out = null;
@@ -42,6 +52,58 @@ public class SSHSession implements Transport {
 
     private static final String endmarker = "]]>]]>";
     private static final int end = endmarker.length() - 1;
+
+    private interface InputWatchdog {
+        public void start();
+        public void watch();
+        public void done();
+        public void terminate();
+    }
+
+    private class DummyWatchdog implements InputWatchdog {
+        public void start() {}
+        public void watch() {}
+        public void done() {}
+        public void terminate() {}
+    }
+
+    private class TimeoutWatchdog extends Thread implements InputWatchdog {
+        private Semaphore semaphore = new Semaphore(0);
+        private boolean running = true;
+
+        @Override
+        public void watch() {
+            semaphore.release();
+        }
+
+        @Override
+        public void done() {
+            semaphore.release();
+        }
+
+        @Override
+        public void terminate() {
+            running = false;
+            interrupt();
+        }
+
+        @Override
+        public void run() {
+            try {
+                while (running) {
+                    semaphore.acquire();
+                    // now the session is reading, watch for timeout
+                    if (! semaphore.tryAcquire(readTimeout, TimeUnit.MILLISECONDS)) {
+                        log.warn("read timeout, closing session");
+                        close();
+                        running = false;
+                    }
+                }
+            } catch (InterruptedException e) {
+                // log.debug("watchdog interrupted");
+            }
+        }
+    }
 
     /**
      * Constructor for SSH session object. This method creates a a new SSh
@@ -72,6 +134,12 @@ public class SSHSession implements Transport {
         final InputStream is = subsys.getInputStream();
         final OutputStream os = session.getOutputStream();
         in = new BufferedReader(new InputStreamReader(is));
+        if (readTimeout > 0) {
+            watchdog = new TimeoutWatchdog();
+        } else {
+            watchdog = new DummyWatchdog();
+        }
+        watchdog.start();
         out = new PrintWriter(os, false);
         ioSubscribers = new ArrayList<IOSubscriber>();
         // hello will be done by NetconfSession
@@ -115,7 +183,6 @@ public class SSHSession implements Transport {
      */
     @Override
     public boolean ready() throws IOException {
-        // TODO: test
         return subsys.getInputStream().available() > 0;
     }
 
@@ -124,7 +191,6 @@ public class SSHSession implements Transport {
      * the ssh socket
      */
     public boolean serverSideClosed() throws IOException {
-        // TODO: does this work even for timed-out connection?
         return session.isEOF();
     }
 
@@ -135,6 +201,9 @@ public class SSHSession implements Transport {
      * parts of unprocessed xml data left on the socket. This function reads
      * and throws away all such unprocessed data. An alternative after timeout
      * is of course to close the socket and reconnect.
+     *
+     * Note that this is currently useless, in case of timeout the
+     * connection is closed.
      *
      * @return number of discarded characters
      */
@@ -153,6 +222,15 @@ public class SSHSession implements Transport {
         }
     }
 
+    private int watchRead() throws IOException {
+        watchdog.watch();
+        try {
+            return in.read();
+        } finally {
+            watchdog.done();
+        }
+    }
+
     /**
      * Reads in "one" reply from the SSH transport input stream. A
      * <em>]]&gt;]]&gt;</em> character sequence is used to separate multiple
@@ -164,9 +242,7 @@ public class SSHSession implements Transport {
         final StringWriter wr = new StringWriter();
         int ch;
         while (true) {
-            // TODO: no support for recv timeout
-
-            ch = in.read();
+            ch = watchRead();
             if (ch == -1) {
                 trace("end of input (-1)");
                 throw new IOException("Session closed");
@@ -175,7 +251,7 @@ public class SSHSession implements Transport {
             for (int i=0; i < endmarker.length(); i++) {
                 if (ch == endmarker.charAt(i)) {
                     if (i < end) {
-                        ch = in.read();
+                        ch = watchRead();
                     } else {
                         for (final IOSubscriber sub : ioSubscribers) {
                             sub.inputFlush(endmarker.substring(0, end));
@@ -333,6 +409,7 @@ public class SSHSession implements Transport {
     @Override
     public void close() {
         try {
+            watchdog.terminate();
             session.close();
         } catch (SSHException e) {
             System.out.println("Exception caught while closing " + e);
