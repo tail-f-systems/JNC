@@ -24,6 +24,13 @@ class JncPyangTask extends DefaultTask {
     @TaskAction
     def generate() {
         // TODO check pyang is installed
+        outputs.getPreviousOutputFiles().each {file ->
+            if (file.isFile()) {
+                logger.info("Deleting previous file ${file.getPath()}")
+                file.delete()
+            }
+        }
+
         inputFiles.each { yang ->
             def script = "pyang${yangPath == null ? "" : " -p $yangPath"}${pluginDir == null ? "" : " --plugindir $pluginDir"} -f jnc --jnc-output ${outputDir} ${yang}".execute()
             script.waitForProcessOutput(System.out, System.err)
