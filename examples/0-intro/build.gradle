@@ -5,9 +5,6 @@ plugins {
 //https://tomgregory.com/gradle-task-inputs-and-outputs/
 
 class PyangTask extends DefaultTask {
-    @Internal
-    String initMessage = 'Generating JNC classes...'
-
     @OutputDirectory
     File outputDir;
 
@@ -15,45 +12,43 @@ class PyangTask extends DefaultTask {
     @Input
     String yangPath = null
 
+    @Optional
+    @Input
+    String pluginDir = null
+
     @InputFiles
     File[] inputFiles;
 
     @TaskAction
     def generate() {
-        println initMessage
-
-//        def gen = new JavaClassGenerator()
-//                        .loadFromFiles(inputFiles())
-//                        .save(outputDir())
-
-        println "Generated ${inputFiles.size()} to ${outputDir.getPath()} path ${yangPath}"
-        //println "Generated "
+        // TODO check pyang is installed
+        inputFiles.each { yang ->
+            def script = "pyang${yangPath == null ? "" : " -p $yangPath"}${pluginDir == null ? "" : " --plugindir $pluginDir"} -f jnc --jnc-output ${outputDir} ${yang}".execute()
+            script.waitForProcessOutput(System.out, System.err)
+            logger.info "Generated ${yang}"
+        }
+        logger.info "Generated ${inputFiles.size()} to ${outputDir.getPath()} path ${yangPath}"
     }
 }
 
-def genSrc1 ="${buildDir}/generated/src/gen/com/example/test"
-def genSrc2 ="${buildDir}/generated/src/gen/com/example/test/inet"
+assert(System.env.CONFD_DIR)
 
-def generateSources = tasks.register("generateSources") {
-    outputs.dirs([genSrc1, genSrc2])
-    doLast {
-        def script = "pyang -p $System.env.CONFD_DIR/src/confd/yang --plugindir $JNCDir -f jnc --jnc-output ${genSrc1} ../yang/hosts.yang".execute()
-        script.waitForProcessOutput(System.out, System.err)
-        script = "pyang --plugindir $JNCDir -f jnc --jnc-output ${genSrc2} $System.env.CONFD_DIR/src/confd/yang/ietf-inet-types.yang".execute()
-        script.waitForProcessOutput(System.out, System.err)
-    }
-}
-
-tasks.register("pyang", PyangTask) {
-    outputDir = new File(genSrc1)
+def pyang = tasks.register("pyang", PyangTask) {
+    pluginDir = JNCDir
+    outputDir = new File("${buildDir}/generated/src/gen/com/example/test")
     yangPath = "$System.env.CONFD_DIR/src/confd/yang"
     inputFiles = [new File("../yang/hosts.yang")]
 }
 
+def pyang2 = tasks.register("pyang2", PyangTask) {
+    pluginDir = JNCDir
+    outputDir = new File("${buildDir}/generated/src/gen/com/example/test")
+    yangPath = "$System.env.CONFD_DIR/src/confd/yang"
+    inputFiles = [new File("$System.env.CONFD_DIR/src/confd/yang/ietf-inet-types.yang")]
+}
 
-compileJava.dependsOn(generateSources)
-
-sourceSets.main.java.srcDirs = ['src/app', genSrc1, genSrc2]
+compileJava.dependsOn([pyang, pyang2])
+sourceSets.main.java.srcDirs = ['src/app', pyang, pyang2] //non standard source layout
 
 application {
     mainClass = 'simple.Main'
