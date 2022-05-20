@@ -24,7 +24,8 @@ public class DeviceUser implements Serializable {
     private String password = null;
     private File pemFile = null;
     private char[] pemPrivateKey = null;
-    private String keyPassPhrase = null;
+    // TODO: private key passphrase not supported
+    // private String keyPassPhrase = null;
 
     /**
      * Constructor. Creates a user with a local name, remote user name, and
@@ -39,23 +40,20 @@ public class DeviceUser implements Serializable {
     /**
      * Constructor. Creates a user with a local user name, remote user name.
      */
-    public DeviceUser(String localUser, String remoteUser, File pemFile,
-            String keyPassPhrase) {
+    public DeviceUser(String localUser, String remoteUser, File pemFile) {
         this.localUser = localUser;
         this.remoteUser = remoteUser;
         this.pemFile = pemFile;
-        this.keyPassPhrase = keyPassPhrase;
     }
 
     /**
      * Constructor. Creates a user with a local user name, remote user name.
      */
     public DeviceUser(String localUser, String remoteUser,
-            char[] pemPrivateKey, String keyPassPhrase) {
+            char[] pemPrivateKey) {
         this.localUser = localUser;
         this.remoteUser = remoteUser;
         this.pemPrivateKey = pemPrivateKey;
-        this.keyPassPhrase = keyPassPhrase;
     }
 
     public String getLocalUser() {
@@ -77,9 +75,4 @@ public class DeviceUser implements Serializable {
     public char[] getPemPrivateKey() {
         return pemPrivateKey;
     }
-
-    public String getKeyPassPhrase() {
-        return keyPassPhrase;
-    }
-
 }

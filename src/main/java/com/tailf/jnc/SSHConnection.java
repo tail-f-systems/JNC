@@ -3,6 +3,9 @@ package com.tailf.jnc;
 import java.io.File;
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.userauth.UserAuthException;
 import net.schmizz.sshj.transport.verification.HostKeyVerifier;
@@ -24,6 +27,7 @@ import net.schmizz.sshj.transport.verification.OpenSSHKnownHosts;
  */
 public class SSHConnection {
 
+    protected final Logger log = LoggerFactory.getLogger(getClass());
     SSHClient client = null;
 
     public SSHConnection() {
@@ -36,6 +40,7 @@ public class SSHConnection {
             verifier = new PromiscuousVerifier();
         } else {
             verifier = new OpenSSHKnownHosts(new File(knownHostsFile));
+            log.debug("using OpenSSH known-hosts file {}", knownHostsFile);
         }
         client.addHostKeyVerifier(verifier);
         return this;
@@ -129,21 +134,22 @@ public class SSHConnection {
         }
     }
 
-    // /**
-    //  * Authenticate with the name of a file containing the private key See
-    //  * ganymed docs for full explanation, use null for password if the key
-    //  * doesn't have a passphrase.
-    //  * 
-    //  * @param user User name.
-    //  * @param pemFile Fila name.
-    //  * @param password Password.
-    //  **/
-    // public void authenticateWithPublicKeyFile(String user, File pemFile,
-    //         String password) throws IOException, JNCException {
-    //     if (!client.authPublicKey(user, pemFile, password)) {
-    //         throw new JNCException(JNCException.AUTH_FAILED, this);
-    //     }
-    // }
+    /**
+     * Authenticate with the name of a file containing the private key.
+     *
+     * TODO: key file with a passphrase support.
+     *
+     * @param user User name.
+     * @param keyFile File name.
+     **/
+    public void authenticateWithPublicKeyFile(String user, String keyFile)
+        throws IOException, JNCException {
+        try {
+            client.authPublickey(user, keyFile);
+        } catch (UserAuthException e) {
+            throw new JNCException(JNCException.AUTH_FAILED, e);
+        }
+    }
 
     // /**
     //  * Authenticate with a private key. See ganymed docs for full explanation,

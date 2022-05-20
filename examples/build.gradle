@@ -18,7 +18,6 @@ subprojects {
         implementation 'com.hierynomus:sshj:0.32.0'
         implementation 'ch.qos.logback:logback-classic:1.2.11'
         implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
-        implementation 'ch.ethz.ganymed:ganymed-ssh2:262'
         testImplementation 'junit:junit:4.11'
         testImplementation 'org.hamcrest:hamcrest-all:1.3'
     }

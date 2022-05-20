@@ -541,19 +541,11 @@ public class Device implements Serializable {
             con.authenticateWithPassword(
                     currentUser.getRemoteuser(),
                     currentUser.getPassword());
+        } else if (currentUser.getPemFile() != null) {
+            con.authenticateWithPublicKeyFile(
+                    currentUser.getRemoteuser(),
+                    currentUser.getPemFile().getAbsolutePath());
         }
-        // TODO: public key support
-        //  else if (currentUser.getPemPrivateKey() != null) {
-        //     con.authenticateWithPublicKey(
-        //             currentUser.getRemoteuser(),
-        //             currentUser.getPemPrivateKey(),
-        //             currentUser.getKeyPassPhrase());
-        // } else if (currentUser.getPemFile() != null) {
-        //     con.authenticateWithPublicKeyFile(
-        //             currentUser.getRemoteuser(),
-        //             currentUser.getPemFile(),
-        //             currentUser.getKeyPassPhrase());
-        // }
     }
 
 }
