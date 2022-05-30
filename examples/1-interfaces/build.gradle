@@ -5,7 +5,8 @@ plugins {
 task pyang(type: JncPyangTask) {
     pluginDir = JNCDir
     outputDir = new File("${buildDir}/generated/src/gen")
-    inputFiles = [new File("ietf-interfaces.yang")]
+    yangPath = projectDir
+    inputFiles = [new File("$projectDir/ietf-interfaces.yang")]
 }
 
 compileJava.dependsOn(pyang)
