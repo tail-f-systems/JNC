@@ -1589,6 +1589,7 @@ class JavaValue(object):
     file once all the attributes have been set set.
 
     """
+    hashattrs = ('value', 'default_modifiers', 'name')
 
     def __init__(self, exact=None, javadocs=None, modifiers=None, name=None,
                  value=None, imports=None, indent=4):
@@ -1653,9 +1654,8 @@ class JavaValue(object):
                 return False
         return True
 
-    items = ('value', 'default_modifiers', 'name')
     def __hash__(self):
-        return tuple(getattr(self, attr, None) for attr in self.items).__hash__()
+        return tuple(getattr(self, attr, None) for attr in self.hashattrs).__hash__()
 
     def __ne__(self, other):
         """Returns True iff self and other represents different values"""
@@ -1747,6 +1747,8 @@ class JavaValue(object):
 
 class JavaMethod(JavaValue):
     """A Java method. Default behaviour is public void."""
+
+    hashattrs = ('value', 'default_modifiers', 'name', 'return_type', 'params')
 
     def __init__(self, exact=None, javadocs=None, modifiers=None,
                  return_type=None, name=None, params=None, exceptions=None,
