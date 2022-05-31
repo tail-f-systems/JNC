@@ -2,7 +2,7 @@ plugins {
     id 'application'
 }
 
-assert(System.env.CONFD_DIR)
+assert (System.env.CONFD_DIR): "CONFD_DIR is not set!"
 
 task pyang(type: JncPyangTask) {
     pluginDir = JNCDir
@@ -19,7 +19,7 @@ task pyang2(type: JncPyangTask) {
 }
 
 compileJava.dependsOn([pyang, pyang2])
-sourceSets.main.java.srcDirs = ['src/app', pyang, pyang2] //non standard source layout
+sourceSets.main.java.srcDirs = ["src/app", pyang, pyang2] //non standard source layout
 
 application {
     mainClass = 'simple.Main'
