@@ -1,7 +1,7 @@
-package app;
+package com.tailf.jnc.example.interfaces1;
 
-import gen.ietfInterfaces.Interfaces;
-import gen.ietfInterfaces.JIf;
+import com.tailf.jnc.example.interfaces1.gen.ietfInterfaces.Interfaces;
+import com.tailf.jnc.example.interfaces1.gen.ietfInterfaces.JIf;
 
 import java.io.IOException;
 
@@ -28,7 +28,7 @@ public class Client {
         dev = new Device("mydev", duser, ip, 2022);
 
         try {
-            dev.connect(emsUserName);
+            dev.connect(emsUserName, 0, false);
             dev.newSession("cfg");
         } catch (IOException e) {
             System.err.println(e);
@@ -59,10 +59,10 @@ public class Client {
     public NodeSet getConfig() throws IOException, JNCException {
         return getConfig(dev);
     }
-    
+
     /**
      * Gets the first configuration element in configs with specified name.
-     * 
+     *
      * @param configs Set of device configuration data.
      * @param name The identifier of the configuration to select
      * @return First configuration with matching name, or null if none present.
@@ -90,10 +90,10 @@ public class Client {
         JIf.enable();
         client.init();
         NodeSet configs = client.getConfig();
-        
+
         // Get (first) config with name "interfaces"
         Interfaces config = (Interfaces)getConfig(configs, "interfaces");
-        
+
         System.out.println(config.toXMLString());
 
         // Cleanup

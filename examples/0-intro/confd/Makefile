@@ -60,7 +60,7 @@ action_script:
 
 ######################################################################
 clean:	iclean
-	-rm *.log *.trace 2>/dev/null
+	-rm -f *.log *.trace 2>/dev/null
 
 ######################################################################
 start:  stop action_script
