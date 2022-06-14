@@ -1,0 +1,17 @@
+plugins {
+    id 'application'
+}
+
+task pyang(type: JncPyangTask) {
+    pluginDir = JNCDir
+    outputDir = new File("${buildDir}/generated/src/gen")
+    yangPath = projectDir
+    inputFiles = [new File("$projectDir/ietf-interfaces.yang")]
+}
+
+compileJava.dependsOn(pyang)
+sourceSets.main.java.srcDirs = ['src/app', pyang]
+
+application {
+    mainClass = 'app.Client'
+}

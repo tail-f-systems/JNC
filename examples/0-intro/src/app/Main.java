@@ -33,7 +33,7 @@ public class Main {
             dev = new Device("mydev", duser, "localhost", 2022);
 
             try {
-                dev.connect(emsUserName);
+                dev.connect(emsUserName, 0, false);
                 dev.newSession("cfg");
             } catch (IOException e0) {
                 System.err.println("Can't connect");

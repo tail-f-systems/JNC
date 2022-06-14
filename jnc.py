@@ -202,10 +202,9 @@ class JNCPlugin(plugin.PyangPlugin):
         while num_modules != len(module_set):
             num_modules = len(module_set)
             for module in list(module_set):
-                imported = map(lambda x: x.arg, search(module, 'import'))
-                included = map(lambda x: x.arg, search(module, 'include'))
+                i_modules = {s.arg for s in search(module, 'import') + search(module, 'include')}
                 for (module_stmt, rev) in self.ctx.modules:
-                    if module_stmt in (imported + included):
+                    if module_stmt in i_modules:
                         module_set.add(self.ctx.modules[(module_stmt, rev)])
 
         # Generate files from main modules
@@ -1215,7 +1214,6 @@ class ClassGenerator(object):
                 print('pkg ' + '.'.join([self.package, self.n2]) + ' generated')
             if self.ctx.opts.verbose:
                 print('Generating "' + self.filename + '"...')
-
         gen = MethodGenerator(stmt, self.ctx)
 
         for constructor in gen.constructors():
@@ -1591,6 +1589,7 @@ class JavaValue(object):
     file once all the attributes have been set set.
 
     """
+    hashattrs = ('value', 'default_modifiers', 'name')
 
     def __init__(self, exact=None, javadocs=None, modifiers=None, name=None,
                  value=None, imports=None, indent=4):
@@ -1655,6 +1654,9 @@ class JavaValue(object):
                 return False
         return True
 
+    def __hash__(self):
+        return tuple(getattr(self, attr, None) for attr in self.hashattrs).__hash__()
+
     def __ne__(self, other):
         """Returns True iff self and other represents different values"""
         return not self.__eq__(other)
@@ -1667,7 +1669,7 @@ class JavaValue(object):
                          warning is printed with the msg "Unknown attribute"
                          followed by the attribute name. The value is added,
                          appended or assigned, depending on if the attribute is
-                         a MutableSet, a list or something else, respectively.
+                         a set, a list or something else, respectively.
         value         -- Typically a String, but can be anything, really.
 
         The 'exact' cache is invalidated is the attribute exists.
@@ -1677,7 +1679,7 @@ class JavaValue(object):
             data = getattr(self, attr)
             if isinstance(data, list):
                 data.append(value)
-            elif isinstance(data, collections.MutableSet):
+            elif isinstance(data, collections.abc.MutableSet):
                 data.add(value)
             else:
                 setattr(self, attr, value)
@@ -1746,6 +1748,8 @@ class JavaValue(object):
 class JavaMethod(JavaValue):
     """A Java method. Default behaviour is public void."""
 
+    hashattrs = ('value', 'default_modifiers', 'name', 'return_type', 'params')
+
     def __init__(self, exact=None, javadocs=None, modifiers=None,
                  return_type=None, name=None, params=None, exceptions=None,
                  body=None, indent=4):
@@ -1811,6 +1815,9 @@ class JavaMethod(JavaValue):
 
         self.exact = exact
         self.default_modifiers = True
+
+    def __hash__(self):
+        return id(self)
 
     def set_return_type(self, return_type):
         """Sets the type of the return value of this method"""
@@ -1934,10 +1941,10 @@ class MethodGenerator(object):
             return get_import(import_)
 
     def fix_imports(self, method, child=False):
-        res = set([])
+        res = OrderedSet([])
         imports = method.imports
         if self.ctx.opts.import_on_demand:
-            imports = set([])
+            imports = OrderedSet([])
             pkg = self.pkg
             if child:
                 pkg = pkg.rpartition('.')[0]
@@ -2945,7 +2952,7 @@ class ListMethodGenerator(MethodGenerator):
         return res
 
 
-class OrderedSet(collections.MutableSet):
+class OrderedSet(collections.abc.MutableSet):
     """A set of unique items that preserves the insertion order.
 
     Created by: Raymond Hettinger 2009-03-19
