@@ -1,6 +1,6 @@
 ## Release History
 
-2022-06-22
+Next version (SNAPSHOT)
 - Ganymed SSH-2 was replaced with SSHJ. Build system updated to Gradle. 
 
 2012-10-17

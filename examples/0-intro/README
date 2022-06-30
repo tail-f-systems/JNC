@@ -62,9 +62,7 @@ Then change directory
 
 Build the ConfD node and start it:
 
-  # cd confd
   # make clean all start
-  # cd ..
 
 4.2 Building JNC example
 ========================
@@ -92,9 +90,7 @@ Run this example by doing:
 
 After completing the examples above, stop ConfD as follows:
 
-  # cd confd
   # make stop
-  # cd ..
 
 5. ConfD and JNC on different hosts
 =====================================

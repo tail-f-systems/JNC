@@ -8,7 +8,7 @@ task pyang(type: JncPyangTask) {
     pluginDir = JNCDir
     outputDir = new File("${buildDir}/generated/src/com/tailf/jnc/example/intro0/gen")
     yangPath = "$System.env.CONFD_DIR/src/confd/yang"
-    inputFiles = [new File("$project.rootDir/yang/hosts.yang"),
+    inputFiles = [new File("$projectDir/hosts.yang"),
                   new File("$System.env.CONFD_DIR/src/confd/yang/ietf-inet-types.yang")]
 }
 
@@ -17,4 +17,8 @@ sourceSets.main.java.srcDirs = ["src", pyang ] //non standard source layout
 
 application {
     mainClass = 'com.tailf.jnc.example.intro0.Main'
+}
+
+clean.doFirst {
+    delete "$projectDir/Hosts.xml"
 }

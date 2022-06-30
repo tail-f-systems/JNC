@@ -1,8 +1,0 @@
-<hosts xmlns="http://acme.com/ns/simple/1.0" xmlns:simple="http://acme.com/ns/simple/1.0">
-  <host>
-    <name>Jupiter</name>
-  </host>
-  <host>
-    <name>Saturn</name>
-  </host>
-</hosts>
