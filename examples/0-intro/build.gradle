@@ -6,21 +6,19 @@ assert (System.env.CONFD_DIR): "CONFD_DIR is not set!"
 
 task pyang(type: JncPyangTask) {
     pluginDir = JNCDir
-    outputDir = new File("${buildDir}/generated/src/gen/com/example/test")
+    outputDir = new File("${buildDir}/generated/src/com/tailf/jnc/example/intro0/gen")
     yangPath = "$System.env.CONFD_DIR/src/confd/yang"
-    inputFiles = [new File("$project.rootDir/yang/hosts.yang")]
+    inputFiles = [new File("$projectDir/hosts.yang"),
+                  new File("$System.env.CONFD_DIR/src/confd/yang/ietf-inet-types.yang")]
 }
 
-task pyang2(type: JncPyangTask) {
-    pluginDir = JNCDir
-    outputDir = new File("${buildDir}/generated/src/gen/com/example/test/inet")
-    yangPath = "$System.env.CONFD_DIR/src/confd/yang"
-    inputFiles = [new File("$System.env.CONFD_DIR/src/confd/yang/ietf-inet-types.yang")]
-}
-
-compileJava.dependsOn([pyang, pyang2])
-sourceSets.main.java.srcDirs = ["src/app", pyang, pyang2] //non standard source layout
+compileJava.dependsOn([pyang])
+sourceSets.main.java.srcDirs = ["src", pyang ] //non standard source layout
 
 application {
-    mainClass = 'simple.Main'
+    mainClass = 'com.tailf.jnc.example.intro0.Main'
+}
+
+clean.doFirst {
+    delete "$projectDir/Hosts.xml"
 }

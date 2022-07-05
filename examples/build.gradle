@@ -1,4 +1,11 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
 plugins {
+    id 'com.github.ben-manes.versions' version '0.42.0' // gradle dependencyUpdates -Drevision=release
     id 'application'
 }
 
@@ -15,10 +22,8 @@ subprojects {
 
     dependencies {
         implementation fileTree(dir: "$JNCDir/build/libs", include: 'JNC*.jar')
-        implementation 'com.hierynomus:sshj:0.32.0'
+        implementation 'com.hierynomus:sshj:0.33.0'
         implementation 'ch.qos.logback:logback-classic:1.2.11'
         implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
-        testImplementation 'junit:junit:4.11'
-        testImplementation 'org.hamcrest:hamcrest-all:1.3'
     }
 }

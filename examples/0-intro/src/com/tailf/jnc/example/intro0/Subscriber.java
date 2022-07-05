@@ -1,12 +1,10 @@
-package simple;
+package com.tailf.jnc.example.intro0;
 
-import java.io.*;
-
-import com.tailf.jnc.*;
+import com.tailf.jnc.IOSubscriber;
 
 class Subscriber extends IOSubscriber {
-    String devName;
-    public static boolean rawMode = false;
+    final String devName;
+    public static final boolean rawMode = false;
 
     Subscriber(String devName) {
         super(rawMode);

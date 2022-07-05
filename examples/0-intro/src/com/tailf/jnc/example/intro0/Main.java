@@ -1,14 +1,10 @@
+package com.tailf.jnc.example.intro0;
 
-package simple;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.io.*;
-
+import java.io.IOException;
 import com.tailf.jnc.*;
-
-import gen.com.example.test.hosts.*;
-import gen.com.example.test.hosts.hosts.*;
+import com.tailf.jnc.example.intro0.gen.hosts.Hosts;
+import com.tailf.jnc.example.intro0.gen.hosts.Simple;
+import com.tailf.jnc.example.intro0.gen.hosts.hosts.Host;
 
 
 public class Main {
@@ -22,8 +18,8 @@ public class Main {
         public Test(Subscriber s) {
             init(s);
         }
-        
-        
+
+
         private Device dev;
         private DeviceUser duser;
 
@@ -64,7 +60,7 @@ public class Main {
 
         /**
          * Gets the first configuration element in configs with specified name.
-         * 
+         *
          * @param configs Set of device configuration data.
          * @param name The identifier of the configuration to select
          * @return First configuration with matching name, or null if none present.
@@ -183,7 +179,7 @@ NetconfSession.RUNNING);
 
 
         // Example on how to handle errors from the agent
-        void delete_no_vera() throws JNCException, IOException, Exception {
+        void delete_no_vera() throws Exception {
             print_cfg("Config With vera ", dev);
             Hosts h = new Hosts();
             Host vera = new Host("vera_noExists");
@@ -208,7 +204,7 @@ NetconfSession.RUNNING);
         // if it wasn't for this code - the second time we run this
         // the delete_vera() would fail - because there was no vera Host
 
-        void create_vera() throws JNCException, IOException, Exception {
+        void create_vera() throws Exception {
             print_cfg("Create vera ", dev);
             Hosts h = new Hosts();
             Host vera = new Host("vera");
@@ -218,7 +214,7 @@ NetconfSession.RUNNING);
         }
 
         // Create an additional host
-        void create_vera_space() throws JNCException, IOException, Exception {
+        void create_vera_space() throws Exception {
             print_cfg("Create vera space", dev);
             Hosts h = new Hosts();
             Host vera = new Host("vera space");
@@ -263,7 +259,7 @@ NetconfSession.RUNNING);
     }
 
 
-    static public int NUMTESTS = 11;
+    static public final int NUMTESTS = 11;
 
     static void runTest(Test t, int n) throws Exception {
         System.out.println("TEST " + n);
@@ -308,7 +304,7 @@ NetconfSession.RUNNING);
     }
 
 
-    static public void main(String args[]) {
+    static public void main(String[] args) {
         System.out.println("In MAIN");
         try {
             Simple.enable();

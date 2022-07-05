@@ -39,13 +39,13 @@ START_FLAGS ?=
 all: ietf-inet-types.fxs hosts.fxs ssh-keydir $(CDB_DIR)/hosts.xml
 	@echo "Build complete"
 
-hosts.fxs: ../../yang/hosts.yang
-	$(CONFDC) --java-package com.example.test -c ../../yang/hosts.yang
+hosts.fxs: hosts.yang
+	$(CONFDC) --java-package com.example.test -c hosts.yang
 
 ietf-inet-types.fxs:
 	cp $(CONFD_DIR)/etc/confd/ietf-inet-types.fxs ietf-inet-types.fxs
 
-$(CDB_DIR)/aaa_init.xml: ../../confd/aaa_init.xml $(CDB_DIR)
+$(CDB_DIR)/aaa_init.xml: ../confd/aaa_init.xml $(CDB_DIR)
 	@cp $< $@
 
 $(CDB_DIR)/%.xml: %.xml $(CDB_DIR)
@@ -60,11 +60,11 @@ action_script:
 
 ######################################################################
 clean:	iclean
-	-rm *.log *.trace 2>/dev/null
+	-rm -f *.log *.trace 2>/dev/null
 
 ######################################################################
 start:  stop action_script
-	$(CONFD) --addloadpath $(CONFD_DIR)/etc/confd -c ../../confd/confd.conf $(CONFD_FLAGS)
+	$(CONFD) --addloadpath $(CONFD_DIR)/etc/confd -c ../confd/confd.conf $(CONFD_FLAGS)
 
 ######################################################################
 stop:
