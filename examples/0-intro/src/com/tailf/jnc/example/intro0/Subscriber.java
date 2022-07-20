@@ -21,5 +21,3 @@ class Subscriber extends IOSubscriber {
         System.out.println(s);
     }
 }
-
-

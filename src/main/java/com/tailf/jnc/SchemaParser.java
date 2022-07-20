@@ -3,7 +3,8 @@ package com.tailf.jnc;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -53,19 +54,19 @@ public class SchemaParser {
             }
         } catch (final Exception e) {
             System.exit(-1);
-            throw new JNCException(JNCException.PARSER_ERROR,
-                    "failed to initialize parser: " + e);
+            throw (JNCException) new JNCException(JNCException.PARSER_ERROR,
+                    "failed to initialize parser").initCause(e);
         }
     }
 
     private class SchemaHandler extends DefaultHandler {
-        protected HashMap<Tagpath, SchemaNode> h;
+        protected Map<Tagpath, SchemaNode> h;
         protected SchemaNode node;
         protected RevisionInfo ri;
-        protected ArrayList<RevisionInfo> riArrayList;
+        protected List<RevisionInfo> riArrayList;
         protected String value = null;
 
-        SchemaHandler(HashMap<Tagpath, SchemaNode> h2) {
+        SchemaHandler(Map<Tagpath, SchemaNode> h2) {
             super();
             h = h2;
         }
@@ -73,69 +74,116 @@ public class SchemaParser {
         @Override
         public void startElement(String uri, String localName, String qName,
                 Attributes attributes) throws SAXException {
-            if (localName.equals("node")) {
-                node = new SchemaNode();
-                value = null;
-            } else if (localName.equals("rev")) {
-                riArrayList = new ArrayList<RevisionInfo>();
-                value = null;
-            } else if (localName.equals("info")) {
-                ri = new RevisionInfo();
-                value = null;
-            } else if (localName.equals("schema") || localName.equals("node")) {
-                value = null;
-            } else {
-                value = "";
+            switch (localName) {
+                case "node": {
+                    node = new SchemaNode();
+                    value = null;
+                    break;
+                }
+                case "rev": {
+                    riArrayList = new ArrayList<RevisionInfo>();
+                    value = null;
+                    break;
+                }
+                case "info": {
+                    ri = new RevisionInfo();
+                    value = null;
+                    break;
+                }
+                case "schema":
+                // case "node":
+                {
+                    value = null;
+                    break;
+                }
+                default: {
+                    value = "";
+                    break;
+                }
+
             }
         }
 
         @Override
         public void endElement(String uri, String localName, String qName) {
-            if (localName.equals("node")) {
-                h.put(node.tagpath, node);
-            } else if (localName.equals("tagpath")) {
-                final String[] splittedTagpath = value.split("/");
-
-                if (splittedTagpath.length == 0) {
-                    node.tagpath = new Tagpath(0);
-                } else {
-                    node.tagpath = new Tagpath(splittedTagpath.length - 1);
-                    System.arraycopy(splittedTagpath, 1, node.tagpath.p, 0, splittedTagpath.length - 1);
+            switch (localName) {
+                case "node": {
+                    h.put(node.tagpath, node);
+                    break;
                 }
-            } else if (localName.equals("namespace")) {
-                node.namespace = value;
-            } else if (localName.equals("primitive_type")) {
-                node.primitive_type = Integer.parseInt(value);
-            } else if (localName.equals("min_occurs")) {
-                node.min_occurs = Integer.parseInt(value);
-            } else if (localName.equals("max_occurs")) {
-                node.max_occurs = Integer.parseInt(value);
-            } else if (localName.equals("children")) {
-                final String[] child = value.split(" ");
-                if (child.length == 0) {
-                    node.children = null;
-                } else {
-                    node.children = new String[child.length];
-                    System.arraycopy(child, 0, node.children, 0, child.length);
+                case "tagpath": {
+                    final String[] splittedTagpath = value.split("/");
+                    if (splittedTagpath.length == 0) {
+                        node.tagpath = new Tagpath(0);
+                    } else {
+                        node.tagpath = new Tagpath(splittedTagpath.length - 1);
+                        System.arraycopy(splittedTagpath, 1, node.tagpath.p, 0, splittedTagpath.length - 1);
+                    }
+                    break;
                 }
-            } else if (localName.equals("flags")) {
-                node.flags = Integer.parseInt(value);
-            } else if (localName.equals("desc")) {
-                node.desc = value;
-            } else if (localName.equals("type")) {
-                ri.type = Integer.parseInt(value);
-            } else if (localName.equals("idata")) {
-                ri.idata = Integer.parseInt(value);
-            } else if (localName.equals("data")) {
-                ri.data = value;
-            } else if (localName.equals("introduced")) {
-                ri.introduced = value;
-            } else if (localName.equals("info")) {
-                riArrayList.add(ri);
-            } else if (localName.equals("rev")) {
-                final RevisionInfo[] riArray = new RevisionInfo[riArrayList
-                        .size()];
-                node.revInfo = riArrayList.toArray(riArray);
+                case "namespace": {
+                    node.namespace = value;
+                    break;
+                }
+                case "primitive_type": {
+                    node.primitive_type = Integer.parseInt(value);
+                    break;
+                }
+                case "min_occurs": {
+                    node.min_occurs = Integer.parseInt(value);
+                    break;
+                }
+                case "max_occurs": {
+                    node.max_occurs = Integer.parseInt(value);
+                    break;
+                }
+                case "children": {
+                    final String[] child = value.split(" ");
+                    if (child.length == 0) {
+                        node.children = null;
+                    } else {
+                        node.children = new String[child.length];
+                        System.arraycopy(child, 0, node.children, 0, child.length);
+                    }
+                    break;
+                }
+                case "flags": {
+                    node.flags = Integer.parseInt(value);
+                    break;
+                }
+                case "desc": {
+                    node.desc = value;
+                    break;
+                }
+                case "type": {
+                    ri.type = Integer.parseInt(value);
+                    break;
+                }
+                case "idata": {
+                    ri.idata = Integer.parseInt(value);
+                    break;
+                }
+                case "data": {
+                    ri.data = value;
+                    break;
+                }
+                case "introduced": {
+                    ri.introduced = value;
+                    break;
+                }
+                case "info": {
+                    riArrayList.add(ri);
+                    break;
+                }
+                case "rev": {
+                    final RevisionInfo[] riArray = new RevisionInfo[riArrayList
+                            .size()];
+                    node.revInfo = riArrayList.toArray(riArray);
+                    break;
+                }
+                default: {
+                    break;
+                }
             }
 
             value = null;
@@ -158,7 +206,7 @@ public class SchemaParser {
      * @param h The hashtable to populate.
      * @throws JNCException If there is an IO or SAX parse problem.
      */
-    public void readFile(String filename, HashMap<Tagpath, SchemaNode> h)
+    public void readFile(String filename, Map<Tagpath, SchemaNode> h)
             throws JNCException {
         readFile(new InputSource(filename), h);
     }
@@ -171,27 +219,27 @@ public class SchemaParser {
      * @param h The hashtable to populate.
      * @throws JNCException If there is an IO or SAX parse problem.
      */
-    public void readFile(URL schemaUrl, HashMap<Tagpath, SchemaNode> h)
+    public void readFile(URL schemaUrl, Map<Tagpath, SchemaNode> h)
             throws JNCException {
         try {
             readFile(new InputSource(schemaUrl.openStream()), h);
         } catch (IOException e) {
             e.printStackTrace();
-            throw new JNCException(JNCException.PARSER_ERROR, "Unable to open" +
-            		" file: " + schemaUrl + ": " + e);
+            throw (JNCException) new JNCException(JNCException.PARSER_ERROR, "Unable to open" +
+            		" file: " + schemaUrl + ": ").initCause(e);
         }
     }
 
     private void readFile(InputSource inputSource,
-            HashMap<Tagpath, SchemaNode> h) throws JNCException {
+            Map<Tagpath, SchemaNode> h) throws JNCException {
         try {
             final SchemaHandler handler = new SchemaHandler(h);
             parser.setContentHandler(handler);
             parser.parse(inputSource);
         } catch (final Exception e) {
             e.printStackTrace();
-            throw new JNCException(JNCException.PARSER_ERROR, "parse file: "
-                    + inputSource + " error: " + e);
+            throw (JNCException) new JNCException(JNCException.PARSER_ERROR, "parse file: "
+                    + inputSource + " error: ").initCause(e);
         }
     }
 
@@ -205,7 +253,7 @@ public class SchemaParser {
      * @param clazz
      * @throws JNCException if the file is not found or cannot be parsed.
      */
-    public void findAndReadFile(final String filename, final HashMap<Tagpath, SchemaNode> h, final Class clazz)
+    public void findAndReadFile(final String filename, final Map<Tagpath, SchemaNode> h, final Class clazz)
             throws JNCException {
         final URL url = clazz.getResource(filename);
         if (url == null){

@@ -8,7 +8,7 @@ package com.tailf.jnc;
  * {@link DefaultIOSubscriber}.
  * <p>
  * To register an IO subscriber:
- * 
+ *
  * <pre>
  * SSHConnection c = new SSHConnection(&quot;127.0.0.1&quot;, 2022);
  * c.authenticateWithPassword(&quot;adimin&quot;, &quot;pass&quot;);
@@ -23,12 +23,14 @@ package com.tailf.jnc;
 public abstract class IOSubscriber {
 
     private boolean rawmode;
+    @SuppressWarnings("PMD.AvoidStringBufferField")
     private StringBuffer inb;
+    @SuppressWarnings("PMD.AvoidStringBufferField")
     private StringBuffer outb;
 
     /**
      * Constructor.
-     * 
+     *
      * @param rawmode If true 'raw' text will appear instead of pretty
      *            formatted XML.
      */
@@ -42,18 +44,19 @@ public abstract class IOSubscriber {
      * Empty constructor. The rawmode, inb and outb fields will be unassigned.
      */
     public IOSubscriber() {
+        // Intentionally empty.
     }
 
     /**
      * Will get called as soon as we have input (data which is received).
-     * 
+     *
      * @param s Text being received
      */
     abstract public void input(String s);
 
     /**
      * Will get called as soon as we have output (data which is being sent).
-     * 
+     *
      * @param s Text being sent
      */
     abstract public void output(String s);

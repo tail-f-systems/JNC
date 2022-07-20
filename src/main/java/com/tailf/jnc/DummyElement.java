@@ -25,13 +25,12 @@ class DummyElement extends YangElement {
 
     /**
      * Clones this object, returning an exact copy.
-     * 
+     *
      * @return A clone of the object.
      */
-    @Override
-    public Object clone() {
+    public DummyElement clone() {
         try {
-            return cloneContent(new DummyElement(namespace, name));
+            return (DummyElement) cloneContent(new DummyElement(namespace, name));
         } catch (final Exception e) {
             return null;
         }
@@ -39,7 +38,7 @@ class DummyElement extends YangElement {
 
     /**
      * Clones this object, returning a shallow copy.
-     * 
+     *
      * @return A clone of the object. Children are not included.
      */
     @Override

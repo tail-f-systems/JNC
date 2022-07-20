@@ -41,9 +41,9 @@ public class YangBoolean extends YangBaseType<Boolean> {
     @Override
     protected Boolean fromString(String s) throws YangException {
         s = Utils.wsCollapse(s);
-        if (s.equals("true")) {
+        if ("true".equals(s)) {
             return true;
-        } else if (s.equals("false")) {
+        } else if ("false".equals(s)) {
             return false;
         } else {
             throw new YangException(YangException.BAD_VALUE, this);
@@ -55,6 +55,7 @@ public class YangBoolean extends YangBaseType<Boolean> {
      */
     @Override
     public void check() throws YangException {
+        // Intentionally empty.
     }
 
     /**

@@ -113,5 +113,6 @@ public class ElementChildrenIterator implements Iterator<Element> {
      */
     @Override
     public void remove() {
+        // Intentionally empty.
     }
 }

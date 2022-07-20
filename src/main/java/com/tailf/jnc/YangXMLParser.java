@@ -31,8 +31,8 @@ public class YangXMLParser extends XMLParser {
             parser.parse(filename);
             return (YangElement) handler.top;
         } catch (final Exception e) {
-            throw new JNCException(JNCException.PARSER_ERROR, "parse file: "
-                    + filename + " error: " + e);
+            throw (JNCException) new JNCException(JNCException.PARSER_ERROR, "parse file: "
+                    + filename + " error").initCause(e);
         }
     }
 
@@ -51,8 +51,8 @@ public class YangXMLParser extends XMLParser {
             return handler.top;
         } catch (final Exception e) {
             e.printStackTrace();
-            throw new JNCException(JNCException.PARSER_ERROR, "parse error: "
-                    + e);
+            throw (JNCException) new JNCException(JNCException.PARSER_ERROR,
+                "parse error").initCause(e);
         }
     }
 

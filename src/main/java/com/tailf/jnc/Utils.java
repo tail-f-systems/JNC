@@ -18,6 +18,10 @@ import org.w3c.dom.Text;
 
 final class Utils {
 
+    private Utils() {
+        throw new UnsupportedOperationException("Cannot instantiate class Utils");
+    }
+
     /* ---------- YangType utilities ---------- */
 
     /**
@@ -51,7 +55,7 @@ final class Utils {
      * 
      * @author emil@tail-f.com
      */
-    public static enum Operator {
+    public enum Operator {
 
         /**
          * Equality operator. EQ.cmp(a, b) is equivalent to a == b.
@@ -190,8 +194,9 @@ final class Utils {
             throws YangException {
         boolean matches = true;
         try {
-            for (int i = 0; i < regexes.length; i++) {
-                if (!(matches = Pattern.matches(regexes[i], value))) {
+            for (String element : regexes) {
+                matches = Pattern.matches(element, value);
+                if (!matches) {
                     break;
                 }
             }

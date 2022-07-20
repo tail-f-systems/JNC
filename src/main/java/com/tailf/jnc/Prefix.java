@@ -1,19 +1,17 @@
 package com.tailf.jnc;
 
-import java.io.Serializable;
-
 /**
  * This class represents a prefix mapping of a prefix string into a namespace.
- * 
+ *
  * For example:
  * <pre>
  *    xmlns:foo='http://foo.com'
  * </pre>
- * 
+ *
  * <p>
  * Provides a mapping from prefix "foo" into the namespace "http://foo.com".
  */
-public class Prefix extends Attribute implements Serializable {
+public class Prefix extends Attribute {
 
     private static final long serialVersionUID = 1L;
 
@@ -30,14 +28,14 @@ public class Prefix extends Attribute implements Serializable {
 
     /**
      * Constructs a new Prefix object which represents a prefix mapping.
-     * 
+     *
      * @param name The prefix name
      * @param nsValue the uri namespace that the prefix is mapped to
      */
     public Prefix(String name, String nsValue) {
         super(name, nsValue);
         ns = XMLNS_NAMESPACE;
-        if (name.equals("")) {
+        if ("".equals(name)) {
             qName = "xmlns";
         } else {
             qName = "xmlns:" + name;

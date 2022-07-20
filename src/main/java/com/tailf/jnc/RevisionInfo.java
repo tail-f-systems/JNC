@@ -51,6 +51,7 @@ public class RevisionInfo {
     }
 
     public RevisionInfo() {
+        // Intentionally empty.
     }
 
     public RevisionInfo(int type, String data, String introduced) {

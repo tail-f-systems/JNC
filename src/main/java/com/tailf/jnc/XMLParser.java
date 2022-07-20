@@ -32,8 +32,8 @@ public class XMLParser {
                 parser = XMLReaderFactory.createXMLReader();
             }
         } catch (final Exception e) {
-            throw new JNCException(JNCException.PARSER_ERROR,
-                    "failed to initialize parser: " + e);
+            throw (JNCException) new JNCException(JNCException.PARSER_ERROR,
+                    "failed to initialize parser").initCause(e);
         }
 
     }
@@ -66,15 +66,15 @@ public class XMLParser {
                         attrValue);
                 // System.out.println("ATTRIBUTE: "+attributes.getQName(i)+
                 // "  URI="+attributes.getURI(i));
-                trace("add attr: " + attr);
+                trace("add attr: {}", attr);
                 child.addAttr(attr);
             }
             if (current == null) {
-                trace("add to top: " + child);
+                trace("add to top: {}", child);
                 top = child;
             } else {
                 current.addChild(child);
-                trace("add child: " + child);
+                trace("add child: {}", child);
             }
             current = child; // step down
         }
@@ -100,12 +100,12 @@ public class XMLParser {
 
         @Override
         public void startPrefixMapping(String prefix, String uri) {
-            trace("startPrefixMapping: uri=\"" + uri + "\" prefix=" + prefix);
+            trace("startPrefixMapping: uri=\"{}\" prefix={}", uri, prefix);
             if (prefixes == null) {
                 prefixes = new PrefixMap();
             }
             prefixes.add(new Prefix(prefix, uri));
-            trace("added prefixmapping: " + prefix);
+            trace("added prefixmapping: {}", prefix);
         }
     }
 
@@ -119,8 +119,8 @@ public class XMLParser {
             parser.parse(filename);
             return handler.top;
         } catch (final Exception e) {
-            throw new JNCException(JNCException.PARSER_ERROR, "parse file: "
-                    + filename + " error: " + e);
+            throw (JNCException) new JNCException(JNCException.PARSER_ERROR, "parse file: "
+                    + filename).initCause(e);
         }
     }
 
@@ -136,8 +136,8 @@ public class XMLParser {
             parser.parse(is);
             return handler.top;
         } catch (final Exception e) {
-            throw new JNCException(JNCException.PARSER_ERROR, "parse error: "
-                    + e);
+            throw (JNCException) new JNCException(JNCException.PARSER_ERROR,
+                "parse error").initCause(e);
         }
     }
 
@@ -157,9 +157,9 @@ public class XMLParser {
     /**
      * trace
      */
-    protected void trace(String s) {
+    protected void trace(String format, Object ... args) {
         if (Element.debugLevel >= Element.DEBUG_LEVEL_PARSER) {
-            System.err.println("*XMLParser: " + s);
+            System.err.println(String.format("*XMLParser: " + format, args));
         }
     }
 }

@@ -3,6 +3,8 @@ package com.tailf.jnc;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * The YangElement is a configuration sub-tree like the
@@ -72,7 +74,7 @@ public abstract class YangElement extends Element {
             final YangElement c = (YangElement) elem;
             if (c.parent instanceof YangElement) {
                 String pkg = getPackage(c.parent);
-                if (!pkg.equals("")) {
+                if (!"".equals(pkg)) {
                     pkg += ".";
                 }
                 return pkg + camelize(c.name);
@@ -145,9 +147,9 @@ public abstract class YangElement extends Element {
                     // It's an unknown element or child
                     // FIXME - check capabilities
                     if (!RevisionInfo.newerRevisionSupportEnabled) {
-                        throw new YangException(
+                        throw (YangException) new YangException(
                                 YangException.ELEMENT_MISSING,
-                                parent.getElementPath(name) + COLON_UNEXPECTED_ELEMENT);
+                                parent.getElementPath(name) + COLON_UNEXPECTED_ELEMENT).initCause(e);
                     }
                     parser.unknownLevel = 1;
                     return null;
@@ -160,21 +162,13 @@ public abstract class YangElement extends Element {
                 parent.addChild(child);
                 return child;
             }
-        } catch (final ClassNotFoundException e) {
+        } catch (final ClassNotFoundException|InstantiationException|IllegalAccessException e) {
             e.printStackTrace();
-            throw new YangException(YangException.ELEMENT_MISSING,
-                    (parent != null ? parent.getElementPath(name) : null) + COLON_UNEXPECTED_ELEMENT);
-        } catch (final InstantiationException e) {
-            e.printStackTrace();
-            throw new YangException(YangException.ELEMENT_MISSING,
-                    (parent != null ? parent.getElementPath(name) : null) + COLON_UNEXPECTED_ELEMENT);
-        } catch (final IllegalAccessException e) {
-            e.printStackTrace();
-            throw new YangException(YangException.ELEMENT_MISSING,
-                    (parent != null ? parent.getElementPath(name) : null) + COLON_UNEXPECTED_ELEMENT);
+            throw (YangException) new YangException(YangException.ELEMENT_MISSING,
+                    (parent != null ? parent.getElementPath(name) : null) + COLON_UNEXPECTED_ELEMENT).initCause(e);
         } catch (final InvocationTargetException e) {
-            throw new YangException(YangException.ELEMENT_MISSING,
-                    parent.getElementPath(name) + COLON_UNEXPECTED_ELEMENT);
+            throw (YangException) new YangException(YangException.ELEMENT_MISSING,
+                    parent.getElementPath(name) + COLON_UNEXPECTED_ELEMENT).initCause(e);
         }
     }
 
@@ -199,8 +193,8 @@ public abstract class YangElement extends Element {
         } catch (final NoSuchMethodException e) {
             if (!RevisionInfo.newerRevisionSupportEnabled) {
                 // e.printStackTrace();
-                throw new YangException(YangException.ELEMENT_MISSING,
-                        getElementPath(name) + COLON_UNEXPECTED_ELEMENT);
+                throw (YangException) new YangException(YangException.ELEMENT_MISSING,
+                        getElementPath(name) + COLON_UNEXPECTED_ELEMENT).initCause(e);
             }
             final NodeSet nodes = get(name);
             if (nodes.isEmpty()) {
@@ -211,11 +205,11 @@ public abstract class YangElement extends Element {
                 final Element leaf = nodes.first();
                 leaf.setValue(value);
             }
-        } catch (final java.lang.reflect.InvocationTargetException cm) {
+        } catch (final InvocationTargetException cm) {
             // case with added enumerations,
             if (!RevisionInfo.newerRevisionSupportEnabled) {
-                throw new YangException(YangException.BAD_VALUE,
-                        getElementPath(name) + ": " + cm.getCause().toString());
+                throw (YangException) new YangException(YangException.BAD_VALUE,
+                        getElementPath(name) + ": " + cm.getCause().toString()).initCause(cm);
             }
 
             final NodeSet nodes = get(name);
@@ -231,8 +225,8 @@ public abstract class YangElement extends Element {
 
         catch (final Exception invErr) {
             // type error
-            throw new YangException(YangException.BAD_VALUE, getElementPath(name)
-                    + ": " + invErr.getCause().toString());
+            throw (YangException) new YangException(YangException.BAD_VALUE, getElementPath(name)
+                    + ": " + invErr.getCause().toString()).initCause(invErr);
         }
     }
 
@@ -250,7 +244,7 @@ public abstract class YangElement extends Element {
      * Static list of packages.
      * 
      */
-    static ArrayList<Package> packages = new ArrayList<Package>();
+    static List<Package> packages = new ArrayList<Package>();
 
     /**
      * Locate package from Namespace.
@@ -300,7 +294,7 @@ public abstract class YangElement extends Element {
         if (s.isEmpty()) {
             return s;
         }
-        return s.substring(0, 1).toUpperCase() + s.substring(1);
+        return s.substring(0, 1).toUpperCase(Locale.ENGLISH) + s.substring(1);
     }
 
     private static boolean isReserved(String s) {
@@ -350,7 +344,8 @@ public abstract class YangElement extends Element {
 
     public static String normalize(String s) {
         final String res = camelize(s);
-        int start = 0, end = res.length();
+        int start = 0;
+        int end = res.length();
 
         if (res.startsWith("_")) {
             start++;
@@ -397,7 +392,7 @@ public abstract class YangElement extends Element {
 
     protected boolean isLeafDefault(String path) throws JNCException {
         final NodeSet nodes = get(path);
-        return (nodes.isEmpty());
+        return nodes.isEmpty();
     }
 
     protected void markLeafReplace(String path) throws JNCException {
@@ -471,9 +466,9 @@ public abstract class YangElement extends Element {
         if (keys == null) {
             return false; // not a list entry
         }
-        for (int i = 0; i < keys.length; i++) {
-            final Element x = getChild(keys[i]);
-            final Element bx = b.getChild(keys[i]);
+        for (String key : keys) {
+            final Element x = getChild(key);
+            final Element bx = b.getChild(key);
             if (!x.equals(bx)) {
                 return false;
             }
@@ -680,8 +675,10 @@ public abstract class YangElement extends Element {
      * @return 'true' if both trees are equal. 'false' otherwise.
      */
     public static boolean checkSync(YangElement a, YangElement b) {
-        final NodeSet uniqueA = new NodeSet(), uniqueB = new NodeSet();
-        final NodeSet changedA = new NodeSet(), changedB = new NodeSet();
+        final NodeSet uniqueA = new NodeSet();
+        final NodeSet uniqueB = new NodeSet();
+        final NodeSet changedA = new NodeSet();
+        final NodeSet changedB = new NodeSet();
         YangElement.getDiff(a, b, uniqueA, uniqueB, changedA, changedB);
         final boolean noUniques = uniqueA.isEmpty() && uniqueB.isEmpty();
         final boolean noChanges = changedA.isEmpty() && changedB.isEmpty();
@@ -986,8 +983,8 @@ public abstract class YangElement extends Element {
             }
             for (; i < children.size(); i++) {
                 final Element child = children.getElement(i);
-                final Element child_copy = (Element) child.clone();
-                copy.addChild(child_copy);
+                final Element childCopy = (Element) child.clone();
+                copy.addChild(childCopy);
             }
         }
         cloneAttrs(copy);
@@ -1012,7 +1009,7 @@ public abstract class YangElement extends Element {
     private SchemaNode n = null;
 
     @Override
-    protected void encode(Transport out, boolean newline_at_end,
+    protected void encode(Transport out, boolean newlineAtEnd,
             Capabilities capas) throws JNCException {
         if (RevisionInfo.olderRevisionSupportEnabled && capas != null) {
             if (tp == null) {
@@ -1053,7 +1050,7 @@ public abstract class YangElement extends Element {
                 }
             }
         }
-        super.encode(out, newline_at_end, capas);
+        super.encode(out, newlineAtEnd, capas);
     }
 
     /**
@@ -1065,8 +1062,8 @@ public abstract class YangElement extends Element {
      */
     public boolean isChild(String childName) {
         final String[] children = childrenNames();
-        for (int i = 0; i < children.length; i++) {
-            if (childName.equals(children[i])) {
+        for (String child : children) {
+            if (childName.equals(child)) {
                 return true;
             }
         }
