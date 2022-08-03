@@ -7,9 +7,7 @@ import com.tailf.jnc.example.intro0.gen.hosts.Simple;
 import com.tailf.jnc.example.intro0.gen.hosts.hosts.Host;
 
 
-    private Main() {
-        throw new UnsupportedOperationException();
-    }
+public class Main {
 
     private static class Test {
 
@@ -180,8 +178,8 @@ import com.tailf.jnc.example.intro0.gen.hosts.hosts.Host;
 
 
         // Example on how to handle errors from the agent
-        void delete_no_vera() throws Exception {
-            print_cfg("Config With vera ", dev);
+        void deleteNoVera() throws Exception {
+            printCfg("Config With vera ", dev);
             Hosts h = new Hosts();
             Host vera = new Host("vera_noExists");
             vera.markDelete();
@@ -205,8 +203,8 @@ import com.tailf.jnc.example.intro0.gen.hosts.hosts.Host;
         // if it wasn't for this code - the second time we run this
         // the delete_vera() would fail - because there was no vera Host
 
-        void create_vera() throws Exception {
-            print_cfg("Create vera ", dev);
+        void createVera() throws Exception {
+            printCfg("Create vera ", dev);
             Hosts h = new Hosts();
             Host vera = new Host("vera");
             vera.setNumberOfServersValue(0);
@@ -215,8 +213,8 @@ import com.tailf.jnc.example.intro0.gen.hosts.hosts.Host;
         }
 
         // Create an additional host
-        void create_vera_space() throws Exception {
-            print_cfg("Create vera space", dev);
+        void createVeraSpace() throws Exception {
+            printCfg("Create vera space", dev);
             Hosts h = new Hosts();
             Host vera = new Host("vera space");
             vera.setNumberOfServersValue(0);

@@ -1149,8 +1149,8 @@ class ClassGenerator(object):
         reg.add_line('SchemaParser parser = new SchemaParser();')
         reg.add_dependency('com.tailf.jnc.SchemaParser')
         reg.add_line(
-            'HashMap<Tagpath, SchemaNode> h = SchemaTree.create(NAMESPACE);')
-        reg.add_dependency('java.util.HashMap')
+            'Map<Tagpath, SchemaNode> h = SchemaTree.create(NAMESPACE);')
+        reg.add_dependency('java.util.Map')
         reg.add_dependency('com.tailf.jnc.Tagpath')
         reg.add_dependency('com.tailf.jnc.SchemaNode')
         reg.add_dependency('com.tailf.jnc.SchemaTree')
@@ -2814,11 +2814,11 @@ class ListMethodGenerator(MethodGenerator):
                 self.is_config = False  # is_config produced wrong value
 
         def findkey(k):
-            search_one(self.stmt, 'leaf', arg=k)
+            return search_one(self.stmt, 'leaf', arg=k)
         self.key_stmts = [findkey(k) for k in self.keys]
 
         def notstring(k):
-            get_types(k, ctx)[1] != 'String'
+            return get_types(k, ctx)[1] != 'String'
         self.is_string = not all(notstring(k) for k in self.key_stmts)
 
     def value_constructors(self):
