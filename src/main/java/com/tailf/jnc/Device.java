@@ -43,7 +43,7 @@ import java.util.List;
  * </p>
  */
 
-public class Device implements Serializable {
+public class Device implements Serializable, AutoCloseable {
 
     private static final long serialVersionUID = 1L;
 
@@ -267,16 +267,21 @@ public class Device implements Serializable {
      * @param sessionName symbolic Name of the session
      */
     public void closeSession(String sessionName) {
-        final SessionConnData data = removeConnData(sessionName);
-        if (data.session != null) {
-            try {
-                // data.session.closeSession();
-                data.sshSession.close();
-            } catch (final Exception e) {
-                // silently continue
+        for (int i = 0; i < connSessions.size(); i++) {
+            final SessionConnData p = connSessions.get(i);
+            if (p.sessionName.equals(sessionName)) {
+                closeSession(p);
+                connSessions.remove(i);
+                return;
             }
         }
-        clearConfig(sessionName);
+    }
+
+    private void closeSession(SessionConnData data) {
+        if (data != null && data.session != null) {
+            data.sshSession.close();
+        }
+        clearConfig(data.sessionName);
     }
 
     /**
@@ -285,11 +290,7 @@ public class Device implements Serializable {
      */
     public void close() {
         for (final SessionConnData d : connSessions) {
-            try {
-                d.session.closeSession();
-            } catch (final Exception e) {
-                // silently continue
-            }
+            closeSession(d);
         }
         connSessions = new ArrayList<SessionConnData>();
         for (SessionTree tree : trees) {
@@ -423,7 +424,13 @@ public class Device implements Serializable {
      * @param sub IO subscriber for trace messages.
      * @param sessionName symbolic Name of the session
      */
+
     public void newSession(IOSubscriber sub, String sessionName)
+            throws JNCException, IOException {
+        newSession(sub, sessionName, true);
+    }
+
+    public void newSession(IOSubscriber sub, String sessionName, boolean use11)
             throws JNCException, IOException {
         final SessionConnData data = getConnData(sessionName);
         // always create the configTree
@@ -440,7 +447,7 @@ public class Device implements Serializable {
         if (sub != null) {
             sshSession.addSubscriber(sub);
         }
-        final NetconfSession session = new NetconfSession(sshSession, parser);
+        final NetconfSession session = new NetconfSession(sshSession, parser, use11);
         final SessionConnData d = new SessionConnData(sessionName,
                 sshSession, session);
         connSessions.add(d);
@@ -520,17 +527,6 @@ public class Device implements Serializable {
         for (final SessionTree t : trees) {
             if (t.sessionName.equals(sessionName)) {
                 return t;
-            }
-        }
-        return null;
-    }
-
-    private SessionConnData removeConnData(String sessionName) {
-        for (int i = 0; i < connSessions.size(); i++) {
-            final SessionConnData p = connSessions.get(i);
-            if (p.sessionName.equals(sessionName)) {
-                connSessions.remove(i);
-                return p;
             }
         }
         return null;

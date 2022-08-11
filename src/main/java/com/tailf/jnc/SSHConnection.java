@@ -25,7 +25,7 @@ import net.schmizz.sshj.transport.verification.OpenSSHKnownHosts;
  * NetconfSession dev1 = new NetconfSession(tr);
  * </pre>
  */
-public class SSHConnection {
+public class SSHConnection implements AutoCloseable {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
     SSHClient client = null;
@@ -111,9 +111,6 @@ public class SSHConnection {
         return this;
     }
 
-    /**
-     * TODO: needed?
-     */
     SSHClient getClient() {
         return client;
     }

@@ -1,6 +1,9 @@
 package com.tailf.jnc;
 
+import com.tailf.jnc.framing.Framing;
+
 import java.io.IOException;
+import java.util.Collection;
 
 /**
  * A NETCONF transport interface. This interface can be used to write custom
@@ -23,7 +26,7 @@ public interface Transport {
     /**
      * Reads "one" reply from the transport input stream.
      */
-    StringBuffer readOne() throws IOException, JNCException;
+    String readOne() throws IOException, JNCException;
 
     /**
      * Prints an integer to the transport output stream.
@@ -39,7 +42,7 @@ public interface Transport {
      * Prints an integer to the transport output stream and an additional line
      * break.
      */
-    void println(int i);
+    void println(long i);
 
     /**
      * Prints a string to the transport output stream and an additional line
@@ -53,10 +56,23 @@ public interface Transport {
      * <p>
      * This method furthermore flushes the transport output stream buffer.
      */
-    void flush();
+    void flush() throws IOException;
 
     /**
      * Closes the Transport session/connection.
      */
     void close();
+
+    /** 
+     * Sets the framing for the session for Netconf 1.1 support
+     */
+    void setFraming(Framing f);
+
+    /**
+     * get hostname
+     */
+    String getDeviceConnectionInfo();
+
+    Collection<IOSubscriber> getIOSubscribers();
+
 }

@@ -1,22 +1,24 @@
 package com.tailf.jnc;
 
+import com.tailf.jnc.framing.BaseReader;
+import com.tailf.jnc.framing.DataReader;
+import com.tailf.jnc.framing.Framer;
+import com.tailf.jnc.framing.Framing;
+
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
-import net.schmizz.sshj.common.SSHException;
 import net.schmizz.sshj.connection.channel.direct.Session;
 
 /**
@@ -37,7 +39,7 @@ import net.schmizz.sshj.connection.channel.direct.Session;
  *
  */
 
-public class SSHSession implements Transport {
+public class SSHSession implements Transport, AutoCloseable {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -47,13 +49,15 @@ public class SSHSession implements Transport {
 
     private InputWatchdog watchdog;
 
-    private BufferedReader in = null;
-    private PrintWriter out = null;
+    private BufferedReader in;
+    @SuppressWarnings("PMD.AvoidStringBufferField")
+    private StringBuilder message;
     private final List<IOSubscriber> ioSubscribers;
     protected long readTimeout = 0; // millisecs
 
-    private static final String endmarker = "]]>]]>";
-    private static final int end = endmarker.length() - 1;
+    private Framer framer;
+    private InputStream subsysInput;
+    private OutputStream sessionOutput;
 
     private interface InputWatchdog {
         void start();
@@ -115,6 +119,39 @@ public class SSHSession implements Transport {
         }
     }
 
+    private class SessionDataReader implements DataReader {
+        @Override
+        public <DataBufType> int readData(BaseReader<DataBufType> rdr, DataBufType buf)
+            throws IOException {
+            // not ideal, but avoiding code duplication
+            return readData(rdr, buf, 0, rdr.bufSize(buf));
+        }
+
+        @Override
+        public <DataBufType> int readData(BaseReader<DataBufType> rdr, DataBufType buf,
+                                          int offset, int length) throws IOException {
+            int read = 0;
+            watchdog.watch();
+            try {
+                read = rdr.read(buf, offset, length);
+                if (read == -1) {
+                    trace("end of input (-1)");
+                    throw new IOException("Session closed");
+                } else {
+                    ByteBuffer data = rdr.encode(buf, offset, read);
+                    // FIXME: this is broken, readData may be called repeatedly
+                    // on the same data due to buffering and mark/reset calls
+                    for (final IOSubscriber sub: ioSubscribers) {
+                        sub.inputRaw(data);
+                    }
+                }
+                return read;
+            } finally {
+                watchdog.done();
+            }
+        }
+    }
+
     /**
      * Constructor for SSH session object. This method creates a a new SSh
      * channel on top of an existing connection. SSHSession objects imlement
@@ -141,18 +178,24 @@ public class SSHSession implements Transport {
         session = con.client.startSession();
         subsys = session.startSubsystem("netconf");
 
-        final InputStream is = subsys.getInputStream();
-        final OutputStream os = session.getOutputStream();
-        in = new BufferedReader(new InputStreamReader(is));
+        subsysInput = subsys.getInputStream();
+        sessionOutput = session.getOutputStream();
+        setFraming(Framing.END_OF_MESSAGE);
         if (readTimeout > 0) {
             watchdog = new TimeoutWatchdog();
         } else {
             watchdog = new DummyWatchdog();
         }
         watchdog.start();
-        out = new PrintWriter(os, false);
+        message = new StringBuilder();
         ioSubscribers = new ArrayList<IOSubscriber>();
         // hello will be done by NetconfSession
+    }
+    
+    // Sets the framing to accommodate Netconf 1.1
+    public void setFraming (Framing f) {
+    	framer = f.newSessionFramer(new SessionDataReader(),
+                                    subsysInput, sessionOutput);
     }
 
     /**
@@ -193,7 +236,7 @@ public class SSHSession implements Transport {
      */
     @Override
     public boolean ready() throws IOException {
-        return subsys.getInputStream().available() > 0;
+        return in.ready();
     }
 
     /**
@@ -205,89 +248,18 @@ public class SSHSession implements Transport {
     }
 
     /**
-     * If we have readTimeout set, and an outstanding operation was timed out -
-     * the socket may still be alive. However since we timed out our read
-     * operation and subsequently didn't process the xml data - there may be
-     * parts of unprocessed xml data left on the socket. This function reads
-     * and throws away all such unprocessed data. An alternative after timeout
-     * is of course to close the socket and reconnect.
-     *
-     * Note that this is currently useless, in case of timeout the
-     * connection is closed.
-     *
-     * @return number of discarded characters
-     */
-    public int readUntilWouldBlock() {
-        int ret = 0;
-        while (true) {
-            try {
-                if (! ready()) {
-                    return ret;
-                }
-                in.read();
-                ret++;
-            } catch (final IOException e) {
-                return ret;
-            }
-        }
-    }
-
-    private int watchRead() throws IOException {
-        watchdog.watch();
-        try {
-            return in.read();
-        } finally {
-            watchdog.done();
-        }
-    }
-
-    /**
      * Reads in "one" reply from the SSH transport input stream. A
      * <em>]]&gt;]]&gt;</em> character sequence is used to separate multiple
      * replies as described in <a target="_top"
      * href="ftp://ftp.rfc-editor.org/in-notes/rfc4742.txt">RFC 4742</a>.
      */
     @Override
-    public StringBuffer readOne() throws IOException, JNCException {
-        final StringWriter wr = new StringWriter();
-        int ch;
-        while (true) {
-            ch = watchRead();
-            if (ch == -1) {
-                trace("end of input (-1)");
-                throw new IOException("Session closed");
-            }
-
-            for (int i=0; i < endmarker.length(); i++) {
-                if (ch == endmarker.charAt(i)) {
-                    if (i < end) {
-                        ch = watchRead();
-                    } else {
-                        for (final IOSubscriber sub : ioSubscribers) {
-                            sub.inputFlush(endmarker.substring(0, end));
-                        }
-                        return wr.getBuffer();
-                    }
-                } else {
-                    subInputChar(wr, endmarker.substring(0, i));
-                    subInputChar(wr, ch);
-                    break;
-                }
-            }
+    public String readOne() throws IOException, JNCException {
+        String frame = framer.parseFrame();
+        for (final IOSubscriber sub: ioSubscribers) {
+            sub.inputFrame(frame);
         }
-    }
-
-    private void subInputChar(StringWriter wr, int ch) {
-        wr.write(ch);
-        for (final IOSubscriber sub : ioSubscribers) {
-            sub.inputChar(ch);
-        }
-    }
-
-    private void subInputChar(StringWriter wr, String s) {
-        for (int i = 0; i < s.length(); i++) {
-            subInputChar(wr, s.charAt(i));
-        }
+        return frame;
     }
 
     /**
@@ -295,12 +267,12 @@ public class SSHSession implements Transport {
      *
      * @param iVal Text to send to the stream.
      */
-    @Override
+   @Override
     public void print(long iVal) {
-        for (final IOSubscriber sub : ioSubscribers) {
-            sub.outputPrint(iVal);
-        }
-        out.print(iVal);
+
+        String data = String.valueOf(iVal);
+        trace(data);
+        message.append(data);
     }
 
     /**
@@ -310,10 +282,8 @@ public class SSHSession implements Transport {
      */
     @Override
     public void print(String s) {
-        for (final IOSubscriber sub : ioSubscribers) {
-            sub.outputPrint(s);
-        }
-        out.print(s);
+        trace(s);
+        message.append(s);
     }
 
     /**
@@ -323,11 +293,9 @@ public class SSHSession implements Transport {
      * @param iVal Text to send to the stream.
      */
     @Override
-    public void println(int iVal) {
-        for (final IOSubscriber sub : ioSubscribers) {
-            sub.outputPrintln(iVal);
-        }
-        out.println(iVal);
+    public void println(long iVal) {
+        String data = String.valueOf(iVal);
+        print(data);
     }
 
     /**
@@ -338,10 +306,8 @@ public class SSHSession implements Transport {
      */
     @Override
     public void println(String s) {
-        for (final IOSubscriber sub : ioSubscribers) {
-            sub.outputPrintln(s);
-        }
-        out.println(s);
+        trace(s);
+        message.append(s).append("\n");
     }
 
     /**
@@ -371,21 +337,15 @@ public class SSHSession implements Transport {
     }
 
     /**
-     * Signals that the final chunk of data has be printed to the output
+     * Signals that the message is complete and should be sent to the output
      * transport stream. This method furthermore flushes the transport output
      * stream buffer.
-     * <p>
-     * A <em>]]&gt;]]&gt;</em> character sequence is added, as described in <a
-     * target="_top" href="ftp://ftp.rfc-editor.org/in-notes/rfc4742.txt">RFC
-     * 4742</a>, to signal that the last part of the reply has been sent.
      */
     @Override
-    public void flush() {
-        out.print(endmarker);
-        out.flush();
-        for (final IOSubscriber sub : ioSubscribers) {
-            sub.outputFlush(endmarker);
-        }
+    public void flush() throws IOException {
+        String messageStr = message.toString();
+        framer.sendFrame(messageStr);
+        message = new StringBuilder();
     }
 
     /**
@@ -419,20 +379,36 @@ public class SSHSession implements Transport {
     public void close() {
         try {
             watchdog.terminate();
+            sessionOutput.close();
+            subsys.close();
             session.close();
-        } catch (SSHException e) {
+        } catch (IOException e) {
             System.out.println("Exception caught while closing " + e);
         }
     }
 
     /* help functions */
 
+    public String getDeviceConnectionInfo()
+    {
+        return getSSHConnection().getClient().getRemoteHostname()
+            + ":" + getSSHConnection().getClient().getRemotePort();
+    }
+
+    public Collection<IOSubscriber> getIOSubscribers()
+    {
+        return ioSubscribers;
+    }
+
     /**
      * Printout trace if 'debug'-flag is enabled.
      */
-    private static void trace(String s) {
+    private  void trace(String s) {
+        for (final IOSubscriber sub : ioSubscribers) {
+            sub.output("*SSHSession:" + s);
+        }
         if (Element.debugLevel >= Element.DEBUG_LEVEL_TRANSPORT) {
-            System.err.println("*SSHSession: " + s);
+            System.err.println("*SSHSession:@" + getDeviceConnectionInfo() + "\n" + s);
         }
     }
 }

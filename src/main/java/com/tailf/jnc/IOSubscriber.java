@@ -1,5 +1,8 @@
 package com.tailf.jnc;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+
 /**
  * The IO subscriber is used for tracing, auditing, and logging of messages
  * which are sent and received over the SSHSession by a NETCONF session.
@@ -24,8 +27,6 @@ public abstract class IOSubscriber {
 
     private boolean rawmode;
     @SuppressWarnings("PMD.AvoidStringBufferField")
-    private StringBuffer inb;
-    @SuppressWarnings("PMD.AvoidStringBufferField")
     private StringBuffer outb;
 
     /**
@@ -35,7 +36,6 @@ public abstract class IOSubscriber {
      *            formatted XML.
      */
     public IOSubscriber(boolean rawmode) {
-        inb = new StringBuffer(1024);
         outb = new StringBuffer(1024);
         this.rawmode = rawmode;
     }
@@ -61,26 +61,21 @@ public abstract class IOSubscriber {
      */
     abstract public void output(String s);
 
-    void inputChar(int i) {
-        final char ch = (char) i;
-        inb.append(ch);
-        if (ch == '\n' && rawmode) {
-            // call usercode
-            input(inb.toString());
-            inb.setLength(0);
+    void inputRaw(ByteBuffer buffer) {
+        if (rawmode) {
+            input(new String(buffer.array(), buffer.position(), buffer.limit(),
+                             StandardCharsets.UTF_8));
         }
     }
 
-    private void xmlFlush(StringBuffer buf, boolean isInput) {
+    private void xmlFlush(String data, boolean isInput) {
         String res;
         try {
             final XMLParser p = new XMLParser();
-            final Element e = p.parse(buf.toString());
+            final Element e = p.parse(data);
             res = e.toXMLString();
-            buf.setLength(0);
         } catch (final Exception e) {
-            res = buf.toString();
-            buf.setLength(0);
+            res = data;
         }
         if (isInput) {
             input(res);
@@ -89,18 +84,16 @@ public abstract class IOSubscriber {
         }
     }
 
-    void inputFlush(String endMarker) {
+    void inputFrame(String frame) {
         if (!rawmode) {
-            xmlFlush(inb, true);
-        } else {
-            input(inb.toString() + endMarker + "\n");
-            inb.setLength(0);
+            xmlFlush(frame, true);
         }
     }
 
     void outputFlush(String endMarker) {
         if (!rawmode) {
-            xmlFlush(outb, false);
+            xmlFlush(outb.toString(), false);
+            outb.setLength(0);
         } else {
             output(outb.toString() + endMarker + "\n");
             outb.setLength(0);
