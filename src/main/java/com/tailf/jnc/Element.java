@@ -1718,12 +1718,12 @@ public class Element implements Cloneable, Serializable {
     }
 
     public String encodedXMLString(boolean newline_at_end) {
-        final StringBuffer s = new StringBuffer();
-        encodedXMLString(s, newline_at_end);
+        final StringBuilder s = new StringBuilder();
+        buildXMLString(s, newline_at_end);
         return s.toString();
     }
 
-    private void encodedXMLString(StringBuffer s, boolean newline_at_end) {
+    private void buildXMLString(StringBuilder s, boolean newline_at_end) {
         final String qName = qualifiedName();
         s.append("<").append(qName);
         // add xmlns attributes (prefixes)
@@ -1742,7 +1742,7 @@ public class Element implements Cloneable, Serializable {
             // add children elements if any
             s.append(">");
             for (final Element child : children) {
-                child.encodedXMLString(s, newline_at_end);
+                child.buildXMLString(s, newline_at_end);
             }
         } else if (value != null) {
             // otherwise, add value (if any)

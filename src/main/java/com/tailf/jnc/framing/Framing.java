@@ -28,7 +28,7 @@ public enum Framing {
                                                                           OutputStream.class);
             return cstr.newInstance(rdr, in, out);
         } catch (ReflectiveOperationException e) {
-            // what?
+            System.err.println("Failed to instantiate a framer.");
             return null;
         }
     }

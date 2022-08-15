@@ -20,7 +20,7 @@ following facts or requirements:
   
 The components are these, described top-down:
 
-* Enumeration `Framing` with two instances (for 1.0 and 1.1 framing mechanisms)
+* Enumeration `Framing` with two variants (for 1.0 and 1.1 framing mechanisms)
   that serve as a factory for `Framer` instances.
   
 * Interface `Framer` whose instances are responsible for actual receiving and

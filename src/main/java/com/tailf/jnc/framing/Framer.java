@@ -84,14 +84,8 @@ class NC1_1_Framer extends BaseFramer {
     static final int MAX_HEADER_SIZE = 13;
     byte[] chunkHdr = new byte[MAX_HEADER_SIZE];
 
-    static final int LF;
-    static final int HASH;
-
-    static {
-        byte[] bytes = "\n#".getBytes(StandardCharsets.UTF_8);
-        LF = bytes[0];
-        HASH = bytes[1];
-    }
+    static final int LF = '\n';
+    static final int HASH = '#';
 
     InputStream in;
     OutputStream out;
