@@ -59,6 +59,7 @@ class JNCPlugin(plugin.PyangPlugin):
     """
 
     def __init__(self):
+        super().__init__()
         self.done = set([])  # Helps avoiding processing modules more than once
 
     def add_output_format(self, fmts):
