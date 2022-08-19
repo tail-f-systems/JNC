@@ -1717,6 +1717,44 @@ public class Element implements Cloneable, Serializable {
         s.append(getIndentationSpacing(flag, indent)).append("</").append(qName).append(">\n");
     }
 
+    public String encodedXMLString(boolean newline_at_end) {
+        final StringBuilder s = new StringBuilder();
+        buildXMLString(s, newline_at_end);
+        return s.toString();
+    }
+
+    private void buildXMLString(StringBuilder s, boolean newline_at_end) {
+        final String qName = qualifiedName();
+        s.append("<").append(qName);
+        // add xmlns attributes (prefixes)
+        if (prefixes != null) {
+            for (final Prefix p : prefixes) {
+                s.append(" ").append(p.toXMLString());
+            }
+        }
+        // add attributes
+        if (attrs != null) {
+            for (final Attribute attr : attrs) {
+                s.append(" ").append(attr.toXMLString(this));
+            }
+        }
+        if (hasChildren()) {
+            // add children elements if any
+            s.append(">");
+            for (final Element child : children) {
+                child.buildXMLString(s, newline_at_end);
+            }
+        } else if (value != null) {
+            // otherwise, add value (if any)
+            s.append(">" + Utils.escapeXml(value.toString()));
+        } else {
+            // self-closing tag
+            s.append("/>" + (newline_at_end ? "\n" : ""));
+            return;
+        }
+        s.append("</" + qName + ">" + (newline_at_end ? "\n" : ""));
+    }
+
     /**
      * Gets indentation spacing for any given indent level.
      *

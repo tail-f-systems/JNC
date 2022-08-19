@@ -87,17 +87,14 @@ public class Client {
      */
     public static void main(String[] args) throws IOException, JNCException {
         Client client = new Client();
-        JIf.enable();
-        client.init();
-        NodeSet configs = client.getConfig();
+        try (Device dev = client.dev) {
+            JIf.enable();
+            NodeSet configs = client.getConfig();
 
-        // Get (first) config with name "interfaces"
-        Interfaces config = (Interfaces)getConfig(configs, "interfaces");
+            // Get (first) config with name "interfaces"
+            Interfaces config = (Interfaces)getConfig(configs, "interfaces");
 
-        System.out.println(config.toXMLString());
-
-        // Cleanup
-        client.dev.close();
+            System.out.println(config.toXMLString());
+        }
     }
-
 }

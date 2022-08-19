@@ -1,7 +1,16 @@
 package com.tailf.jnc.example.intro0;
 
 import java.io.IOException;
-import com.tailf.jnc.*;
+
+import com.tailf.jnc.Device;
+import com.tailf.jnc.DeviceUser;
+import com.tailf.jnc.Element;
+import com.tailf.jnc.ElementChildrenIterator;
+import com.tailf.jnc.JNCException;
+import com.tailf.jnc.NetconfSession;
+import com.tailf.jnc.NodeSet;
+import com.tailf.jnc.YangElement;
+
 import com.tailf.jnc.example.intro0.gen.hosts.Hosts;
 import com.tailf.jnc.example.intro0.gen.hosts.Simple;
 import com.tailf.jnc.example.intro0.gen.hosts.hosts.Host;
@@ -9,7 +18,7 @@ import com.tailf.jnc.example.intro0.gen.hosts.hosts.Host;
 
 public class Main {
 
-    private static class Test {
+    private static class Test implements AutoCloseable {
 
         public Test() {
             init();
@@ -56,6 +65,10 @@ public class Main {
                  System.err.println("Can't authenticate" + e1);
                  System.exit(1);
              }
+        }
+
+        public void close() {
+            dev.close();
         }
 
         /**
@@ -334,18 +347,17 @@ public class Main {
                 }
             }
 
-            Test t = new Test();
-            if (trace) {
-                t = new Test(new Subscriber("mydev"));
-            }
-            if (n == -1) {
-                for (int i=1; i< (NUMTESTS+1); i++) {
-                    runTest(t, i);
+            try (Test t = trace ?
+                 new Test(new Subscriber("mydev")) : new Test()) {
+                if (n == -1) {
+                    for (int i=1; i< (NUMTESTS+1); i++) {
+                        runTest(t, i);
+                    }
+                    System.out.println("OK");
                 }
-                System.out.println("OK");
-            }
-            else {
-                runTest(t, n);
+                else {
+                    runTest(t, n);
+                }
             }
         }
         catch (Exception e) {
