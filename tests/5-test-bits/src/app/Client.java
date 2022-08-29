@@ -37,7 +37,7 @@ public class Client {
         dev = new Device("mydev", duser, ip, 2022);
 
         try {
-            dev.connect(emsUserName);
+            dev.connect(emsUserName, 2000, false);
             dev.newSession("cfg");
         } catch (IOException e) {
             System.err.println(e);

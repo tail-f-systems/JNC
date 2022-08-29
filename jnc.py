@@ -79,8 +79,7 @@ class JNCPlugin(plugin.PyangPlugin):
     def add_opts(self, optparser):
         """Adds options to pyang, displayed in the pyang CLI help message"""
         optlist = [
-            optparse.make_option(
-                '-d', '--jnc-output',
+            optparse.make_option('--jnc-output',
                 dest='directory',
                 help='Generate output to DIRECTORY.'),
             optparse.make_option(
@@ -123,11 +122,6 @@ class JNCPlugin(plugin.PyangPlugin):
                 dest='ignore',
                 action='store_true',
                 help='Ignore errors from validation.'),
-            optparse.make_option(
-                '--jnc-import-on-demand',
-                dest='import_on_demand',
-                action='store_true',
-                help='Use non explicit imports where possible.'),
             optparse.make_option(
                 '--jnc-classpath-schema-loading',
                 dest='classpath_schema_loading',
@@ -549,7 +543,7 @@ def get_package(stmt, ctx):
         sub_packages.appendleft(camelize(stmt.arg))
     full_package = ctx.rootpkg.split(os.sep)
     full_package.extend(sub_packages)
-    return '.'.join(full_package)
+    return '.'.join(part for part in full_package if part)
 
 
 def pairwise(iterable):
@@ -1218,15 +1212,9 @@ class ClassGenerator(object):
                     all_fully_qualified = False
                 if field:
                     fields.add(field)  # Container child
-                if (not self.ctx.opts.import_on_demand
-                        or ch_arg in java_lang
-                        or ch_arg in java_util
-                        or ch_arg in com_tailf_jnc
-                        or ch_arg in class_hierarchy[self.rootpkg]
-                        or ch_arg in class_hierarchy[self.package]):
-                    # Need to do explicit import
-                    import_ = '.'.join([self.package, self.n2, ch_arg])
-                    self.java_class.imports.add(import_)
+                # Need to do explicit import
+                import_ = '.'.join([self.package, self.n2, ch_arg])
+                self.java_class.imports.add(import_)
 
         if self.ctx.opts.debug or self.ctx.opts.verbose:
             if package_generated:
@@ -1248,26 +1236,6 @@ class ClassGenerator(object):
 
         self.java_class.add_name_getter(gen.key_names())
         self.java_class.add_name_getter(gen.children_names())
-
-        if self.ctx.opts.import_on_demand:
-            self.java_class.imports.add('com.tailf.jnc.*')
-            self.java_class.imports.add('java.math.*')
-            self.java_class.imports.add('java.util.*')
-            if self.rootpkg != self.package:
-                self.java_class.imports.add(self.rootpkg + '.*')
-                top = get_module(self.stmt)
-                if top is None:
-                    top = self.stmt
-                elif top.keyword == 'submodule':
-                    top = search_one(top, 'belongs-to')
-                top_classname = normalize(search_one(top, 'prefix').arg)
-                if (top_classname in java_built_in
-                        or top_classname in java_util):
-                    top_import = self.rootpkg + '.' + top_classname
-                    self.java_class.imports.add(top_import)
-            if package_generated and not all_fully_qualified:
-                import_ = '.'.join([self.package, self.n2, '*'])
-                self.java_class.imports.add(import_)
 
         self.write_to_file()
 
@@ -1922,10 +1890,14 @@ class MethodGenerator(object):
 
         self.pkg = get_package(stmt, ctx)
         self.basepkg = self.pkg.partition('.')[0]
-        self.rootpkg = ctx.rootpkg.split(os.sep)
-        if self.rootpkg[:1] == ['src']:
-            self.rootpkg = self.rootpkg[1:]  # src not part of package
-        self.rootpkg.append(camelize(self.module_stmt.arg))
+        module_part = camelize(self.module_stmt.arg)
+        if ctx.rootpkg:
+            self.rootpkg = ctx.rootpkg.split(os.sep)
+            if self.rootpkg[:1] == ['src']:
+                self.rootpkg = self.rootpkg[1:]  # src not part of package
+            self.rootpkg.append(module_part)
+        else:
+            self.rootpkg = [module_part]
 
         self.is_container = stmt.keyword in ('container', 'notification')
         self.is_list = stmt.keyword == 'list'
@@ -1972,20 +1944,6 @@ class MethodGenerator(object):
     def fix_imports(self, method, child=False):
         res = OrderedSet([])
         imports = method.imports
-        if self.ctx.opts.import_on_demand:
-            imports = OrderedSet([])
-            pkg = self.pkg
-            if child:
-                pkg = pkg.rpartition('.')[0]
-            pkg_classes = class_hierarchy.get(pkg, [])
-            for import_ in method.imports:
-                if import_.rpartition('.')[2] in pkg_classes:
-                    if (child and not import_.rpartition('.')[1]
-                            and import_ != self.root):
-                        imports.add('.'.join([self.pkg, import_]))
-                    else:
-                        imports.add(import_)
-
         for dependency in imports:
             if dependency.startswith(('java.math', 'java.util',
                                       'com.tailf.jnc', self.basepkg)):

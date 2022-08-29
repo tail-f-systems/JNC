@@ -2254,8 +2254,8 @@ public class NetconfSession {
         rpcMsg.getMessage().append("\n<" + ncn + "create-subscription " + xmlnsAttr + ">");
         if (stream != null) {
             rpcMsg.getMessage().append("\n<" + ncn + STREAM_GT);
-            rpcMsg.getMessage().append("\n" + stream);
-            rpcMsg.getMessage().append("\n</" + ncn + STREAM_GT);
+            rpcMsg.getMessage().append(stream);
+            rpcMsg.getMessage().append("</" + ncn + STREAM_GT);
         }
         if (filter != null) {
             rpcMsg.getMessage().append("\n<" + ncn + FILTER + ncn + "type='xpath'>");
@@ -2293,8 +2293,8 @@ public class NetconfSession {
         rpcMsg.getMessage().append("\n<" + ncn + "create-subscription " + xmlnsAttr + ">");
         if (stream != null) {
             rpcMsg.getMessage().append("\n<" + ncn + STREAM_GT);
-            rpcMsg.getMessage().append("\n" + stream);
-            rpcMsg.getMessage().append("\n</" + ncn + STREAM_GT);
+            rpcMsg.getMessage().append(stream);
+            rpcMsg.getMessage().append("</" + ncn + STREAM_GT);
         }
         if (eventFilter != null) {
             rpcMsg.getMessage().append("\n<" + ncn + FILTER + ncn + "type='subtree'>");

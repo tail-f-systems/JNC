@@ -1,7 +1,7 @@
 package app;
 
 import gen.ietfInetTypes.IpAddress;
-import gen.ietfSystem.system.ntp.Server;
+import gen.ietfSystem.system.ntp.NtpServer;
 
 import java.io.IOException;
 
@@ -29,7 +29,7 @@ public class Client {
         dev = new Device("mydev", duser, ip, 2022);
 
         try {
-            dev.connect(emsUserName);
+            dev.connect(emsUserName, 2000, false);
             dev.newSession("cfg");
         } catch (IOException e) {
             System.err.println(e);
@@ -95,7 +95,7 @@ public class Client {
         gen.ietfSystem.System systemConfig = getSystemConfig(configs);
         
         // Add new server
-        Server server = new Server(new IpAddress("4.4.4.4"));
+        NtpServer server = new NtpServer(new IpAddress("4.4.4.4"));
         systemConfig.getChild("ntp").addChild(server);
 
         String configAsXML = systemConfig.toXMLString();

@@ -10,7 +10,13 @@ $ python -m unittest discover -v
 """
 import unittest
 
-import jnc
+import sys
+import os
+import importlib
+
+sys.path.append(os.path.realpath(os.path.dirname(__file__)
+                                 + os.path.sep + os.pardir))
+jnc = importlib.import_module('jnc')
 
 
 class Test(unittest.TestCase):

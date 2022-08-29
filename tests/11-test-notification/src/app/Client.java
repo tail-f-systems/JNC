@@ -32,7 +32,7 @@ public class Client {
         dev = new Device("mydev", duser, ip, 2022);
 
         try {
-            dev.connect(emsUserName);
+            dev.connect(emsUserName, 2000, false);
             dev.newSession("cfg");
         } catch (IOException e) {
             System.err.println(e);
@@ -136,16 +136,16 @@ public class Client {
 
         // Loop for 10000 iterations, print every 1000 received notification
         System.out.println("Waiting for more \"interface\" notifications...");
-        System.out.println("Only every 100 notification is printed.");
+        System.out.println("Only every 1000th notification is printed.");
         for (int i=0; i<10000; i++) {
             Element notification = client.waitForNotification();
-            if (i % 1000 == 0) {
+            if ((i+1) % 1000 == 0) {
                 System.out.println(notification.toXMLString());
             }
         }
 
         // Cleanup
-        //client.dev.close();
+        client.dev.close();
     }
 
 }
