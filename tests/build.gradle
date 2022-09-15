@@ -11,6 +11,7 @@ plugins {
 
 ext {
     JNCDir = "$project.rootDir/.."
+    PyangJNC = "$JNCDir/pyang_jnc"
 }
 
 // Define dependencies

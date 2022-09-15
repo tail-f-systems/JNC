@@ -3,7 +3,7 @@ plugins {
 }
 
 jncPyang {
-    pluginDir = JNCDir
+    pluginDir = PyangJNC
     outputDir = new File("${buildDir}/src/com/tailf/jnc/example/interfaces1/gen")
     yangPath = projectDir
     inputFiles = [new File("$projectDir/ietf-interfaces.yang")]

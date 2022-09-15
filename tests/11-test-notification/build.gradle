@@ -5,7 +5,7 @@ plugins {
 assert (System.env.CONFD_DIR): "CONFD_DIR is not set!"
 
 task pyang(type: JncPyangTask) {
-    pluginDir = JNCDir
+    pluginDir = PyangJNC
     outputDir = new File("${buildDir}/generated/src")
     yangPath = "$System.env.CONFD_DIR/src/confd/yang"
     inputFiles = [new File("$projectDir/notif.yang")]

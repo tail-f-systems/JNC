@@ -2,9 +2,6 @@
 
 Java NETCONF Client.
 
-[![Build Status](https://travis-ci.org/btisystems/JNC.svg?branch=master)](https://travis-ci.org/btisystems/JNC)
-
-
 ## Overview
 
 JNC (Java NETCONF Client) consists of two parts: 

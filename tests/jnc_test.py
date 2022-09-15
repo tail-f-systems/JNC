@@ -16,7 +16,7 @@ import importlib
 
 sys.path.append(os.path.realpath(os.path.dirname(__file__)
                                  + os.path.sep + os.pardir))
-jnc = importlib.import_module('jnc')
+jnc = importlib.import_module('pyang_jnc.jnc')
 
 
 class Test(unittest.TestCase):
