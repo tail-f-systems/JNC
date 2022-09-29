@@ -22,7 +22,7 @@ CONFD_HOST ?= localhost
 CONFD_FLAGS = --addloadpath $(CONFD_DIR)/etc/confd
 START_FLAGS ?=
 
-all: ietf-ip.fxs ietf-interfaces.fxs iana-if-type.fxs ssh-keydir $(CDB_DIR)/ietf-ip.xml
+all: ietf-interfaces.fxs iana-if-type.fxs ietf-ip.fxs ssh-keydir $(CDB_DIR)/ietf-ip.xml
 	@echo "Build complete"
 
 $(CDB_DIR)/aaa_init.xml: ../confd/aaa_init.xml $(CDB_DIR)
