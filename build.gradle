@@ -24,9 +24,6 @@ dependencies {
     testImplementation 'org.hamcrest:hamcrest-all:1.3'
 }
 
-sourceSets.main.resources.srcDirs = [ projectDir ]
-sourceSets.main.resources.includes = [ "jnc.py" ]
-
 def manifestAttrs = [
         'Implementation-Title'  : project.name,
         'Implementation-Version': project.version,
