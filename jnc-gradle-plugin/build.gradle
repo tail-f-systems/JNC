@@ -1,5 +1,3 @@
-/* (c) Michal Novák, LxDockerPlugin it.novakmi@gmail.com, see LICENSE file */
-
 plugins {
     id 'base'
     id 'groovy'
@@ -12,7 +10,6 @@ plugins {
 repositories {
     gradlePluginPortal()
 }
-
 
 gradlePlugin {
     plugins {
@@ -43,14 +40,6 @@ jar {
         attributes(manifestAttrs)
     }
 }
-
-//task sourcesJar(type: Jar) {
-//    archiveClassifier = 'sources'
-//    from "${project.projectDir}/src/main"
-//    manifest {
-//        attributes(manifestAttrs)
-//    }
-//}
 
 task groovydocJar(type: Jar, dependsOn: groovydoc) {
     archiveClassifier = 'groovydoc'
