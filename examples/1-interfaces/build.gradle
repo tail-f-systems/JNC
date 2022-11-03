@@ -1,16 +1,16 @@
 plugins {
-    id 'application'
+    id 'jncPyang'
 }
 
-task pyang(type: JncPyangTask) {
+jncPyang {
     pluginDir = JNCDir
     outputDir = new File("${buildDir}/src/com/tailf/jnc/example/interfaces1/gen")
     yangPath = projectDir
     inputFiles = [new File("$projectDir/ietf-interfaces.yang")]
 }
 
-compileJava.dependsOn(pyang)
-sourceSets.main.java.srcDirs = ['src', pyang]
+compileJava.dependsOn(jncPyang)
+sourceSets.main.java.srcDirs = ['src', jncPyang]
 
 application {
     mainClass = 'com.tailf.jnc.example.interfaces1.Client'

@@ -1,0 +1,80 @@
+plugins {
+    id 'base'
+    id 'groovy'
+    id 'java-gradle-plugin'
+    id 'idea'
+    id 'com.github.ben-manes.versions' version '0.42.0' // gradle dependencyUpdates -Drevision=release
+    id 'maven-publish' // to use maven repository
+}
+
+repositories {
+    gradlePluginPortal()
+}
+
+gradlePlugin {
+    plugins {
+        "$project.name" {
+            id = project.name
+            implementationClass = "${group}.JncPyangPlugin"
+        }
+    }
+}
+
+dependencies {
+    implementation gradleApi()
+    testImplementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
+}
+
+def manifestAttrs = [
+    'Implementation-Title'  : project.name,
+    'Implementation-Version': project.version,
+    'Specification-Vendor'  : project.author,
+    'Built-By'              : project.author,
+    'Specification-Title'   : project.name,
+    'Extension-Name'        : project.name,
+    'Specification-Version' : project.version
+]
+
+jar {
+    manifest {
+        attributes(manifestAttrs)
+    }
+}
+
+task groovydocJar(type: Jar, dependsOn: groovydoc) {
+    archiveClassifier = 'groovydoc'
+    from groovydoc.destinationDir
+    manifest {
+        attributes(manifestAttrs)
+    }
+}
+
+java {
+    withSourcesJar()
+
+}
+
+publishing { // use 'gradle --info -PJNC_GITLAB_TOKEN=<token> publish'
+    def gitlabToken = project.findProperty('JNC_GITLAB_TOKEN')
+    publications {
+        jncPyangPlugin(MavenPublication) {
+            artifact groovydocJar {
+                classifier "groovydoc"
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "GitLab"
+            url "https://gitlab.com/api/v4/projects/39363041/packages/maven"
+            credentials(HttpHeaderCredentials) {
+                name = "Deploy-Token"
+                value = gitlabToken
+            }
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
+        }
+
+    }
+}
