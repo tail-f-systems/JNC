@@ -9,8 +9,6 @@ JNC (Java NETCONF Client) consists of two parts:
 * Java library for NETCONF client (JNC library)
 * pyang plugin for Java class hierarchies generation.
 
-You need an installation of *pyang* to use the JNC plugin. Get it [here](https://github.com/mbj4668/pyang) (or use `pip3 install pyang`).
-
 Together with the JNC library, these generated Java classes may be used as the foundation for a NETCONF client (AKA manager) written in Java.
 
 JNC's Java library code uses [SSHJ](https://github.com/hierynomus/sshj) to communicate with NETCONF servers/agents.
@@ -44,18 +42,29 @@ Alternative to building the JNC library locally is to utilize online Maven based
 See codebase of JNC `examples/` for details on the inclusion of Java lib for building your NETCONF client application.
 
 
-### JNC Pyang plugin
+### Installing JNC Pyang plugin
 
-Make sure `pyang` is installed in your system and is on the `PATH` (check it with `pyang --version`).
+The easiest way to use the pyang plugin is to install it into your environment
+using `pip` (or `pip3`) like `pip install jnc`.  This makes sure that `pyang`
+is installed too and that `jnc` is registered as a Pyang plugin.
 
-Add the JNC plugin to your existing pyang installation. This may be done in one of the following three ways:
+Another option is to use the plugin source that is part of this repository.
+For that, you need an installation of *pyang* - get it
+[here](https://github.com/mbj4668/pyang) or use `pip3 install pyang`. Then, add
+the JNC plugin to your existing pyang installation. This may be done in one of
+the following three ways:
 
 1. Add jnc.py to `pyang/plugins` in your pyang installation directory,
 2. Add the location of jnc.py to the `$PYANG_PLUGINPATH` environment variable, or
 3. Use the `--plugindir` option of pyang each time you want to use JNC
 
 **Note!**
-If more than one of these approaches is used, you will end up with *optparse* library conflicts, so please choose one and stick with it. From here on, we will assume that you went for (1), but using (2) or (3) should be analogous.
+If more than one of these approaches is used, you will end up with *optparse*
+library conflicts, so please choose one and stick with it. From here on, we
+will assume that you went for (1), but using (2) or (3) should be analogous.
+
+
+### Generating Java classes
 
 JNC plugin can be used to generate Java classes from a YANG file of your choice.
 
