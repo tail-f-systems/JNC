@@ -45,8 +45,8 @@ See codebase of JNC `examples/` for details on the inclusion of Java lib for bui
 ### Installing JNC Pyang plugin
 
 The easiest way to use the pyang plugin is to install it into your environment
-using `pip` (or `pip3`) like `pip install jnc`.  This makes sure that `pyang`
-is installed too and that `jnc` is registered as a Pyang plugin.
+using `pip` (or `pip3`) like `pip install pyang-jnc`.  This makes sure that
+`pyang` is installed too and that `jnc` is registered as a Pyang plugin.
 
 Another option is to use the plugin source that is part of this repository.
 For that, you need an installation of *pyang* - get it
