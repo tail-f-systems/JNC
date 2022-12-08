@@ -4,8 +4,10 @@ Next version (SNAPSHOT)
 - Ganymed SSH-2 was replaced with SSHJ.
 - Build system updated to Gradle.
 - cleaned Python PEP 8 lints for jnc.py
-- reduced Java lints (PMD tool, "java" quickstart.xml lint set)
+- reduced some Java lints (PMD tool, "java" quickstart.xml lint set)
 - implemented NETCONF-1.1 framing
+- cleaned up some deprecated examples
+- updated root README.md 
 
 2012-10-17
 - JNC is finally made open source! There are some changes remaining
