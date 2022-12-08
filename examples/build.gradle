@@ -7,7 +7,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.tailf.jnc.gradle:jncPyang:0.1.0-SNAPSHOT'
+        classpath 'com.tailf.jnc.gradle:jncPyang:1.1.0'
     }
 }
 
@@ -25,6 +25,12 @@ subprojects {
     apply plugin:'application'
     apply plugin: 'java'
     apply plugin: com.tailf.jnc.gradle.JncPyangPlugin
+
+    java {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
+
     repositories {
         mavenCentral()
         maven {
@@ -34,7 +40,7 @@ subprojects {
     }
 
     dependencies {
-        implementation 'com.tailf.jnc:JNC:1.1.0-SNAPSHOT'
+        implementation 'com.tailf.jnc:JNC:1.1.0'
         implementation 'com.hierynomus:sshj:0.33.0'
         implementation 'ch.qos.logback:logback-classic:1.2.11'
         implementation 'org.bouncycastle:bcprov-jdk15on:1.70'

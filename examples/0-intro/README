@@ -34,8 +34,8 @@ In order to run this demonstration, you need the following:
   * ConfD version 5.2 or later.
   * JNC.
   * Tools to build C programs, e.g. gcc, make.
-  * Java version 1.4 or later.
-  * ant program.
+  * Java version 1.8 or later
+  * Gradle build system
 
 4. Building and Running the JNC Introductory Example
 ======================================================

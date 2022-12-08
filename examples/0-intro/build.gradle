@@ -5,8 +5,7 @@ plugins {
 
 assert (System.env.CONFD_DIR): "CONFD_DIR is not set!"
 
-jncPyang {
-    pluginDir = PyangJNC
+jncPyang { // pyang and pyang-jnc python packages are required
     outputDir = new File("${buildDir}/generated/src/com/tailf/jnc/example/intro0/gen")
     yangPath = "$System.env.CONFD_DIR/src/confd/yang"
     inputFiles = [new File("$projectDir/hosts.yang"),
