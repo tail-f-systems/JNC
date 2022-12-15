@@ -13,7 +13,7 @@ jncPyang { // pyang and pyang-jnc python packages are required
 }
 
 compileJava.dependsOn([jncPyang])
-sourceSets.main.java.srcDirs = ["src", jncPyang ] //non standard source layout
+sourceSets.main.java.srcDirs = ["src", "${buildDir}/generated/src"]
 
 application {
     mainClass = 'com.tailf.jnc.example.intro0.Main'

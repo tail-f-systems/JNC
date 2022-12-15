@@ -7,7 +7,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.tailf.jnc.gradle:jncPyang:1.1.0'
+        classpath 'com.tailf.jnc.gradle:jncPyang:1.2.0'
     }
 }
 
