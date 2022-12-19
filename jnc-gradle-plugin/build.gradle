@@ -50,8 +50,9 @@ task groovydocJar(type: Jar, dependsOn: groovydoc) {
 }
 
 java {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
     withSourcesJar()
-
 }
 
 publishing { // use 'gradle --info -PJNC_GITLAB_TOKEN=<token> publish'
