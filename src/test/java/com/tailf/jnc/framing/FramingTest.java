@@ -32,6 +32,14 @@ public class FramingTest {
     private final static String CHUNKED_INTL_FRAME =
         String.format("\n#%d\n%s\n##\n", INTL_FRAME.getBytes(StandardCharsets.UTF_8).length, INTL_FRAME);
 
+    private InputStream nullInputStream() {
+       return new ByteArrayInputStream(new byte[0]);
+    }
+
+    private OutputStream nullOutputStream() {
+        return new ByteArrayOutputStream(0);
+    }
+
     @Rule
     public Timeout globalTimeout= new Timeout(500, TimeUnit.MILLISECONDS);
 
@@ -39,50 +47,50 @@ public class FramingTest {
     public void separatedFraming() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Framer framer =
-            Framing.END_OF_MESSAGE.newSessionFramer(null, InputStream.nullInputStream(), out);
+            Framing.END_OF_MESSAGE.newSessionFramer(null, nullInputStream(), out);
         framer.sendFrame(FRAME);
         assertEquals("formatted frame should have separator",
-                     FRAME + ENDMARK, out.toString(StandardCharsets.UTF_8));
+                     FRAME + ENDMARK, out.toString());
     }
 
     @Test
     public void chunkedFraming() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Framer framer =
-            Framing.CHUNKED.newSessionFramer(null, InputStream.nullInputStream(), out);
+            Framing.CHUNKED.newSessionFramer(null, nullInputStream(), out);
         framer.sendFrame(FRAME);
         assertEquals("formatted frame should be chunked",
-                     CHUNKED_FRAME, out.toString(StandardCharsets.UTF_8));
+                     CHUNKED_FRAME, out.toString());
     }
 
     @Test
     public void chunkedIntlFraming() throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Framer framer =
-            Framing.CHUNKED.newSessionFramer(null, InputStream.nullInputStream(), out);
+            Framing.CHUNKED.newSessionFramer(null, nullInputStream(), out);
         framer.sendFrame(INTL_FRAME);
         assertEquals("formatted frame with non-latin chars should be chunked",
-                     CHUNKED_INTL_FRAME, out.toString(StandardCharsets.UTF_8));
+                     CHUNKED_INTL_FRAME, out.toString());
     }
 
     @Test
     public void baseAccept() throws IOException {
         InputStream in = new ByteArrayInputStream((FRAME + ENDMARK).getBytes(StandardCharsets.UTF_8));
-        Framer framer = Framing.END_OF_MESSAGE.newSessionFramer(in, OutputStream.nullOutputStream());
+        Framer framer = Framing.END_OF_MESSAGE.newSessionFramer(in, nullOutputStream());
         assertEquals("should accept the 1.0 frame", FRAME, framer.parseFrame());
     }
 
     @Test
     public void chunkedAccept() throws IOException {
         InputStream in = new ByteArrayInputStream(CHUNKED_FRAME.getBytes(StandardCharsets.UTF_8));
-        Framer framer = Framing.CHUNKED.newSessionFramer(in, OutputStream.nullOutputStream());
+        Framer framer = Framing.CHUNKED.newSessionFramer(in, nullOutputStream());
         assertEquals("should accept the 1.1 frame", FRAME, framer.parseFrame());
     }
 
     @Test
     public void chunkedIntlAccept() throws IOException {
         InputStream in = new ByteArrayInputStream(CHUNKED_INTL_FRAME.getBytes(StandardCharsets.UTF_8));
-        Framer framer = Framing.CHUNKED.newSessionFramer(in, OutputStream.nullOutputStream());
+        Framer framer = Framing.CHUNKED.newSessionFramer(in, nullOutputStream());
         assertEquals("should accept the 1.1 frame with multibyte chars",
                      INTL_FRAME, framer.parseFrame());
     }
@@ -90,7 +98,7 @@ public class FramingTest {
     @Test
     public void twoChunks() throws IOException {
         InputStream in = new ByteArrayInputStream(CHUNKED_LONGER_FRAME.getBytes(StandardCharsets.UTF_8));
-        Framer framer = Framing.CHUNKED.newSessionFramer(in, OutputStream.nullOutputStream());
+        Framer framer = Framing.CHUNKED.newSessionFramer(in, nullOutputStream());
         assertEquals("should accept the chunked frame", LONGER_FRAME, framer.parseFrame());
     }
 
@@ -139,7 +147,7 @@ public class FramingTest {
         for (int i = 2; i < data.length - 1; i++) {
             DataReader rdr = new TestDataReader(po, data, i);
             Framer framer = Framing.CHUNKED.newSessionFramer(rdr, pi,
-                                                             OutputStream.nullOutputStream());
+                                                             nullOutputStream());
             assertEquals("should restore the frame from two parts", frame, framer.parseFrame());
         }
     }
@@ -164,7 +172,7 @@ public class FramingTest {
             int bytesplit = frames.substring(0, i).getBytes(StandardCharsets.UTF_8).length;
             DataReader rdr = new TestDataReader(po, data, bytesplit);
             Framer framer = Framing.END_OF_MESSAGE.newSessionFramer(rdr, pi,
-                                                             OutputStream.nullOutputStream());
+                                                             nullOutputStream());
             assertEquals("should restore both frames from parts",
                          INTL_FRAME + LONGER_FRAME,
                          framer.parseFrame() + framer.parseFrame());
@@ -179,7 +187,7 @@ public class FramingTest {
         for (int i = 1; i < data.length; i++) {
             DataReader rdr = new TestDataReader(po, data, i);
             Framer framer = Framing.CHUNKED.newSessionFramer(rdr, pi,
-                                                             OutputStream.nullOutputStream());
+                                                             nullOutputStream());
             assertEquals("should restore both frames from parts",
                          INTL_FRAME + LONGER_FRAME,
                          framer.parseFrame() + framer.parseFrame());
