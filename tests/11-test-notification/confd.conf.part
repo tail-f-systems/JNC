@@ -1,0 +1,15 @@
+  <notifications>
+    <eventStreams>
+      <stream>
+        <name>interface</name>
+        <replaySupport>true</replaySupport>
+        <builtinReplayStore>
+          <enabled>true</enabled>
+          <dir>confd-cdb</dir>
+          <maxSize>S10M</maxSize>
+          <maxFiles>10</maxFiles>
+        </builtinReplayStore>
+        <description>Interface event stream</description>
+      </stream>
+    </eventStreams>
+  </notifications>

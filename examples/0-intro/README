@@ -34,8 +34,8 @@ In order to run this demonstration, you need the following:
   * ConfD version 5.2 or later.
   * JNC.
   * Tools to build C programs, e.g. gcc, make.
-  * Java version 1.4 or later.
-  * ant program.
+  * Java version 1.8 or later
+  * Gradle build system
 
 4. Building and Running the JNC Introductory Example
 ======================================================
@@ -56,20 +56,18 @@ Source the rc script in the ConfD root directory:
 
   # source <confd_dir>/confdrc.tcsh
 
-Then change directory 
+Then change directory
 
   # cd <YOUR JNC DIR>/examples/0-intro
 
 Build the ConfD node and start it:
 
-  # cd confd
   # make clean all start
-  # cd ..
 
 4.2 Building JNC example
 ========================
 
-Follow the instructions in the <YOUR JNC DIR>/README to install JNC.
+Follow the instructions in the <YOUR JNC DIR>/README to build JNC.
 
 Set your current working directory to the directory where
 this JNC example resides:
@@ -78,30 +76,28 @@ this JNC example resides:
 
 Build the JNC example:
 
-  # ant clean compile
+  # gradle clean build
 
 4.3 Run the Example
 ===============================
 
 Run this example by doing:
 
-  # ant run
+  # gradle run
 
 4.4 Stopping ConfD
 ===============================
 
 After completing the examples above, stop ConfD as follows:
 
-  # cd confd
   # make stop
-  # cd ..
 
 5. ConfD and JNC on different hosts
 =====================================
 
 You can also run the example above having ConfD and JNC on separate
 machines. If so, the following additional steps has to be made:
-This is the required procedure for users using the win32 version of 
+This is the required procedure for users using the win32 version of
 JNC.
 
 5.1 Building and Starting ConfD
@@ -132,4 +128,4 @@ or
 
   dev = new Device("mydev", duser, "192.168.1.1", 2022);
 
-Then rerun the ant script.
+Then rebuild.

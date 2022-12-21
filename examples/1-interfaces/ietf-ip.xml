@@ -2,8 +2,8 @@
   <interface>
     <name>eth0</name>
     <type>fast</type>
-    <mtu>1500</mtu>
     <ipv4 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip">
+      <mtu>1500</mtu>
       <address>
         <ip>192.168.0.1</ip>
         <netmask>255.255.255.0</netmask>
@@ -14,9 +14,8 @@
     <name>eth1</name>
     <type>atm</type>
     <enabled>true</enabled>
-    <speed>0</speed>
     <ipv4 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip">
-      <ip-forwarding>true</ip-forwarding>
+      <forwarding>true</forwarding>
       <address>
         <ip>127.0.0.1</ip>
         <netmask>255.0.0.0</netmask>
@@ -27,7 +26,7 @@
       </address>
       <neighbor>
         <ip>192.168.111.20</ip>
-        <phys-address>00:08:c7:1b:8c:02</phys-address>
+        <link-layer-address>00:08:c7:1b:8c:02</link-layer-address>
       </neighbor>
     </ipv4>
     <ipv6 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip">

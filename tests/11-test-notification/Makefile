@@ -22,8 +22,13 @@ CONFD_HOST ?= localhost
 CONFD_FLAGS = --addloadpath $(CONFD_DIR)/etc/confd
 START_FLAGS ?=
 
-all: notif.fxs ssh-keydir $(CDB_DIR)/notif.xml
+all: notif.fxs ssh-keydir $(CDB_DIR) confd.conf notifier
 	@echo "Build complete"
+
+notifier: notifier.o
+	 $(CC) notifier.o $(LIBS) $(CFLAGS) -ansi -pedantic -o $@
+
+notifier.o: notif.h
 
 notif.xsd: notif.fxs
 	$(CONFDC) --emit-xsd notif.xsd notif.fxs
@@ -37,8 +42,14 @@ $(CDB_DIR)/%.xml: %.xml $(CDB_DIR)
 
 clean:	iclean
 
+confd.conf: ../confd/confd.conf
+	awk -lreadfile -f confd.awk $^ >| $@
+
 start:  stop
-	$(CONFD) -c ../confd/confd.conf $(CONFD_FLAGS)
+	$(CONFD) -c confd.conf $(CONFD_FLAGS)
+
+start_notifier:
+	./notifier
 
 stop:
 	$(CONFD) --stop || true

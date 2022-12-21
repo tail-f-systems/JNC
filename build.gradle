@@ -1,0 +1,71 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id 'com.github.ben-manes.versions' version '0.42.0' // gradle dependencyUpdates -Drevision=release
+    id 'java-library'
+    id 'idea'
+    id 'maven-publish' // to use maven repository
+}
+
+repositories {
+    mavenCentral()
+}
+
+// Define dependencies
+dependencies {
+    implementation 'com.hierynomus:sshj:0.33.0'
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.hamcrest:hamcrest-all:1.3'
+}
+
+def manifestAttrs = [
+        'Implementation-Title'  : project.name,
+        'Implementation-Version': project.version,
+        'Specification-Vendor'  : project.author,
+        'Built-By'              : project.author,
+        'Specification-Title'   : project.name,
+        'Extension-Name'        : project.name,
+        'Specification-Version' : project.version
+]
+
+jar {
+    manifest {
+        attributes(manifestAttrs)
+    }
+}
+
+java {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+    withSourcesJar()
+    withJavadocJar()
+}
+
+publishing { // use 'gradle --info -PJNC_GITLAB_TOKEN=<token> publish'
+    def gitlabToken = project.findProperty('JNC_GITLAB_TOKEN')
+    publications {
+        jncLibrary(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            name = "GitLab"
+            url "https://gitlab.com/api/v4/projects/39363041/packages/maven"
+            credentials(HttpHeaderCredentials) {
+                name = "Deploy-Token"
+                value = gitlabToken
+            }
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
+        }
+
+    }
+}

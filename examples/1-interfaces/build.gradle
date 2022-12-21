@@ -1,0 +1,16 @@
+plugins {
+    id 'jncPyang'
+}
+
+jncPyang { // pyang and pyang-jnc python packages are required
+    outputDir = new File("${buildDir}/generated/src/com/tailf/jnc/example/interfaces1/gen")
+    yangPath = "$projectDir:$System.env.CONFD_DIR/src/confd/yang"
+    inputFiles = [new File("$projectDir/ietf-interfaces.yang")]
+}
+
+compileJava.dependsOn(jncPyang)
+sourceSets.main.java.srcDirs = ["src", "${buildDir}/generated/src"]
+
+application {
+    mainClass = 'com.tailf.jnc.example.interfaces1.Client'
+}

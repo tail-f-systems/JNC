@@ -1,4 +1,0 @@
-module minimal {
-  namespace "http://example.com/ns/minimal/1.0";
-  prefix minimal;
-}

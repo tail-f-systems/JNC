@@ -10,7 +10,14 @@ $ python -m unittest discover -v
 """
 import unittest
 
-import jnc
+import sys
+import os
+import importlib
+
+sys.path.append(os.path.realpath(os.path.dirname(__file__)
+                                 + os.path.sep + os.pardir))
+jnc = importlib.import_module('pyang_jnc.jnc')
+
 
 class Test(unittest.TestCase):
 
@@ -78,7 +85,8 @@ class Test(unittest.TestCase):
         message = 'will remove all except consecutive and trailing'
         assert result == expected, message + ' but was ' + result
 
+
 if __name__ == "__main__":
     """Launch all unit tests"""
-    #import sys;sys.argv = ['', 'Test.testCapitalize_first']  # Only one
+    # import sys;sys.argv = ['', 'Test.testCapitalize_first']  # Only one
     unittest.main()

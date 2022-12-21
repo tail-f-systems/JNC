@@ -1,0 +1,30 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id 'com.github.ben-manes.versions' version '0.42.0' // gradle dependencyUpdates -Drevision=release
+    id 'application'
+}
+
+ext {
+    JNCDir = "$project.rootDir/.."
+    PyangJNC = "$JNCDir/pyang_jnc"
+}
+
+// Define dependencies
+subprojects {
+    apply plugin: 'java'
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation fileTree(dir: "$JNCDir/build/libs", include: 'JNC*.jar')
+        implementation 'com.hierynomus:sshj:0.33.0'
+        implementation 'ch.qos.logback:logback-classic:1.2.11'
+        implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    }
+}
