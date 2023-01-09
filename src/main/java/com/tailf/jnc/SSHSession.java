@@ -5,7 +5,6 @@ import com.tailf.jnc.framing.DataReader;
 import com.tailf.jnc.framing.Framer;
 import com.tailf.jnc.framing.Framing;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -49,7 +48,6 @@ public class SSHSession implements Transport, AutoCloseable {
 
     private InputWatchdog watchdog;
 
-    private BufferedReader in;
     @SuppressWarnings("PMD.AvoidStringBufferField")
     private StringBuilder message;
     private final List<IOSubscriber> ioSubscribers;
@@ -236,7 +234,7 @@ public class SSHSession implements Transport, AutoCloseable {
      */
     @Override
     public boolean ready() throws IOException {
-        return in.ready();
+        return subsysInput.available() > 0;
     }
 
     /**
