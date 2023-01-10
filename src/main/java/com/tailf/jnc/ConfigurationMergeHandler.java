@@ -1,5 +1,6 @@
 package com.tailf.jnc;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -222,14 +223,14 @@ public class ConfigurationMergeHandler {
     private List<PathComponent> splitPathIntoComponents(final String rawPath) {
         final List<PathComponent> pcs = new ArrayList<PathComponent>();
         if (rawPath != null) {
-            final byte[] buf = rawPath.getBytes();
+            final byte[] buf = rawPath.getBytes(StandardCharsets.UTF_8);
             int i = 0;
 
             while (i < rawPath.length()) {
                 if (buf[i] == '/') {
                     i++;
                     final int j = scanName(buf, i);
-                    final PathComponent pc = new PathComponent(new String(buf, i, j - i));
+                    final PathComponent pc = new PathComponent(new String(buf, i, j - i, StandardCharsets.UTF_8));
                     pcs.add(pc);
                     i = scanAndAddKeys(buf, j, pc);
                 } else {
@@ -263,7 +264,7 @@ public class ConfigurationMergeHandler {
                     j++;
                 }
                 if (buf[j] == '=') {
-                    keyName = new String(buf, i, j - i);
+                    keyName = new String(buf, i, j - i, StandardCharsets.UTF_8);
                     i = j + 1;
                     j = i;
                 }
@@ -278,7 +279,7 @@ public class ConfigurationMergeHandler {
                     }
                     j++;
                 }
-                final String keyVal = new String(buf, i + quoted, j - i - 2 * quoted);
+                final String keyVal = new String(buf, i + quoted, j - i - 2 * quoted, StandardCharsets.UTF_8);
                 pc.addKey(keyName, keyVal);
                 i = j + 1;
             } else {
@@ -344,11 +345,15 @@ public class ConfigurationMergeHandler {
 
         @Override
         public String toString() {
-            String ret = name;
+            StringBuilder ret = new StringBuilder(name);
             for (final Key key : keys) {
-                ret += "[" + key.name + "='" + key.value + "']";
+                ret.append('[');
+                ret.append(key.name);
+                ret.append("='");
+                ret.append(key.value);
+                ret.append("']");
             }
-            return ret;
+            return ret.toString();
         }
     }
 }

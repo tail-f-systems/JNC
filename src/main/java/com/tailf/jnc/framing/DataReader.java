@@ -14,10 +14,12 @@ public interface DataReader {
 }
 
 class BasicDataReader implements DataReader {
+    @Override
     public <DataBufType> int readData(BaseReader<DataBufType> rdr, DataBufType buf)
         throws IOException {
         return rdr.read(buf);
     }
+    @Override
     public <DataBufType> int readData(BaseReader<DataBufType> rdr, DataBufType buf, int offset, int length)
         throws IOException {
         return rdr.read(buf, offset, length);

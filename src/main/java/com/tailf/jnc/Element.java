@@ -1,10 +1,11 @@
 package com.tailf.jnc;
 
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
@@ -92,12 +93,12 @@ public class Element implements Cloneable, Serializable {
     /**
      * Children to the node, if container element.
      */
-    protected NodeSet children = null;
+    protected NodeSet children;
 
     /**
      * The parent to this node.
      */
-    protected Element parent = null;
+    protected Element parent;
 
     /**
      * Constructor that creates a new element tree. An element consists of a
@@ -430,7 +431,7 @@ public class Element implements Cloneable, Serializable {
     /**
      * Sets a prefix mapping to the context node. A prefix map is used for
      * resolving prefix to namespace mappings for a given path.
-     * 
+     *
      * @param prefix String prefix to be used for the namespace.
      */
     public void setPrefix(String prefix) {
@@ -440,7 +441,7 @@ public class Element implements Cloneable, Serializable {
     /**
      * Sets a prefix map to the context node. A prefix map is used for
      * resolving prefix to namespace mappings for a given path.
-     * 
+     *
      * @param prefix A prefix mapping
      */
     public void setPrefix(Prefix prefix) {
@@ -450,7 +451,7 @@ public class Element implements Cloneable, Serializable {
     /**
      * Sets prefix mappings to the context node. A prefix map is used for
      * resolving prefix to namespace mappings for a given path.
-     * 
+     *
      * @param prefixMap Prefix mappings
      */
     public void setPrefix(PrefixMap prefixMap) {
@@ -474,7 +475,7 @@ public class Element implements Cloneable, Serializable {
 
     /**
      * Returns the parent node of this node. Or <code>null</code> if none.
-     * 
+     *
      * @return Parent configuration element node or <code>null</code>
      */
     public Element getParent() {
@@ -483,7 +484,7 @@ public class Element implements Cloneable, Serializable {
 
     /**
      * Adds child to children and makes this element the parent of child.
-     * 
+     *
      * @param child Child element to be added
      */
     public void addChild(Element child) {
@@ -500,7 +501,7 @@ public class Element implements Cloneable, Serializable {
      * occurrence of) the inserted child in the list of children.
      * <p>
      * Checks that child is not already in use.
-     * 
+     *
      * @param child Child element to be inserted
      * @throws JNCException If child is already a child of another element or
      *             if child equals this element
@@ -516,7 +517,7 @@ public class Element implements Cloneable, Serializable {
     /**
      * Inserts a child element at a specific index in the list of children and
      * returns that index upon success.
-     * 
+     *
      * @param child Child element to be inserted
      * @param index Position in child list to insert child to. 0 is the first.
      * @throws JNCException If child is already a child of another element.
@@ -538,7 +539,7 @@ public class Element implements Cloneable, Serializable {
     /**
      * Inserts a child element at the correct position by providing structure
      * information (the names of all the children, in order).
-     * 
+     *
      * @param child Child element to be inserted
      * @param childrenNames The names of all children in order.
      * @throws JNCException If child is already a child of another element.
@@ -574,7 +575,7 @@ public class Element implements Cloneable, Serializable {
 
     /**
      * Inserts a child element first in the list of children. Always returns 0.
-     * 
+     *
      * @param child Child element to be inserted
      * @throws JNCException If child is already a child of another element.
      */
@@ -585,7 +586,7 @@ public class Element implements Cloneable, Serializable {
     /**
      * Inserts a child element last in the list of children. Returns the
      * position of the inserted child.
-     * 
+     *
      * @param child Child element to be inserted
      * @throws JNCException If child is already a child of another element or
      *             if child equals this element
@@ -607,7 +608,7 @@ public class Element implements Cloneable, Serializable {
      * deleted. An array of the deleted children is returned.
      * <p>
      * See {@link Path} for more information about path expressions.
-     * 
+     *
      * @param pathStr Path string for children that will be deleted
      * @return An array of the deleted element nodes.
      */
@@ -635,7 +636,7 @@ public class Element implements Cloneable, Serializable {
 
     /**
      * Deletes a child node, provided it is present in the children list.
-     * 
+     *
      * @param child Child to delete
      */
     public void deleteChild(Element child) {
@@ -757,7 +758,7 @@ public class Element implements Cloneable, Serializable {
      * <p>
      * If name starts with xmlns and ns starts with the xmlns namespace
      * (http://www.w3.org/2000/xmlns/), the value is set as a prefix map.
-     * 
+     *
      * @param ns The namespace that the attribute name belongs to
      * @param name The name of the attribute
      * @param value The value of the attribute
@@ -791,7 +792,7 @@ public class Element implements Cloneable, Serializable {
      * Removes an attribute with specified name. This method does not consider
      * namespace so note that it will remove the first attribute which matches
      * the name (and no other).
-     * 
+     *
      * @param name The name of the attribute to be removed.
      */
     public void removeAttr(String name) {
@@ -830,7 +831,7 @@ public class Element implements Cloneable, Serializable {
 
     /**
      * Finds the value of child with specified name, if it exists.
-     * 
+     *
      * @param childName Name of child
      * @return Value of child, or null if none
      */
@@ -845,7 +846,7 @@ public class Element implements Cloneable, Serializable {
 
     /**
      * Returns the value of this element.
-     * 
+     *
      * @return The value of the element.
      */
     public Object getValue() {
@@ -856,7 +857,7 @@ public class Element implements Cloneable, Serializable {
      * Check if any nodes in this element matches a given path string.
      * <p>
      * See {@link Path} for more information about path expressions.
-     * 
+     *
      * @param pathStr The path to match
      * @return <code>true</code> if any node matches pathStr;
      *         <code>false</code> otherwise.
@@ -871,7 +872,7 @@ public class Element implements Cloneable, Serializable {
      * or null if there are no matches.
      * <p>
      * See {@link Path} for more information about path expressions.
-     * 
+     *
      * @param pathStr Path string to find node
      * @return The value of the (first) found element or <code>null</code>
      */
@@ -886,7 +887,7 @@ public class Element implements Cloneable, Serializable {
      * Returns the value(s) of nodes in a given path expression.
      * <p>
      * See {@link Path} for more information about path expressions.
-     * 
+     *
      * @param pathStr Path string to find nodes
      * @return An array of the values of the element nodes found by the
      *         expression (or <code>null</code>)
@@ -907,7 +908,7 @@ public class Element implements Cloneable, Serializable {
      * Returns the values of nodes in a given path expression.
      * <p>
      * See {@link Path} for more information about path expressions.
-     * 
+     *
      * @param pathStr Path string to find nodes
      * @return A set with the values of the element nodes found by the
      *         expression (or <code>null</code>)
@@ -945,7 +946,7 @@ public class Element implements Cloneable, Serializable {
      * Deletes value of node(s)
      * <p>
      * See {@link Path} for more information about path expressions.
-     * 
+     *
      * @param pathStr Path string to find nodes
      */
     public void deleteValue(String pathStr) throws JNCException {
@@ -968,16 +969,16 @@ public class Element implements Cloneable, Serializable {
      * <code>null</code> if no such node was found.
      * <p>
      * Example:
-     * 
+     *
      * <pre>
      *      Element full = NetconfSession:getConfig();
-     * 
+     *
      *      Element first_host = full.getFirst("/hosts/host");
      *      Element last_host = full.getLast("/hosts/host");
      * </pre>
-     * 
+     *
      * See {@link Path} for more information about path expressions.
-     * 
+     *
      * @param pathStr Path string to find nodes
      * @return The first element node found by the expression.
      */
@@ -994,7 +995,7 @@ public class Element implements Cloneable, Serializable {
      * <code>null</code> if no such node was found.
      * <p>
      * See {@link Path} for more information about path expressions.
-     * 
+     *
      * @param pathStr Path string to find nodes
      * @return The last element node found by the expression.
      */
@@ -1010,14 +1011,14 @@ public class Element implements Cloneable, Serializable {
      * Gets all nodes matching a given path expression.
      * <p>
      * Example:
-     * 
+     *
      * <pre>
      * Element full_config = session.get();
      * NodeSet calle_nodes = full_config.get(&quot;host[www='Calle']&quot;);
      * </pre>
-     * 
+     *
      * See {@link Path} for more information about path expressions.
-     * 
+     *
      * @param pathStr Path string to find nodes
      * @return An array of the element nodes found by the expression.
      */
@@ -1028,7 +1029,7 @@ public class Element implements Cloneable, Serializable {
 
     /**
      * Returns the children of this node.
-     * 
+     *
      * @return The children node set of this node or <code>null</code>
      */
     public NodeSet getChildren() {
@@ -1037,7 +1038,7 @@ public class Element implements Cloneable, Serializable {
 
     /**
      * Get the children with specified name, from children list
-     * 
+     *
      * @param name Name of child
      * @return a NodeSet with all chldren that has the name
      */
@@ -1078,6 +1079,7 @@ public class Element implements Cloneable, Serializable {
      *
      * @return A copy of the element sub-tree.
      */
+    @Override
     public Element clone() {
         final Element copy = new Element(namespace, name);
         // copy all children
@@ -1118,7 +1120,7 @@ public class Element implements Cloneable, Serializable {
     /**
      * Clones the tree, making an exact copy. Does only clone this level. not
      * the children.
-     * 
+     *
      * @return A copy of the shallow element sub-tree.
      */
     protected Element cloneShallow() {
@@ -1150,12 +1152,12 @@ public class Element implements Cloneable, Serializable {
      * Merges a subtree into a resulting target subtree. The 'op' parameter
      * controls how the nodes that are added in the target subtree should be
      * marked. Either OP_CREATE, OP_DELETE, OP_MERGE or OP_REPLACE.
-     * 
+     *
      * @param root Target subtree. Must start from root node.
      * @param op One of {@link #OP_CREATE}, {@link #OP_DELETE},
      *            {@link #OP_MERGE} or {@link #OP_REPLACE}
      * @return Resulting target subtrees in NodeSet
-     * 
+     *
      */
     public Element merge(Element root, int op) throws JNCException {
 
@@ -1660,7 +1662,7 @@ public class Element implements Cloneable, Serializable {
             res.append("], children=[").append(sChildren);
         }
 
-        res.append("], path=").append(getElementPath()).append("}");
+        res.append("], path=").append(getElementPath()).append('}');
         return res.toString();
     }
 
@@ -1679,37 +1681,37 @@ public class Element implements Cloneable, Serializable {
     private void toXMLString(int indent, StringBuffer s) {
         final boolean flag = hasChildren();
         final String qName = qualifiedName();
-        s.append(new String(new char[indent * 2]).replace("\0", " "));
-        s.append("<").append(qName);
+        String whitespacePrefix = new String(new char[indent * 2]).replace('\0', ' ');
+        s.append(whitespacePrefix).append('<').append(qName);
         // add xmlns attributes (prefixes)
         if (prefixes != null) {
             for (final Prefix p : prefixes) {
-                s.append(" ").append(p.toXMLString());
+                s.append(' ').append(p.toXMLString());
             }
         }
         // add attributes
         if (attrs != null) {
             for (final Attribute attr : attrs) {
-                s.append(" ").append(attr.toXMLString(this));
+                s.append(' ').append(attr.toXMLString(this));
             }
         }
         indent++;
         // add children elements if any
         if (flag) {
-            s.append(">").append("\n");
+            s.append(">\n");
             for (final Element child : children) {
                 child.toXMLString(indent, s);
             }
         } else { // add value if any
             if (value != null) {
-                s.append(">").append("");
+                s.append('>');
                 final String stringValue = value.toString().replaceAll("&",
                         "&amp;");
                 s.append(getIndentationSpacing(false, indent));
-                s.append(stringValue).append("");
+                s.append(stringValue);
             } else {
              // self-closing tag
-             s.append("/>").append("");
+             s.append("/>");
              return;
             }
         }
@@ -1717,42 +1719,42 @@ public class Element implements Cloneable, Serializable {
         s.append(getIndentationSpacing(flag, indent)).append("</").append(qName).append(">\n");
     }
 
-    public String encodedXMLString(boolean newline_at_end) {
+    public String encodedXMLString(boolean newlineAtEnd) {
         final StringBuilder s = new StringBuilder();
-        buildXMLString(s, newline_at_end);
+        buildXMLString(s, newlineAtEnd);
         return s.toString();
     }
 
-    private void buildXMLString(StringBuilder s, boolean newline_at_end) {
+    private void buildXMLString(StringBuilder s, boolean newlineAtEnd) {
         final String qName = qualifiedName();
-        s.append("<").append(qName);
+        s.append('<').append(qName);
         // add xmlns attributes (prefixes)
         if (prefixes != null) {
             for (final Prefix p : prefixes) {
-                s.append(" ").append(p.toXMLString());
+                s.append(' ').append(p.toXMLString());
             }
         }
         // add attributes
         if (attrs != null) {
             for (final Attribute attr : attrs) {
-                s.append(" ").append(attr.toXMLString(this));
+                s.append(' ').append(attr.toXMLString(this));
             }
         }
         if (hasChildren()) {
             // add children elements if any
-            s.append(">");
+            s.append('>');
             for (final Element child : children) {
-                child.buildXMLString(s, newline_at_end);
+                child.buildXMLString(s, newlineAtEnd);
             }
         } else if (value != null) {
             // otherwise, add value (if any)
-            s.append(">" + Utils.escapeXml(value.toString()));
+            s.append('>').append(Utils.escapeXml(value.toString()));
         } else {
             // self-closing tag
-            s.append("/>" + (newline_at_end ? "\n" : ""));
+            s.append("/>").append(newlineAtEnd ? "\n" : "");
             return;
         }
-        s.append("</" + qName + ">" + (newline_at_end ? "\n" : ""));
+        s.append("</" + qName + ">" + (newlineAtEnd ? "\n" : ""));
     }
 
     /**
@@ -1920,8 +1922,7 @@ public class Element implements Cloneable, Serializable {
      * @see #readFile(String)
      */
     public void writeFile(String filename) throws IOException {
-        final File file = new File(filename);
-        final FileOutputStream fos = new FileOutputStream(file);
+        final OutputStream fos = Files.newOutputStream(Paths.get(filename));
         try {
             final DataOutputStream dos = new DataOutputStream(fos);
             try {
@@ -1968,7 +1969,7 @@ public class Element implements Cloneable, Serializable {
         debugLevel = level;
     }
 
-    static int debugLevel = 0;
+    static int debugLevel;
 
     /**
      * Printout trace if 'debug'-flag is enabled.

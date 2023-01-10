@@ -17,7 +17,7 @@ import net.schmizz.sshj.transport.verification.OpenSSHKnownHosts;
  * intends to use SSH for its transport.
  * <p>
  * Example:
- * 
+ *
  * <pre>
  * SSHConnection ssh = new SSHConnection(&quot;127.0.0.1&quot;, 2023);
  * ssh.authenticateWithPassword(&quot;ola&quot;, &quot;secret&quot;);
@@ -28,7 +28,7 @@ import net.schmizz.sshj.transport.verification.OpenSSHKnownHosts;
 public class SSHConnection implements AutoCloseable {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
-    SSHClient client = null;
+    SSHClient client;
 
     public SSHConnection() {
         client = new SSHClient();
@@ -49,7 +49,7 @@ public class SSHConnection implements AutoCloseable {
     /**
      * By default we connect to the IANA registered port for NETCONF which is
      * 830
-     * 
+     *
      * @param host Host or IP address to connect to
      */
     public SSHConnection connect(String host) throws IOException, JNCException {
@@ -59,7 +59,7 @@ public class SSHConnection implements AutoCloseable {
     /**
      * This method establishes an SSH connection to a host, once the connection
      * is established it must be authenticated.
-     * 
+     *
      * @param host Host name.
      * @param port Port number to connect to.
      */
@@ -71,7 +71,7 @@ public class SSHConnection implements AutoCloseable {
     /**
      * This method establishes an SSH connection to a host, once the connection
      * is established it must be authenticated.
-     * 
+     *
      * @param host Host name.
      * @param port Port number to connect to.
      * @param connectTimeout
@@ -84,7 +84,7 @@ public class SSHConnection implements AutoCloseable {
     /**
      * This method establishes an SSH connection to a host, once the connection
      * is established it must be authenticated.
-     * 
+     *
      * @param host Host name.
      * @param port Port number to connect to.
      * @param connectTimeout Connection timeout timer. Connect the underlying
@@ -117,10 +117,10 @@ public class SSHConnection implements AutoCloseable {
 
     /**
      * Authenticate with regular username pass.
-     * 
+     *
      * @param user User name.
      * @param password Password.
-     * 
+     *
      **/
     public void authenticateWithPassword(String user, String password)
             throws IOException, JNCException {
@@ -151,7 +151,7 @@ public class SSHConnection implements AutoCloseable {
     // /**
     //  * Authenticate with a private key. See ganymed docs for full explanation,
     //  * use null for password if the key doesn't have a passphrase.
-    //  * 
+    //  *
     //  * @param user User name.
     //  * @param pemPrivateKey Private key.
     //  * @param pass Passphrase.
@@ -166,6 +166,7 @@ public class SSHConnection implements AutoCloseable {
     /**
      * Closes the SSH session/connection.
      */
+    @Override
     public void close() {
         try {
             client.close();

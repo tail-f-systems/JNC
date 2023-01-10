@@ -1,8 +1,10 @@
 package com.tailf.jnc;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Implements the built-in YANG data type "binary".
- * 
+ *
  * @author emil@tail-f.com
  */
 public class YangBinary extends YangBaseType<String> {
@@ -12,7 +14,7 @@ public class YangBinary extends YangBaseType<String> {
     /**
      * Creates a YangBinary object from a String. The string is whitespace
      * collapsed before it is encoded.
-     * 
+     *
      * @param value the String
      * @throws YangException if setValue(value) does
      */
@@ -24,7 +26,7 @@ public class YangBinary extends YangBaseType<String> {
      * Creates a YangBinary object from a base 64 encoded byte buffer. No
      * checks are performed to confirm that the buffer is actually encoded in
      * base 64.
-     * 
+     *
      * @param buffer The base 64 encoded byte buffer
      */
     public YangBinary(byte[] buffer) {
@@ -34,7 +36,7 @@ public class YangBinary extends YangBaseType<String> {
     /**
      * Sets the value of this object using a String. The string is whitespace
      * collapsed before it is encoded.
-     * 
+     *
      * @param value The string
      * @throws YangException If the input is not valid Base64 encoded data.
      */
@@ -52,11 +54,11 @@ public class YangBinary extends YangBaseType<String> {
      * Sets the value of this object by copying a base 64 encoded byte buffer.
      * No checks are performed to confirm that the buffer is actually encoded
      * in base 64.
-     * 
+     *
      * @param buffer The base 64 encoded byte buffer.
      */
     public void setValue(byte[] buffer) {
-        value = new String(buffer);
+        value = new String(buffer, StandardCharsets.UTF_8);
     }
 
     /**
@@ -78,7 +80,7 @@ public class YangBinary extends YangBaseType<String> {
     /**
      * Identity method provided because this class extends the YangBaseType
      * class.
-     * 
+     *
      * @param s A string.
      * @return s.
      */
@@ -89,7 +91,7 @@ public class YangBinary extends YangBaseType<String> {
 
     /**
      * Compares type of obj with this object to see if they can be equal.
-     * 
+     *
      * @param obj Object to compare type with.
      * @return true if obj is an instance of YangBinary; false otherwise.
      */
@@ -100,7 +102,7 @@ public class YangBinary extends YangBaseType<String> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.YangBaseType#cloneShallow()
      */
     @Override
@@ -113,7 +115,7 @@ public class YangBinary extends YangBaseType<String> {
     /**
      * Checks that the value buffer of this object has the specified number of
      * octets/bytes.
-     * 
+     *
      * @param len The number of octets/bytes to check for.
      * @throws YangException If value buffer does not have len number of
      *             octets/bytes.
@@ -125,7 +127,7 @@ public class YangBinary extends YangBaseType<String> {
     /**
      * Checks that the value buffer of this object has less than the specified
      * number of octets/bytes.
-     * 
+     *
      * @param len The number of octets/bytes to compare against.
      * @throws YangException If value buffer does not have less than len number
      *             of octets/bytes.
@@ -137,7 +139,7 @@ public class YangBinary extends YangBaseType<String> {
     /**
      * Checks that the value buffer of this object has more than the specified
      * number of octets/bytes.
-     * 
+     *
      * @param len The number of octets/bytes to compare against.
      * @throws YangException If value buffer does not have more than len number
      *             of octets/bytes.
@@ -159,7 +161,7 @@ public class YangBinary extends YangBaseType<String> {
      * Switzerland.<br>
      * Home page: <a href="http://www.source-code.biz">www.source-code.biz</a>
      * <br>
-     * 
+     *
      * @author Christian d'Heureuse
      */
     private static class Base64Coder {
@@ -203,18 +205,18 @@ public class YangBinary extends YangBaseType<String> {
         /**
          * Encodes a string into Base64 format. No blanks or line breaks are
          * inserted.
-         * 
+         *
          * @param s a String to be encoded.
          * @return A String with the Base64 encoded data.
          */
         public static String encodeString(String s) {
-            return new String(encode(s.getBytes()));
+            return new String(encode(s.getBytes(StandardCharsets.UTF_8)));
         }
 
         /**
          * Encodes a byte array into Base64 format. No blanks or line breaks
          * are inserted.
-         * 
+         *
          * @param in an array containing the data bytes to be encoded.
          * @return A character array with the Base64 encoded data.
          */
@@ -225,7 +227,7 @@ public class YangBinary extends YangBaseType<String> {
         /**
          * Encodes a byte array into Base64 format. No blanks or line breaks
          * are inserted.
-         * 
+         *
          * @param in an array containing the data bytes to be encoded.
          * @param iLen number of bytes to process in <code>in</code>.
          * @return A character array with the Base64 encoded data.
@@ -258,19 +260,19 @@ public class YangBinary extends YangBaseType<String> {
 
         /**
          * Decodes a string from Base64 format.
-         * 
+         *
          * @param s a Base64 String to be decoded.
          * @return A String containing the decoded data.
          * @throws IllegalArgumentException If the input is not valid Base64
          *             encoded data.
          */
         public static String decodeString(String s) {
-            return new String(decode(s));
+            return new String(decode(s), StandardCharsets.UTF_8);
         }
 
         /**
          * Decodes a byte array from Base64 format.
-         * 
+         *
          * @param s a Base64 String to be decoded.
          * @return An array containing the decoded data bytes.
          * @throws IllegalArgumentException If the input is not valid Base64
@@ -283,7 +285,7 @@ public class YangBinary extends YangBaseType<String> {
         /**
          * Decodes a byte array from Base64 format. No blanks or line breaks
          * are allowed within the Base64 encoded data.
-         * 
+         *
          * @param in a character array containing the Base64 encoded data.
          * @return An array containing the decoded data bytes.
          * @throws IllegalArgumentException If the input is not valid Base64

@@ -161,23 +161,23 @@ public class Capabilities {
     /**
      * Capabilites
      */
-    protected boolean baseCapability = false;
-    protected boolean baseCapability_v1_1 = false;
-    protected boolean writableRunningCapability = false;
-    protected boolean candidateCapability = false;
-    protected boolean confirmedCommitCapability = false;
-    protected boolean rollbackOnErrorCapability = false;
-    protected boolean validateCapability = false;
-    protected boolean startupCapability = false;
-    protected boolean notificationCapability = false;
-    protected boolean interleaveCapability = false;
-    protected boolean urlCapability = false;
-    protected boolean xpathCapability = false;
-    protected boolean partialLockCapability = false;
+    protected boolean baseCapability;
+    protected boolean baseCapability_v1_1;
+    protected boolean writableRunningCapability;
+    protected boolean candidateCapability;
+    protected boolean confirmedCommitCapability;
+    protected boolean rollbackOnErrorCapability;
+    protected boolean validateCapability;
+    protected boolean startupCapability;
+    protected boolean notificationCapability;
+    protected boolean interleaveCapability;
+    protected boolean urlCapability;
+    protected boolean xpathCapability;
+    protected boolean partialLockCapability;
 
-    protected boolean actionsCapability = false;
-    protected boolean transactionsCapability = false;
-    protected boolean withDefaultsCapability = false;
+    protected boolean actionsCapability;
+    protected boolean transactionsCapability;
+    protected boolean withDefaultsCapability;
 
     /**
      * Predicate for the <code>:writable-running</code> capability.

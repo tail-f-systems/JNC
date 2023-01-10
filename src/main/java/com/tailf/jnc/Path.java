@@ -1,5 +1,6 @@
 package com.tailf.jnc;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,12 +13,12 @@ import java.util.List;
  * expression operates on an element tree.
  * <p>
  * Example:
- * 
+ *
  * <pre>
  * Path expr = new Path(&quot;/hosts/host[name='kalle']/ip&quot;);
  * NodeSet s = path.eval(element_tree);
  * </pre>
- * 
+ *
  **/
 
 public class Path {
@@ -43,7 +44,7 @@ public class Path {
      * <p>
      * Makes a selection by traversing the locationSteps, return an ArrayList
      * (NodeSet) of Element nodes.
-     * 
+     *
      * @param contextNode The context node to evaluate expressions on
      * @return A nodeSet of elements
      */
@@ -93,7 +94,7 @@ public class Path {
     /**
      * Flag says if it's a 'path' or a 'create path' expression.
      */
-    boolean create = false;
+    boolean create;
 
     /**
      * The list of location steps (LocationStep).
@@ -268,35 +269,40 @@ public class Path {
          */
         @Override
         public String toString() {
-            String s = "LocationStep{";
+            StringBuilder s = new StringBuilder("LocationStep{");
             switch (axis) {
             case AXIS_CHILD:
-                s = s + "AXIS_CHILD";
+                s.append("AXIS_CHILD");
                 break;
             case AXIS_PARENT:
-                s = s + "AXIS_PARENT";
+                s.append("AXIS_PARENT");
                 break;
             case AXIS_SELF:
-                s = s + "AXIS_SELF";
+                s.append("AXIS_SELF");
                 break;
             case AXIS_ROOT:
-                s = s + "AXIS_ROOT";
+                s.append("AXIS_ROOT");
                 break;
             default:
-                s = s + "AXIS_UNKNOWN(" + axis + ")";
+                s.append("AXIS_UNKNOWN(");
+                s.append(axis);
+                s.append(')');
                 break;
             }
             if (prefix != null) {
-                s = s + ",prefix=" + prefix;
+                s.append(",prefix=");
+                s.append(prefix);
             }
             if (name != null) {
-                s = s + ",name=" + name;
+                s.append(",name=");
+                s.append(name);
             }
             if (predicates != null && !predicates.isEmpty()) {
-                s = s + "," + predicates;
+                s.append(',');
+                s.append(predicates);
             }
-            s = s + "}";
-            return s;
+            s.append('}');
+            return s.toString();
         }
 
         // /**
@@ -313,7 +319,7 @@ public class Path {
     /**
      * Predicate expression Examples: [@AttrName=Value, ...] [@AttrName>Value,
      * ...] [@AttrName, ...] ; value=null denotes that AttrName exists
-     * 
+     *
      */
     class Expr {
 
@@ -746,7 +752,7 @@ public class Path {
 
     /**
      * Returns a list of LocationSteps for a path expression.
-     * 
+     *
      */
     List<LocationStep> parse(TokenList tokens) throws JNCException {
         final ArrayList<LocationStep> steps = new ArrayList<LocationStep>();
@@ -762,11 +768,7 @@ public class Path {
             while (sz > 0) {
                 trace("parse(): {}", tokens);
                 /* peek at tokens */
-                if (sz >= 1) {
-                    tok1 = tokens.getToken(0);
-                } else {
-                    tok1 = new Token();
-                }
+                tok1 = tokens.getToken(0);
                 if (sz >= 2) {
                     tok2 = tokens.getToken(1);
                 } else {
@@ -1013,17 +1015,17 @@ public class Path {
     }
 
     void parseError(TokenList tokens, int from, int to) throws JNCException {
-        String errStr = "parse error: \"";
+        StringBuilder errStr = new StringBuilder("parse error: \"");
         final int sz = tokens.size();
         for (int i = from; i < to; i++) {
             if (i < sz) {
-                errStr = errStr + tokens.getToken(i).value;
+                errStr.append(tokens.getToken(i).value);
             } else {
                 break;
             }
         }
-        errStr = errStr + "...\"";
-        throw new JNCException(JNCException.PATH_ERROR, errStr);
+        errStr.append("...\"");
+        throw new JNCException(JNCException.PATH_ERROR, errStr.toString());
     }
 
     /* Tokenizer */
@@ -1065,17 +1067,17 @@ public class Path {
 
         @Override
         public String toString() {
-            String s = "TokenList[";
+            StringBuilder s = new StringBuilder("TokenList[");
             boolean comma = false;
             for (int i = 0; i < size(); i++) {
                 if (comma) {
-                    s = s + ",";
+                    s.append(',');
                 }
-                s = s + getToken(i);
+                s.append(getToken(i));
                 comma = true;
             }
-            s = s + "]";
-            return s;
+            s.append(']');
+            return s.toString();
         }
     }
 
@@ -1161,7 +1163,7 @@ public class Path {
      */
     TokenList tokenize(String s) throws JNCException {
         final TokenList tokens = new TokenList();
-        final byte[] buf = s.getBytes();
+        final byte[] buf = s.getBytes(StandardCharsets.UTF_8);
         byte curr;
         byte next;
         int i = 0;
@@ -1195,7 +1197,7 @@ public class Path {
                     }
                     j++;
                 }
-                final String newToken = new String(buf, i, j - i);
+                final String newToken = new String(buf, i, j - i, StandardCharsets.UTF_8);
                 tokens.add(new Token(ATOM, newToken.replaceAll("\\\\", "")));
                 i = j;
             } else if (curr == '@'
@@ -1211,7 +1213,7 @@ public class Path {
                 ) {
                     j++;
                 }
-                tokens.add(new Token(ATTR, new String(buf, i, j - i)));
+                tokens.add(new Token(ATTR, new String(buf, i, j - i, StandardCharsets.UTF_8)));
                 i = j;
             } else if (curr == '\'') {
                 i++;
@@ -1222,9 +1224,9 @@ public class Path {
                 if (j == buf.length) {
                     throw new JNCException(JNCException.PATH_ERROR,
                             "unterminated value: "
-                                    + new String(buf, i, buf.length - i));
+                                    + new String(buf, i, buf.length - i, StandardCharsets.UTF_8));
                 }
-                tokens.add(new Token(STRING, new String(buf, i, j - i)));
+                tokens.add(new Token(STRING, new String(buf, i, j - i, StandardCharsets.UTF_8)));
                 i = j + 1;
             } else if (curr == '\"') {
                 i++;
@@ -1235,9 +1237,9 @@ public class Path {
                 if (j == buf.length) {
                     throw new JNCException(JNCException.PATH_ERROR,
                             "unterminated value: "
-                                    + new String(buf, i, buf.length - i));
+                                    + new String(buf, i, buf.length - i, StandardCharsets.UTF_8));
                 }
-                tokens.add(new Token(STRING, new String(buf, i, j - i)));
+                tokens.add(new Token(STRING, new String(buf, i, j - i, StandardCharsets.UTF_8)));
                 i = j + 1;
             } else if (curr >= '0' && curr <= '9') {
                 j = i + 1;
@@ -1252,10 +1254,10 @@ public class Path {
                     while (j < buf.length && buf[j] >= '0' && buf[j] <= '9') {
                         j++;
                     }
-                    value = new String(buf, i, j - i);
+                    value = new String(buf, i, j - i, StandardCharsets.UTF_8);
                     number = Float.valueOf(value);
                 } else {
-                    value = new String(buf, i, j - i);
+                    value = new String(buf, i, j - i, StandardCharsets.UTF_8);
                     number = Integer.valueOf(value);
                 }
                 tokens.add(new Token(NUMBER, value, number));
@@ -1301,7 +1303,7 @@ public class Path {
                 case '+':
                 case '-':
                 case '*':
-                    tokens.add(new Token(OP, new String(new byte[] { curr })));
+                    tokens.add(new Token(OP, new String(new byte[] { curr }, StandardCharsets.UTF_8)));
                     break;
                 case '=':
                     if (next == '>') {
@@ -1353,7 +1355,7 @@ public class Path {
         for (LocationStep lstep : locationSteps) {
             s.append(lstep);
         }
-        s.append("]");
+        s.append(']');
         return s.toString();
     }
 

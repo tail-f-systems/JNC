@@ -64,7 +64,7 @@ public class SchemaParser {
         protected SchemaNode node;
         protected RevisionInfo ri;
         protected List<RevisionInfo> riArrayList;
-        protected String value = null;
+        protected String value;
 
         SchemaHandler(Map<Tagpath, SchemaNode> h2) {
             super();
@@ -247,7 +247,7 @@ public class SchemaParser {
      * Scans the classpath for the XML schema file and populates the hashtable with 
      * SchemaNode objects. Class is passed in so that in the case of multiple {@link ClassLoader}s 
      * the correct one can be used to locate the schema.
-     * 
+     *
      * @param filename
      * @param h
      * @param clazz

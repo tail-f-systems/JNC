@@ -60,7 +60,7 @@ public class JNCException extends Exception {
      * Contextual information describing the error. The meaning of this field
      * as is described for each possible errorCode value.
      */
-    protected Object opaqueData = null;
+    protected Object opaqueData;
 
     /**
      * If errorCode is RPC_REPLY_ERROR the rpc-error is parsed and the

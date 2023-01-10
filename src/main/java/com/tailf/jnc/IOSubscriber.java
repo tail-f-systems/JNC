@@ -127,8 +127,7 @@ public abstract class IOSubscriber {
 
     void outputPrintln(String s) {
         final StringBuffer tmp = new StringBuffer(64);
-        tmp.append(s);
-        tmp.append('\n');
+        tmp.append(s).append('\n');
         for (int i = 0; i < tmp.length(); i++) {
             outputChar(tmp.charAt(i));
         }
@@ -136,8 +135,7 @@ public abstract class IOSubscriber {
 
     void outputPrintln(int iVal) {
         final StringBuffer tmp = new StringBuffer(16);
-        tmp.append(iVal);
-        tmp.append('\n');
+        tmp.append(iVal).append('\n');
         for (int i = 0; i < tmp.length(); i++) {
             outputChar(tmp.charAt(i));
         }

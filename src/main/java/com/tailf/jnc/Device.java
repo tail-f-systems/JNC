@@ -83,7 +83,7 @@ public class Device implements Serializable, AutoCloseable {
     /**
      * An SSH Connection to this device.
      */
-    protected transient SSHConnection con = null;
+    protected transient SSHConnection con;
 
     /**
      * The NETCONF sessions (channels) for this device.
@@ -116,7 +116,7 @@ public class Device implements Serializable, AutoCloseable {
     /**
      * Time to wait for read, in milliseconds.
      */
-    protected int defaultReadTimeout = 0;
+    protected int defaultReadTimeout;
 
     /**
      * Constructor for the Device with on initial user. We need at least one
@@ -281,13 +281,16 @@ public class Device implements Serializable, AutoCloseable {
         if (data != null && data.session != null) {
             data.sshSession.close();
         }
-        clearConfig(data.sessionName);
+        if (data != null) {
+            clearConfig(data.sessionName);
+        }
     }
 
     /**
      * end all NETCONF sessions and close the SSH socket associated to this
      * device It also clears all accumulated config trees.
      */
+    @Override
     public void close() {
         for (final SessionConnData d : connSessions) {
             closeSession(d);
@@ -507,7 +510,8 @@ public class Device implements Serializable, AutoCloseable {
      */
     @Override
     public String toString() {
-        StringBuffer s = new StringBuffer("Device: " + name + " " + mgmt_ip + ":" + mgmt_port + "\n");
+        StringBuffer s = new StringBuffer("Device: ");
+        s.append(name).append(' ').append(mgmt_ip).append(':').append(mgmt_port).append('\n');
         for (final SessionConnData p : connSessions) {
             s.append("   session: ").append(p.sessionName);
         }

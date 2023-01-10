@@ -23,14 +23,14 @@ public class Tagpath {
 
     @Override
     public String toString() {
-        String ret = "";
+        StringBuilder ret = new StringBuilder();
         for (int i = 0; i < p.length; i++) {
-            ret += p[i];
+            ret.append(p[i]);
             if (i != p.length - 1) {
-                ret += "/";
+                ret.append('/');
             }
         }
-        return ret;
+        return ret.toString();
     }
 
     @Override

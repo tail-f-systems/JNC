@@ -22,10 +22,10 @@ class ElementHandler extends DefaultHandler {
     // pointer to current element (node)
     public Element current;
     public Element top;
-    public PrefixMap prefixes = null;
-    public int unknownLevel = 0;
-    
-    private boolean leaf = false;
+    public PrefixMap prefixes;
+    public int unknownLevel;
+
+    private boolean leaf;
     private String leafNs;
     private String leafName;
     private String leafValue;

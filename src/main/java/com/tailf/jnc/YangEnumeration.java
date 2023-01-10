@@ -85,7 +85,7 @@ public class YangEnumeration extends YangBaseString {
      */
     @Override
     public boolean equals(Object obj) {
-        return canEqual(obj)
+        return obj instanceof YangEnumeration
                 && Arrays.equals(enums, ((YangEnumeration)obj).enums)
                 && super.equals(obj);
     }

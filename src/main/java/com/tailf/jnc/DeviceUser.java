@@ -21,9 +21,9 @@ public class DeviceUser implements Serializable {
     private String localUser;
     private String remoteUser;
 
-    private String password = null;
-    private File pemFile = null;
-    private char[] pemPrivateKey = null;
+    private String password;
+    private File pemFile;
+    private char[] pemPrivateKey;
     // TODO: private key passphrase not supported
     // private String keyPassPhrase = null;
 

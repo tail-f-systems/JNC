@@ -3,7 +3,6 @@ package com.tailf.jnc;
 import com.tailf.jnc.framing.Framing;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -1578,7 +1577,7 @@ public class NetconfSession {
      * Used by ConfDSession to set the withDefaults Attribute. Will be included
      * in the RPC header, if set
      */
-    Attribute withDefaultsAttr = null;
+    Attribute withDefaultsAttr;
 
     /* Encoding */
 
@@ -1756,7 +1755,7 @@ public class NetconfSession {
         RPCRequest()
         {
             msgId = message_id++ ;
-            message = new StringBuilder();
+            message = new StringBuilder(64); // few extra bytes to save a few re-inits
         }
 
         public int getMsgId()
@@ -1780,15 +1779,15 @@ public class NetconfSession {
             StringBuilder rpcBegin  = new StringBuilder("<" + nc + "rpc " + xmlnsAttr + " " +
                     nc + "message-id=\"" + msgId + "\"");
             if (attr != null) {
-                rpcBegin.append(" ").append(attr.toXMLString(null));
+                rpcBegin.append(' ').append(attr.toXMLString(null));
             }
-            rpcBegin.append(">");
+            rpcBegin.append('>');
             message.append(rpcBegin.toString());
         }
 
         void addRpcEnd()
         {
-            message.append("\n</" + nc + "rpc>");
+            message.append("\n</").append(nc).append("rpc>");
         }
 
         /**
@@ -1799,16 +1798,16 @@ public class NetconfSession {
                 case NOT_SET:
                     return;
                 case MERGE:
-                    message.append("\n<" + nc + "default-operation>merge</" + nc
-                            + "default-operation>");
+                    message.append("\n<").append(nc).append("default-operation>merge</")
+                        .append(nc).append("default-operation>");
                     return;
                 case REPLACE:
-                    message.append("\n<" + nc + "default-operation>replace</" + nc
-                            + "default-operation>");
+                    message.append("\n<").append(nc).append("default-operation>replace</")
+                        .append(nc).append("default-operation>");
                     return;
                 case NONE:
-                    message.append("\n<" + nc + "default-operation>none</" + nc
-                            + "default-operation>");
+                    message.append("\n<").append(nc).append("default-operation>none</")
+                        .append(nc).append("default-operation>");
                     return;
                 default:
                     throw new JNCException(JNCException.SESSION_ERROR,
@@ -1829,7 +1828,8 @@ public class NetconfSession {
                                 "test-option is given but the :validate "
                                         + "capability is not supported by server");
                     }
-                    message.append("\n<" + nc + "test-option>set</" + nc + "test-option>");
+                    message.append("\n<").append(nc).append("test-option>set</")
+                        .append(nc).append("test-option>");
                     return;
                 case TEST_THEN_SET:
                     if (!capabilities.hasValidate()) {
@@ -1837,8 +1837,8 @@ public class NetconfSession {
                                 "test-option is given but the :validate "
                                         + "capability is not supported by server");
                     }
-                    message.append("\n<" + nc + "test-option>test-then-set</" + nc
-                            + "test-option>");
+                    message.append("\n<").append(nc).append("test-option>test-then-set</")
+                        .append(nc).append("test-option>");
                     return;
                 case TEST_ONLY:
                     if (!capabilities.hasValidate()) {
@@ -1846,8 +1846,8 @@ public class NetconfSession {
                                 "test-option is given but the :validate "
                                         + "capability is not supported by server");
                     }
-                    message.append("\n<" + nc + "test-option>test-only</" + nc
-                            + "test-option>");
+                    message.append("\n<").append(nc).append("test-option>test-only</")
+                        .append(nc).append("test-option>");
                     return;
                 default:
                     throw new JNCException(JNCException.SESSION_ERROR,
@@ -1863,12 +1863,12 @@ public class NetconfSession {
                 case NOT_SET:
                     return;
                 case STOP_ON_ERROR:
-                    message.append("\n<" + nc + "error-option>stop-on-error</" + nc
-                            + "error-option>");
+                    message.append("\n<").append(nc).append("error-option>stop-on-error</")
+                        .append(nc).append("error-option>");
                     return;
                 case CONTINUE_ON_ERROR:
-                    message.append("\n<" + nc + "error-option>continue-on-error</" + nc
-                            + "error-option>");
+                    message.append("\n<").append(nc).append("error-option>continue-on-error</")
+                        .append(nc).append("error-option>");
                     return;
                 case ROLLBACK_ON_ERROR:
                     if (!capabilities.hasRollbackOnError()) {
@@ -1876,8 +1876,8 @@ public class NetconfSession {
                                 "the :rollback-on-error capability "
                                         + "is used but not supported by server");
                     }
-                    message.append("\n<" + nc + "error-option>rollback-on-error</" + nc
-                            + "error-option>");
+                    message.append("\n<").append(nc).append("error-option>rollback-on-error</")
+                           .append(nc).append("error-option>");
                     return;
                 default:
                     throw new JNCException(JNCException.SESSION_ERROR,
@@ -2166,7 +2166,7 @@ public class NetconfSession {
         rpcMsg.getMessage().append("\n<" + nc + "commit>");
         rpcMsg.getMessage().append("\n<" + nc + "confirmed/>");
         rpcMsg.getMessage().append("\n<" + nc + "confirm-timeout>");
-        rpcMsg.getMessage().append("\n" + Integer.valueOf(timeout).toString());
+        rpcMsg.getMessage().append("\n" + timeout);
         rpcMsg.getMessage().append("\n</" + nc + "confirm-timeout>");
         rpcMsg.getMessage().append("\n</" + nc + "commit>");
 
