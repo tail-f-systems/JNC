@@ -1,6 +1,11 @@
 package com.tailf.jnc;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.fail;
 
 import java.util.regex.PatternSyntaxException;
 
@@ -24,15 +29,13 @@ public class YangBaseStringTest {
 
     @Test
     public void testSetValueString() throws YangException {
-        try {
+        assertThrows(NullPointerException.class, () -> {
             nullary.setValue("setValue");
-            fail("Expected NullPointerException");
-        } catch (NullPointerException e) {
-        }
+        });
 
-        assertTrue(bs.value.equals("baseString"));
+        assertEquals("baseString", bs.value);
         bs.setValue("newString");
-        assertTrue(bs.value.equals("newString"));
+        assertEquals("newString", bs.value);
 
         try {
             bs.setValue(null);
@@ -40,19 +43,16 @@ public class YangBaseStringTest {
         } catch (YangException e) {
             assertTrue(e.opaqueData instanceof NullPointerException);
         }
-        assertTrue(bs.value != null);
+        assertNotEquals(null, bs.value);
     }
 
     @Test
     public void testCheck() throws YangException {
         bs.check();
         empty.check();
-
-        try {
+        assertThrows(NullPointerException.class, () -> {
             nullary.check();
-            fail("Expected NullPointerException");
-        } catch (NullPointerException e) {
-        }
+        });
     }
 
     @Test
@@ -65,24 +65,21 @@ public class YangBaseStringTest {
 
     @Test
     public void testBaseString() throws YangException {
-        try {
+        assertThrows(YangException.class, () -> {
             nullary = new YangBaseString(null);
             fail("Expected NullPointerException");
-        } catch (NullPointerException e) {
-        } catch (YangException e) {
-        }
-        assertTrue(nullary == null);
+        });
+        assertEquals(null, nullary);
 
         nullary = new YangBaseString("nullary");
-        assertTrue(nullary.value.equals("nullary"));
+        assertEquals("nullary", nullary.value);
     }
 
     @Test
     public void testFromString() {
-        bs.fromString("baseString").equals("baseString");
-        bs.fromString("fromString").equals("fromString");
-        assertTrue(bs.value + " is not baseString",
-                bs.value.equals("baseString"));
+        assertEquals("baseString", bs.fromString("baseString"));
+        assertEquals("fromString", bs.fromString("fromString"));
+        assertEquals(bs.value + " is not baseString", "baseString", bs.value);
     }
 
     @Test
@@ -97,11 +94,9 @@ public class YangBaseStringTest {
         empty.pattern("");
         empty.pattern(".*");
 
-        try {
+        assertThrows(YangException.class, () -> {
             bs.pattern("[a-z]*");
-            fail("Expected pattern mismatch");
-        } catch (YangException e) {
-        }
+        });
         try {
             bs.pattern("[a*(\\");
             fail("Expected syntax error");
@@ -110,104 +105,89 @@ public class YangBaseStringTest {
                     e.opaqueData instanceof PatternSyntaxException);
         }
 
-        try {
+        assertThrows(NullPointerException.class, () -> {
             nullary.pattern("null");
-        } catch (NullPointerException e) {
-        }
-        try {
+        });
+        assertThrows(NullPointerException.class, () -> {
             bs.pattern((String) null);
-            fail("Expected NullPointerException");
-        } catch (NullPointerException e) {
-        }
+        });
 
-        try {
+        assertThrows(YangException.class, () -> {
             bs.pattern("");
-            fail("Expected pattern mismatch");
-        } catch (YangException e) {
-        }
+        });
     }
 
     @Test
     public void testPatternStringArray() throws YangException {
-        try {
+        assertThrows(NullPointerException.class, () -> {
             nullary.pattern(new String[] { "null" });
-            fail("Expected NullPointerException");
-        } catch (NullPointerException e) {
-        }
-        try {
+        });
+        assertThrows(NullPointerException.class, () -> {
             bs.pattern((String[]) null);
-            fail("Expected NullPointerException");
-        } catch (NullPointerException e) {
-        }
+        });
 
         bs.pattern(new String[] {});
     }
 
     @Test
     public void testWsReplace() {
-        assertTrue(spacy.value.equals("  A\t  space   "));
+        assertEquals("  A\t  space   ", spacy.value);
         spacy.wsReplace();
-        assertTrue(spacy.value.equals("  A   space   "));
+        assertEquals("  A   space   ", spacy.value);
     }
 
     @Test
     public void testWsCollapse() {
-        assertTrue(spacy.value.equals("  A\t  space   "));
+        assertEquals("  A\t  space   ", spacy.value);
         spacy.wsCollapse();
-        assertTrue(spacy.value.equals("A\t space"));
+        assertEquals("A\t space", spacy.value);
         spacy.wsReplace();
-        assertTrue(spacy.value.equals("A  space"));
+        assertEquals("A  space", spacy.value);
         spacy.wsCollapse();
-        assertTrue(spacy.value.equals("A space"));
+        assertEquals("A space", spacy.value);
     }
 
     @Test
     public void testHashCode() {
-        assertTrue(bs.hashCode() == "baseString".hashCode());
-        assertTrue(empty.hashCode() == 0);
-        assertTrue(spacy.hashCode() == "  A\t  space   ".hashCode());
+        assertEquals("baseString".hashCode(), bs.hashCode());
+        assertEquals(0, empty.hashCode());
+        assertEquals("  A\t  space   ".hashCode(), spacy.hashCode());
         spacy.wsReplace();
         spacy.wsCollapse();
-        assertFalse(spacy.hashCode() == "  A\t  space   ".hashCode());
-        assertTrue(spacy.hashCode() == "A space".hashCode());
+        assertNotEquals("  A\t  space   ".hashCode(), spacy.hashCode());
+        assertEquals("A space".hashCode(), spacy.hashCode());
     }
 
     @Test
     public void testToString() {
-        assertTrue(bs.toString().equals(bs.value));
-        assertTrue(empty.toString().equals(""));
-        assertTrue(spacy.toString().equals(spacy.value));
-        assertFalse(spacy.toString().equals(bs.value));
-        assertFalse(spacy.toString().equals(empty.value));
+        assertEquals(bs.value, bs.toString());
+        assertEquals("", empty.toString());
+        assertEquals(spacy.value, spacy.toString());
+        assertNotEquals(bs.value, spacy.toString());
+        assertNotEquals(empty.value, spacy.toString());
         spacy.value = "";
-        assertTrue(spacy.toString().equals(empty.value));
+        assertEquals(empty.value, spacy.toString());
     }
 
     @Test
     public void testEquals() {
-        assertTrue(bs.equals(bs));
-        assertFalse(bs.equals(null));
-        assertFalse(bs.equals("baseString"));
+        assertEquals(bs, bs);
+        assertNotEquals(null, bs);
+        assertNotEquals("baseString", bs);
     }
 
     @Test
     public void testExact() throws YangException {
         bs.exact("baseString".length());
-        try {
+        assertThrows(YangException.class, () -> {
             bs.exact(0);
-            fail("Expected YangException");
-        } catch (YangException e) {
-        }
-        try {
+        });
+        assertThrows(YangException.class, () -> {
             bs.exact(-1);
-            fail("Expected YangException");
-        } catch (YangException e) {
-        }
-        try {
+        });
+        assertThrows(YangException.class, () -> {
             bs.exact(Integer.MAX_VALUE);
-            fail("Expected YangException");
-        } catch (YangException e) {
-        }
+        });
 
         empty.exact(0);
         spacy.exact("  A\t  space   ".length());
@@ -225,24 +205,17 @@ public class YangBaseStringTest {
         bs.min(-1);
         bs.min(Integer.MIN_VALUE);
 
-        try {
+        assertThrows(YangException.class, () -> {
             bs.min(Integer.MAX_VALUE);
-            fail("Expected YangException");
-        } catch (YangException e) {
-        }
-        try {
+        });
+        assertThrows(YangException.class, () -> {
             bs.min("baseString".length() + 1);
-            fail("Expected YangException");
-        } catch (YangException e) {
-        }
-
+        });
         bs.value = "base";
         bs.min("base".length());
-        try {
+        assertThrows(YangException.class, () -> {
             bs.min("baseString".length());
-            fail("Expected YangException");
-        } catch (YangException e) {
-        }
+        });
 
         empty.min(0);
         spacy.min(0);
@@ -254,42 +227,30 @@ public class YangBaseStringTest {
         bs.max("baseString".length() + 1);
         bs.max(Integer.MAX_VALUE);
 
-        try {
+        assertThrows(YangException.class, () -> {
             bs.max(Integer.MIN_VALUE);
-            fail("Expected YangException");
-        } catch (YangException e) {
-        }
-        try {
+        });
+        assertThrows(YangException.class, () -> {
             bs.max("baseString".length() - 1);
-            fail("Expected YangException");
-        } catch (YangException e) {
-        }
-        try {
+        });
+        assertThrows(YangException.class, () -> {
             bs.max(0);
-            fail("Expected YangException");
-        } catch (YangException e) {
-        }
-        try {
+        });
+        assertThrows(YangException.class, () -> {
             bs.max(-1);
-            fail("Expected YangException");
-        } catch (YangException e) {
-        }
+        });
 
         bs.value = "base";
         bs.max("base".length());
         bs.max("baseString".length());
-        try {
+        assertThrows(YangException.class, () -> {
             bs.max("bas".length());
-            fail("Expected YangException");
-        } catch (YangException e) {
-        }
+        });
 
         empty.max(0);
-        try {
+        assertThrows(YangException.class, () -> {
             spacy.max(0);
-            fail("Expected YangException");
-        } catch (YangException e) {
-        }
+        });
     }
 
 }

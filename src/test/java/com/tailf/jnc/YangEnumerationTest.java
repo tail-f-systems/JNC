@@ -1,6 +1,10 @@
 package com.tailf.jnc;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,36 +36,36 @@ public class YangEnumerationTest {
     @Test
     public void testYangEnumeration() throws YangException {
         // Values set in setUp
-        assertTrue(one.value.equals("one"));
-        assertTrue(two.value.equals("two"));
-        assertTrue(spacy.value.equals("spacy"));
+        assertEquals("one", one.value);
+        assertEquals("two", two.value);
+        assertEquals("spacy", spacy.value);
 
         // Empty string not allowed
         try {
             spacy = new YangEnumeration("", new String[] {""});
             fail("Expected YangException");
         } catch (YangException e) {
-            assertTrue(e.opaqueData.equals("empty string in enum value"));
+            assertEquals("empty string in enum value", e.opaqueData);
         }
-        assertFalse(spacy.value.equals(""));
-        assertTrue(spacy.value.equals("spacy"));
-        
+        assertNotEquals("", spacy.value);
+        assertEquals("spacy", spacy.value);
+
         // Leading and trailing spaces not allowed
         try {
             spacy = new YangEnumeration(spacystr, new String[] {spacystr});
             fail("Expected YangException");
         } catch (YangException e) {
-            assertTrue(e.opaqueData.equals(spacystr));
+            assertEquals(spacystr, e.opaqueData);
         }
-        assertFalse(spacy.value.equals(spacystr));
-        assertTrue(spacy.value.equals("spacy"));
-        
+        assertNotEquals(spacystr, spacy.value);
+        assertEquals("spacy", spacy.value);
+
         // No wsCollapse occurs
         spacy = new YangEnumeration("leading  and trailing",
                 new String[] {"leading  and trailing"});
-        assertFalse(spacy.value.equals("leading and trailing"));
-        assertTrue(spacy.value.equals("leading  and trailing"));
-        
+        assertNotEquals("leading and trailing", spacy.value);
+        assertEquals("leading  and trailing", spacy.value);
+
         // Null not allowed
         try {
             one = new YangEnumeration(null, null);
@@ -73,7 +77,7 @@ public class YangEnumerationTest {
             one = new YangEnumeration("hej", null);
             fail("Expected YangException");
         } catch (YangException e) {
-            assertTrue(e.opaqueData.equals("no enum names provided"));
+            assertEquals("no enum names provided", e.opaqueData);
         }
         try {
             one = new YangEnumeration(null, new String[] {"hej"});
@@ -81,7 +85,7 @@ public class YangEnumerationTest {
         } catch (YangException e) {
             assertTrue(e.opaqueData instanceof NullPointerException);
         }
-        one.value.equals("one");
+        assertEquals("one", one.value);
     }
 
 }

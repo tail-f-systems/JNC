@@ -4,22 +4,17 @@ import java.io.IOException;
 
 import notif.Notif;
 import notif.Interfaces;
-import notif.interfaces.JInterface;
 
 import com.tailf.jnc.Device;
 import com.tailf.jnc.DeviceUser;
 import com.tailf.jnc.Element;
-import com.tailf.jnc.ElementChildrenIterator;
 import com.tailf.jnc.JNCException;
 import com.tailf.jnc.NetconfSession;
 import com.tailf.jnc.NodeSet;
-import com.tailf.jnc.YangElement;
-import com.tailf.jnc.YangUInt32;
 
 public class Client {
 
     private Device dev;
-    private DeviceUser duser;
 
     public Client() {
         this.init();
@@ -28,7 +23,7 @@ public class Client {
     private void init() {
         String emsUserName = "bobby";
         String ip = "localhost";
-        duser = new DeviceUser(emsUserName, "admin", "admin");
+        DeviceUser duser = new DeviceUser(emsUserName, "admin", "admin");
         dev = new Device("mydev", duser, ip, 2022);
 
         try {
@@ -56,8 +51,7 @@ public class Client {
 
     private NodeSet getConfig(Device d) throws IOException, JNCException {
         NetconfSession session = d.getSession("cfg");
-        NodeSet reply = session.getConfig(NetconfSession.RUNNING);
-        return reply;
+        return session.getConfig(NetconfSession.RUNNING);
     }
 
     public NodeSet getConfig() throws IOException, JNCException {
@@ -67,27 +61,27 @@ public class Client {
     public NodeSet getStreams() throws IOException, JNCException {
         return dev.getSession("cfg").getStreams();
     }
-    
+
     public void subscribe() throws IOException, JNCException {
         dev.getSession("cfg").createSubscription("interface");
     }
-    
+
     public Element waitForNotification() throws IOException, JNCException {
         return dev.getSession("cfg").receiveNotification();
     }
-    
+
     /**
      * Gets the first configuration element in configs with name "c".
-     * 
+     *
      * @param configs Set of device configuration data.
      * @return First c configuration, or null if none present.
      */
     public static Interfaces getInterfacesConfig(NodeSet configs) {
         Element interfacesConfig = configs.first();
-        if (!interfacesConfig.name.equals("interfaces")) {
+        if ("interfaces".equals(interfacesConfig.name)) {
             interfacesConfig = null;
             for (Element config : configs) {
-                if (config.name.equals("interfaces")) {
+                if ("interfaces".equals(config.name)) {
                     interfacesConfig = config;
                 }
             }
@@ -104,21 +98,16 @@ public class Client {
         Client client = new Client();
         Notif.enable();
         client.init();
-        
+
         NodeSet reply = client.getStreams();
         System.out.println("got streams:" + reply.toXMLString());
-        
+
         NodeSet configs = client.getConfig();
         if (configs.isEmpty()) {
             System.out.println("Received empty configuration");
             return;
         }
 
-        // Buffered reader used to pause execution
-        java.io.InputStreamReader isr =
-                new java.io.InputStreamReader(System.in);
-        java.io.BufferedReader br = new java.io.BufferedReader(isr);
-        
         // Confirm that there are no interfaces configs
         Interfaces interfacesConfig = getInterfacesConfig(configs);
         if (interfacesConfig == null) {
@@ -126,10 +115,10 @@ public class Client {
         } else {
             System.err.println("Remote configuration contains interfaces");
         }
-        
+
         // Subscribe to "interface" notifications
         client.subscribe();
-        
+
         // Wait for a notification and print it as XML (blocking)
         System.out.println("Waiting for \"interface\" notification...");
         System.out.println(client.waitForNotification().toXMLString());

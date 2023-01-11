@@ -1,13 +1,12 @@
 package com.tailf.jnc;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import com.tailf.jnc.YangException;
-import com.tailf.jnc.YangInt16;
-import com.tailf.jnc.YangString;
 
 public class YangStringTest {
 
@@ -39,29 +38,29 @@ public class YangStringTest {
 
     @Test
     public void testSetValueString() throws YangException {
-        assertTrue(ys1.value.equals(str1));
-        assertTrue(ys1.value.equals(str2));
-        assertFalse(ys1.value.equals(str3));
+        assertEquals(str1, ys1.value);
+        assertEquals(str2, ys1.value);
+        assertNotEquals(str3, ys1.value);
         ys1.setValue(str3);
-        assertTrue(ys1.value.equals(str3));
-        assertFalse(ys1.value.equals(str1));
+        assertEquals(str3, ys1.value);
+        assertNotEquals(str1, ys1.value);
     }
 
     @Test
     public void testToString() {
-        assertTrue(ys1.toString().equals(str1));
+        assertEquals(str1, ys1.toString());
     }
 
     @Test
     public void testEquals() {
-        assertTrue(ys1.equals(ys1));
-        assertTrue(ys1.equals(ys2));
-        assertFalse(ys1.equals(yi16));
-        assertFalse(yi16.equals(ys1));
-        
-        assertTrue(ys1.equals(str1));
-        assertTrue(ys1.equals(str2));
-        assertFalse(ys1.equals(str3));
+        assertEquals(ys1, ys1);
+        assertEquals(ys2, ys1);
+        assertNotEquals(yi16, ys1);
+        assertNotEquals(ys1, yi16);
+
+        assertEquals(ys1, str1);
+        assertEquals(ys1, str2);
+        assertNotEquals(ys1, str3);
     }
 
     @Test
@@ -76,8 +75,8 @@ public class YangStringTest {
 
     @Test
     public void testFromStringString() {
-        assertTrue(ys1.fromString(str1).equals(str1));
-        assertTrue(ys1.fromString(str2).equals(str2));
+        assertEquals(str1, ys1.fromString(str1));
+        assertEquals(str2, ys1.fromString(str2));
     }
 
     @Test
@@ -128,16 +127,16 @@ public class YangStringTest {
 
     @Test
     public void testWsCollapse() {
-        assertTrue(ys4.value.equals(str4));
+        assertEquals(str4, ys4.value);
         assertTrue(ys4.value.startsWith(" "));
         assertTrue(ys4.value.endsWith(" "));
         assertTrue(ys4.value.contains("   "));
         ys4.wsCollapse();
-        assertFalse(ys4.value.equals(str4));
+        assertNotEquals(str4, ys4.value);
         assertFalse(ys4.value.startsWith(" "));
         assertFalse(ys4.value.endsWith(" "));
         assertFalse(ys4.value.contains("   "));
-        assertTrue(ys4.value.equals("Hi there"));
+        assertEquals("Hi there", ys4.value);
     }
 
 }

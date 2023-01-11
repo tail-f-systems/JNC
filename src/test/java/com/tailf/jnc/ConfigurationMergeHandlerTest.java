@@ -1,20 +1,15 @@
-
 package com.tailf.jnc;
 
-import com.tailf.jnc.Attribute;
-import com.tailf.jnc.Element;
-import com.tailf.jnc.NodeSet;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 
 public class ConfigurationMergeHandlerTest {
     protected static final String NAMESPACE = "urn:ietf:params:xml:ns:yang:ietf-system";
 
     private final ConfigurationMergeHandler handler = new ConfigurationMergeHandler();
-
-    public ConfigurationMergeHandlerTest() {
-    }
 
     @Test
     public void shouldAddElementAtRoot() throws Exception {

@@ -1,6 +1,7 @@
 package com.tailf.jnc;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +15,7 @@ public class YangBinaryTest {
 			"+/+=",
 			"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789+/="
 	};
-	
+
 	@Before
 	public void setUp() throws YangException {
 		ybs = new YangBinary[values.length];

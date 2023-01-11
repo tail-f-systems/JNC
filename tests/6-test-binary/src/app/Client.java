@@ -19,7 +19,6 @@ import com.tailf.jnc.YangElement;
 public class Client {
 
     private Device dev;
-    private DeviceUser duser;
 
     public Client() {
         init();
@@ -28,7 +27,7 @@ public class Client {
     private void init() {
         String emsUserName = "bobby";
         String ip = "localhost";
-        duser = new DeviceUser(emsUserName, "admin", "admin");
+        DeviceUser duser = new DeviceUser(emsUserName, "admin", "admin");
         dev = new Device("mydev", duser, ip, 2022);
 
         try {
@@ -56,8 +55,7 @@ public class Client {
 
     private NodeSet getConfig(Device d) throws IOException, JNCException {
         NetconfSession session = d.getSession("cfg");
-        NodeSet reply = session.getConfig(NetconfSession.RUNNING);
-        return reply;
+        return session.getConfig(NetconfSession.RUNNING);
     }
 
     public NodeSet getConfig() throws IOException, JNCException {
@@ -66,16 +64,16 @@ public class Client {
 
     /**
      * Gets the first configuration element in configs with name "c".
-     * 
+     *
      * @param configs Set of device configuration data.
      * @return First c configuration, or null if none present.
      */
     public static C getCConfig(NodeSet configs) {
         Element cConfig = configs.first();
-        if (!cConfig.name.equals("c")) {
+        if (!"c".equals(cConfig.name)) {
             cConfig = null;
             for (Element config : configs) {
-                if (config.name.equals("c")) {
+                if ("c".equals(config.name)) {
                     cConfig = config;
                 }
             }

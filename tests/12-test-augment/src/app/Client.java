@@ -11,12 +11,10 @@ import com.tailf.jnc.Element;
 import com.tailf.jnc.JNCException;
 import com.tailf.jnc.NetconfSession;
 import com.tailf.jnc.NodeSet;
-import com.tailf.jnc.YangElement;
 
 public class Client {
 
     private Device dev;
-    private DeviceUser duser;
 
     public Client() {
         this.init();
@@ -25,7 +23,7 @@ public class Client {
     private void init() {
         String emsUserName = "bobby";
         String ip = "localhost";
-        duser = new DeviceUser(emsUserName, "admin", "admin");
+        DeviceUser duser = new DeviceUser(emsUserName, "admin", "admin");
         dev = new Device("mydev", duser, ip, 2022);
 
         try {
@@ -53,8 +51,7 @@ public class Client {
 
     private NodeSet getConfig(Device d) throws IOException, JNCException {
         NetconfSession session = d.getSession("cfg");
-        NodeSet reply = session.getConfig(NetconfSession.RUNNING);
-        return reply;
+        return session.getConfig(NetconfSession.RUNNING);
     }
 
     public NodeSet getConfig() throws IOException, JNCException {
@@ -69,10 +66,10 @@ public class Client {
      */
     public static gen.ietfSystem.System getSystemConfig(NodeSet configs) {
         Element systemConfig = configs.first();
-        if (!systemConfig.name.equals("system")) {
+        if (!"system".equals(systemConfig.name)) {
             systemConfig = null;
             for (Element config : configs) {
-                if (config.name.equals("system")) {
+                if ("system".equals(config.name)) {
                     systemConfig = config;
                 }
             }
@@ -93,7 +90,7 @@ public class Client {
 
         // Get (first) config with name "system"
         gen.ietfSystem.System systemConfig = getSystemConfig(configs);
-        
+
         // Add new server
         NtpServer server = new NtpServer(new IpAddress("4.4.4.4"));
         systemConfig.getChild("ntp").addChild(server);

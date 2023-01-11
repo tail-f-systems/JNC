@@ -1,6 +1,10 @@
 package com.tailf.jnc;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThrows;
 
 import java.math.BigInteger;
 
@@ -10,15 +14,13 @@ import org.junit.Test;
 public class YangUInt16Test {
 
     private short iv1;
-    private long iv2;
-    private String iv3;
     private YangUInt16 i1;
     private YangUInt16 i2;
     private YangUInt16 i3;
 
     private YangUInt16 inull;
     private YangDecimal64 d;
-    
+
     private YangUInt16 tmp1;
     private YangInt16 tmp2;
     private java.io.Serializable tmp3;
@@ -30,16 +32,16 @@ public class YangUInt16Test {
     @Before
     public void setUp() throws Exception {
         iv1 = 7;
-        iv2 = 0xffff;
-        iv3 = "13";
+        long iv2 = 0xffff;
+        String iv3 = "13";
         i1 = new YangUInt16(iv1);
         i2 = new YangUInt16(iv2);
         i3 = new YangUInt16(iv3);
-        
+
         inull = new YangUInt16(iv3);
         inull.value = null;
         d = new YangDecimal64(1, 0);
-        
+
         tmp1 = new YangUInt16(7);
         tmp2 = new YangInt16(7);
         tmp3 = new YangUInt16(7);
@@ -51,105 +53,88 @@ public class YangUInt16Test {
 
     @Test
     public void testMin() throws YangException {
-        try {
+        assertThrows("Short.MIN_VALUE should be invalid", YangException.class, () -> {
             i1.min(Short.MIN_VALUE);
-            fail("Short.MIN_VALUE should be invalid");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("-1 should be invalid", YangException.class, () -> {
             i1.min(-1);
-            fail("-1 should be invalid");
-        } catch (YangException e) {}
-        
+        });
+
         i1.min(0);  // Zero boundary value
-        
-        try {
+
+        assertThrows("7 not smaller than Short.MAX_VALUE", YangException.class, () -> {
             i1.min(Short.MAX_VALUE);
-            fail("7 not smaller than Short.MAX_VALUE");
-        } catch (YangException e) {}
+        });
         i2.min(Short.MAX_VALUE);  // 0xffff Smaller than Short.MAX_VALUE
-        
-        try {
+
+        assertThrows("7 not smaller than 0xffff", YangException.class, () -> {
             i1.min(0xffff);
-            fail("7 not smaller than 0xffff");
-        } catch (YangException e) {}
+        });
         i2.min(0xffff);  // 0xffff Smaller than 0xffff
-        
-        try {
+
+        assertThrows("0x100000 valid and/or 0xffff smaller than 0x10000", YangException.class, () -> {
             i2.min(0x10000);
-            fail("0x100000 valid and/or 0xffff smaller than 0x10000");
-        } catch (YangException e) {}
+        });
     }
 
     @Test
     public void testMax() throws YangException {
-        try {
+        assertThrows("0x100000 should not be valid", YangException.class, () -> {
             i2.max(0x10000);
-            fail("0x100000 should not be valid");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("-1 should not be valid", YangException.class, () -> {
             i2.max(-1);
-            fail("-1 should not be valid");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("-0x8000 should not be valid", YangException.class, () -> {
             i2.max(-0x8000);
-            fail("-0x8000 should not be valid");
-        } catch (YangException e) {}
+        });
 
-        try {
+        assertThrows("0xffff should be larger than 0", YangException.class, () -> {
             i2.max(0);
-            fail("0xffff should be larger than 0");
-        } catch (YangException e) {}
+        });
         i2.max(0xffff);  // 0xffff should not be smaller than 0xffff
     }
 
     @Test
     public void testDecodeString() {
-        assertFalse(i1.decode("7").equals((byte)7));
-        assertFalse(i1.decode("7").equals((short)7));
-        assertTrue(i1.decode("7").equals((int)7));
-        assertFalse(i1.decode("7").equals((long)7));
-        
+        assertNotEquals(Byte.valueOf((byte)7), i1.decode("7"));
+        assertNotEquals(Short.valueOf((short)7), i1.decode("7"));
+        assertEquals(Integer.valueOf((int)7), i1.decode("7"));
+        assertNotEquals(Long.valueOf((long)7), i1.decode("7"));
+
         assertTrue(i1.decode("7") == (byte)7);
         assertTrue(i1.decode("7") == (short)7);
-        assertTrue(i1.decode("7") == (int)7);
+        assertEquals((Integer)(int)7, i1.decode("7"));
         assertTrue(i1.decode("7") == (long)7);
 
-        assertTrue(i1.decode("-1") == -1);
-        
-        assertTrue(i1.decode(Integer.valueOf(Integer.MAX_VALUE).toString())
-                == Integer.MAX_VALUE);
-        try {
-            i1.decode(Long.valueOf(Integer.MAX_VALUE + 1L).toString());
-            fail("Should not be able to parse such a large number");
-        } catch (NumberFormatException e) {}
-        
-        assertTrue(i1.decode(Integer.valueOf(Integer.MIN_VALUE).toString())
-                == Integer.MIN_VALUE);
-        try {
-            i1.decode(Long.valueOf(Integer.MIN_VALUE - 1L).toString());
-            fail("Should not be able to parse such a small number");
-        } catch (NumberFormatException e) {}
+        assertEquals(Integer.valueOf(-1), i1.decode("-1"));
 
-        try {
+        assertEquals(Integer.valueOf(Integer.MAX_VALUE), i1.decode(Integer.valueOf(Integer.MAX_VALUE).toString()));
+        assertThrows("Should not be able to parse such a large number", NumberFormatException.class, () -> {
+            i1.decode(Long.valueOf(Integer.MAX_VALUE + 1L).toString());
+        });
+
+        assertEquals(Integer.valueOf(Integer.MIN_VALUE), i1.decode(Integer.valueOf(Integer.MIN_VALUE).toString()));
+        assertThrows("Should not be able to parse such a small number", NumberFormatException.class, () -> {
+            i1.decode(Long.valueOf(Integer.MIN_VALUE - 1L).toString());
+        });
+
+        assertThrows("Should not accept non numbers", YangException.class, () -> {
             i1.fromString("k");
-            fail("Should not accept non numbers");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("Should not accept strings ending with characters", YangException.class, () -> {
             i1.fromString("1k");
-            fail("Should not accept strings ending with characters");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("Should not accept strings beginning with characters", YangException.class, () -> {
             i1.fromString("k1");
-            fail("Should not accept strings beginning with characters");
-        } catch (YangException e) {}
+        });
     }
 
     @Test
     public void testCheck() throws YangException {
-        try {
+        assertThrows("Expected YangException since value is null", YangException.class, () -> {
             inull.check();
-            fail("Expected YangException since value is null");
-        } catch (YangException e) {}
+        });
         i1.check();
         i2.check();
         i3.check();
@@ -169,7 +154,7 @@ public class YangUInt16Test {
 
         assertTrue(i2.canEqual(d));
         assertFalse(d.canEqual(i2));
-        assertFalse("Symmetry", i1.canEqual(d) == d.canEqual(i1));
+        assertNotEquals("Symmetry", i1.canEqual(d), d.canEqual(i1));
     }
 
     @Test
@@ -177,47 +162,43 @@ public class YangUInt16Test {
         i1.exact(7);
         i2.exact(0xffff);
         i3.exact(13);
-        
-        try {
+
+        assertThrows("i1 is not 0", YangException.class, () -> {
             i1.exact(0);
-            fail("i1 is not 0");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("i1 is not 0xffff", YangException.class, () -> {
             i1.exact(0xffff);
-            fail("i1 is not 0xffff");
-        } catch (YangException e) {}
-        
-        try {
+
+        });
+
+        assertThrows("i2 is not -0x8000", YangException.class, () -> {
             i2.exact(-0x8000);
-            fail("i2 is not -0x8000");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("i2 is not 0x10000", YangException.class, () -> {
             i2.exact(0x10000);
-            fail("i2 is not 0x10000");
-        } catch (YangException e) {}
-        
+        });
+
         i2.exact((int)0x10000ffffL);
-        try {
+        assertThrows("i2 is not 0xfffff", YangException.class, () -> {
             i2.exact((int)0x1000fffffL);
-            fail("i2 is not 0xfffff");
-        } catch (YangException e) {}
+        });
     }
 
     @Test
     public void testValid() {
         assertTrue(i1.valid(0));
         assertFalse(i1.valid(-1));
-        
+
         assertTrue(i1.valid(Byte.MAX_VALUE));
         assertFalse(i1.valid(Byte.MIN_VALUE));
         assertTrue(i1.valid(Short.MAX_VALUE));
         assertFalse(i1.valid(Short.MIN_VALUE));
-        
+
         assertTrue(i1.valid(0xffff));
         assertFalse(i1.valid(0x10000));
         assertFalse(i1.valid(-0xffff));
         assertFalse(i1.valid(-0x10000));
-        
+
         assertFalse(i1.valid(Integer.MAX_VALUE));
         assertFalse(i1.valid(Integer.MIN_VALUE));
         assertFalse(i1.valid(Long.MAX_VALUE));
@@ -232,111 +213,103 @@ public class YangUInt16Test {
 
     @Test
     public void testHashCode() {
-        assertTrue(i1 + "not 7", i1.hashCode() == 7);
-        assertTrue(i2 + "not 65535", i2.hashCode() == 0xffff);
-        assertTrue(i3 + "not 13", i3.hashCode() == 13);
+        assertEquals(i1 + "not 7", 7, i1.hashCode());
+        assertEquals(i2 + "not 65535", 0xffff, i2.hashCode());
+        assertEquals(i3 + "not 13", 13, i3.hashCode());
     }
 
     @Test
     public void testSetValueString() throws YangException {
-        assertTrue(i1.value == 7);
+        assertEquals((Integer)7, i1.value);
         i1.setValue("8");
-        assertFalse(i1.value == 7);
-        assertTrue(i1.value == 8);
-        try {
+        assertNotEquals((Integer)7, i1.value);
+        assertEquals((Integer)8, i1.value);
+        assertThrows("Should not be able to set the value to xxx", YangException.class, () -> {
             i1.setValue("xxx");
-            fail("Should not be able to set the value to xxx");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("Should not be able to set a negative value", YangException.class, () -> {
             i1.setValue("-1");
-            fail("Should not be able to set a negative value");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("Should not be able to set a value that is too large", YangException.class, () -> {
             i1.setValue("65536");
-            fail("Should not be able to set a value that is too large");
-        } catch (YangException e) {}
-        
-        i1.setValue("0xffff");
-        assertFalse(i1.value == 7);
-        assertFalse(i1.value == 8);
-        assertTrue(i1.value == 0xffff);
+        });
 
-        try {
+        i1.setValue("0xffff");
+        assertNotEquals((Integer)7, i1.value);
+        assertNotEquals((Integer) 8, i1.value);
+        assertEquals((Integer) 0xffff, i1.value);
+
+        assertThrows("Should not be able to set a negative value", YangException.class, () -> {
             i1.setValue("-0x1");
-            fail("Should not be able to set a negative value");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("Should not be able to set a value that is too large", YangException.class, () -> {
             i1.setValue("0xffffff");
-            fail("Should not be able to set a value that is too large");
-        } catch (YangException e) {}
+        });
     }
 
     @Test
     public void testSetValueInteger() throws YangException {
-        assertTrue(i1.value == 7);
+        assertEquals((Integer)7, i1.value);
         i1.setValue(8);
-        assertFalse(i1.value == 7);
-        assertTrue(i1.value == 8);
-        try {
+        assertNotEquals((Integer)7, i1.value);
+        assertEquals((Integer)8, i1.value);
+        assertThrows("Should not be able to set a negative value", YangException.class, () -> {
             i1.setValue(-1);
-            fail("Should not be able to set a negative value");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("Should not be able to set a value that is too large", YangException.class, () -> {
             i1.setValue(65536);
-            fail("Should not be able to set a value that is too large");
-        } catch (YangException e) {}
-        
-        i1.setValue(0xffff);
-        assertFalse(i1.value == 7);
-        assertFalse(i1.value == 8);
-        assertTrue(i1.value == 0xffff);
+        });
 
-        try {
+        i1.setValue(0xffff);
+        assertNotEquals((Integer)7, i1.value);
+        assertNotEquals((Integer)8, i1.value);
+        assertEquals((Integer)0xffff, i1.value);
+
+        assertThrows("Should not be able to set a negative value", YangException.class, () -> {
             i1.setValue(-0x1);
-            fail("Should not be able to set a negative value");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("Should not be able to set a value that is too large", YangException.class, () -> {
             i1.setValue(0xffffff);
-            fail("Should not be able to set a value that is too large");
-        } catch (YangException e) {}
+        });
     }
 
     @Test
     public void testToString() {
-        assertTrue(i1 + "not 7", i1.toString().equals("7"));
-        assertTrue(i2 + "not 65535", i2.toString().equals("65535"));
-        assertTrue(i3 + "not 13", i3.toString().equals("13"));
+        assertEquals(i1 + "not 7", "7", i1.toString());
+        assertEquals(i2 + "not 65535", "65535", i2.toString());
+        assertEquals(i3 + "not 13", "13", i3.toString());
     }
 
+    @SuppressWarnings("unlikely-arg-type")
     @Test
     public void testEqualsObject() throws YangException {
 
-        assertTrue("Reflexive", i1.equals(i1));
-        assertTrue("Reflexive", tmp1.equals(tmp1));
-        assertTrue("Reflexive", tmp3.equals(tmp3));
+        assertEquals("Reflexive", i1, i1);
+        assertEquals("Reflexive", tmp1, tmp1);
+        assertEquals("Reflexive", tmp3, tmp3);
 
-        assertTrue("Symmetric", i1.equals(tmp1) == tmp1.equals(i1));
-        assertTrue(i1.equals(tmp1));
-        assertTrue("Symmetric", i1.equals(tmp2) == tmp2.equals(i1));
-        assertTrue(i1.equals(tmp2));
-        assertTrue("Symmetric", i1.equals(tmp3) == tmp3.equals(i1));
-        assertTrue(i1.equals(tmp3));
-        assertTrue("Symmetric", i1.equals(tmp4) == tmp4.equals(i1));
-        assertTrue(i1.equals(tmp4));
-        assertTrue("Symmetric", tmp2.equals(tmp3) == tmp3.equals(tmp2));
-        assertTrue(tmp2.equals(tmp3));
+        assertEquals("Symmetric", tmp1.equals(i1), i1.equals(tmp1));
+        assertEquals(tmp1, i1);
+        assertEquals("Symmetric", tmp2.equals(i1), i1.equals(tmp2));
+        assertEquals(tmp2, i1);
+        assertEquals("Symmetric", tmp3.equals(i1), i1.equals(tmp3));
+        assertEquals(tmp3, i1);
+        assertEquals("Symmetric", tmp4.equals(i1), i1.equals(tmp4));
+        assertEquals(tmp4, i1);
+        assertEquals("Symmetric", tmp3.equals(tmp2), tmp2.equals(tmp3));
+        assertEquals(tmp3, tmp2);
 
-        assertTrue("Symmetric", i1.equals(s1) == s1.equals(i1));
-        assertFalse(i1.equals(s1));
-        assertTrue("Symmetric", i1.equals(iv1) == ((Short)iv1).equals(i1));
-        assertFalse(i1.equals(iv1));
-        assertTrue("Symmetric", s1.equals(iv1) == ((Short)iv1).equals(s1));
-        assertTrue(s1.equals(iv1));
-        
-        assertTrue("Symmetric", s1.equals(l1) == l1.equals(s1));
-        assertFalse(s1.equals(l1));
-        assertTrue("Symmetric", i1.equals(str1) == str1.equals(i1));
-        assertFalse(i1.equals(str1));
+        assertEquals("Symmetric", s1.equals(i1), i1.equals(s1));
+        assertNotEquals(s1, i1);
+        assertEquals("Symmetric", ((Short)iv1).equals(i1), i1.equals(iv1));
+        assertNotEquals(iv1, i1);
+        assertEquals("Symmetric", ((Short)iv1).equals(s1), s1.equals(iv1));
+        assertEquals(s1, Short.valueOf(iv1));
+
+        assertEquals("Symmetric", l1.equals(s1), s1.equals(l1));
+        assertNotEquals(l1, s1);
+        assertEquals("Symmetric", str1.equals(i1), i1.equals(str1));
+        assertNotEquals(str1, i1);
 
         // Transitivity: (A r B and B r C) implies (A r C)
         // A1 implies A2: (not A1) or A2
@@ -351,9 +324,9 @@ public class YangUInt16Test {
         assertTrue("Transitive", !(i1.equals(l1) && l1.equals(i1))
                 || i1.equals(i1));
 
-        assertFalse(i1.equals(i2));
-        assertFalse(i1.equals(i3));
-        assertFalse(i2.equals(i3));
+        assertNotEquals(i2, i1);
+        assertNotEquals(i3, i1);
+        assertNotEquals(i3, i2);
     }
 
 }
