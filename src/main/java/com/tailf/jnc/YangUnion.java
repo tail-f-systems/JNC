@@ -147,7 +147,7 @@ public class YangUnion extends YangBaseType<YangType<?>> {
      */
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof YangUnion
+        return canEqual(obj)
                 && Arrays.equals(memberTypes,
                         ((YangUnion)obj).memberTypes)
                 && super.equals(obj);
