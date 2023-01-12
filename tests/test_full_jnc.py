@@ -34,6 +34,7 @@ class JncTestBase:
                         '5-test-bits',
                         '6-test-binary',
                         '7-test-uint64',
+                        '10-test-nested',
                         '11-test-notification',
                         '12-test-augment'])
 def jnc_test(request):
