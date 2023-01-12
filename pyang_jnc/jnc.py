@@ -643,18 +643,13 @@ def flatten(iterable):
 
     Example: flatten([['12', '34'], ['56', ['7']]]) = ['12', '34', '56', '7']
     """
-    res = []
     while hasattr(iterable, 'values'):
         iterable = list(iterable.values())
     for item in iterable:
-        try:
-            assert not isinstance(item, str)
-            iter(item)
-        except (AssertionError, TypeError):
-            res.append(item)
+        if isinstance(item, collections.abc.Iterable):
+            yield from flatten(item)
         else:
-            res.extend(flatten(item))
-    return res
+            yield item
 
 
 def get_types(yang_type, ctx):
@@ -1071,7 +1066,8 @@ class ClassGenerator(object):
             for i, method in enumerate(gen.setters()):
                 java_class.append_access_method(str(i), method)
 
-            java_class.append_access_method('check', gen.checker())
+            if (checker := gen.checker()) is not None:
+                java_class.append_access_method('check', checker)
 
             type_stmt = search_one(stmt, 'type')
             super_type = get_types(type_stmt, self.ctx)[0]
@@ -1203,18 +1199,20 @@ class ClassGenerator(object):
             ch_arg = normalize(ch.arg)
             if field is not None:
                 package_generated = True
+                pkg = '.'.join([self.package, self.n2, ch_arg])
                 if ch_arg == self.n and not fully_qualified:
                     fully_qualified = True
                     s = ('\n * <p>\n * Children with the same name as this ' +
                          'class are fully qualified.')
                     self.java_class.description += s
+                    type = pkg
                 else:
                     all_fully_qualified = False
+                    type = ch_arg
                 if field:
-                    fields.add(field)  # Container child
+                    fields.add((field, type))  # Container child
                 # Need to do explicit import
-                import_ = '.'.join([self.package, self.n2, ch_arg])
-                self.java_class.imports.add(import_)
+                self.java_class.imports.add(pkg)
 
         if self.ctx.opts.debug or self.ctx.opts.verbose:
             if package_generated:
@@ -1289,7 +1287,8 @@ class ClassGenerator(object):
                 key = search_one(self.stmt, 'key')
                 optional = key is None or sub.arg not in key.arg.split(' ')
                 # FIXME: The leaf might be mandatory even if it is not a key
-                add(sub.arg, child_gen.getters())
+                for getter in child_gen.getters():
+                    add(sub.arg, getter)
                 for setter in child_gen.setters():
                     add(sub.arg, setter)
                 if optional:
@@ -1913,7 +1912,7 @@ class MethodGenerator(object):
             if self.is_typedef:
                 self.gen = TypedefMethodGenerator(stmt, ctx)
             elif self.is_container:
-                self.gen = ContainerMethodGenerator(stmt, ctx)
+                self.gen = ContainerMethodGenerator(stmt, self, ctx)
             elif self.is_list:
                 self.gen = ListMethodGenerator(stmt, ctx)
             elif self.is_leaf or self.is_leaflist:
@@ -2111,12 +2110,10 @@ class MethodGenerator(object):
         if fields is None:
             fields = OrderedSet()
         cond = ''
-        for field in fields:  # could do reversed(fields) to preserve order
-            add_child.add_line(''.join([
-                    cond, 'if (child instanceof ',
-                    normalize(field), ') ', camelize(field), ' = (',
-                    normalize(field), ')child;']))
-            add_child.add_dependency(normalize(field))
+        for field, type in fields:  # could do reversed(fields) to preserve order
+            varname = camelize(field)
+            line = f'{cond}if (child instanceof {type}) {varname} = ({type})child;'
+            add_child.add_line(line)
             cond = 'else '
         return self.fix_imports(add_child)
 
@@ -2528,10 +2525,8 @@ class LeafMethodGenerator(MethodGenerator):
         return self.fix_imports(method, child=True)
 
     def markers(self):
-        res = []
         for op in ('replace', 'merge', 'create', 'delete'):
-            res.append(self.mark(op))
-        return res
+            yield from self.mark(op)
 
     def mark(self, op):
         assert op in ('replace', 'merge', 'create', 'delete')
@@ -2700,16 +2695,17 @@ class TypedefMethodGenerator(MethodGenerator):
                 checker.add_line('super.check();')
             elif self.enum:
                 checker.add_line('super.check();')
-            return [self.fix_imports(checker)]
-        return []
+            return self.fix_imports(checker)
+        return None
 
 
 class ContainerMethodGenerator(MethodGenerator):
     """Method generator specific to classes generated from container stmts"""
 
-    def __init__(self, stmt, ctx=None):
+    def __init__(self, stmt, parent, ctx=None):
         super(ContainerMethodGenerator, self).__init__(stmt, ctx)
         assert self.gen is self
+        self.parent = parent
         assert self.is_container, 'Only valid for containers and notifications'
 
     def constructors(self):
@@ -2727,7 +2723,11 @@ class ContainerMethodGenerator(MethodGenerator):
         res.add_javadoc(' '.join(['Field for child', self.stmt.keyword,
                                   '"' + self.stmt.arg + '".']))
         res.add_modifier('public')
-        res.add_modifier(self.n)
+        if self.parent.n == self.n:
+            type = f'{self.pkg}.{self.n}'
+        else:
+            type = self.n
+        res.add_modifier(type)
         res.add_dependency(self.n)
         return self.fix_imports(res, child=True)
 
@@ -2751,7 +2751,7 @@ class ContainerMethodGenerator(MethodGenerator):
         res = []
         res.append(self.access_methods_comment())
         res.extend(self.adders())
-        res.append(self.deleters())
+        res.extend(self.deleters())
         return res
 
 
