@@ -4,16 +4,15 @@ plugins {
 
 assert (System.env.CONFD_DIR): "CONFD_DIR is not set!"
 
-task pyang(type: JncPyangTask) {
-    pluginDir = PyangJNC
+jncPyang {
     outputDir = new File("${buildDir}/generated/src/gen")
     yangPath = "$System.env.CONFD_DIR/src/confd/yang"
     inputFiles = [new File("$projectDir/ietf-inet-types.yang"),
                   new File("$projectDir/ietf-system.yang")]
 }
 
-compileJava.dependsOn([pyang])
-sourceSets.main.java.srcDirs = ["src", pyang ] //non standard source layout
+compileJava.dependsOn([jncPyang])
+sourceSets.main.java.srcDirs = ["src", "${buildDir}/generated/src/gen"]
 
 application {
     mainClass = 'app.Client'
