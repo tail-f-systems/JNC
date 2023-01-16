@@ -78,7 +78,7 @@ public class PathCreate extends Path {
         for (final LocationStep step : locationSteps) {
             s.append(step);
         }
-        s.append("]");
+        s.append(']');
         return s.toString();
     }
 

@@ -14,17 +14,17 @@ abstract class YangBaseInt<T extends Number> extends YangBaseType<T> {
 
     /**
      * A lower bound for the value of this object, or null if none.
-     * 
+     *
      * @serial
      */
-    protected BigDecimal MIN_VALUE = null;
+    protected BigDecimal MIN_VALUE;
 
     /**
      * An upper bound for the value of this object, or null if none.
-     * 
+     *
      * @serial
      */
-    protected BigDecimal MAX_VALUE = null;
+    protected BigDecimal MAX_VALUE;
 
     /**
      * Creates a YangBaseInt object from a String.

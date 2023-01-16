@@ -28,6 +28,7 @@ class DummyElement extends YangElement {
      *
      * @return A clone of the object.
      */
+    @Override
     public DummyElement clone() {
         try {
             return (DummyElement) cloneContent(new DummyElement(namespace, name));

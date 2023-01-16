@@ -1,6 +1,7 @@
 package com.tailf.jnc;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -12,7 +13,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 /**
  * A simple SAX parser, for parsing NETCONF messages, into a simple
  * {@link Element} tree.
- * 
+ *
  */
 public class XMLParser {
 
@@ -47,7 +48,7 @@ public class XMLParser {
         // pointer to current element (node)
         public Element current;
         public Element top;
-        public PrefixMap prefixes = null;
+        public PrefixMap prefixes;
 
         @Override
         public void startElement(String uri, String localName, String qName,
@@ -126,7 +127,7 @@ public class XMLParser {
 
     /**
      * Parses an XML string returning an element tree from it.
-     * 
+     *
      * @param is Inputsource (byte stream) where the XML text is read from
      */
     public Element parse(InputSource is) throws JNCException {
@@ -144,12 +145,12 @@ public class XMLParser {
     /**
      * Parses an XML String, returning a Element tree representing the XML
      * structure.
-     * 
+     *
      * @param str String containing the XML text to parse
      */
     public Element parse(String str) throws JNCException {
         final ByteArrayInputStream istream = new ByteArrayInputStream(
-                str.getBytes());
+                str.getBytes(StandardCharsets.UTF_8));
         final InputSource is = new InputSource(istream);
         return parse(is);
     }

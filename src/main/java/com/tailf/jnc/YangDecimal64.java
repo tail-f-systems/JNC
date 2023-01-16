@@ -16,7 +16,7 @@ public class YangDecimal64 extends YangBaseInt<BigDecimal> {
      *
      * @serial
      */
-    private Integer fractionDigits = null;
+    private Integer fractionDigits;
 
     /**
      * Creates a YangDecimal64 object from a String.

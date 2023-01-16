@@ -8,7 +8,7 @@ import java.util.Iterator;
  * class is obtained from the {@link Element#iterator} method.
  * <p>
  * Example usage:
- * 
+ *
  * <pre>
  * ElementLeafListValueIterator domainIter = config.iterator(&quot;domain&quot;);
  * while (domainIter.hasNext()) {
@@ -16,12 +16,12 @@ import java.util.Iterator;
  *     System.out.println(&quot;Domain: &quot; + host);
  * }
  * </pre>
- * 
+ *
  */
 public class ElementLeafListValueIterator implements Iterator<Object> {
     private Iterator<Element> childrenIterator;
     private Element nextChild;
-    private boolean hasNextChild = false;
+    private boolean hasNextChild;
     private final String name;
 
     /**

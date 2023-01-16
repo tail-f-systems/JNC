@@ -32,7 +32,7 @@ final class Utils {
     /**
      * Converts a number into its BigDecimal equivalent. Useful for comparisons
      * between Numbers.
-     * 
+     *
      * @param n an instance of java.lang.Number to be converted.
      * @return BigDecimal equivalent of n.
      */
@@ -52,7 +52,7 @@ final class Utils {
 
     /**
      * Boolean operators.
-     * 
+     *
      * @author emil@tail-f.com
      */
     public enum Operator {
@@ -109,7 +109,7 @@ final class Utils {
 
         /**
          * Comparison function for a Boolean operator.
-         * 
+         *
          * @param x1 First operand
          * @param x2 Second operand
          * @return The result of the comparison
@@ -120,7 +120,7 @@ final class Utils {
     /**
      * Checks that a comparison between v and arg, or between the length of v
      * and arg if applicable, evaluates to true.
-     * 
+     *
      * @param v A Number or String value to be compared.
      * @param arg The Number value to compare against.
      * @param op The operator to use (EQ: ==, GR: &gt;, LT: &lt;).
@@ -141,7 +141,7 @@ final class Utils {
     /**
      * Checks that a comparison between v and arg, or between the length of v
      * and arg if applicable, evaluates to true.
-     * 
+     *
      * @param v A Number value to be compared.
      * @param arg The BigDecimal value to compare against.
      * @param op The operator to use (EQ: ==, GR: &gt;, LT: &lt;).
@@ -161,7 +161,7 @@ final class Utils {
      * <p>
      * This method is used by most other data types to collapse Strings from
      * the XML parser.
-     * 
+     *
      * @param value The string to collapse.
      * @return The collapsed string.
      */
@@ -174,14 +174,14 @@ final class Utils {
         final String res = value.replaceAll(" +", " ");
 
         // Remove any leading and/or trailing space
-        final int startOffset = res.startsWith(" ") ? 1 : 0;
+        final int startOffset = res.charAt(0) == ' ' ? 1 : 0;
         final int stopOffset = res.length() > 1 && res.endsWith(" ") ? -1 : 0;
         return res.substring(startOffset, res.length() + stopOffset);
     }
 
     /**
      * Whitespace replace. Replaces whitespaces with spaces.
-     * 
+     *
      * @param value The String to replace whitespaces in.
      * @return a copy of value with all characters matching "[\t\n\r]" replaced
      *         by " " (a blank).
@@ -220,6 +220,7 @@ final class Utils {
             transformer.transform(source, result);
             escaped = writer.toString();
         } catch (Exception ignored) {
+            // intentionally ignore
         }
         return (escaped != null) ? escaped : original ;
     }

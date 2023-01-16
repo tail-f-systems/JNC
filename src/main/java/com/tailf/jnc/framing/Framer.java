@@ -53,20 +53,21 @@ class NC1_0_Framer extends BaseFramer {
         inFacade = new CharReader(this.in);
     }
 
+    @Override
     public void sendFrame(String frame) throws IOException {
         out.write(frame);
         out.write(endmarker);
         out.flush();
     }
 
+    @Override
     public String parseFrame() throws IOException {
         StringBuilder frame = new StringBuilder();
-        int offset = 0;
         while (true) {
             in.mark(BUFSIZ + 1);
             int read = rdr.readData(inFacade, buf);
             frame.append(buf, 0, read);
-            offset = frame.length() - read;
+            int offset = frame.length() - read;
             int start = Integer.max(0, offset - endmarker.length() + 1);
             int markerpos = frame.indexOf(endmarker, start);
             if (markerpos != -1) {
@@ -98,10 +99,11 @@ class NC1_1_Framer extends BaseFramer {
         inFacade = new ByteReader(this.in);
     }
 
+    @Override
     public void sendFrame(String frame) throws IOException {
         byte[] data = frame.getBytes(StandardCharsets.UTF_8);
         out.write(String
-                  .format("\n#%1$d\n", data.length)
+                  .format("%n#%1$d%n", data.length)
                   .getBytes(StandardCharsets.UTF_8));
         out.write(data);
         out.write("\n##\n".getBytes(StandardCharsets.UTF_8));
@@ -122,7 +124,7 @@ class NC1_1_Framer extends BaseFramer {
             }
         }
         return -1;
-    }            
+    }
 
     /**
      * Read the chunk header or frame terminator.  Assumes that the
@@ -154,6 +156,7 @@ class NC1_1_Framer extends BaseFramer {
         return realHdrSize;
     }
 
+    @Override
     public String parseFrame() throws IOException {
         StringBuilder frame = new StringBuilder();
         byte[] chunk;
@@ -165,7 +168,7 @@ class NC1_1_Framer extends BaseFramer {
             }
             // we know we are looking at new chunk - parse its length
             String chunkSizeStr = new String(chunkHdr, 2, hdrSize - 3, StandardCharsets.UTF_8);
-            int chunkSize = 0;
+            int chunkSize;
             try {
                 chunkSize = Integer.parseUnsignedInt(chunkSizeStr);
             } catch (NumberFormatException e) {

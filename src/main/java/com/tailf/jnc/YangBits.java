@@ -6,7 +6,7 @@ import java.util.StringTokenizer;
 
 /**
  * Implements the built-in YANG data type "bits".
- * 
+ *
  * @author emil@tail-f.com
  */
 public class YangBits extends YangBaseInt<BigInteger> {
@@ -21,7 +21,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /**
      * Constructor with value as a String.
-     * 
+     *
      * @param value The value to initialize the object with, as a Number.
      * @param mask The bit mask as a string.
      * @param smap mapping from flag names to position values
@@ -41,7 +41,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /**
      * Constructor with value as a Number.
-     * 
+     *
      * @param value The value to initialize the object with, as a Number.
      * @param mask The bit mask to initialize the object with.
      * @param smap mapping from flag names to position values
@@ -60,7 +60,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /**
      * Checks that the value matches mask.
-     * 
+     *
      * @throws YangException if value space does not match mask.
      */
     @Override
@@ -75,7 +75,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.YangBaseType#toString()
      */
     @Override
@@ -86,7 +86,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
             if (!value.and(flag).equals(BigInteger.ZERO)) {
                 res.append(smap[i]);
                 if (i < imap.length - 1) {
-                    res.append(" ");
+                    res.append(' ');
                 }
             }
         }
@@ -95,7 +95,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.YangBaseInt#canEqual(java.lang.Object)
      */
     @Override
@@ -105,7 +105,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.YangBaseType#hashCode()
      */
     @Override
@@ -116,7 +116,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.YangBaseType#equals(java.lang.Object)
      */
     @Override
@@ -139,7 +139,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.YangBaseInt#decode(java.lang.String)
      */
     @Override
@@ -168,7 +168,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.YangBaseType#cloneShallow()
      */
     @Override
@@ -178,7 +178,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /**
      * Performs arithmetic or assignment: this.value &= v.value.
-     * 
+     *
      * @param v YangBits instance to fetch value from.
      */
     public void and(YangBits v) {
@@ -187,7 +187,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /**
      * Performs arithmetic or assignment: this.value |= v.value.
-     * 
+     *
      * @param v YangBits instance to fetch value from.
      */
     public void or(YangBits v) {
@@ -196,7 +196,7 @@ public class YangBits extends YangBaseInt<BigInteger> {
 
     /**
      * Performs arithmetic or assignment: this.value ^= v.value.
-     * 
+     *
      * @param v YangBits instance to fetch value from.
      */
     public void xor(YangBits v) {

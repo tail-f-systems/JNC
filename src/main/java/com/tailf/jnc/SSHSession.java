@@ -42,8 +42,8 @@ public class SSHSession implements Transport, AutoCloseable {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    private SSHConnection connection = null;
-    private Session session = null;
+    private SSHConnection connection;
+    private Session session;
     private Session.Subsystem subsys;
 
     private InputWatchdog watchdog;
@@ -51,7 +51,7 @@ public class SSHSession implements Transport, AutoCloseable {
     @SuppressWarnings("PMD.AvoidStringBufferField")
     private StringBuilder message;
     private final List<IOSubscriber> ioSubscribers;
-    protected long readTimeout = 0; // millisecs
+    protected long readTimeout; // 0 millisecs by default
 
     private Framer framer;
     private InputStream subsysInput;
@@ -65,15 +65,19 @@ public class SSHSession implements Transport, AutoCloseable {
     }
 
     private class DummyWatchdog implements InputWatchdog {
+        @Override
         public void start() {
             // intentionally empty
         }
+        @Override
         public void watch() {
             // intentionally empty
         }
+        @Override
         public void done() {
             // intentionally empty
         }
+        @Override
         public void terminate() {
             // intentionally empty
         }
@@ -128,10 +132,9 @@ public class SSHSession implements Transport, AutoCloseable {
         @Override
         public <DataBufType> int readData(BaseReader<DataBufType> rdr, DataBufType buf,
                                           int offset, int length) throws IOException {
-            int read = 0;
             watchdog.watch();
             try {
-                read = rdr.read(buf, offset, length);
+                int read = rdr.read(buf, offset, length);
                 if (read == -1) {
                     trace("end of input (-1)");
                     throw new IOException("Session closed");
@@ -189,8 +192,9 @@ public class SSHSession implements Transport, AutoCloseable {
         ioSubscribers = new ArrayList<IOSubscriber>();
         // hello will be done by NetconfSession
     }
-    
+
     // Sets the framing to accommodate Netconf 1.1
+    @Override
     public void setFraming (Framing f) {
     	framer = f.newSessionFramer(new SessionDataReader(),
                                     subsysInput, sessionOutput);
@@ -305,7 +309,7 @@ public class SSHSession implements Transport, AutoCloseable {
     @Override
     public void println(String s) {
         trace(s);
-        message.append(s).append("\n");
+        message.append(s).append('\n');
     }
 
     /**
@@ -387,12 +391,14 @@ public class SSHSession implements Transport, AutoCloseable {
 
     /* help functions */
 
+    @Override
     public String getDeviceConnectionInfo()
     {
         return getSSHConnection().getClient().getRemoteHostname()
             + ":" + getSSHConnection().getClient().getRemotePort();
     }
 
+    @Override
     public Collection<IOSubscriber> getIOSubscribers()
     {
         return ioSubscribers;

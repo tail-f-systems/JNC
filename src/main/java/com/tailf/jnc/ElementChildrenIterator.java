@@ -8,7 +8,7 @@ import java.util.Iterator;
  * obtained from the {@link Element#iterator} method.
  * <p>
  * Example usage:
- * 
+ *
  * <pre>
  * ElementChildrenIterator hostIter = config.iterator(&quot;host&quot;);
  * while (hostIter.hasNext()) {
@@ -16,13 +16,13 @@ import java.util.Iterator;
  *     System.out.println(&quot;Host: &quot; + host);
  * }
  * </pre>
- * 
+ *
  */
 public class ElementChildrenIterator implements Iterator<Element> {
 
     private Iterator<Element> childrenIterator;
     private Element nextChild;
-    private boolean hasNextChild = false;
+    private boolean hasNextChild;
     private final String name;
 
     /**
@@ -79,7 +79,7 @@ public class ElementChildrenIterator implements Iterator<Element> {
 
     /**
      * Iterates the Node set.
-     * 
+     *
      * @return next element with this.name in set or null if none.
      */
     public Element nextElement() {
@@ -100,7 +100,7 @@ public class ElementChildrenIterator implements Iterator<Element> {
 
     /**
      * Iterates the Node set.
-     * 
+     *
      * @return next element with this.name in set or null if none.
      */
     @Override

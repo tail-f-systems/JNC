@@ -17,8 +17,8 @@ public class Leaf extends Element implements Cloneable {
     }
 
     // cache the Tagpath and the SchemaNode
-    private Tagpath tp = null;
-    private SchemaNode n = null;
+    private Tagpath tp;
+    private SchemaNode n;
 
     @Override
     protected void encode(Transport out, boolean newlineAtEnd,
