@@ -141,14 +141,17 @@ public class FramingTest {
     }
 
     void partialChunksTest(String frame, String chunkedFrame) throws IOException {
-        PipedOutputStream po = new PipedOutputStream();
-        PipedInputStream pi = new PipedInputStream(po);
         byte[] data = chunkedFrame.getBytes(StandardCharsets.UTF_8);
-        for (int i = 2; i < data.length - 1; i++) {
-            DataReader rdr = new TestDataReader(po, data, i);
-            Framer framer = Framing.CHUNKED.newSessionFramer(rdr, pi,
-                                                             nullOutputStream());
-            assertEquals("should restore the frame from two parts", frame, framer.parseFrame());
+        try (
+            PipedOutputStream po = new PipedOutputStream();
+            PipedInputStream pi = new PipedInputStream(po);
+        ) {
+            for (int i = 2; i < data.length - 1; i++) {
+                DataReader rdr = new TestDataReader(po, data, i);
+                Framer framer = Framing.CHUNKED.newSessionFramer(rdr, pi,
+                                                                 nullOutputStream());
+                assertEquals("should restore the frame from two parts", frame, framer.parseFrame());
+            }
         }
     }
 
@@ -166,31 +169,37 @@ public class FramingTest {
     public void twoSeparatedFrames() throws IOException {
         String frames = INTL_FRAME + ENDMARK + LONGER_FRAME + ENDMARK;
         byte[] data = frames.getBytes(StandardCharsets.UTF_8);
-        PipedOutputStream po = new PipedOutputStream();
-        PipedInputStream pi = new PipedInputStream(po);
-        for (int i = 1; i < frames.length(); i++) {
-            int bytesplit = frames.substring(0, i).getBytes(StandardCharsets.UTF_8).length;
-            DataReader rdr = new TestDataReader(po, data, bytesplit);
-            Framer framer = Framing.END_OF_MESSAGE.newSessionFramer(rdr, pi,
-                                                             nullOutputStream());
-            assertEquals("should restore both frames from parts",
-                         INTL_FRAME + LONGER_FRAME,
-                         framer.parseFrame() + framer.parseFrame());
+        try (
+            PipedOutputStream po = new PipedOutputStream();
+            PipedInputStream pi = new PipedInputStream(po);
+        ) {
+            for (int i = 1; i < frames.length(); i++) {
+                int bytesplit = frames.substring(0, i).getBytes(StandardCharsets.UTF_8).length;
+                DataReader rdr = new TestDataReader(po, data, bytesplit);
+                Framer framer = Framing.END_OF_MESSAGE.newSessionFramer(rdr, pi,
+                nullOutputStream());
+                assertEquals("should restore both frames from parts",
+                INTL_FRAME + LONGER_FRAME,
+                framer.parseFrame() + framer.parseFrame());
+            }
         }
     }
 
     @Test
     public void twoChunkedFrames() throws IOException {
         byte[] data = (CHUNKED_INTL_FRAME + CHUNKED_LONGER_FRAME).getBytes(StandardCharsets.UTF_8);
-        PipedOutputStream po = new PipedOutputStream();
-        PipedInputStream pi = new PipedInputStream(po);
-        for (int i = 1; i < data.length; i++) {
-            DataReader rdr = new TestDataReader(po, data, i);
-            Framer framer = Framing.CHUNKED.newSessionFramer(rdr, pi,
-                                                             nullOutputStream());
-            assertEquals("should restore both frames from parts",
-                         INTL_FRAME + LONGER_FRAME,
-                         framer.parseFrame() + framer.parseFrame());
+        try (
+            PipedOutputStream po = new PipedOutputStream();
+            PipedInputStream pi = new PipedInputStream(po);
+        ) {
+            for (int i = 1; i < data.length; i++) {
+                DataReader rdr = new TestDataReader(po, data, i);
+                Framer framer = Framing.CHUNKED.newSessionFramer(rdr, pi,
+                nullOutputStream());
+                assertEquals("should restore both frames from parts",
+                INTL_FRAME + LONGER_FRAME,
+                framer.parseFrame() + framer.parseFrame());
+            }
         }
     }
 }

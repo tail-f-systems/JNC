@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import union.C;
 import union.Union;
-import union.c.L;
+// import union.c.L;
 
 import com.tailf.jnc.Device;
 import com.tailf.jnc.DeviceUser;
@@ -14,14 +14,11 @@ import com.tailf.jnc.JNCException;
 import com.tailf.jnc.NetconfSession;
 import com.tailf.jnc.NodeSet;
 import com.tailf.jnc.YangElement;
-import com.tailf.jnc.YangException;
 import com.tailf.jnc.YangString;
-import com.tailf.jnc.YangUInt32;
 
 public class Client {
 
     private Device dev;
-    private DeviceUser duser;
 
     public Client() {
         this.init();
@@ -30,7 +27,7 @@ public class Client {
     private void init() {
         String emsUserName = "bobby";
         String ip = "localhost";
-        duser = new DeviceUser(emsUserName, "admin", "admin");
+        DeviceUser duser = new DeviceUser(emsUserName, "admin", "admin");
         dev = new Device("mydev", duser, ip, 2022);
 
         try {
@@ -58,26 +55,25 @@ public class Client {
 
     private NodeSet getConfig(Device d) throws IOException, JNCException {
         NetconfSession session = d.getSession("cfg");
-        NodeSet reply = session.getConfig(NetconfSession.RUNNING);
-        return reply;
+        return session.getConfig(NetconfSession.RUNNING);
     }
 
     public NodeSet getConfig() throws IOException, JNCException {
         return getConfig(dev);
     }
-    
+
     /**
      * Gets the first configuration element in configs with name "c".
-     * 
+     *
      * @param configs Set of device configuration data.
      * @return First c configuration, or null if none present.
      */
     public static C getCConfig(NodeSet configs) {
         Element cConfig = configs.first();
-        if (!cConfig.name.equals("c")) {
+        if (!"c".equals(cConfig.name)) {
             cConfig = null;
             for (Element config : configs) {
-                if (config.name.equals("c")) {
+                if ("c".equals(config.name)) {
                     cConfig = config;
                 }
             }
@@ -95,10 +91,10 @@ public class Client {
         Union.enable();
         client.init();
         NodeSet configs = client.getConfig();
-        
+
         // Get (first) config with name "c"
         C cConfig = getCConfig(configs);
-        
+
         // Clone a backup configuration for rollback purposes
         YangElement backup = cConfig.clone();
 
@@ -106,15 +102,15 @@ public class Client {
         System.out.println("Initial config:\n" + configAsXML);
         System.out.println("HashCode of the config XML string: " +
                 configAsXML.hashCode());
-        
+
 //        // Increment number of servers at each l by one
         ElementChildrenIterator lIterator = cConfig.lIterator();
 //        while (lIterator.hasNext()) {
 //            L h = (L) lIterator.next();
-//            
+//
 //            // Internal representation of numberOfServers
 //            YangUInt32 numberOfServers = h.getNumberOfServersValue();
-//            
+//
 //            // Set value of the with a Java long
 //            numberOfServers.setValue(numberOfServers.getValue() + 1);
 //        }
@@ -129,7 +125,7 @@ public class Client {
 //                    h.getNumberOfServersValue() + "), ");
 //        }
 //        System.out.println();
-        
+
         // Get "enabled"-value, using default value when not present
         System.out.print("C enable status: ");
         lIterator = cConfig.lIterator();
@@ -139,7 +135,7 @@ public class Client {
 //                    h.getEnabledValue() + "), ");
 //        }
 //        System.out.println();
-        
+
         // Add a new l
         YangString lName = new YangString("uppsala");
 //        L uppsala = new L(lName);
@@ -151,7 +147,7 @@ public class Client {
 //        } catch (YangException e) {
 //            System.err.println("Cannot add l " + lName + ": Fail");
 //        }
-        
+
         // Try to add one with same name (key collision!)
 //        try {
 //            cConfig.addL(lName);
@@ -159,18 +155,18 @@ public class Client {
 //        } catch (YangException e) {
 //            System.out.println("Cannot add l " + lName + " twice: OK");
 //        }
-        
+
         // Fill the l list with MAX_ELEMENTS entries
-        final int MAX_ELEMENTS = 64;
-        int spaceLeft = MAX_ELEMENTS - cConfig.getChildren().size();
+        final int maxElements = 64;
+        int spaceLeft = maxElements - cConfig.getChildren().size();
         if (spaceLeft <= 0) {
             System.err.println("No space for more l list entries! FAIL");
         }
 //        for(int i = 0; i < spaceLeft; i++) {
 //            cConfig.addL("l" + i);
 //        }
-        if (cConfig.getChildren().size() == MAX_ELEMENTS) {
-            System.out.println("L list contains " + MAX_ELEMENTS +
+        if (cConfig.getChildren().size() == maxElements) {
+            System.out.println("L list contains " + maxElements +
                     " entries: OK");
         } else {
             System.err.println("Fill list to limit: FAIL (is limit 0?)");
@@ -185,7 +181,7 @@ public class Client {
 //            System.out.println("Cannot add more than " + MAX_ELEMENTS +
 //                    " c: OK");
 //        }
-        
+
         // Delete the added l list entries
 //        for(int i = 0; i < spaceLeft; i++) {
 //            cConfig.deleteL("l" + i);
@@ -209,14 +205,14 @@ public class Client {
 
         // Edit the remote configuration and get the new one
         NodeSet configs2 = client.editConfig(cConfig);
-        
+
         // Get the new (changed) config with name "c"
         cConfig = getCConfig(configs2);
         String configAsXML2 = cConfig.toXMLString();
 //        System.out.println("New config:\n" + configAsXML2);
         System.out.println("HashCode of the new configuration: " +
                 configAsXML2.hashCode());
-        
+
         // Get diff between "backup" and "cConfig"
         NodeSet toKeep1 = new NodeSet();
         NodeSet toDelete1 = new NodeSet();
@@ -246,7 +242,7 @@ public class Client {
 //            }
 //        }
 //        System.out.println();
-        
+
         // Clear remote l config
         cConfig.markDelete();
         NodeSet configs3 = client.editConfig(cConfig);
@@ -256,7 +252,7 @@ public class Client {
         } else {
             System.out.println("Clear the remote c config: FAIL");
         }
-        
+
         // Change back to original config
         client.editConfig(backup);
         NodeSet configs4 = client.getConfig();

@@ -1,6 +1,8 @@
 package com.tailf.jnc;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,13 +35,13 @@ public class YangUInt8Test {
 
     @Test
     public void testEqualsObject() {
-        assertFalse(i1.equals((Object)iv1));
-        assertFalse(i1.equals((Object)7));
-        assertFalse(i1.equals((Object)iv2));
-        assertFalse(i1.equals((Object)"7"));
-        assertFalse(i2.equals((Object)iv2));
-        assertFalse(i3.equals((Object)iv3));
-        assertFalse(i3.equals((Object)iv2));
+        assertNotEquals((Object)iv1, i1);
+        assertNotEquals((Object)7, i1);
+        assertNotEquals((Object)iv2, i1);
+        assertNotEquals((Object)"7", i1);
+        assertNotEquals((Object)iv2, i2);
+        assertNotEquals((Object)iv3, i3);
+        assertNotEquals((Object)iv2, i3);
     }
 
     @Test
@@ -58,7 +60,7 @@ public class YangUInt8Test {
         assertTrue(i1.valid(255));
         assertTrue(i1.valid(Byte.MAX_VALUE));
         assertTrue(i1.valid(0x7f));
-        
+
         // These should not be valid
         assertFalse(i1.valid(-1));
         assertFalse(i1.valid(256));

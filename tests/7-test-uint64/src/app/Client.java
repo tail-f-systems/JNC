@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import uint64.C;
 import uint64.Uint64;
-import uint64.Uint642;
 import uint64.c.L;
 
 import com.tailf.jnc.Device;
@@ -22,7 +21,6 @@ import com.tailf.jnc.YangUInt64;
 public class Client {
 
     private Device dev;
-    private DeviceUser duser;
 
     public Client() {
         this.init();
@@ -31,7 +29,7 @@ public class Client {
     private void init() {
         String emsUserName = "bobby";
         String ip = "localhost";
-        duser = new DeviceUser(emsUserName, "admin", "admin");
+        DevicUser duser = new DeviceUser(emsUserName, "admin", "admin");
         dev = new Device("mydev", duser, ip, 2022);
 
         try {
@@ -59,26 +57,25 @@ public class Client {
 
     private NodeSet getConfig(Device d) throws IOException, JNCException {
         NetconfSession session = d.getSession("cfg");
-        NodeSet reply = session.getConfig(NetconfSession.RUNNING);
-        return reply;
+        return session.getConfig(NetconfSession.RUNNING);
     }
 
     public NodeSet getConfig() throws IOException, JNCException {
         return getConfig(dev);
     }
-    
+
     /**
      * Gets the first configuration element in configs with name "c".
-     * 
+     *
      * @param configs Set of device configuration data.
      * @return First c configuration, or null if none present.
      */
     public static C getCConfig(NodeSet configs) {
         Element cConfig = configs.first();
-        if (!cConfig.name.equals("c")) {
+        if (!"c".equals(cConfig.name)) {
             cConfig = null;
             for (Element config : configs) {
-                if (config.name.equals("c")) {
+                if ("c".equals(config.name)) {
                     cConfig = config;
                 }
             }
@@ -97,14 +94,9 @@ public class Client {
         client.init();
         NodeSet configs = client.getConfig();
 
-        // Buffered reader used to pause execution
-        java.io.InputStreamReader isr =
-                new java.io.InputStreamReader(System.in);
-        java.io.BufferedReader br = new java.io.BufferedReader(isr);
-        
         // Get (first) config with name "c"
         C cConfig = getCConfig(configs);
-        
+
         // Clone a backup configuration for rollback purposes
         YangElement backup = cConfig.clone();
 
@@ -112,18 +104,18 @@ public class Client {
         System.out.println("Initial config:\n" + configAsXML);
         System.out.println("HashCode of the config XML string: " +
                 configAsXML.hashCode());
-        
+
         ElementChildrenIterator lIterator = cConfig.lIterator();
         while (lIterator.hasNext()) {
             L h = (L) lIterator.next();
-            
+
             // Internal representations of key1 and key2
             YangString key1Value = h.getKey1Value();
             YangUInt64 key2Value = (YangUInt64)h.getKey2Value();
-            
+
             // Change the key1 value (prepend "new")
             key1Value.setValue("new" + key1Value);
-            
+
             // Try setting key2 to the invalid value "a", then set to "0"
             try {
                 key2Value.setValue("a");
@@ -135,17 +127,17 @@ public class Client {
 
         // Edit the remote configuration and get the new one
         NodeSet configs2 = client.editConfig(cConfig);
-        
+
         // Pause (Read line)
         br.readLine();
-        
+
         // Get the new (changed) config with name "c"
         cConfig = getCConfig(configs2);
         String configAsXML2 = cConfig.toXMLString();
 //        System.out.println("New config:\n" + configAsXML2);
         System.out.println("HashCode of the new configuration: " +
                 configAsXML2.hashCode());
-        
+
         // Get diff between "backup" and "cConfig"
         NodeSet toKeep1 = new NodeSet();
         NodeSet toDelete1 = new NodeSet();
@@ -175,7 +167,7 @@ public class Client {
             }
         }
         System.out.println();
-        
+
         // Clear remote l config
         cConfig.markDelete();
         NodeSet configs3 = client.editConfig(cConfig);
@@ -188,7 +180,7 @@ public class Client {
 
         // Pause (Read line)
         br.readLine();
-        
+
         // Change back to original config
         client.editConfig(backup);
         NodeSet configs4 = client.getConfig();

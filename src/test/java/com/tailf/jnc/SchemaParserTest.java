@@ -1,6 +1,8 @@
 package com.tailf.jnc;
 
 import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,10 +12,7 @@ import org.junit.Assert;
 public class SchemaParserTest {
 
     private static SchemaParser parser;
-    private HashMap<Tagpath, SchemaNode> h = new HashMap<Tagpath, SchemaNode>();
-
-    public SchemaParserTest() {
-    }
+    private Map<Tagpath, SchemaNode> h = new HashMap<Tagpath, SchemaNode>();
 
     @Before
     public void setUp() throws JNCException {
@@ -22,6 +21,7 @@ public class SchemaParserTest {
 
     @After
     public void tearDown() {
+        // empty
     }
 
     @Test (expected=JNCException.class)

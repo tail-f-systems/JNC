@@ -1,6 +1,10 @@
 package com.tailf.jnc;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 
 import java.math.BigDecimal;
 
@@ -30,46 +34,46 @@ public class YangDecimal64Test {
 
     @Test
     public void testToString() {
-        assertTrue(d1 + "not 0", d1.toString().equals("0"));
-        assertTrue(d2 + "not 3.14", d2.toString().equals("3.14"));
-        assertTrue(d3 + "not 3.14", d3.toString().equals("3.14"));
+        assertEquals(d1 + "not 0", "0", d1.toString());
+        assertEquals(d2 + "not 3.14", "3.14", d2.toString());
+        assertEquals(d3 + "not 3.14", "3.14", d3.toString());
     }
 
     @Test
     public void testEqualsObject() throws YangException {
-        assertTrue(d1.equals(d1));
-        assertTrue(d1.equals(new YangDecimal64(0, 1)));
-        assertFalse(d1.equals(d2));
-        assertFalse(d1.equals(d3));
-        assertFalse(d2.equals(d3));
+        assertEquals(d1, d1);
+        assertEquals(new YangDecimal64(0, 1), d1);
+        assertNotEquals(d2, d1);
+        assertNotEquals(d3, d1);
+        assertNotEquals(d3, d2);
     }
 
     @Test
     public void testYangDecimal64StringInt() throws YangException {
         tmp1 = new YangDecimal64("0", 1);
-        assertTrue(tmp1.value.intValue() == 0);
-        assertTrue(tmp1.getFractionDigits() == 1);
+        assertEquals(0, tmp1.value.intValue());
+        assertEquals(1, tmp1.getFractionDigits());
 
         tmp1 = new YangDecimal64("0.01000", 5);
         assertTrue(Math.abs(tmp1.value.doubleValue() - 0.01) < Utils.EPSILON);
-        assertTrue(tmp1.getFractionDigits() == 5);
+        assertEquals(5, tmp1.getFractionDigits());
     }
 
     @Test
     public void testYangDecimal64NumberInt() throws YangException {
         tmp1 = new YangDecimal64(0, 1);
-        assertTrue(tmp1.value.intValue() == 0);
-        assertTrue(tmp1.getFractionDigits() == 1);
+        assertEquals(0, tmp1.value.intValue());
+        assertEquals(1, tmp1.getFractionDigits());
 
         tmp1 = new YangDecimal64(0.01, 5);
         assertTrue(Math.abs(tmp1.value.doubleValue() - 0.01) < Utils.EPSILON);
-        assertTrue(tmp1.getFractionDigits() == 5);
+        assertEquals(5, tmp1.getFractionDigits());
     }
 
     @Test
     public void testSetValueString() throws YangException {
         assertTrue(Math.abs(d1.value.doubleValue()) < Utils.EPSILON);
-        assertTrue(d1.getFractionDigits() == 1);
+        assertEquals(1, d1.getFractionDigits());
         d1.setValue("-0.1");
         assertTrue(Math.abs(d1.value.doubleValue()+0.1) < Utils.EPSILON);
     }
@@ -77,7 +81,7 @@ public class YangDecimal64Test {
     @Test
     public void testSetValueNumber() throws YangException {
         assertTrue(Math.abs(d1.value.doubleValue()) < Utils.EPSILON);
-        assertTrue(d1.getFractionDigits() == 1);
+        assertEquals(1, d1.getFractionDigits());
         d1.setValue(-0.1);
         assertTrue(Math.abs(d1.value.doubleValue()+0.1) < Utils.EPSILON);
 
@@ -89,7 +93,7 @@ public class YangDecimal64Test {
 
     @Test
     public void testDecodeString() {
-        assertTrue(d1.decode("7").byteValue() == 7);
+        assertEquals(7, d1.decode("7").byteValue());
     }
 
     @Test
@@ -98,32 +102,28 @@ public class YangDecimal64Test {
         d2.exact(new BigDecimal("3.14"));
         d3.exact(new BigDecimal("3.14"));
 
-        try {
+        assertThrows("Truncation should not occur", YangException.class, () -> {
             (new YangDecimal64(0.945645, 1)).exact(0);
-            fail("Truncation should not occur");
-        } catch (YangException e) {}
-        try {
+        } );
+        assertThrows("Rounding should not occur", YangException.class, () -> {
             d2.exact(3);
             d3.exact(3);
-            fail("Rounding should not occur");
-        } catch (YangException e) {}
-        
+        } );
+
         // Invalid fraction digits
-        try {
-            new YangDecimal64("0.9999999999999999999", 19); // 19
-            fail("Should not accept that high precision");
-        } catch (YangException e) {}
+        assertThrows("Should not accept that high precision", YangException.class, () -> {
+            new YangDecimal64("0.9999999999999999999", 19);
+        } );
 
         BigDecimal bd19 = new BigDecimal("0.9999999999999999999");
         YangDecimal64 d18 = new YangDecimal64(bd19, 18);
         d18.exact(1);
-        
+
         // Outside precision
         YangDecimal64 d17 = new YangDecimal64("0.99999999999999999", 17);
-        try {
+        assertThrows("Outside precision", YangException.class, () -> {
             d17.exact(1);
-            fail("Outside precision");
-        } catch (YangException e) {}
+       } );
     }
 
     @Test
@@ -132,19 +132,16 @@ public class YangDecimal64Test {
         d2.min(Integer.MIN_VALUE);
         d3.min(Integer.MIN_VALUE);
 
-        try {
+        assertThrows("No value should be larger than MAX_VALUE", YangException.class, () -> {
             d1.min(Integer.MAX_VALUE);
-            fail("No value should be larger than MAX_VALUE");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("No value should be larger than MAX_VALUE", YangException.class, () -> {
             d2.min(Integer.MAX_VALUE);
-            fail("No value should be larger than MAX_VALUE");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("No value should be larger than MAX_VALUE", YangException.class, () -> {
             d3.min(Integer.MAX_VALUE);
-            fail("No value should be larger than MAX_VALUE");
-        } catch (YangException e) {}
-        
+        });
+
         // Tight integer lower bound
         d1.min(0);
         d2.min(3);
@@ -157,32 +154,27 @@ public class YangDecimal64Test {
         d2.max(Integer.MAX_VALUE);
         d3.max(Integer.MAX_VALUE);
 
-        try {
+        assertThrows("No value should be smaller than MIN_VALUE", YangException.class, () -> {
             d1.max(Integer.MIN_VALUE);
-            fail("No value should be smaller than MIN_VALUE");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("No value should be smaller than MIN_VALUE", YangException.class, () -> {
             d2.max(Integer.MIN_VALUE);
-            fail("No value should be smaller than MIN_VALUE");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("No value should be smaller than MIN_VALUE", YangException.class, () -> {
             d3.max(Integer.MIN_VALUE);
-            fail("No value should be smaller than MIN_VALUE");
-        } catch (YangException e) {}
-        
+        });
+
         // Tight integer lower bound
         d1.max(0);
         d2.max(4);
         d3.max(4);
 
-        try {
+        assertThrows("Truncation should not occur", YangException.class, () -> {
             d2.max(3);
-            fail("Truncation should not occur");
-        } catch (YangException e) {}
-        try {
+        });
+        assertThrows("Truncation should not occur", YangException.class, () -> {
             d3.max(3);
-            fail("Truncation should not occur");
-        } catch (YangException e) {}
+        });
     }
 
     @Test
@@ -200,35 +192,35 @@ public class YangDecimal64Test {
         assertFalse(d1.valid(Long.MAX_VALUE));
         assertFalse(d1.valid(new BigDecimal("-752389597325739823759827.389")));
         assertFalse(d1.valid(new BigDecimal("18721468758671265235134231.42")));
-        
+
         assertTrue(d1.valid(-922337203685477580L));
         assertFalse(d1.valid(-922337203685477581L));
-        
+
         assertTrue(d1.valid(922337203685477580L));
         assertFalse(d1.valid(922337203685477581L));
 
         assertTrue(d1.valid(new BigDecimal("-922337203685477580.8")));
         assertFalse(d1.valid(new BigDecimal("-922337203685477580.9")));
-        
+
         assertTrue(d1.valid(new BigDecimal("922337203685477580.7")));
         assertFalse(d1.valid(new BigDecimal("922337203685477580.8")));
-        
+
         // Valid numbers for d2: -92233720368547758.08 to 92233720368547758.07
         assertTrue(d2.valid(new BigDecimal("-92233720368547758.08")));
         assertFalse(d2.valid(new BigDecimal("-92233720368547758.09")));
-        
+
         assertTrue(d2.valid(new BigDecimal("92233720368547758.07")));
         assertFalse(d2.valid(new BigDecimal("92233720368547758.08")));
     }
 
     @Test
     public void testHashCode() {
-        int expected = new BigDecimal("0").hashCode() << 1;  // 0
-        assertTrue("was: "+d2.hashCode(), d1.hashCode() == expected);
+        int expected = BigDecimal.ZERO.hashCode() << 1;  // 0
+        assertEquals("was: "+d2.hashCode(), expected, d1.hashCode());
         expected = new BigDecimal("3.14").hashCode() << 2;   // 38944
-        assertTrue("was: "+d2.hashCode(), d2.hashCode() == expected);
+        assertEquals("was: "+d2.hashCode(), expected, d2.hashCode());
         expected = new BigDecimal("3.14").hashCode() << 1;   // 19472
-        assertTrue("was: "+d3.hashCode(), d3.hashCode() == expected);
+        assertEquals("was: "+d3.hashCode(), expected, d3.hashCode());
     }
 
 }

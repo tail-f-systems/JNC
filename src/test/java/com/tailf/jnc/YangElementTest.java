@@ -1,6 +1,8 @@
 package com.tailf.jnc;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,16 +19,16 @@ public class YangElementTest {
     NodeSet uniqueB;
     NodeSet changedA;
     NodeSet changedB;
-    private final String ns = "http://test.com/ns/containertest/1.0";
-    private final String prefix = "conttest";
-    
+    private static final String ns = "http://test.com/ns/containertest/1.0";
+    private static final String prefix = "conttest";
+
     private void clearNodeSets() {
         uniqueA = new NodeSet();
         uniqueB = new NodeSet();
         changedA = new NodeSet();
         changedB = new NodeSet();
     }
-    
+
     @Before
     public void setUp() {
         leaf1 = new Leaf(ns, "leaf");
@@ -48,12 +50,12 @@ public class YangElementTest {
                 new Attribute(ns, "description", "For testing"),
                 new Attribute(ns, "reference", "YangElementTest"),
         };
-        for (int i=0; i<attrs.length; i++) {
-            a1.addAttr(attrs[i]);
-            b1.addAttr(attrs[i]);
+        for (Attribute attr : attrs) {
+            a1.addAttr(attr);
+            b1.addAttr(attr);
         }
     }
-    
+
     private boolean nodeSetsAreEmpty() {
         boolean noUniques = uniqueA.isEmpty() && uniqueB.isEmpty();
         boolean noChanges = changedA.isEmpty() && changedB.isEmpty();
@@ -72,7 +74,7 @@ public class YangElementTest {
         assertFalse("Different trees yield no diff", nodeSetsAreEmpty());
         clearNodeSets();
         assertTrue("The clearNodeSets method works", nodeSetsAreEmpty());
-        
+
         // Remove child 'a' from b2 and confirm that it is then unique to b1
         b2.delete("child::a");
         YangElement.getDiff(b1, b2, uniqueA, uniqueB, changedA, changedB);
@@ -82,12 +84,12 @@ public class YangElementTest {
         assertTrue("No changed leaves in A", changedA.isEmpty());
         assertTrue("No changed leaves in B", changedB.isEmpty());
         clearNodeSets();
-        
+
         // Add it and confirm that the trees are now equal again
         b2.addChild(a2);
         YangElement.getDiff(b1, b2, uniqueA, uniqueB, changedA, changedB);
         assertTrue(nodeSetsAreEmpty());
-        
+
         // Change value of leaf in b2, confirm "changed" status in b1 and b2
         b2.setValue("child::a/leaf", "");
         YangElement.getDiff(b1, b2, uniqueA, uniqueB, changedA, changedB);
@@ -98,7 +100,7 @@ public class YangElementTest {
         assertEquals("leaf changed in A", leaf1, changedA.first());
         assertEquals("leaf changed in B", leaf2, changedB.first());
         clearNodeSets();
-        
+
         // Restore and confirm that the trees are now equal again
         b2.setValue("child::a/leaf", "leaf");
         YangElement.getDiff(b1, b2, uniqueA, uniqueB, changedA, changedB);
@@ -108,13 +110,13 @@ public class YangElementTest {
         b1.addChild(leaf2);
         b1.setValue("child::leaf", "leaf2");
         assertEquals("Value changed", "leaf2", b2.getValue("child::a/leaf"));
-        
+
         // Confirm that leaf2 is 'unique' to b1 (because of structure diff)
         YangElement.getDiff(b1, b2, uniqueA, uniqueB, changedA, changedB);
         assertFalse("b1 has no unique children", uniqueA.isEmpty());
         assertTrue("b2 has no unique children", uniqueB.isEmpty());
         clearNodeSets();
-        
+
         // Add same leaf to b2 and confirm that leaf1 and leaf2 are 'changed'
         b2.addChild(leaf2);
         YangElement.getDiff(b1, b2, uniqueA, uniqueB, changedA, changedB);
@@ -125,46 +127,45 @@ public class YangElementTest {
         assertEquals("leaf changed in A", leaf1, changedA.first());
         assertEquals("leaf changed in B", leaf2, changedB.first());
         clearNodeSets();
-        
+
         // Change value of leaf2 and confirm that trees are identical
         b2.setValue("child::leaf", "leaf");
         YangElement.getDiff(b1, b2, uniqueA, uniqueB, changedA, changedB);
         assertTrue(nodeSetsAreEmpty());
     }
-    
+
     @Test
     public void shouldProduceValidXmlRegardlessOfLeafNamespace() throws JNCException {
-    	
-    	final Leaf leafWithNamespace = new Leaf("http://testNamespace", "leafWithNamespace");
+
+        final Leaf leafWithNamespace = new Leaf("http://testNamespace", "leafWithNamespace");
         leafWithNamespace.setDefaultPrefix();
-    	leafWithNamespace.setValue("leafValue");
-    	a1.addChild(leafWithNamespace);
-    	
-    	final YangXMLParser parser = new YangXMLParser();
-    	 	
-    	String expectedXml = new StringBuilder()
-    		.append("<a xmlns=\"http://test.com/ns/containertest/1.0\" xmlns:conttest=\"http://test.com/ns/containertest/1.0\" presence=\"Always present\" description=\"For testing\" reference=\"YangElementTest\">\n")
+        leafWithNamespace.setValue("leafValue");
+        a1.addChild(leafWithNamespace);
+
+        final YangXMLParser parser = new YangXMLParser();
+
+        String expectedXml = new StringBuilder()
+            .append("<a xmlns=\"http://test.com/ns/containertest/1.0\" xmlns:conttest=\"http://test.com/ns/containertest/1.0\" presence=\"Always present\" description=\"For testing\" reference=\"YangElementTest\">\n")
             .append("  <leaf>leaf</leaf>\n")
             .append("  <leafWithNamespace xmlns=\"http://testNamespace\">leafValue</leafWithNamespace>\n")
             .append("</a>\n")
-    		.toString();
+            .toString();
 
-    	// Used to verify expectedXML is parseable
-    	final Element expectedElement = parser.parse(expectedXml);
-    	final Element expectedLeafElement = expectedElement.getChild("leafWithNamespace");
-    	assertEquals(expectedLeafElement.namespace, leafWithNamespace.namespace);
-    	
-    	/*
-    	 * Throws SAX exception
-    	 * 
-    	 * [Fatal Error] The prefix "unknown" for element "unknown:leafWithNamespace" is not bound...
-    	 * 
-    	 */
-    	final Element parsedElement = parser.parse(a1.toXMLString());   
-    	assertEquals(expectedXml, parsedElement.toXMLString());  	
-    	
+        // Used to verify expectedXML is parseable
+        final Element expectedElement = parser.parse(expectedXml);
+        final Element expectedLeafElement = expectedElement.getChild("leafWithNamespace");
+        assertEquals(expectedLeafElement.namespace, leafWithNamespace.namespace);
+
+        /*
+         * Throws SAX exception
+         *
+         * [Fatal Error] The prefix "unknown" for element "unknown:leafWithNamespace" is not bound...
+         *
+         */
+        final Element parsedElement = parser.parse(a1.toXMLString());
+        assertEquals(expectedXml, parsedElement.toXMLString());
+
     }
-    
 
 }
 

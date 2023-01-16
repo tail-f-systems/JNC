@@ -1,13 +1,13 @@
 package com.tailf.jnc;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
 public class CamelizeTest {
 
     @Test
-    public void test_when_upper_case() {
+    public void testWhenUpperCase() {
         String result = YangElement.camelize("TESTSTRING");
         String expected = "teststring";
         String msg = "should convert to lower case";
@@ -15,7 +15,7 @@ public class CamelizeTest {
     }
 
     @Test
-    public void test_when_lower_camelcase() {
+    public void testWhenLowerCamelcase() {
         String result = YangElement.camelize("testString");
         String expected = "testString";
         String msg = "should return string unchanged";
@@ -23,7 +23,7 @@ public class CamelizeTest {
     }
 
     @Test
-    public void test_when_upper_camelcase() {
+    public void testWhenUpperCamelcase() {
         String result = YangElement.camelize("TestString");
         String expected = "testString";
         String msg = "should return string decapitalized";
@@ -31,7 +31,7 @@ public class CamelizeTest {
     }
 
     @Test
-    public void test_when_contains_hyphens() {
+    public void testWhenContainsHyphens() {
         String result1 = YangElement.camelize("test-string");
         String result2 = YangElement.camelize("TEST-STRING");
         String expected = "testString";
@@ -41,7 +41,7 @@ public class CamelizeTest {
     }
 
     @Test
-    public void test_when_contains_underlines() {
+    public void testWhenContainsUnderlines() {
         String result1 = YangElement.camelize("test_string_");
         String result2 = YangElement.camelize("TEST_STRING_");
         String expected = "test_string_";
@@ -51,7 +51,7 @@ public class CamelizeTest {
     }
 
     @Test
-    public void test_when_empty() {
+    public void testWhenEmpty() {
         String result = YangElement.camelize("");
         String expected = "";
         String msg = "should return empty string";
@@ -59,7 +59,7 @@ public class CamelizeTest {
     }
 
     @Test
-    public void test_when_null() {
+    public void testWhenNull() {
         String result = YangElement.camelize(null);
         String expected = "";
         String msg = "should return empty string";
@@ -67,7 +67,7 @@ public class CamelizeTest {
     }
 
     @Test
-    public void test_when_single_character() {
+    public void testWhenSingleCharacter() {
         String result = YangElement.camelize("A");
         String expected = "a";
         String msg = "should return lower case version of string";
@@ -75,7 +75,7 @@ public class CamelizeTest {
     }
 
     @Test
-    public void test_when_trailing_hyphen() {
+    public void testWhenTrailingHyphen() {
         String result = YangElement.camelize("test-");
         String expected = "test-"; // "test" might be better
         String msg = "should not remove hyphen";
@@ -83,7 +83,7 @@ public class CamelizeTest {
     }
 
     @Test
-    public void test_when_many_dots_and_hyphens() {
+    public void testWhenManyDotsAndHyphens() {
         String result = YangElement.camelize("test--...STR.ING.");
         String expected = "test-.StrIng."; // "testStrIng" might be better
         String msg = "should remove all except consecutive and trailing";

@@ -1,12 +1,13 @@
 package com.tailf.jnc;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import com.tailf.jnc.YangException;
-import com.tailf.jnc.YangInt16;
 
 public class YangInt16Test {
 
@@ -36,26 +37,26 @@ public class YangInt16Test {
 
     @Test
     public void testEquals() throws YangException {
-        assertFalse(i1.equals((Object)iv1));
-        assertFalse(i1.equals((Object)7));
-        assertFalse(i1.equals((Object)iv2));
-        assertFalse(i1.equals((Object)"7"));
-        assertFalse(i2.equals((Object)iv2));
-        assertTrue(i2.equals((Object)i3));
-        assertFalse(i3.equals((Object)iv3));
-        assertFalse(i3.equals((Object)iv2));
+        assertNotEquals((Object)iv1, i1);
+        assertNotEquals((Object)7, i1);
+        assertNotEquals((Object)iv2, i1);
+        assertNotEquals((Object)"7", i1);
+        assertNotEquals((Object)iv2, i2);
+        assertEquals((Object)i3, i2);
+        assertNotEquals((Object)iv3, i3);
+        assertNotEquals((Object)iv2, i3);
 
-        assertTrue(i1.equals(i1));
-        assertFalse(i1.equals(null));
-        assertFalse(i1.equals(7));
-        assertFalse(i1.equals(Short.valueOf((short)7)));
-        assertTrue(i1.equals(new YangInt16((short)7)));
+        assertEquals(i1, i1);
+        assertNotEquals(null, i1);
+        assertNotEquals(7, i1);
+        assertNotEquals(Short.valueOf((short)7), i1);
+        assertEquals(new YangInt16((short)7), i1);
         i1.value = null;
-        assertFalse(i1.equals(i1));
-        assertFalse(i1.equals(new YangInt16((short)7)));
+        assertNotEquals(i1, i1);
+        assertNotEquals(new YangInt16((short)7), i1);
         i1.value = 7;
-        
-        assertTrue(i2.equals(i3));
+
+        assertEquals(i3, i2);
     }
 
     @Test
@@ -80,7 +81,7 @@ public class YangInt16Test {
     	assertTrue(i1.valid(0x7fffL));
     	assertTrue(i1.valid(0x0000L));
     	assertTrue(i1.valid(-0x8000L));
-    	
+
     	// These should not be valid
     	assertFalse(i1.valid(0x8000L));
     	assertFalse(i1.valid(-0x8001L));
@@ -91,38 +92,32 @@ public class YangInt16Test {
     	assertFalse(i1.valid(Long.MAX_VALUE));
     	assertFalse(i1.valid(Long.MIN_VALUE));
     	assertFalse(i1.valid(0xffffffffL));
-    	
-    	// null
-        try {
+
+        assertThrows(NullPointerException.class, () -> {
             i1.valid(null);
-            fail("Expected NullPointerException");
-        } catch (NullPointerException e) {}
+        });
     }
 
     @Test
     public void testDecodeString() {
-        assertTrue(i1.decode("123") == 123);
-        assertTrue(i1.decode("123").equals(Short.valueOf((short)123)));
-        assertTrue(i1.decode("-123") == -123);
-        assertTrue(i1.decode("-0") == 0);
-        assertTrue(i1.decode("010") == 8);  // Octal
-        assertTrue(i1.decode("0x10") == 16);  // Hexadecimal
-        assertTrue(i1.decode("#10") == 16);  // Hexadecimal
-        assertTrue(i1.decode("-0x8000") == -32768);  // Min
-        assertTrue(i1.decode("0x7fFf") == 32767);  // Max, mixed case
+        assertEquals((Short)(short)123, i1.decode("123"));
+        assertEquals(Short.valueOf((short)123), i1.decode("123"));
+        assertEquals((Short)(short)-123, i1.decode("-123"));
+        assertEquals((Short)(short)0, i1.decode("-0"));
+        assertEquals((Short)(short)8, i1.decode("010"));  // Octal
+        assertEquals((Short)(short)16, i1.decode("0x10"));  // Hexadecimal
+        assertEquals((Short)(short)16, i1.decode("#10"));  // Hexadecimal
+        assertEquals((Short)(short)-32768, i1.decode("-0x8000"));  // Min
+        assertEquals((Short)(short)32767, i1.decode("0x7fFf"));  // Max, mixed case
 
-        try {
+        assertThrows(NumberFormatException.class, () -> {
             i1.decode("");
-            fail("Expected NumberFormatException");
-        } catch (NumberFormatException e) {}
-        try {
+        });
+        assertThrows(NumberFormatException.class, () -> {
             i1.decode("0x8000"); // Max + 1
-            fail("Expected NumberFormatException");
-        } catch (NumberFormatException e) {}
-        try {
+        });
+        assertThrows(NullPointerException.class, () -> {
             i1.decode(null);
-            fail("Expected NullPointerException");
-        } catch (NullPointerException e) {}
+        });
     }
-
 }
