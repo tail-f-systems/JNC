@@ -42,9 +42,9 @@ public class YangBinary extends YangBaseType<String> {
      */
     @Override
     public void setValue(String value) throws YangException {
-        value = Utils.wsCollapse(value);
+        String collapsed = Utils.wsCollapse(value);
         try {
-            this.value = Base64Coder.encodeString(value);
+            this.value = Base64Coder.encodeString(collapsed);
         } catch (IllegalArgumentException e) {
             YangException.throwException(true, e);
         }

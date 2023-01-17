@@ -1160,6 +1160,7 @@ public class Element implements Cloneable, Serializable {
      *
      */
     public Element merge(Element root, int op) throws JNCException {
+        Element rootElem = root;
 
         // make list of nodes down to this node from root
         final NodeSet list = new NodeSet();
@@ -1173,9 +1174,9 @@ public class Element implements Cloneable, Serializable {
         Element x = list.getElement(0);
         list.remove(0);
 
-        if (root == null) {
+        if (rootElem == null) {
             if (list.size() >= 1) {
-                root = x.cloneShallow();
+                rootElem = x.cloneShallow();
             } else {
                 // special case. only one path in root. Differ already
                 if (op == OP_CREATE) {
@@ -1198,16 +1199,16 @@ public class Element implements Cloneable, Serializable {
             }
         }
 
-        if (x.compare(root) == -1) {
+        if (x.compare(rootElem) == -1) {
             System.err.println(" x= " + x);
-            System.err.println(" root= " + root);
-            System.err.println(" compare: " + x.compare(root));
+            System.err.println(" root= " + rootElem);
+            System.err.println(" compare: " + x.compare(rootElem));
 
             throw new JNCException(JNCException.ELEMENT_MISSING,
-                    x.getElementPath() + ", " + (root != null ? root.getElementPath() : null));
+                    x.getElementPath() + ", " + (rootElem != null ? rootElem.getElementPath() : null));
         }
         // same now, go down
-        Element parent = root;
+        Element parent = rootElem;
         while (list.size() > 1) {
             // pop first element from list
             x = list.getElement(0);
@@ -1249,7 +1250,7 @@ public class Element implements Cloneable, Serializable {
             }
         }
         // done
-        return root;
+        return rootElem;
     }
 
     /**
@@ -1679,9 +1680,10 @@ public class Element implements Cloneable, Serializable {
     }
 
     private void toXMLString(int indent, StringBuffer s) {
+        int currentIndent = indent;
         final boolean flag = hasChildren();
         final String qName = qualifiedName();
-        String whitespacePrefix = new String(new char[indent * 2]).replace('\0', ' ');
+        String whitespacePrefix = new String(new char[currentIndent * 2]).replace('\0', ' ');
         s.append(whitespacePrefix).append('<').append(qName);
         // add xmlns attributes (prefixes)
         if (prefixes != null) {
@@ -1695,19 +1697,19 @@ public class Element implements Cloneable, Serializable {
                 s.append(' ').append(attr.toXMLString(this));
             }
         }
-        indent++;
+        currentIndent++;
         // add children elements if any
         if (flag) {
             s.append(">\n");
             for (final Element child : children) {
-                child.toXMLString(indent, s);
+                child.toXMLString(currentIndent, s);
             }
         } else { // add value if any
             if (value != null) {
                 s.append('>');
                 final String stringValue = value.toString().replaceAll("&",
                         "&amp;");
-                s.append(getIndentationSpacing(false, indent));
+                s.append(getIndentationSpacing(false, currentIndent));
                 s.append(stringValue);
             } else {
              // self-closing tag
@@ -1715,8 +1717,8 @@ public class Element implements Cloneable, Serializable {
              return;
             }
         }
-        indent--;
-        s.append(getIndentationSpacing(flag, indent)).append("</").append(qName).append(">\n");
+        currentIndent--;
+        s.append(getIndentationSpacing(flag, currentIndent)).append("</").append(qName).append(">\n");
     }
 
     public String encodedXMLString(boolean newlineAtEnd) {
@@ -1922,16 +1924,11 @@ public class Element implements Cloneable, Serializable {
      * @see #readFile(String)
      */
     public void writeFile(String filename) throws IOException {
-        final OutputStream fos = Files.newOutputStream(Paths.get(filename));
-        try {
-            final DataOutputStream dos = new DataOutputStream(fos);
-            try {
-                dos.writeBytes(toXMLString());
-            } finally {
-                dos.close();
-            }
-        } finally {
-            fos.close();
+        try (
+            OutputStream fos = Files.newOutputStream(Paths.get(filename));
+            DataOutputStream dos = new DataOutputStream(fos);
+        ) {
+            dos.writeBytes(toXMLString());
         }
     }
 

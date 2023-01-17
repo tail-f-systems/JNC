@@ -244,8 +244,8 @@ public class SchemaParser {
     }
 
     /**
-     * Scans the classpath for the XML schema file and populates the hashtable with 
-     * SchemaNode objects. Class is passed in so that in the case of multiple {@link ClassLoader}s 
+     * Scans the classpath for the XML schema file and populates the hashtable wit
+     * SchemaNode objects. Class is passed in so that in the case of multiple {@link ClassLoader}s
      * the correct one can be used to locate the schema.
      *
      * @param filename
@@ -253,7 +253,7 @@ public class SchemaParser {
      * @param clazz
      * @throws JNCException if the file is not found or cannot be parsed.
      */
-    public void findAndReadFile(final String filename, final Map<Tagpath, SchemaNode> h, final Class clazz)
+    public void findAndReadFile(final String filename, final Map<Tagpath, SchemaNode> h, final Class<?> clazz)
             throws JNCException {
         final URL url = clazz.getResource(filename);
         if (url == null){
