@@ -34,6 +34,7 @@ class JncTestBase:
                         '5-test-bits',
                         '6-test-binary',
                         '7-test-uint64',
+                        '10-test-nested',
                         '11-test-notification',
                         '12-test-augment'])
 def jnc_test(request):
@@ -63,7 +64,7 @@ def run_notifier(jnc_test):
 def test_run_jnc(jnc_test):
     if jnc_test.basedir == '11-test-notification':
         run_notifier(jnc_test)
-    jnc_test.jnc_runner.expect('BUILD SUCCESSFUL in')
+    jnc_test.jnc_runner.expect('BUILD SUCCESSFUL')
     jnc_test.jnc_runner.expect(pexpect.EOF)
     jnc_test.jnc_runner.close()
     assert 0 == jnc_test.jnc_runner.exitstatus

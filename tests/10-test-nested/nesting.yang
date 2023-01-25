@@ -1,0 +1,15 @@
+module nesting {
+  namespace "http://acme.com/ns/nesting/1.0";
+  prefix nesting;
+  list nested {
+    key k;
+    leaf k {
+      type string;
+    }
+    container nested {
+      leaf l {
+        type string;
+      }
+    }
+  }
+}
