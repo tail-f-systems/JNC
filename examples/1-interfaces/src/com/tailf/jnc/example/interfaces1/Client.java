@@ -15,7 +15,6 @@ import com.tailf.jnc.NodeSet;
 public class Client {
 
     private Device dev;
-    private DeviceUser duser;
 
     public Client() {
         this.init();
@@ -24,7 +23,7 @@ public class Client {
     private void init() {
         String emsUserName = "bobby";
         String ip = "localhost";
-        duser = new DeviceUser(emsUserName, "admin", "admin");
+        DeviceUser duser = new DeviceUser(emsUserName, "admin", "admin");
         dev = new Device("mydev", duser, ip, 2022);
 
         try {
@@ -52,8 +51,7 @@ public class Client {
 
     private NodeSet getConfig(Device d) throws IOException, JNCException {
         NetconfSession session = d.getSession("cfg");
-        NodeSet reply = session.getConfig(NetconfSession.RUNNING);
-        return reply;
+        return session.getConfig(NetconfSession.RUNNING);
     }
 
     public NodeSet getConfig() throws IOException, JNCException {

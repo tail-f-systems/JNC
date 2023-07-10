@@ -313,7 +313,8 @@ public abstract class YangElement extends Element {
         }
         StringBuilder sb = new StringBuilder(len);
         sb.append(Character.toLowerCase(s.charAt(0)));
-        for (int i = 1; i < len; i++) {
+        int i;
+        for (i = 1; i < len; i++) {
             boolean isLast = i == len - 1;
             char c = s.charAt(i);
             char next = isLast ? c : s.charAt(i+1);
@@ -331,15 +332,15 @@ public abstract class YangElement extends Element {
                 sb.append(c);
             }
         }
-        s = sb.toString();
 
-        if (isReserved(s)) {
-            s += "_";
+        String builtString = sb.toString();
+        if (isReserved(builtString)) {
+            builtString += "_";
         } else if (s.matches("[0-9]")) {
-            s = "_" + s;
+            builtString = "_" + builtString;
         }
 
-        return s;
+        return builtString;
     }
 
     public static String normalize(String s) {
@@ -380,7 +381,7 @@ public abstract class YangElement extends Element {
     protected void setLeafListValue(String ns, String path, Object value,
             String[] childrenNames) throws JNCException {
         final Element listEntry = get(path).last();
-        
+
         if (listEntry instanceof Leaf && listEntry.value == null) {
             listEntry.setValue(value);
         } else {
@@ -486,7 +487,7 @@ public abstract class YangElement extends Element {
      * <li>1 - if the key children of this YangElement are equal to those of b,
      *         but non-key children are different.
      * </ul>
-     * 
+     *
      * @param b YangElement to compare against.
      * @return -1 if not equal, 0 if completely equal, 1 if same except for
      *         non-key children
@@ -544,7 +545,7 @@ public abstract class YangElement extends Element {
      * <li>1 - if the key children of this YangElement are equal to those of b,
      *         but non-key children are different.
      * </ul>
-     * 
+     *
      * @param b Element to compare against.
      * @return -1 if not equal, 0 if completely equal, 1 if same except for
      *         non-key children
@@ -577,7 +578,7 @@ public abstract class YangElement extends Element {
      * <p>
      * Note that both subtrees must have a common starting point YangElement in
      * order to compare them.
-     * 
+     *
      * @param a Subtree A (YangElement)
      * @param b Subtree B (YangElement)
      * @param uniqueA Place for elements that are unique to A.
@@ -642,7 +643,7 @@ public abstract class YangElement extends Element {
 
     /**
      * Checks if two configurations are equal, or if a sync is needed.
-     * 
+     *
      * @param b
      * @return 'true' if both trees are equal. 'false' otherwise.
      */
@@ -652,7 +653,7 @@ public abstract class YangElement extends Element {
 
     /**
      * Checks if two configurations are equal, or if a sync is needed.
-     * 
+     *
      * @return 'true' if both trees are equal. 'false' otherwise.
      */
     public static boolean checkSync(NodeSet a, NodeSet b) {
@@ -671,7 +672,7 @@ public abstract class YangElement extends Element {
 
     /**
      * Checks if two configurations are equal, or if a sync is needed.
-     * 
+     *
      * @return 'true' if both trees are equal. 'false' otherwise.
      */
     public static boolean checkSync(YangElement a, YangElement b) {
@@ -688,7 +689,7 @@ public abstract class YangElement extends Element {
     /**
      * Will return a subtree for syncing a subtree A with all the necessary
      * operations to make it look like the target tree B.
-     * 
+     *
      * @return Return subtree with operations to transmute subtree A into
      *         subtree B.
      */
@@ -704,7 +705,7 @@ public abstract class YangElement extends Element {
      * "nc:operation="replace". An alternative (and better) method is "merge".
      * The method {@link #syncMerge} produces a NETCONF tree with the merge
      * operation instead.
-     * 
+     *
      * @return Return subtree with operations to transmute subtree A into
      *         subtree B.
      */
@@ -742,7 +743,7 @@ public abstract class YangElement extends Element {
      * Returns a list of subtrees for syncing a subtree A with all the
      * necessary operations to make it look like the target tree B. This
      * variant uses the NETCONF merge operation.
-     * 
+     *
      * @return Subtrees with operations to transmute subtree A into subtree B.
      */
 
@@ -765,7 +766,7 @@ public abstract class YangElement extends Element {
      * Will return a subtree for syncing a subtree A with all the necessary
      * operations to make it look like the target tree B. This version of sync
      * will produce a NETCONF tree with NETCONF merge operations.
-     * 
+     *
      * @return Subtree with operations to transmute subtree A into subtree B.
      */
 
@@ -782,7 +783,7 @@ public abstract class YangElement extends Element {
 
     /**
      * Which NETCONF do we need to produce in order to go from a to b?
-     * 
+     *
      * @param a Subtree to sync
      * @param b Copy of subtree to mimic
      * @param toDel A list with leaves that should be removed from 'b'
@@ -916,7 +917,7 @@ public abstract class YangElement extends Element {
     /**
      * Will return a list of subtrees for syncing a subtree A with all the
      * necessary operations to make it look like the target tree B.
-     * 
+     *
      * @return Return subtrees with operations to transmute subtree A into
      *         subtree B.
      */
@@ -939,7 +940,7 @@ public abstract class YangElement extends Element {
     /**
      * Clones a YangElement. Only key children are cloned, the other children
      * are skipped. Attributes and values are cloned.
-     * 
+     *
      * @return A clone of this YangElement with the same key children,
      *         attributes and values.
      */
@@ -952,7 +953,7 @@ public abstract class YangElement extends Element {
      * <p>
      * Note: Used by the generated JNC classes The key children are already
      * cloned.
-     * 
+     *
      * @param copy The target copy to clone the contents to
      * @return copy with attributes and prefix of this YangElement added.
      */
@@ -967,7 +968,7 @@ public abstract class YangElement extends Element {
      * <p>
      * Note: Used by the generated JNC classes. The key children should already
      * be cloned into copy.
-     * 
+     *
      * @param copy The target copy to clone the contents into
      * @return copy with non-key children, attributes and values of this
      *         YangElement added.
@@ -995,7 +996,7 @@ public abstract class YangElement extends Element {
     /**
      * Read file with XML text and parse it into a data model aware
      * configuration tree.
-     * 
+     *
      * @param filename File name.
      * @see #writeFile(String)
      */

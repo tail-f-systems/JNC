@@ -208,7 +208,7 @@ final class Utils {
 
     // Thanks Dimitris Kolovos for the code below
     public static String escapeXml(String original) {
-        String escaped = null;
+        String escaped;
         try {
             Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
             Text text = document.createTextNode(original);
@@ -220,7 +220,7 @@ final class Utils {
             transformer.transform(source, result);
             escaped = writer.toString();
         } catch (Exception ignored) {
-            // intentionally ignore
+            escaped = null;
         }
         return (escaped != null) ? escaped : original ;
     }

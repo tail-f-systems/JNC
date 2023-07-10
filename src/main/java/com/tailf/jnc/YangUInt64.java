@@ -5,7 +5,7 @@ import java.math.BigInteger;
 
 /**
  * Implements the built-in YANG data type "uint64".
- * 
+ *
  * @author emil@tail-f.com
  */
 public class YangUInt64 extends YangBaseInt<BigInteger> {
@@ -14,7 +14,7 @@ public class YangUInt64 extends YangBaseInt<BigInteger> {
 
     /**
      * Creates a YangUInt64 object from a String.
-     * 
+     *
      * @param s The string.
      * @throws YangException If value could not be parsed from s or if it is
      *             negative or larger than 18446744073709551615.
@@ -27,7 +27,7 @@ public class YangUInt64 extends YangBaseInt<BigInteger> {
 
     /**
      * Creates a YangUInt64 object from a Number.
-     * 
+     *
      * @param n The initial value of the new YangUInt64 object.
      * @throws YangException If value is negative, larger than
      *             18446744073709551615 or rounding is necessary.
@@ -38,7 +38,7 @@ public class YangUInt64 extends YangBaseInt<BigInteger> {
 
     /**
      * Sets the value of this object using a Number.
-     * 
+     *
      * @param n The new value to set.
      * @throws YangException If an invariant was broken during assignment or if
      *             the number has a non-zero fractional part.
@@ -53,7 +53,7 @@ public class YangUInt64 extends YangBaseInt<BigInteger> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.YangBaseInt#decode(java.lang.String)
      */
     @Override
@@ -67,7 +67,7 @@ public class YangUInt64 extends YangBaseInt<BigInteger> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.tailf.jnc.YangBaseType#cloneShallow()
      */
     @Override
