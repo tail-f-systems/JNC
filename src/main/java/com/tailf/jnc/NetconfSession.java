@@ -324,7 +324,7 @@ public class NetconfSession {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "hello contains no capabilities");
         }
-        trace("capabilities: \n{}", capatree.toXMLString());
+        trace("capabilities: \n%s", capatree.toXMLString());
 
         capabilities = new Capabilities(capatree);
         if (!capabilities.baseCapability && !capabilities.baseCapability_v1_1) {
@@ -343,7 +343,7 @@ public class NetconfSession {
                     "hello contains no session identifier");
         }
         sessionId = Long.parseLong((String) sess.value);
-        trace("sessionId = {}", sessionId);
+        trace("sessionId = %s", sessionId);
     }
 
     /**
@@ -453,7 +453,7 @@ public class NetconfSession {
      * Gets the device configuration data.
      */
     public NodeSet getConfig(int datastore) throws JNCException, IOException {
-        trace("getConfig: {}", datastoreToString(datastore));
+        trace("getConfig: %s", datastoreToString(datastore));
         RPCRequest rpcRequest = prepareGetConfigMessage(encodeDatastore(datastore));
         out.print(rpcRequest.getMessage().toString());
         out.flush();
@@ -503,7 +503,7 @@ public class NetconfSession {
      */
     public NodeSet getConfig(int datastore, Element subtreeFilter)
             throws JNCException, IOException {
-        trace("getConfig: {}\n{}", datastoreToString(datastore),
+        trace("getConfig: %s\n%s", datastoreToString(datastore),
               subtreeFilter.toXMLString());
         RPCRequest rpcRequest = prepareGetConfigMessage(encodeDatastore(datastore), subtreeFilter);
         out.print(rpcRequest.getMessage().toString());
@@ -520,7 +520,7 @@ public class NetconfSession {
      */
     public NodeSet getConfig(int datastore, String xpath)
             throws JNCException, IOException {
-        trace("getConfig: {} \"{}\"", datastoreToString(datastore), xpath);
+        trace("getConfig: %s \"%s\"", datastoreToString(datastore), xpath);
         if (!capabilities.xpathCapability) {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "the :xpath capability is not supported by server");
@@ -563,7 +563,7 @@ public class NetconfSession {
      * @param xpath An xpath epxression.
      */
     public NodeSet get(String xpath) throws JNCException, IOException {
-        trace("get: \"{}\"", xpath);
+        trace("get: \"%s\"", xpath);
         if (!capabilities.hasXPath()) {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "the :xpath capability is not supported by server");
@@ -608,7 +608,7 @@ public class NetconfSession {
      */
     public void editConfig(int datastore, Element configTree)
             throws JNCException, IOException {
-        trace("editConfig: target={}\n{}", datastoreToString(datastore), configTree.toXMLString());
+        trace("editConfig: target=%s\n%s", datastoreToString(datastore), configTree.toXMLString());
         RPCRequest rpcRequest = prepareEditConfigMessage(encodeDatastore(datastore),
                 new NodeSet(configTree));
         out.print(rpcRequest.getMessage().toString());
@@ -637,7 +637,7 @@ public class NetconfSession {
      */
     public void editConfig(int datastore, String url) throws JNCException,
             IOException {
-        trace("editConfig: target={} source={}", datastoreToString(datastore), url);
+        trace("editConfig: target=%s source=%s", datastoreToString(datastore), url);
         RPCRequest rpcRequest = prepareEditConfigMessage(encodeDatastore(datastore), url);
         out.print(rpcRequest.getMessage().toString());
         out.flush();
@@ -874,7 +874,7 @@ public class NetconfSession {
      */
     public void copyConfig(int source, int target) throws JNCException,
             IOException {
-        trace("copyConfig: {} {}", datastoreToString(source), datastoreToString(target));
+        trace("copyConfig: %s %s", datastoreToString(source), datastoreToString(target));
         RPCRequest rpcRequest = prepareCopyConfigMessage(encodeDatastore(source), encodeDatastore(target));
         out.print(rpcRequest.getMessage().toString());
         out.flush();
@@ -890,7 +890,7 @@ public class NetconfSession {
      */
     public void copyConfig(int source, String targetUrl) throws JNCException,
             IOException {
-        trace("copyConfig: source={} target={}", datastoreToString(source), targetUrl);
+        trace("copyConfig: source=%s target=%s", datastoreToString(source), targetUrl);
         RPCRequest rpcRequest = prepareCopyConfigMessage(encodeDatastore(source), encodeUrl(targetUrl));
         out.print(rpcRequest.getMessage().toString());
         out.flush();
@@ -907,7 +907,7 @@ public class NetconfSession {
      */
     public void copyConfig(String sourceUrl, String targetUrl)
             throws JNCException, IOException {
-        trace("copyConfig: source={} target={}", sourceUrl, targetUrl);
+        trace("copyConfig: source=%s target=%s", sourceUrl, targetUrl);
         RPCRequest rpcRequest = prepareCopyConfigMessage(encodeUrl(sourceUrl), encodeUrl(targetUrl));
         out.print(rpcRequest.getMessage().toString());
         out.flush();
@@ -923,7 +923,7 @@ public class NetconfSession {
      */
     public void copyConfig(String sourceUrl, int target) throws JNCException,
             IOException {
-        trace("copyConfig: source={} target={}", sourceUrl, datastoreToString(target));
+        trace("copyConfig: source=%s target=%s", sourceUrl, datastoreToString(target));
         RPCRequest rpcRequest = prepareCopyConfigMessage(encodeUrl(sourceUrl), encodeDatastore(target));
         out.print(rpcRequest.getMessage().toString());
         out.flush();
@@ -937,7 +937,7 @@ public class NetconfSession {
      * @param datastore Datastore to be deleted
      */
     public void deleteConfig(int datastore) throws JNCException, IOException {
-        trace("deleteConfig: {}", datastoreToString(datastore));
+        trace("deleteConfig: %s", datastoreToString(datastore));
         RPCRequest rpcRequest = prepareDeleteConfigMessage(encodeDatastore(datastore));
         out.print(rpcRequest.getMessage().toString());
         out.flush();
@@ -951,7 +951,7 @@ public class NetconfSession {
      */
     public void deleteConfig(String targetUrl) throws JNCException,
             IOException {
-        trace("deleteConfig: {}", targetUrl);
+        trace("deleteConfig: %s", targetUrl);
         RPCRequest rpcRequest = prepareDeleteConfigMessage(encodeUrl(targetUrl));
         out.print(rpcRequest.getMessage().toString());
         out.flush();
@@ -971,7 +971,7 @@ public class NetconfSession {
      * @param datastore The datastore to lock
      */
     public void lock(int datastore) throws JNCException, IOException {
-        trace("lock: {}", datastoreToString(datastore));
+        trace("lock: %s", datastoreToString(datastore));
         RPCRequest rpcRequest = prepareLockMessage(encodeDatastore(datastore));
         out.print(rpcRequest.getMessage().toString());
         out.flush();
@@ -985,7 +985,7 @@ public class NetconfSession {
      * @param datastore The target datastore to unlock
      */
     public void unlock(int datastore) throws JNCException, IOException {
-        trace("unlock: {}", datastoreToString(datastore));
+        trace("unlock: %s", datastoreToString(datastore));
         RPCRequest rpcRequest = prepareUnlockMessage(encodeDatastore(datastore));
         out.print(rpcRequest.getMessage().toString());
         out.flush();
@@ -1067,7 +1067,7 @@ public class NetconfSession {
      *            {@link #lockPartial(int,String[])}
      */
     public void unlockPartial(int lockId) throws JNCException, IOException {
-        trace("partialUnlock: {}", lockId);
+        trace("partialUnlock: %s", lockId);
         if (!capabilities.hasPartialLock()) {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "capability :partial-lock is not supported by server");
@@ -1152,7 +1152,7 @@ public class NetconfSession {
      *            reverting config
      */
     public void confirmedCommit(int timeout) throws JNCException, IOException {
-        trace("confirmedCommit: {}", timeout);
+        trace("confirmedCommit: %s", timeout);
         if (!capabilities.hasCandidate()) {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "the :candidate capability is not supported by server");
@@ -1214,7 +1214,7 @@ public class NetconfSession {
      * @param sessionId The id of the session to terminate
      */
     public void killSession(long sessionId) throws JNCException, IOException {
-        trace("killSession: {}", sessionId);
+        trace("killSession: %s", sessionId);
         if (sessionId == this.sessionId) {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "illegal to use kill-session on own session id");
@@ -1232,7 +1232,7 @@ public class NetconfSession {
      * @param configTree configuration tree to validate
      */
     public void validate(Element configTree) throws JNCException, IOException {
-        trace("validate: {}", configTree.toXMLString());
+        trace("validate: %s", configTree.toXMLString());
         if (!capabilities.hasValidate()) {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "capability :validate is not supported by server");
@@ -1250,7 +1250,7 @@ public class NetconfSession {
      * @param datastore The datastore to validate
      */
     public void validate(int datastore) throws IOException, JNCException {
-        trace("validate: {}", datastoreToString(datastore));
+        trace("validate: %s", datastoreToString(datastore));
         if (!capabilities.hasValidate()) {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "capability :validate is not supported by server");
@@ -1269,7 +1269,7 @@ public class NetconfSession {
      * @param url The source url to validate
      */
     public void validate(String url) throws IOException, JNCException {
-        trace("validate: {}", url);
+        trace("validate: %s", url);
         if (!capabilities.hasValidate()) {
             throw new JNCException(JNCException.SESSION_ERROR,
                     "capability :validate is not supported by server");
@@ -1350,7 +1350,7 @@ public class NetconfSession {
     public void createSubscription(String streamName, NodeSet eventFilter,
             String startTime, String stopTime) throws IOException,
             JNCException {
-        trace("createSubscription: stream={} filter={} form={} to={}",
+        trace("createSubscription: stream=%s filter=%s form=%s to=%s",
             streamName, eventFilter.toXMLString(), startTime, stopTime);
         if (!capabilities.hasNotification()) {
             throw new JNCException(JNCException.SESSION_ERROR,
@@ -1378,7 +1378,7 @@ public class NetconfSession {
     public void createSubscription(String streamName, String eventFilter,
             String startTime, String stopTime) throws IOException,
             JNCException {
-        trace("createSubscription: stream={} filter={} from={} to={}",
+        trace("createSubscription: stream=%s filter=%s from=%s to=%s",
              streamName, eventFilter, startTime, stopTime);
         if (!capabilities.hasNotification()) {
             throw new JNCException(JNCException.SESSION_ERROR,
@@ -1422,7 +1422,7 @@ public class NetconfSession {
 
     public Element receiveNotification() throws IOException, JNCException {
         final String notification = in.readOne();
-        trace("notification= {}", notification);
+        trace("notification= %s", notification);
         if (notification.length() == 0) {
             throw new JNCException(JNCException.PARSER_ERROR, "empty input");
         }
@@ -1443,7 +1443,7 @@ public class NetconfSession {
      * @param data element tree with action-data
      */
     public Element action(Element data) throws JNCException, IOException {
-        trace("action: {}", data.toXMLString());
+        trace("action: %s", data.toXMLString());
         RPCRequest rpcRequest = prepareActionMessage(data);
         out.print(rpcRequest.getMessage().toString());
         out.flush();
@@ -1474,7 +1474,7 @@ public class NetconfSession {
      */
     protected Element recvRpcReplyOk(String mid) throws JNCException, IOException {
         final String reply = in.readOne();
-        trace("reply= {}", reply);
+        trace("reply= %s", reply);
         if (reply.length() == 0) {
             throw new JNCException(JNCException.PARSER_ERROR, "empty input");
         }
@@ -1525,7 +1525,7 @@ public class NetconfSession {
     NodeSet recvRpcReply(String path, XMLParser parser, String mid)
             throws JNCException, IOException {
         final String reply = in.readOne();
-        trace("reply= {}", reply);
+        trace("reply= %s", reply);
 
         final Element t = parser.parse(reply);
         final Element rep = t.getFirst("self::rpc-reply");

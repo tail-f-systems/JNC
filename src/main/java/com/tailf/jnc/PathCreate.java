@@ -36,7 +36,7 @@ public class PathCreate extends Path {
      * @return A new element tree
      */
     public Element eval(PrefixMap prefixMap) throws JNCException {
-        trace("eval(): {}", this);
+        trace("eval(): %s", this);
         Element top = null;
         Element parent = null;
 
@@ -64,7 +64,7 @@ public class PathCreate extends Path {
                     "cannot eval location step: " + step + " in create path");
         }
         final LocationStep locStep = locationSteps.get(step);
-        trace("evalStep(): step={}, {}", step, locStep);
+        trace("evalStep(): step=%s, %s", step, locStep);
         return locStep.createElem(prefixMap, parent);
     }
 

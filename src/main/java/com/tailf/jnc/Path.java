@@ -49,7 +49,7 @@ public class Path {
      * @return A nodeSet of elements
      */
     public NodeSet eval(Element contextNode) throws JNCException {
-        trace("eval(): {}", this);
+        trace("eval(): %s", this);
         NodeSet nodeSet = new NodeSet();
         nodeSet.add(contextNode);
         for (final LocationStep step : locationSteps) {
@@ -70,7 +70,7 @@ public class Path {
                     "cannot eval location step: " + step + " in path");
         }
         final LocationStep locStep = locationSteps.get(step);
-        trace("evalStep(): step={}, {}", step, locStep);
+        trace("evalStep(): step=%s, %s", step, locStep);
         nodeSet = locStep.step(nodeSet);
         return nodeSet;
     }
@@ -227,7 +227,7 @@ public class Path {
          */
         Element createElem(PrefixMap prefixMap, Element parent)
                 throws JNCException {
-            trace("createElem() from {}", this);
+            trace("createElem() from %s", this);
             switch (axis) {
             case AXIS_ROOT:
                 return null;
@@ -611,7 +611,7 @@ public class Path {
          * is being created.
          */
         Object evalCreate(Element node) throws JNCException {
-            trace("evalCreate(): Expr= {}", this);
+            trace("evalCreate(): Expr= %s", this);
             // results
             Object lval = lvalue;
             Object rval = rvalue;
@@ -766,7 +766,7 @@ public class Path {
 
             int sz = tokens.size();
             while (sz > 0) {
-                trace("parse(): {}", tokens);
+                trace("parse(): %s", tokens);
                 /* peek at tokens */
                 tok1 = tokens.getToken(0);
                 if (sz >= 2) {
@@ -852,7 +852,7 @@ public class Path {
             final int errorCode = JNCException.PATH_ERROR;
             throw (JNCException) new JNCException(errorCode, "parse error").initCause(e);
         }
-        trace("parse() -> {}", steps);
+        trace("parse() -> %s", steps);
         return steps;
     }
 
@@ -875,7 +875,7 @@ public class Path {
      */
     void parsePredicates(TokenList tokens, LocationStep step)
             throws JNCException {
-        trace("parsePredicates(): {}", tokens);
+        trace("parsePredicates(): %s", tokens);
         final int sz = tokens.size();
         if (sz >= 1) {
             Token tok1 = tokens.getToken(0);
@@ -940,7 +940,7 @@ public class Path {
                 tok3 = null;
             }
 
-            trace("parsePredicate(): from={} to={} [{},{},{}, ...]",
+            trace("parsePredicate(): from=%s to=%s [%s,%s,%s, ...]",
                     from, to, tok1, tok2, tok3);
 
             /* ATOM = */
@@ -987,7 +987,7 @@ public class Path {
                 tok3 = null;
             }
 
-            trace("parsePredicate_rvalue(): from={} to={} [{}, {}, {}, ...]",
+            trace("parsePredicate_rvalue(): from=%s to=%s [%s, %s, %s, ...]",
                 from, to, tok1, tok2, tok3);
 
             if (tok1.type == ATOM && tok2 == null) {
@@ -1339,7 +1339,7 @@ public class Path {
                 i++;
             }
         }
-        trace("tokenize() -> {}", tokens);
+        trace("tokenize() -> %s", tokens);
         return tokens;
     }
 
@@ -1361,7 +1361,7 @@ public class Path {
 
     private static void trace(String format, Object ... args) {
         if (Element.debugLevel >= Element.DEBUG_LEVEL_PATH) {
-            System.err.println(String.format("*Path: {}", format, args));
+            System.err.println(String.format("*Path: " + format, args));
         }
     }
 

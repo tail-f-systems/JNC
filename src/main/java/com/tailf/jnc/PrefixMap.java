@@ -64,7 +64,7 @@ public class PrefixMap extends ArrayList<Prefix> {
      * @param prefixes Prefix mappings
      */
     public void set(PrefixMap prefixes) {
-        trace("set: {}", prefixes);
+        trace("set: %s", prefixes);
         for (Prefix p : prefixes) {
             set(p);
         }

@@ -175,7 +175,7 @@ public class Element implements Cloneable, Serializable {
      */
     public static Element create(PrefixMap prefixMap, String pathStr)
             throws JNCException {
-        trace("create: \"{}\"", pathStr);
+        trace("create: \"%s\"", pathStr);
         final PathCreate path = new PathCreate(pathStr);
         final Element t = path.eval(prefixMap);
         t.setPrefix(prefixMap);
@@ -358,7 +358,7 @@ public class Element implements Cloneable, Serializable {
      */
     public Element createPath(int mode, PrefixMap addPrefixes, String pathStr)
             throws JNCException {
-        trace("createPath: \"{}\"", pathStr);
+        trace("createPath: \"%s\"", pathStr);
         final PathCreate path = new PathCreate(pathStr);
         if (addPrefixes != null) {
             setPrefix(addPrefixes);
@@ -726,7 +726,7 @@ public class Element implements Cloneable, Serializable {
      * @return The configuration attribute.
      */
     public Attribute setAttr(String name, String value) {
-        trace("setAttr: {}=\"{}\"", name, value);
+        trace("setAttr: %s=\"%s\"", name, value);
         if ("xmlns".equals(name)) {
             // it's an xmlns attribute - treat this as a prefix map
             final Prefix p = new Prefix("", value);
@@ -766,7 +766,7 @@ public class Element implements Cloneable, Serializable {
      * @return The configuration attribute.
      */
     public Attribute setAttr(String ns, String name, String value) {
-        trace("setAttr: ({}) {}=\"{}\"", ns, name, value);
+        trace("setAttr: (%s) %s=\"%s\"", ns, name, value);
         if (name.startsWith("xmlns") && ns.startsWith(Prefix.XMLNS_NAMESPACE)) {
             return setAttr(name, value);
         }
@@ -801,7 +801,7 @@ public class Element implements Cloneable, Serializable {
             for (int i = 0; i < attrs.size(); i++) {
                 final Attribute attr = attrs.get(i);
                 if (attr.name.equals(name)) {
-                    trace("removeAttr: {}", name);
+                    trace("removeAttr: %s", name);
                     attrs.remove(i);
                     return;
                 }
@@ -821,7 +821,7 @@ public class Element implements Cloneable, Serializable {
             for (int i = 0; i < attrs.size(); i++) {
                 final Attribute attr = attrs.get(i);
                 if (attr.name.equals(name) && attr.ns.equals(namespace)) {
-                    trace("removeAttr: ({}) {}", namespace, name);
+                    trace("removeAttr: (%s) %s", namespace, name);
                     attrs.remove(i);
                 }
             }
@@ -925,7 +925,7 @@ public class Element implements Cloneable, Serializable {
      * @param value Value to be set
      */
     public void setValue(Object value) {
-        trace("setValue: {}=\"{}\"", name, value);
+        trace("setValue: %s=\"%s\"", name, value);
         this.value = value;
     }
 

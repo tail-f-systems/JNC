@@ -67,15 +67,15 @@ public class XMLParser {
                         attrValue);
                 // System.out.println("ATTRIBUTE: "+attributes.getQName(i)+
                 // "  URI="+attributes.getURI(i));
-                trace("add attr: {}", attr);
+                trace("add attr: %s", attr);
                 child.addAttr(attr);
             }
             if (current == null) {
-                trace("add to top: {}", child);
+                trace("add to top: %s", child);
                 top = child;
             } else {
                 current.addChild(child);
-                trace("add child: {}", child);
+                trace("add child: %s", child);
             }
             current = child; // step down
         }
@@ -101,12 +101,12 @@ public class XMLParser {
 
         @Override
         public void startPrefixMapping(String prefix, String uri) {
-            trace("startPrefixMapping: uri=\"{}\" prefix={}", uri, prefix);
+            trace("startPrefixMapping: uri=\"%s\" prefix=%s", uri, prefix);
             if (prefixes == null) {
                 prefixes = new PrefixMap();
             }
             prefixes.add(new Prefix(prefix, uri));
-            trace("added prefixmapping: {}", prefix);
+            trace("added prefixmapping: %s", prefix);
         }
     }
 
