@@ -1,0 +1,18 @@
+plugins {
+    id 'application'
+}
+
+assert (System.env.CONFD_DIR): "CONFD_DIR is not set!"
+
+jncPyang {
+    outputDir = new File("${buildDir}/generated/src")
+    yangPath = "$System.env.CONFD_DIR/src/confd/yang"
+    inputFiles = [new File("$projectDir/callhome.yang")]
+}
+
+compileJava.dependsOn([jncPyang])
+sourceSets.main.java.srcDirs = ["src", "${buildDir}/generated/src"]
+
+application {
+    mainClass = 'app.Client'
+}

@@ -1,6 +1,7 @@
 include '10-test-nested'
 include '11-test-notification'
 include '12-test-augment'
+include '13-test-callhome'
 include '1-test-union'
 include '2-test-enumeration'
 include '3-test-decimal64'

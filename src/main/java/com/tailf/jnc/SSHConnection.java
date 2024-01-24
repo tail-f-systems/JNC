@@ -3,6 +3,13 @@ package com.tailf.jnc;
 import java.io.File;
 import java.io.IOException;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import javax.net.SocketFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,11 +111,90 @@ public class SSHConnection implements AutoCloseable {
      *             {@link #close()} first.
      */
     public SSHConnection connect(String host, int port, int connectTimeout,
-                        int kexTimeout) throws IOException, JNCException {
+                        int kexTimeout) throws IOException {
         client.setTimeout(connectTimeout);
         client.getTransport().setTimeoutMs(kexTimeout);
         client.connect(host, port);
         return this;
+    }
+
+    /**
+     * Wait for a call-home from a NETCONF server and establish an SSH
+     * connection to it with infinite timeouts and the IANA-registered
+     * NETCONF call-home port 4334.
+     */
+     public InetSocketAddress waitCallHome() throws IOException {
+         return waitCallHome(0);
+    }
+
+    public InetSocketAddress waitCallHome(int waitTimeout) throws IOException {
+        return waitCallHome(waitTimeout, 0);
+    }
+
+    public InetSocketAddress waitCallHome(int waitTimeout, int kexTimeout) throws IOException {
+        return waitCallHome(waitTimeout, kexTimeout, 4334);
+    }
+
+    /**
+     * Wait for a call-home from a NETCONF server and establish an SSH
+     * connection to it.
+     *
+     * @param waitTimeout Wait timeout. Wait for incoming connection
+     *            for given number of milliseconds, 0 for infinite
+     *            timeout.
+     * @param kexTimeout Key exchange timeout timer. Timeout for complete
+     *            connection establishment (non-negative, in milliseconds).
+     *            Zero means no timeout. The timeout counts until the first
+     *            key-exchange round has finished.
+     * @param port Port number to be opened.
+     * @throws IOException In case of a timeout (either connectTimeout or
+     *             kexTimeout) a SocketTimeoutException is thrown.
+     *             <p>
+     *             An exception may also be thrown if the connection was
+     *             already successfully connected (no matter if the connection
+     *             broke in the mean time) and you invoke
+     *             <code>connect()</code> again without having called
+     *             {@link #close()} first.
+     */
+    public InetSocketAddress waitCallHome(int waitTimeout, int kexTimeout, int port)
+        throws IOException {
+        try (ServerSocket svrSocket = new ServerSocket(port)) {
+            try {
+                svrSocket.setSoTimeout(waitTimeout);
+            } catch (SocketException e) {
+                throw new IOException("Failed to set socket timeout", e);
+            }
+            Socket socket = svrSocket.accept();
+            client.setSocketFactory(new SocketFactory() {
+                    @Override
+                    public Socket createSocket() {
+                        return socket;
+                    }
+                    @Override
+                    public Socket createSocket(InetAddress host, int port) {
+                        return socket;
+                    }
+                    @Override
+                    public Socket createSocket(InetAddress address, int port,
+                                               InetAddress localAddress, int localPort) {
+                        return socket;
+                    }
+                    @Override
+                    public Socket createSocket(String host, int port) {
+                        return socket;
+                    }
+                    @Override
+                    public Socket createSocket(String host, int port,
+                                               InetAddress localHost, int localPort) {
+                        return socket;
+                    }
+                });
+            client.getTransport().setTimeoutMs(kexTimeout);
+            InetSocketAddress addr = new InetSocketAddress(socket.getInetAddress().getHostAddress(),
+                                                           socket.getPort());
+            client.connect(addr.getHostName(), addr.getPort());
+            return addr;
+        }
     }
 
     SSHClient getClient() {

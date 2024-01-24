@@ -2,6 +2,7 @@ package com.tailf.jnc;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,21 @@ import java.util.List;
  * Element someConfigTree = makeMyTree();
  * dev.getSession(&quot;cfg&quot;).editConfig(someConfigTree);
  * </pre>
+ *
+ * <p>Another option is to let the Device instance to be built via a
+ * NETCONF call-home mechanism. This can be done like this:</p>
+ *
+ * <pre><code>Device dev = new Device.CallHome(&quot;mydev&quot;)
+ *     .setWaitTimeout(10000)
+ *     .waitForCallHome();
+ * dev.addUser(new DeviceUser(localUserName, &quot;admin&quot;, &quot;admin&quot;));
+ * dev.authenticate(localUserName);
+ * dev.newSession(&quot;cfg&quot;);</code></pre>
+ *
+ * <p>Note that the newly created Device instance is connected, but
+ * does not have any users and is not yet authenticated, so it needs
+ * to be done once call-home successfully completes.</p>
+ *
  * <p>
  * Once we have a new session, we also get a configTree (Element) that we can
  * use to accumulate changes in for the session. This usually handy since the
@@ -148,6 +164,48 @@ public class Device implements Serializable, AutoCloseable {
         backlog = new ArrayList<Element>();
         connSessions = new ArrayList<SessionConnData>();
         trees = new ArrayList<SessionTree>();
+    }
+
+    /**
+     * Builder for Device instances using the NETCONF call-home
+     * mechanism.
+     */
+    public static class CallHome {
+        private String name;
+        private int waitTimeout = 0;
+        private int kexTimeout = 0;
+        private String knownHostsFile = null;
+        private int port = 4334;
+
+        public CallHome(String deviceName) {
+            name = deviceName;
+        }
+        public CallHome setWaitTimeout(int waitTimeout) {
+            this.waitTimeout = waitTimeout;
+            return this;
+        }
+        public CallHome setKexTimeout(int kexTimeout) {
+            this.kexTimeout = kexTimeout;
+            return this;
+        }
+        public CallHome setVerify() {
+            return setKnownHostsFile("~/.ssh/known_hosts");
+        }
+        public CallHome setKnownHostsFile(String knownHostsFile) {
+            this.knownHostsFile = knownHostsFile;
+            return this;
+        }
+        public CallHome setPort(int port) {
+            this.port = port;
+            return this;
+        }
+        public Device waitForCallHome() throws IOException {
+            SSHConnection con = new SSHConnection().setHostVerification(knownHostsFile);
+            InetSocketAddress addr = con.waitCallHome(waitTimeout, kexTimeout, port);
+            Device dev = new Device(name, addr.getHostName(), addr.getPort());
+            dev.con = con;
+            return dev;
+        }
     }
 
     /**
@@ -376,6 +434,13 @@ public class Device implements Serializable, AutoCloseable {
      */
     public void connect(String localUser, int connectTimeout, String knownHostsFile)
             throws IOException, JNCException {
+        con = new SSHConnection()
+            .setHostVerification(knownHostsFile)
+            .connect(mgmt_ip, mgmt_port, connectTimeout);
+        authenticate(localUser);
+    }
+
+    public void authenticate(String localUser) throws IOException, JNCException {
         DeviceUser u = null;
         for (final DeviceUser u2 : users) {
             if (u2.getLocalUser().equals(localUser)) {
@@ -387,9 +452,6 @@ public class Device implements Serializable, AutoCloseable {
             throw new JNCException(JNCException.AUTH_FAILED, "No such user: "
                     + localUser);
         }
-        con = new SSHConnection()
-            .setHostVerification(knownHostsFile)
-            .connect(mgmt_ip, mgmt_port, connectTimeout);
         auth(u);
     }
 

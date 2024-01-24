@@ -1,0 +1,20 @@
+module callhome {
+  namespace "http://acme.com/ns/callhome/1.0";
+  prefix callhome;
+  container c {
+    list l {
+      key "key1 key2";
+      leaf key1 {
+        type string;
+      }
+      leaf key2 {
+        type enumeration {
+          enum xxx;
+          enum abc;
+          enum 7;
+          enum 0;
+        }
+      }
+    }
+  }
+}

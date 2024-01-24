@@ -1,4 +1,5 @@
 import sys
+import time
 import pytest
 import pexpect
 
@@ -36,7 +37,8 @@ class JncTestBase:
                         '7-test-uint64',
                         '10-test-nested',
                         '11-test-notification',
-                        '12-test-augment'])
+                        '12-test-augment',
+                        '13-test-callhome'])
 def jnc_test(request):
     jnc_test = JncTestBase(request.param)
     jnc_test.start_confd()
@@ -61,9 +63,20 @@ def run_notifier(jnc_test):
     notifier.close(force=True)
 
 
+def run_callhome(jnc_test):
+    jnc_test.jnc_runner.expect('accepting connections')
+    # it might take some time for the app to actually open the socket
+    time.sleep(0.5)
+    cmd = 'confd_cmd -c "netconf_ssh_call_home 127.0.0.1 4334"'
+    callhome = pexpect.spawn(cmd, **jnc_test.px_args)
+    callhome.wait()
+
+
 def test_run_jnc(jnc_test):
     if jnc_test.basedir == '11-test-notification':
         run_notifier(jnc_test)
+    elif jnc_test.basedir == '13-test-callhome':
+        run_callhome(jnc_test)
     jnc_test.jnc_runner.expect('BUILD SUCCESSFUL')
     jnc_test.jnc_runner.expect(pexpect.EOF)
     jnc_test.jnc_runner.close()
