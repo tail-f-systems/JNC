@@ -169,14 +169,7 @@ final class Utils {
         if (value == null) {
             return null;
         }
-
-        // Collapse multiple spaces into single spaces
-        final String res = value.replaceAll(" +", " ");
-
-        // Remove any leading and/or trailing space
-        final int startOffset = res.charAt(0) == ' ' ? 1 : 0;
-        final int stopOffset = res.length() > 1 && res.endsWith(" ") ? -1 : 0;
-        return res.substring(startOffset, res.length() + stopOffset);
+        return value.trim().replaceAll(" +", " ");
     }
 
     /**

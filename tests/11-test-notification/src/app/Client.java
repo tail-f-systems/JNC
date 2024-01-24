@@ -78,7 +78,7 @@ public class Client {
      */
     public static Interfaces getInterfacesConfig(NodeSet configs) {
         Element interfacesConfig = configs.first();
-        if ("interfaces".equals(interfacesConfig.name)) {
+        if (!"interfaces".equals(interfacesConfig.name)) {
             interfacesConfig = null;
             for (Element config : configs) {
                 if ("interfaces".equals(config.name)) {

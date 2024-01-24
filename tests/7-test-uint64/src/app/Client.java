@@ -29,7 +29,7 @@ public class Client {
     private void init() {
         String emsUserName = "bobby";
         String ip = "localhost";
-        DevicUser duser = new DeviceUser(emsUserName, "admin", "admin");
+        DeviceUser duser = new DeviceUser(emsUserName, "admin", "admin");
         dev = new Device("mydev", duser, ip, 2022);
 
         try {
@@ -128,9 +128,6 @@ public class Client {
         // Edit the remote configuration and get the new one
         NodeSet configs2 = client.editConfig(cConfig);
 
-        // Pause (Read line)
-        br.readLine();
-
         // Get the new (changed) config with name "c"
         cConfig = getCConfig(configs2);
         String configAsXML2 = cConfig.toXMLString();
@@ -177,9 +174,6 @@ public class Client {
         } else {
             System.out.println("Clear the remote c config: FAIL");
         }
-
-        // Pause (Read line)
-        br.readLine();
 
         // Change back to original config
         client.editConfig(backup);

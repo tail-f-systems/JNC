@@ -121,7 +121,7 @@ public class Path {
      * refine the set of nodes selected by the location step.
      * </ul>
      */
-    class LocationStep {
+    static class LocationStep {
 
         int axis;
         String name;

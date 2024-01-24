@@ -70,8 +70,8 @@ public class Client {
         assert configs2.size() == 2;
         assert configs2.get(0) instanceof Nested;
         assert configs2.get(1) instanceof Nested;
-        assert "l1".equals(((Nested)configs2.get(0)).nested.getLValue());
-        assert "l1".equals(((Nested)configs2.get(1)).nested.getLValue());
+        assert ((Nested)configs2.get(0)).nested.getLValue().equals("l1");
+        assert ((Nested)configs2.get(1)).nested.getLValue().equals("l2");
         configs2.get(0).markDelete();
         configs2.get(1).markDelete();
         client.editConfig(configs);
