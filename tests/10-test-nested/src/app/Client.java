@@ -54,7 +54,6 @@ public class Client {
     public static void main(final String[] args) throws IOException, JNCException {
         Client client = new Client();
         Nesting.enable();
-        client.init();
         NodeSet configs = client.getConfig("/nested");
         assert configs.size() == 0;
 

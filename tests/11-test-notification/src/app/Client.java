@@ -97,7 +97,6 @@ public class Client {
     public static void main(String[] args) throws IOException, JNCException {
         Client client = new Client();
         Notif.enable();
-        client.init();
 
         NodeSet reply = client.getStreams();
         System.out.println("got streams:" + reply.toXMLString());

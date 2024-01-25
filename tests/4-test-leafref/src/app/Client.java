@@ -89,7 +89,6 @@ public class Client {
     public static void main(String[] args) throws IOException, JNCException {
         Client client = new Client();
         Leafref.enable();
-        client.init();
         NodeSet configs = client.getConfig();
 
         // Get (first) config with name "c"
