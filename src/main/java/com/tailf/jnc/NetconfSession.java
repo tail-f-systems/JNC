@@ -1,9 +1,9 @@
 package com.tailf.jnc;
 
-import com.tailf.jnc.framing.Framing;
-
 import java.io.IOException;
 import java.util.List;
+
+import com.tailf.jnc.framing.Framing;
 
 /**
  * A NETCONF session class. It makes it possible to connect to a NETCONF agent
@@ -532,6 +532,23 @@ public class NetconfSession {
     }
 
     /**
+     * Gets the device configuration data specified by an xpath filter.
+     *
+     * @param datastore The datastore. One of {@link #RUNNING},
+     *            {@link #CANDIDATE}, {@link #STARTUP}
+     * @param xpath XPath expression
+     * @param prefixMap Map containing prefix and URL of namespaces
+     */
+    public NodeSet getConfig(int datastore, String xpath, PrefixMap prefixMap)
+            throws JNCException, IOException {
+        trace("getConfig: %s", datastoreToString(datastore));
+        RPCRequest rpcRequest = prepareGetConfigMessage(encodeDatastore(datastore), xpath, prefixMap);
+        out.print(rpcRequest.getMessage().toString());
+        out.flush();
+        return recvRpcReplyData(rpcRequest.getMsgId());
+    }
+
+    /**
      * Retrieves running configuration and device state information.
      */
     public NodeSet get() throws JNCException, IOException {
@@ -573,6 +590,26 @@ public class NetconfSession {
         out.flush();
         return recvRpcReplyData(rpcRequest.getMsgId());
     }
+
+    /**
+     * Retrieves running configuration and device state information. The
+     * <code>:xpath</code> capability must be supported by the server.
+     *
+     * @param xpath An xpath epxression.
+     * @param prefixMap Map containing prefix and URL of namespaces
+     */
+    public NodeSet get(String xpath, PrefixMap prefixMap) throws JNCException, IOException {
+        trace("get: \"%s\"", xpath);
+        if (!capabilities.hasXPath()) {
+            throw new JNCException(JNCException.SESSION_ERROR,
+                    "the :xpath capability is not supported by server");
+        }
+        RPCRequest rpcRequest = prepareGetMessage(xpath, prefixMap);
+        out.print(rpcRequest.getMessage().toString());
+        out.flush();
+        return recvRpcReplyData(rpcRequest.getMsgId());
+    }
+
 
     /**
      * Edits the configuration. The <code>edit-config</code> operation loads
@@ -1921,6 +1958,30 @@ public class NetconfSession {
         return rpcMsg;
     }
 
+    RPCRequest prepareGetMessage(String xpath, PrefixMap prefixMap)
+    {
+        RPCRequest rpcMsg = new RPCRequest();
+        rpcMsg.addRpcBegin(withDefaultsAttr);
+
+        rpcMsg.getMessage().append("\n<" + nc + GET_GT);
+        if (xpath != null && xpath.length() > 0) {
+            String namespaces = "";
+            for (Prefix prefix: prefixMap) {
+                namespaces = namespaces + prefix.toXMLString() + " ";
+            }
+            rpcMsg.getMessage().append(
+                "\n<" + nc + FILTER + namespaces
+                + "type=\"xpath\" "
+                + "select=\"");
+            rpcMsg.getMessage().append(xpath);
+            rpcMsg.getMessage().append("\"/>");
+        }
+        rpcMsg.getMessage().append("\n</" + nc + GET_GT);
+
+        rpcMsg.addRpcEnd();
+        return rpcMsg;
+    }
+
 
     private RPCRequest prepareGetConfigMessage(String source, Element subtreeFilter)
     {
@@ -1952,6 +2013,32 @@ public class NetconfSession {
         if (xpath != null && xpath.length() > 0) {
             rpcMsg.getMessage().append("\n<" + nc + FILTER + nc + "type=\"xpath\" " + nc
                     + "select=\"");
+            rpcMsg.getMessage().append(xpath);
+            rpcMsg.getMessage().append("\"/>");
+        }
+        rpcMsg.getMessage().append("\n</" + nc + GET_CONFIG_GT);
+        rpcMsg.addRpcEnd();
+        return rpcMsg;
+    }
+
+    private RPCRequest prepareGetConfigMessage(String source, String xpath, PrefixMap prefixMap)
+    {
+
+        RPCRequest rpcMsg = new RPCRequest();
+        rpcMsg.addRpcBegin(withDefaultsAttr);
+        rpcMsg.getMessage().append("\n<" + nc + GET_CONFIG_GT);
+        rpcMsg.getMessage().append("\n<" + nc + SOURCE_GT);
+        rpcMsg.getMessage().append("\n" + source);
+        rpcMsg.getMessage().append("\n</" + nc + SOURCE_GT);
+        if (xpath != null && xpath.length() > 0) {
+            String namespaces = "";
+            for (Prefix prefix: prefixMap) {
+                namespaces = namespaces + prefix.toXMLString() + " ";
+            }
+            rpcMsg.getMessage().append(
+                "\n<" + nc + FILTER + namespaces
+                + "type=\"xpath\" "
+                + "select=\"");
             rpcMsg.getMessage().append(xpath);
             rpcMsg.getMessage().append("\"/>");
         }
